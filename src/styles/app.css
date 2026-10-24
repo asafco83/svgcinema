@@ -5363,3 +5363,31 @@ select.sel {
     animation-play-state: running !important;
   }
 }
+
+/* several layers selected (ui/multi): a value that differs reads "Mixed", a colour shows ••• */
+.ih-multi {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+  padding-left: 2px;
+}
+input.mixed::placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+.pswatch.mixed i {
+  display: grid !important;
+  place-items: center;
+  background: var(--raised) !important;
+  background-image: none !important;
+}
+.pswatch.mixed i::after {
+  content: '•••';
+  color: var(--fg);
+  font-size: 9px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.rng.mixed {
+  opacity: 0.5;
+}

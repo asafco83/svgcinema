@@ -1,0 +1,47 @@
+import asyncio, sys, json, os
+from playwright.async_api import async_playwright
+OUT=os.environ.get('CIN_OUT','/tmp/svgcinema-shots/'); os.makedirs(OUT, exist_ok=True)
+# Several layers selected: only shared properties, Mixed values, edits applied to all (one undo step).
+async def main():
+    async with async_playwright() as p:
+        b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1440,'height':900}); pg.set_default_timeout(5000)
+        errs=[]; pg.on('pageerror',lambda e: errs.append(str(e)))
+        await pg.goto((sys.argv[1] if len(sys.argv)>1 else 'http://localhost:5199/')); await pg.wait_for_timeout(2500)
+        await pg.evaluate("async()=>{ window.st=await import('/src/core/state.ts'); window.hi=await import('/src/core/history.ts'); window.C=await import('/src/core/constants.ts'); }")
+        ev=pg.evaluate; R={}; F=[]
+        def check(n,c,i=None):
+            R[n]=('ok' if c else 'FAIL')+('' if i is None else f' {i}')
+            if not c: F.append(n)
+        gr=await ev("st.doc.layers.find(l=>l.name==='Ground').id"); bl=await ev("st.doc.layers.find(l=>l.name==='Blob').id"); gp=await ev("st.doc.layers.find(l=>l.name==='Flag').id")
+        await ev(f"hi.setTime(0); hi.selectMany(['{gr}','{bl}'])"); await pg.wait_for_timeout(200)
+        heads=lambda: ev("[...document.querySelectorAll('#insp .sec:not([hidden]) > h3')].map(h=>h.childNodes[0].textContent.trim())")
+        h=await heads()
+        check('a rectangle and a path: transforms, fill & stroke, appearance; no shape-specific sections', 'Transforms' in h and 'Fill & stroke' in h and 'Appearance' in h and not any(x in h for x in ['Rectangle','Path','Motion path']), h)
+        check('the header says how many layers', (await ev("document.querySelector('.insp-head').textContent")).startswith('2 layers'))
+        fill=await ev("(()=>{const i=document.querySelector('input[data-f=\"fill\"]');return [i.value,i.placeholder,document.querySelector('[data-paint=fill]').classList.contains('mixed')]})()")
+        check('different fills read Mixed, the swatch shows •••', fill==['','Mixed',True], fill)
+        same=await ev("document.querySelector('input[data-f=\"pos:0\"]').value")
+        check('a value they share is shown', same=='0', same)
+        await pg.evaluate("document.querySelector('[data-paint=fill]').scrollIntoView({block:'center'})")
+        await pg.screenshot(path=OUT+'multi-edit.png', clip={'x':1140,'y':0,'width':300,'height':900})
+        await pg.fill('input[data-f="fill"]', '#2257c1'); await pg.press('input[data-f="fill"]','Enter'); await pg.wait_for_timeout(200)
+        f2=await ev(f"[C.valueAt(st.layerById('{gr}'),'fill',0), C.valueAt(st.layerById('{bl}'),'fill',0)]")
+        check('setting the fill applies it to both', all(str(x).lower()=='#2257c1' for x in f2), f2)
+        check('…and the field shows the shared value', (await ev("document.querySelector('input[data-f=\"fill\"]').value")).lower()=='#2257c1' and not await ev("document.querySelector('[data-paint=fill]').classList.contains('mixed')"))
+        await pg.fill('input[data-f="pos:0"]', '25'); await pg.press('input[data-f="pos:0"]','Enter'); await pg.wait_for_timeout(200)
+        xs=await ev(f"[C.valueAt(st.layerById('{gr}'),'pos',0)[0], C.valueAt(st.layerById('{bl}'),'pos',0)[0]]")
+        check('X goes on both (each keeps its own Y)', xs==[25,25], xs)
+        await ev("hi.undo()"); await pg.wait_for_timeout(100)
+        check('one undo step per change', await ev(f"C.valueAt(st.layerById('{gr}'),'pos',0)[0]")==0 and str(await ev(f"C.valueAt(st.layerById('{gr}'),'fill',0)")).lower()=='#2257c1')
+        await pg.click('.row:has(input[data-f="op::100"]) [data-kb]'); await pg.wait_for_timeout(150)
+        check('the ◆ keys both layers', await ev(f"!!(st.layerById('{gr}').t.op && st.layerById('{bl}').t.op)"))
+        await pg.click('[data-tx="x:stroke-linecap"][data-v=round]'); await pg.wait_for_timeout(150)
+        check('a toggle applies to both', await ev(f"st.layerById('{gr}').extra['stroke-linecap']==='round' && st.layerById('{bl}').extra['stroke-linecap']==='round'"))
+        # with a group: no fill & stroke
+        await ev(f"hi.selectMany(['{gr}','{gp}'])"); await pg.wait_for_timeout(200)
+        h=await heads()
+        check('a group in the selection hides fill & stroke and stroke style', 'Fill & stroke' not in h and 'Transforms' in h and not await ev("!!document.querySelector('#insp [data-tx=\"x:stroke-linecap\"]')"), h)
+        check('no page errors', not errs, errs[:3])
+        print(json.dumps(R, indent=1, ensure_ascii=False)); print('FAILS', F)
+        await b.close()
+asyncio.run(main())

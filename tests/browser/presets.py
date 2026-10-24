@@ -27,7 +27,7 @@ async def main():
         check('…', await ev("document.querySelectorAll('#presetPop .pr-tile .pr-js').length")==5)
         await pg.click('[data-pgroup=enter]'); await pg.wait_for_timeout(100)
         tiles=await ev("[...document.querySelectorAll('#presetPop .pr-tile span')].map(s=>s.textContent)")
-        check('Entrances: fade, slides, pop, zoom, drop, rotate, flip', tiles==['Fade in','Slide up','Slide down','Slide left','Slide right','Pop in','Zoom in','Drop in','Rotate in','Flip in'], tiles)
+        check('Entrances: fade, slides, pop, zoom, drop, rotate, flip', tiles==['Fade in','Slide up','Slide down','Slide left','Slide right','Pop in','Zoom in','Drop in','Rotate in','Flip in','Elastic in','Spiral in','Skew in','Unfold'], tiles)
         tr=await ev("document.querySelector('#presetPop [data-preset=slide-up] .pr-tracks').textContent")
         check('each tile says which tracks it animates', tr=='Position · Opacity', tr)
         check('each tile plays its preset', await ev("document.querySelector('#presetPop [data-preset=slide-up] .pv').getAnimations().length")==1)

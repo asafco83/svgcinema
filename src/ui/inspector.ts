@@ -1,4 +1,6 @@
 // SVGcinema — ui/inspector
+import { propOK } from '../core/keyframes';
+import { allPainted, commonType, isMulti, multiEdit, multiFields, multiKey, multiSel } from './multi';
 import { instanceChip, instanceSection } from './symbols-ui';
 import { layerBox } from '../render/mesh';
 import { bgPaint, parseBg, setBg } from '../model/background';
@@ -104,11 +106,25 @@ export function renderInspector() {
     refreshDocFields();
     return;
   }
+  const ms = multiSel();
+  if (ms.length) {
+    // several layers: only what they all have, edited on all of them (ui/multi)
+    let m = `<div class="insp-head"><span class="ih-name ih-multi">${ms.length} layers</span><span class="chip">${commonType(ms)}</span></div>`;
+    m += alignBar();
+    m += `<section class="sec"><h3>${ms.length} layers selected</h3><div class="btns"><button class="btn" data-act="grp">Group them</button><button class="btn danger" data-act="delsel">Delete all</button></div><p>Fields show the value the layers share, or “Mixed”. A change applies to all of them.</p></section>`;
+    if (S.keys.size) m += keyPanel();
+    m += transformSection(l);
+    if (allPainted(ms)) m += paintSection(l);
+    m += appearanceSection(allPainted(ms) ? l : ({ ...l, type: 'group' } as Layer));
+    INSP.innerHTML = m;
+    applyCollapse();
+    refreshInspector(true);
+    drawEz();
+    return;
+  }
   let h = `<div class="insp-head"><input class="txt ih-name" id="ln" data-name value="${esc(l.name)}" spellcheck="false" aria-label="Layer name"><span class="chip${l.sym ? ' sym' : ''}">${l.sym ? instanceChip(l) || l.type : l.type}</span></div>`;
   h += alignBar();
   h += instanceSection(l);
-  if (S.selSet.size > 1)
-    h += `<section class="sec"><h3>${S.selSet.size} layers selected</h3><div class="btns"><button class="btn" data-act="grp">Group them</button><button class="btn danger" data-act="delsel">Delete all</button></div><p>The fields below edit “${esc(l.name)}”.</p></section>`;
   if (S.keys.size) h += keyPanel();
   const painted = ['rect', 'ellipse', 'path', 'text'].includes(l.type);
   if (l.type === 'text') h += textSection(l);
@@ -298,9 +314,12 @@ function openPaint(btn: HTMLElement, l: Layer | null) {
     get: () => valueAt(l, k, S.time),
     set(v) {
       begin();
-      setProp(l, k, v);
-      // a stroke colour needs a width to be seen
-      if (k === 'stk' && !isNone(v) && !(valueAt(l, 'sw', S.time) > 0)) setProp(l, 'sw', 2);
+      // several layers: the colour goes on all of them
+      (multiSel().length ? multiSel().filter(x => propOK(x, k as PropKey)) : [l]).forEach(x => {
+        setProp(x, k, v);
+        // a stroke colour needs a width to be seen
+        if (k === 'stk' && !isNone(v) && !(valueAt(x, 'sw', S.time) > 0)) setProp(x, 'sw', 2);
+      });
       renderStage();
       frame();
     },
@@ -393,6 +412,7 @@ export function refreshInspector(full?: boolean) {
       );
     });
   }
+  multiFields();
 }
 /** Show "no colour" on a colour swatch (a checkerboard with a red line, like other design apps), and
  *  let the checkerboard show through partly transparent colours. */
@@ -472,6 +492,14 @@ export function parseField(l: Layer, inp: HTMLInputElement): [PropKey, any] | nu
   }
   return [k, v];
 }
+/** a field's shown value on a layer (as refreshInspector writes it) */
+function fieldValue(l: Layer, f: string) {
+  const [k, i, m] = f.split(':');
+  let v = valueAt(l, k, S.time);
+  if (i !== undefined && i !== '') v = v ? v[+i] : 0;
+  if (k === 'sz' && i !== undefined && i !== '') v = v * sizeScale(l)[+i];
+  return m ? v * +m : v;
+}
 /** the scale Size fields are shown at (|scale|, never 0) */
 export function sizeScale(l: Layer): number[] {
   const s = valueAt(l, 'scl', S.time) || [1, 1];
@@ -537,6 +565,10 @@ export function init(): void {
   INSP.addEventListener('input', (e: Event) => {
     const t = e.target as HTMLInputElement,
       l = selLayer();
+    if (l && isMulti() && t.dataset.range === 'op') {
+      multiSel().forEach(t2 => propsInput(t, t2));
+      return frame();
+    }
     if (l && propsInput(t, l)) return frame();
     if (l && t.dataset.preach !== undefined) {
       // Reach: live while dragging the slider, one undo step on release (closed on change)
@@ -601,12 +633,24 @@ export function init(): void {
     }
     if (t.dataset.doc !== undefined) return docField(t);
     if (!l) return;
+    if (isMulti() && (t.dataset.x !== undefined || t.dataset.da !== undefined || t.dataset.ly !== undefined)) {
+      multiEdit(t2 => propsChange(t, t2));
+      return;
+    }
     if (propsChange(t, l)) return;
     if (t.id === 'motionPath') {
       if (t.value && !setMotionPath(l, t.value)) toast('That shape has no length to follow.');
       return;
     }
     if (t.dataset.f) {
+      if (isMulti()) {
+        if (!t.value.trim()) return refreshInspector();
+        multiEdit(t2 => {
+          const r = parseField(t2, t);
+          if (r && propOK(t2, r[0])) setField(t2, r[0], r[1]);
+        });
+        return;
+      }
       const r = parseField(l, t);
       if (!r) {
         refreshInspector();
@@ -793,7 +837,7 @@ export function init(): void {
     }
     const kbt = (e.target as any).closest('[data-kb]'),
       l = selLayer();
-    if (kbt && l) return toggleKey(l, kbt.dataset.kb);
+    if (kbt && l) return isMulti() ? multiKey(kbt.dataset.kb, toggleKey) : toggleKey(l, kbt.dataset.kb);
     const ez = (e.target as any).closest('[data-ez]');
     if (ez) {
       applyEase(JSON.parse(ez.dataset.ez));
@@ -832,11 +876,12 @@ export function init(): void {
     const bo = (e.target as any).closest('[data-bool]');
     if (bo) return void booleanOp(bo.dataset.bool);
     const tx = (e.target as any).closest('[data-tx]');
-    if (tx && l) return propsToggle(tx, l);
+    if (tx && l) return isMulti() ? multiEdit(t2 => propsToggle(tx, t2)) : propsToggle(tx, l);
     const an = (e.target as any).closest('[data-anchor]');
     if (an && l) {
       const [u, v] = an.dataset.anchor.split(',').map(Number);
-      setAnchor(l, u, v);
+      if (isMulti()) multiEdit(t2 => setAnchor(t2, u, v));
+      else setAnchor(l, u, v);
       return;
     }
     const b = (e.target as any).closest('[data-act]');
@@ -844,11 +889,15 @@ export function init(): void {
     const a = b.dataset.act;
     if (propsClick(a, b, l)) return;
     if (a === 'flipx' || a === 'flipy') {
-      const s = clone(H.get(l, 'scl', S.time)),
-        ed = beginEdit();
-      s[a === 'flipx' ? 0 : 1] *= -1;
-      setProp(l, 'scl', s);
-      ed.end();
+      const flip = (x: Layer) => {
+        const s = clone(H.get(x, 'scl', S.time)),
+          ed = beginEdit();
+        s[a === 'flipx' ? 0 : 1] *= -1;
+        setProp(x, 'scl', s);
+        ed.end();
+      };
+      if (isMulti()) multiEdit(flip);
+      else flip(l);
       return;
     }
     if (a === 'center') {
@@ -956,17 +1005,24 @@ export function init(): void {
           dof: 1,
         })[k] ||
         (k.startsWith('fx.') ? 0.1 : 1),
-      start = parseFloat(inp.value) || 0,
+      ms = multiSel(),
+      start = parseFloat(inp.value) || (ms.length ? parseFloat(String(fieldValue(l, f))) || 0 : 0),
       x0 = e.clientX,
       ed = beginEdit();
     dragWin(
       ev => {
         inp.value = fmt(start + (ev.clientX - x0) * step * (ev.shiftKey ? 10 : 1));
+        // several layers: each gets the value
+        ms.forEach(t2 => {
+          if (t2 === l) return;
+          const r2 = parseField(t2, inp);
+          if (r2 && propOK(t2, r2[0])) setField(t2, r2[0], r2[1]);
+        });
         const r = parseField(l, inp);
         if (r) {
           setField(l, r[0], r[1]);
           // a value without keyframes (or a size) is drawn from the markup: redraw it as it changes
-          if (r[0] === 'sz' || !(l.t[r[0]] && l.t[r[0]].length)) renderStage();
+          if (ms.length || r[0] === 'sz' || !(l.t[r[0]] && l.t[r[0]].length)) renderStage();
           frame();
         }
       },
