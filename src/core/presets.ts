@@ -280,6 +280,89 @@ export const PRESETS: Preset[] = [
       };
     },
   },
+  {
+    id: 'elastic-in',
+    name: 'Elastic in',
+    group: 'enter',
+    dur: 1,
+    icon: ic.grow,
+    applies: can('scl', 'op'),
+    steps: c => ({
+      scl: [
+        [0, mul(c.b('scl'), Math.max(0, 1 - c.s)), 'outElastic'],
+        [1, vec(c.b('scl'), [1, 1]), 'ease'],
+      ],
+      op: [
+        [0, 0, 'outQuad'],
+        [0.15, num(c.b('op'), 1), 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'spiral-in',
+    name: 'Spiral in',
+    group: 'enter',
+    dur: 0.9,
+    icon: ic.spin,
+    applies: can('rot', 'scl', 'op'),
+    steps: c => ({
+      rot: [
+        [0, num(c.b('rot')) - 360 * c.s, 'outCubic'],
+        [1, num(c.b('rot')), 'ease'],
+      ],
+      scl: [
+        [0, mul(c.b('scl'), Math.max(0, 1 - c.s)), 'outCubic'],
+        [1, vec(c.b('scl'), [1, 1]), 'ease'],
+      ],
+      op: [
+        [0, 0, 'outQuad'],
+        [0.4, num(c.b('op'), 1), 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'skew-in',
+    name: 'Skew in',
+    group: 'enter',
+    dur: 0.7,
+    icon: ic.slide(8, 0),
+    applies: can('pos', 'skw', 'op'),
+    steps: c => ({
+      pos: [
+        [0, add(c.b('pos'), D * c.s, 0), 'outCubic'],
+        [1, vec(c.b('pos')), 'ease'],
+      ],
+      skw: [
+        [0, add(c.b('skw'), -25 * c.s, 0), 'outBack'],
+        [1, vec(c.b('skw')), 'ease'],
+      ],
+      op: [
+        [0, 0, 'outQuad'],
+        [0.5, num(c.b('op'), 1), 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'unfold',
+    name: 'Unfold',
+    group: 'enter',
+    dur: 0.6,
+    icon: ic.grow,
+    applies: can('scl', 'op'),
+    steps: c => {
+      const e = vec(c.b('scl'), [1, 1]);
+      return {
+        scl: [
+          [0, [e[0], r3(e[1] * Math.max(0, 1 - c.s))], 'outCubic'],
+          [1, e, 'ease'],
+        ],
+        op: [
+          [0, 0, 'outQuad'],
+          [0.3, num(c.b('op'), 1), 'ease'],
+        ],
+      };
+    },
+  },
   // Exits
   {
     id: 'fade-out',
@@ -389,6 +472,71 @@ export const PRESETS: Preset[] = [
         scl: [
           [0, a, 'inBack'],
           [1, [r3(a[0] * Math.max(0, 1 - c.s)), a[1]], 'ease'],
+        ],
+        op: [
+          [0.7, num(c.a('op'), 1), 'inQuad'],
+          [1, 0, 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'spiral-out',
+    name: 'Spiral out',
+    group: 'exit',
+    dur: 0.9,
+    icon: ic.spin,
+    applies: can('rot', 'scl', 'op'),
+    steps: c => ({
+      rot: [
+        [0, num(c.a('rot')), 'inCubic'],
+        [1, num(c.a('rot')) + 360 * c.s, 'ease'],
+      ],
+      scl: [
+        [0, vec(c.a('scl'), [1, 1]), 'inCubic'],
+        [1, mul(c.a('scl'), Math.max(0, 1 - c.s)), 'ease'],
+      ],
+      op: [
+        [0.6, num(c.a('op'), 1), 'inQuad'],
+        [1, 0, 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'skew-out',
+    name: 'Skew out',
+    group: 'exit',
+    dur: 0.7,
+    icon: ic.slide(8, 0),
+    applies: can('pos', 'skw', 'op'),
+    steps: c => ({
+      pos: [
+        [0, vec(c.a('pos')), 'inCubic'],
+        [1, add(c.a('pos'), D * c.s, 0), 'ease'],
+      ],
+      skw: [
+        [0, vec(c.a('skw')), 'inBack'],
+        [1, add(c.a('skw'), 25 * c.s, 0), 'ease'],
+      ],
+      op: [
+        [0.5, num(c.a('op'), 1), 'inQuad'],
+        [1, 0, 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'fold',
+    name: 'Fold',
+    group: 'exit',
+    dur: 0.5,
+    icon: ic.shrink,
+    applies: can('scl', 'op'),
+    steps: c => {
+      const a = vec(c.a('scl'), [1, 1]);
+      return {
+        scl: [
+          [0, a, 'inCubic'],
+          [1, [a[0], r3(a[1] * Math.max(0, 1 - c.s))], 'ease'],
         ],
         op: [
           [0.7, num(c.a('op'), 1), 'inQuad'],
@@ -690,6 +838,135 @@ export const PRESETS: Preset[] = [
       };
     },
   },
+  {
+    id: 'head-shake',
+    name: 'Head shake',
+    group: 'emph',
+    dur: 0.9,
+    icon: ic.shake,
+    applies: can('pos', 'rot'),
+    steps: c => {
+      const a = c.a('pos'),
+        r = num(c.a('rot')),
+        s = c.s;
+      return {
+        pos: [
+          [0, vec(a), 'inOutSine'],
+          [0.13, add(a, -6 * s, 0), 'inOutSine'],
+          [0.37, add(a, 5 * s, 0), 'inOutSine'],
+          [0.63, add(a, -3 * s, 0), 'inOutSine'],
+          [0.87, add(a, 2 * s, 0), 'inOutSine'],
+          [1, vec(c.b('pos')), 'ease'],
+        ],
+        rot: [
+          [0, r, 'inOutSine'],
+          [0.13, r - 9 * s, 'inOutSine'],
+          [0.37, r + 7 * s, 'inOutSine'],
+          [0.63, r - 5 * s, 'inOutSine'],
+          [0.87, r + 3 * s, 'inOutSine'],
+          [1, num(c.b('rot')), 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'breathe',
+    name: 'Breathe',
+    group: 'emph',
+    dur: 2,
+    icon: ic.pulse,
+    applies: can('scl', 'op'),
+    steps: c => {
+      const a = vec(c.a('scl'), [1, 1]),
+        o = num(c.a('op'), 1);
+      return {
+        scl: [
+          [0, a, 'inOutSine'],
+          [0.5, mul(a, 1 + 0.05 * c.s), 'inOutSine'],
+          [1, vec(c.b('scl'), [1, 1]), 'ease'],
+        ],
+        op: [
+          [0, o, 'inOutSine'],
+          [0.5, r3(o * Math.max(0, 1 - 0.25 * c.s)), 'inOutSine'],
+          [1, num(c.b('op'), 1), 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'wobble',
+    name: 'Wobble',
+    group: 'emph',
+    dur: 1,
+    icon: ic.swing,
+    applies: can('pos', 'rot'),
+    steps: c => {
+      const a = c.a('pos'),
+        r = num(c.a('rot')),
+        s = c.s,
+        st = (f: number, dx: number, dr: number): [Step, Step] => [
+          [f, add(a, dx * s, 0), 'inOutSine'],
+          [f, r + dr * s, 'inOutSine'],
+        ],
+        k = [st(0.15, -18, -5), st(0.3, 14, 3), st(0.45, -10, -3), st(0.6, 6, 2), st(0.75, -3, -1)];
+      return {
+        pos: [[0, vec(a), 'inOutSine'], ...k.map(x => x[0]), [1, vec(c.b('pos')), 'ease']],
+        rot: [[0, r, 'inOutSine'], ...k.map(x => x[1]), [1, num(c.b('rot')), 'ease']],
+      };
+    },
+  },
+  {
+    id: 'squash',
+    name: 'Squash',
+    group: 'emph',
+    dur: 0.6,
+    icon: ic.pulse,
+    applies: can('scl'),
+    steps: c => {
+      const a = vec(c.a('scl'), [1, 1]),
+        k = (x: number, y: number) => [r3(a[0] * (1 + (x - 1) * c.s)), r3(a[1] * (1 + (y - 1) * c.s))];
+      return {
+        scl: [
+          [0, a, 'outQuad'],
+          [0.3, k(1.3, 0.7), 'outBack'],
+          [1, vec(c.b('scl'), [1, 1]), 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'glitch',
+    name: 'Glitch',
+    group: 'emph',
+    dur: 0.6,
+    icon: ic.shake,
+    applies: can('pos', 'op'),
+    steps: c => {
+      const a = c.a('pos'),
+        o = num(c.a('op'), 1),
+        s = c.s;
+      return {
+        pos: [
+          [0, vec(a), 'hold'],
+          [0.1, add(a, 6 * s, -2 * s), 'hold'],
+          [0.2, add(a, -5 * s, 3 * s), 'hold'],
+          [0.3, vec(a), 'hold'],
+          [0.55, add(a, 4 * s, 0), 'hold'],
+          [0.65, add(a, -3 * s, -2 * s), 'hold'],
+          [0.75, vec(a), 'hold'],
+          [1, vec(c.b('pos')), 'ease'],
+        ],
+        op: [
+          [0, o, 'hold'],
+          [0.2, r3(o * Math.max(0, 1 - 0.6 * s)), 'hold'],
+          [0.3, o, 'hold'],
+          [0.65, r3(o * Math.max(0, 1 - 0.4 * s)), 'hold'],
+          [0.75, o, 'hold'],
+          [1, num(c.b('op'), 1), 'ease'],
+        ],
+      };
+    },
+  },
   // Strokes
   {
     id: 'draw-on',
@@ -769,6 +1046,20 @@ export const PRESETS: Preset[] = [
       };
     },
   },
+  {
+    id: 'undraw',
+    name: 'Undraw',
+    group: 'stroke',
+    dur: 1,
+    icon: ic.erase,
+    applies: can('te'),
+    steps: c => ({
+      te: [
+        [0, num(c.a('te'), 100), 'inOutCubic'],
+        [1, num(c.a('ts'), 0), 'ease'],
+      ],
+    }),
+  },
   // Colour
   {
     id: 'flash',
@@ -820,6 +1111,21 @@ export const PRESETS: Preset[] = [
         [0, c.a('stk'), 'outQuad'],
         [0.3, '#ffffff', 'inOutQuad'],
         [1, c.b('stk'), 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'colour-pulse',
+    name: 'Colour pulse',
+    group: 'colour',
+    dur: 0.9,
+    icon: ic.flash,
+    applies: solidFill,
+    steps: c => ({
+      fill: [
+        [0, c.a('fill'), 'inOutSine'],
+        [0.5, '#ffc547', 'inOutSine'],
+        [1, c.b('fill'), 'ease'],
       ],
     }),
   },
