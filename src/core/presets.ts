@@ -219,6 +219,67 @@ export const PRESETS: Preset[] = [
       ],
     }),
   },
+  {
+    id: 'drop-in',
+    name: 'Drop in',
+    group: 'enter',
+    dur: 0.9,
+    icon: ic.slide(0, -8),
+    applies: can('pos', 'op'),
+    steps: c => ({
+      pos: [
+        [0, add(c.b('pos'), 0, -D * c.s), 'outBounce'],
+        [1, vec(c.b('pos')), 'ease'],
+      ],
+      op: [
+        [0, 0, 'outQuad'],
+        [0.2, num(c.b('op'), 1), 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'rotate-in',
+    name: 'Rotate in',
+    group: 'enter',
+    dur: 0.7,
+    icon: ic.spin,
+    applies: can('rot', 'scl', 'op'),
+    steps: c => ({
+      rot: [
+        [0, num(c.b('rot')) - 180 * c.s, 'outCubic'],
+        [1, num(c.b('rot')), 'ease'],
+      ],
+      scl: [
+        [0, mul(c.b('scl'), Math.max(0, 1 - 0.7 * c.s)), 'outBack'],
+        [1, vec(c.b('scl'), [1, 1]), 'ease'],
+      ],
+      op: [
+        [0, 0, 'outQuad'],
+        [0.4, num(c.b('op'), 1), 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'flip-in',
+    name: 'Flip in',
+    group: 'enter',
+    dur: 0.6,
+    icon: ic.grow,
+    applies: can('scl', 'op'),
+    steps: c => {
+      const e = vec(c.b('scl'), [1, 1]);
+      return {
+        scl: [
+          [0, [r3(e[0] * Math.max(0, 1 - c.s)), e[1]], 'outBack'],
+          [1, e, 'ease'],
+        ],
+        op: [
+          [0, 0, 'outQuad'],
+          [0.3, num(c.b('op'), 1), 'ease'],
+        ],
+      };
+    },
+  },
   // Exits
   {
     id: 'fade-out',
@@ -274,6 +335,67 @@ export const PRESETS: Preset[] = [
         [1, 0, 'ease'],
       ],
     }),
+  },
+  {
+    id: 'drop-out',
+    name: 'Drop out',
+    group: 'exit',
+    dur: 0.6,
+    icon: ic.slide(0, 8),
+    applies: can('pos', 'op'),
+    steps: c => ({
+      pos: [
+        [0, vec(c.a('pos')), 'inBack'],
+        [1, add(c.a('pos'), 0, D * c.s), 'ease'],
+      ],
+      op: [
+        [0.5, num(c.a('op'), 1), 'inQuad'],
+        [1, 0, 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'rotate-out',
+    name: 'Rotate out',
+    group: 'exit',
+    dur: 0.7,
+    icon: ic.spin,
+    applies: can('rot', 'scl', 'op'),
+    steps: c => ({
+      rot: [
+        [0, num(c.a('rot')), 'inCubic'],
+        [1, num(c.a('rot')) + 180 * c.s, 'ease'],
+      ],
+      scl: [
+        [0, vec(c.a('scl'), [1, 1]), 'inBack'],
+        [1, mul(c.a('scl'), Math.max(0, 1 - 0.7 * c.s)), 'ease'],
+      ],
+      op: [
+        [0.6, num(c.a('op'), 1), 'inQuad'],
+        [1, 0, 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'flip-out',
+    name: 'Flip out',
+    group: 'exit',
+    dur: 0.5,
+    icon: ic.shrink,
+    applies: can('scl', 'op'),
+    steps: c => {
+      const a = vec(c.a('scl'), [1, 1]);
+      return {
+        scl: [
+          [0, a, 'inBack'],
+          [1, [r3(a[0] * Math.max(0, 1 - c.s)), a[1]], 'ease'],
+        ],
+        op: [
+          [0.7, num(c.a('op'), 1), 'inQuad'],
+          [1, 0, 'ease'],
+        ],
+      };
+    },
   },
   // Emphasis
   {
@@ -426,6 +548,148 @@ export const PRESETS: Preset[] = [
       };
     },
   },
+  {
+    id: 'bounce',
+    name: 'Bounce',
+    group: 'emph',
+    dur: 0.9,
+    icon: ic.slide(0, 8),
+    applies: can('pos'),
+    steps: c => {
+      const a = c.a('pos'),
+        h = 22 * c.s;
+      return {
+        pos: [
+          [0, vec(a), 'outQuad'],
+          [0.3, add(a, 0, -h), 'inQuad'],
+          [0.55, vec(a), 'outQuad'],
+          [0.72, add(a, 0, -h * 0.35), 'inQuad'],
+          [0.86, vec(a), 'ease'],
+          [1, vec(c.b('pos')), 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'rubber',
+    name: 'Rubber band',
+    group: 'emph',
+    dur: 0.9,
+    icon: ic.pulse,
+    applies: can('scl'),
+    steps: c => {
+      const a = vec(c.a('scl'), [1, 1]),
+        k = (x: number, y: number) => [r3(a[0] * (1 + (x - 1) * c.s)), r3(a[1] * (1 + (y - 1) * c.s))];
+      return {
+        scl: [
+          [0, a, 'inOutSine'],
+          [0.3, k(1.25, 0.75), 'inOutSine'],
+          [0.4, k(0.75, 1.25), 'inOutSine'],
+          [0.5, k(1.15, 0.85), 'inOutSine'],
+          [0.65, k(0.95, 1.05), 'inOutSine'],
+          [0.75, k(1.05, 0.95), 'inOutSine'],
+          [1, vec(c.b('scl'), [1, 1]), 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'jello',
+    name: 'Jello',
+    group: 'emph',
+    dur: 0.9,
+    icon: ic.wiggle,
+    applies: can('skw'),
+    steps: c => {
+      const a = vec(c.a('skw')),
+        k = (d: number) => [r3(a[0] + d * c.s), r3(a[1] + d * c.s)];
+      return {
+        skw: [
+          [0, a, 'inOutSine'],
+          [0.2, k(-12), 'inOutSine'],
+          [0.35, k(6), 'inOutSine'],
+          [0.5, k(-3), 'inOutSine'],
+          [0.65, k(1.5), 'inOutSine'],
+          [0.8, k(-0.6), 'inOutSine'],
+          [1, vec(c.b('skw')), 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'tada',
+    name: 'Tada',
+    group: 'emph',
+    dur: 1,
+    icon: ic.pop,
+    applies: can('scl', 'rot'),
+    steps: c => {
+      const a = vec(c.a('scl'), [1, 1]),
+        r = num(c.a('rot')),
+        s = c.s,
+        w = (f: number, d: number): Step => [f, r + d * s, 'inOutSine'];
+      return {
+        scl: [
+          [0, a, 'inOutSine'],
+          [0.15, mul(a, 1 - 0.1 * s), 'inOutSine'],
+          [0.3, mul(a, 1 + 0.1 * s), 'inOutSine'],
+          [0.9, mul(a, 1 + 0.1 * s), 'inOutSine'],
+          [1, vec(c.b('scl'), [1, 1]), 'ease'],
+        ],
+        rot: [
+          w(0, 0),
+          w(0.15, -3),
+          w(0.3, 3),
+          w(0.4, -3),
+          w(0.5, 3),
+          w(0.6, -3),
+          w(0.7, 3),
+          w(0.8, -3),
+          w(0.9, 3),
+          [1, num(c.b('rot')), 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'float',
+    name: 'Float',
+    group: 'emph',
+    dur: 1.6,
+    icon: ic.slide(0, -6),
+    applies: can('pos'),
+    steps: c => ({
+      pos: [
+        [0, vec(c.a('pos')), 'inOutSine'],
+        [0.5, add(c.a('pos'), 0, -10 * c.s), 'inOutSine'],
+        [1, vec(c.b('pos')), 'ease'],
+      ],
+    }),
+  },
+  {
+    id: 'flicker',
+    name: 'Flicker',
+    group: 'emph',
+    dur: 0.8,
+    icon: ic.blink,
+    applies: can('op'),
+    steps: c => {
+      const a = num(c.a('op'), 1),
+        lo = (f: number) => r3(a * Math.max(0, 1 - f * c.s));
+      return {
+        op: [
+          [0, a, 'hold'],
+          [0.1, lo(0.8), 'hold'],
+          [0.18, a, 'hold'],
+          [0.3, lo(0.5), 'hold'],
+          [0.36, a, 'hold'],
+          [0.6, lo(0.9), 'hold'],
+          [0.66, a, 'hold'],
+          [1, num(c.b('op'), 1), 'ease'],
+        ],
+      };
+    },
+  },
   // Strokes
   {
     id: 'draw-on',
@@ -464,6 +728,47 @@ export const PRESETS: Preset[] = [
     applies: can('to'),
     steps: c => ({ to: [[0, num(c.a('to')), 'linear'], ...turnEnd(c, 'to', 100)] }),
   },
+  {
+    id: 'draw-mid',
+    name: 'Draw from middle',
+    group: 'stroke',
+    dur: 1.2,
+    icon: ic.draw,
+    applies: can('ts', 'te'),
+    steps: c => {
+      const ts = num(c.b('ts'), 0),
+        te = num(c.b('te'), 100),
+        m = r3((ts + te) / 2);
+      return {
+        ts: [
+          [0, m, 'inOutCubic'],
+          [1, ts, 'ease'],
+        ],
+        te: [
+          [0, m, 'inOutCubic'],
+          [1, te, 'ease'],
+        ],
+      };
+    },
+  },
+  {
+    id: 'stroke-pulse',
+    name: 'Stroke pulse',
+    group: 'stroke',
+    dur: 0.8,
+    icon: ic.travel,
+    applies: l => propOK(l, 'sw') && num(valueAt(l, 'sw', S.time)) > 0 && valueAt(l, 'stk', S.time) !== 'none',
+    steps: c => {
+      const a = num(c.a('sw'), 1);
+      return {
+        sw: [
+          [0, a, 'inOutSine'],
+          [0.5, r3(a * (1 + 1.5 * c.s)), 'inOutSine'],
+          [1, num(c.b('sw'), 1), 'ease'],
+        ],
+      };
+    },
+  },
   // Colour
   {
     id: 'flash',
@@ -497,6 +802,26 @@ export const PRESETS: Preset[] = [
         ],
       };
     },
+  },
+  {
+    id: 'stroke-flash',
+    name: 'Stroke flash',
+    group: 'colour',
+    dur: 0.6,
+    icon: ic.flash,
+    applies: l => {
+      const v = valueAt(l, 'stk', S.time);
+      return (
+        paintable(l) && typeof v === 'string' && v !== 'none' && !/^url/.test(v) && num(valueAt(l, 'sw', S.time)) > 0
+      );
+    },
+    steps: c => ({
+      stk: [
+        [0, c.a('stk'), 'outQuad'],
+        [0.3, '#ffffff', 'inOutQuad'],
+        [1, c.b('stk'), 'ease'],
+      ],
+    }),
   },
   // Filters (the JS export plays them; a CSS export keeps filters still)
   {
@@ -595,6 +920,27 @@ export const PRESETS: Preset[] = [
       };
     },
   },
+  {
+    id: 'soft-focus',
+    name: 'Soft focus',
+    group: 'filter',
+    dur: 1,
+    css: false,
+    icon: ic.blurOut,
+    applies: l => l.type !== 'bone',
+    prep: l => filterId(l, 'blur', { sd: 0 }),
+    steps: c => {
+      const k = fxk(c.l, 'blur', 'sd'),
+        a = num(c.a(k));
+      return {
+        [k]: [
+          [0, a, 'inOutSine'],
+          [0.5, r3(a + 6 * c.s), 'inOutSine'],
+          [1, num(c.b(k)), 'ease'],
+        ],
+      };
+    },
+  },
 ];
 export const presetById = (id: string) => PRESETS.find(p => p.id === id) || null;
 
@@ -690,3 +1036,55 @@ export function writePreset(p: Preset, at: number, len: number, stagger = 0, str
 export const presetJSOnly = (p: Preset) => p.css === false;
 /** the filter definitions presets rely on exist (guards against renames) */
 export const PRESET_FILTERS_OK = !!(FILTERS.blur && FILTERS.shadow);
+
+/* ---------- tile previews ---------- */
+
+const NEUTRAL: Record<string, any> = {
+  pos: [0, 0],
+  scl: [1, 1],
+  rot: 0,
+  skw: [0, 0],
+  op: 1,
+  fo: 1,
+  so: 1,
+  sw: 2,
+  ts: 0,
+  te: 100,
+  to: 0,
+  fill: '#7189ff',
+  stk: '#7189ff',
+};
+/** what a preset writes on a plain shape at full strength: its steps, with the shape's values neutral */
+function demo(p: Preset) {
+  const l = { id: 'demo', type: 'path', b: { ...NEUTRAL }, t: {}, geo: {}, extra: {} } as unknown as Layer;
+  if (p.prep) p.prep(l);
+  const val = (k: string) => (k in NEUTRAL ? NEUTRAL[k] : l.b[k]);
+  return { l, steps: p.steps({ a: k => clone(val(k)), b: k => clone(val(k)), s: 1, l }) };
+}
+export const demoSteps = (p: Preset): Record<string, Step[]> => demo(p).steps;
+const LABELS: Record<string, string> = {
+  pos: 'Position',
+  scl: 'Scale',
+  rot: 'Rotate',
+  skw: 'Skew',
+  op: 'Opacity',
+  fo: 'Fill opacity',
+  fill: 'Fill',
+  stk: 'Stroke',
+  sw: 'Stroke width',
+  ts: 'Trim start',
+  te: 'Trim end',
+  to: 'Trim offset',
+};
+/** the tracks a preset animates, in words ("Position · Opacity"); a filter's by its filter */
+export function presetTracks(p: Preset): string[] {
+  const { l, steps } = demo(p),
+    out: string[] = [];
+  Object.keys(steps).forEach(k => {
+    const fx = /^fx\.([^.]+)\./.exec(k),
+      f = fx && (l.fx || []).find(x => x.id === fx[1]),
+      name = LABELS[k] || (f ? (f.type === 'blur' ? 'Blur' : 'Shadow') : k);
+    if (!out.includes(name)) out.push(name);
+  });
+  return out;
+}

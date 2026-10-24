@@ -11,6 +11,7 @@ import { S, layerById } from '../core/state';
 import { familyCSS } from '../render/fonts';
 import { anchorX, textDir, textLines, textWidth, visualAnchor } from '../render/text-layout';
 import { frame, renderStage } from '../render/stage';
+import { spellOn } from '../core/spell';
 
 let ta: HTMLTextAreaElement | null = null,
   edit: { end(o?: any): void } | null = null,
@@ -69,7 +70,7 @@ export function startTextEdit(l: Layer, selectAll?: boolean) {
   ta = document.createElement('textarea');
   ta.className = 'cin-tedit';
   // the browser's own spell check: it underlines misspelt words in the language of the person's browser
-  ta.spellcheck = true;
+  ta.spellcheck = spellOn();
   ta.setAttribute('aria-label', 'Text');
   ta.value = String(l.geo.text || '');
   document.body.appendChild(ta);

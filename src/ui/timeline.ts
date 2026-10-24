@@ -1,5 +1,5 @@
 // SVGcinema — ui/timeline
-import { graphNames, graphSVG, graphTrack, graphable } from './graph';
+import { graphNames, graphSVG, graphTrack, graphable, updateGraphValues } from './graph';
 import type { Keyframe, Layer, PropKey } from '../model/types';
 import { $, ICON, clamp, clone, esc, fmt, isFrozen, layerTracks, propLabel, r3 } from '../core/constants';
 import { TLB, TLS } from '../core/dom';
@@ -173,6 +173,7 @@ export function revealSelected() {
   else if (bot > visBot) TLS.scrollTop = Math.min(top - rh, bot - TLS.clientHeight);
 }
 export function updatePlayhead() {
+  updateGraphValues();
   const ph = $('#playhead');
   if (!ph) return;
   const x = tln() + S.time * S.pps;

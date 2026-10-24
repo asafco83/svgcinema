@@ -29,6 +29,8 @@ import {
 } from './layer-menu';
 import { ANIM_GROUPS, animateProp } from './animate-menu';
 import { openPresets } from './presets-panel';
+import { setSpell, spellOn } from '../core/spell';
+import { toast } from '../io/open';
 import { ONION } from './onion';
 import { deleteSel, duplicate } from './layers-panel';
 import { zoomCommand } from './zoom-menu';
@@ -124,6 +126,7 @@ function helpItems(): Item[] {
   return [
     { id: 'hp:keys', label: 'Keyboard shortcuts', on: true, key: 'F1' },
     { id: 'hp:sample', label: 'Open the sample scene…', on: true },
+    { id: 'hp:spell', label: 'Spell check', on: true, check: spellOn() },
     ...(SITE ? [{ id: 'hp:site', label: 'SVGcinema website', on: true } as Item] : []),
     '-',
     { id: 'hp:about', label: 'About SVGcinema', on: true },
@@ -207,7 +210,10 @@ function run(id: string) {
   else if (id.startsWith('vw:')) toggleView(id.slice(3));
   else if (id === 'hp:keys') openShortcuts();
   else if (id === 'hp:sample') openSample();
-  else if (id === 'hp:site' && SITE) window.open(SITE, '_blank', 'noopener');
+  else if (id === 'hp:spell') {
+    setSpell(!spellOn());
+    toast(spellOn() ? 'Spell check is on for the text you type.' : 'Spell check is off.');
+  } else if (id === 'hp:site' && SITE) window.open(SITE, '_blank', 'noopener');
   else if (id === 'hp:about') openAbout();
   else runLayerCommand(id);
 }
