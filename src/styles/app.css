@@ -2830,6 +2830,14 @@ details summary {
   z-index: 40;
   box-sizing: content-box;
   font-kerning: normal;
+  /* room under the last line, so the browser's spell check underline isn't clipped */
+  padding-bottom: 0.4em;
+}
+/* the browser's spell check underline: drawn a little heavier and lower, so it reads on the canvas */
+.cin-tedit::spelling-error {
+  text-decoration: underline wavy var(--head);
+  text-decoration-thickness: max(1px, 0.05em);
+  text-underline-offset: 0.12em;
 }
 
 /* frozen tracks */

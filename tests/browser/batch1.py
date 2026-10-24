@@ -34,6 +34,9 @@ async def main():
         check('the inspector text box is spell-checked', await ev("document.getElementById('g-text').spellcheck"))
         await ev(f"te.startTextEdit(st.layerById('{title}'))"); await pg.wait_for_timeout(100)
         check('typing on the canvas is spell-checked', await ev("document.querySelector('.cin-tedit').spellcheck"))
+        # the underline sits below the baseline: the editor leaves room under the last line so it isn't clipped
+        check('the canvas editor leaves room for the spell check underline', await ev("parseFloat(getComputedStyle(document.querySelector('.cin-tedit')).paddingBottom) > 0"))
+        check('the spell check underline is styled', await ev("[...document.styleSheets].some(s=>{try{return [...s.cssRules].some(r=>r.selectorText&&r.selectorText.includes('.cin-tedit::spelling-error'))}catch(_){return false}})"))
         await ev("te.endTextEdit()"); await pg.wait_for_timeout(100)
 
         # ---- letter case
