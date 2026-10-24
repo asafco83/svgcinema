@@ -349,6 +349,8 @@ export function refreshInspector(full?: boolean) {
     const [k, i, m] = inp.dataset.f.split(':') as [PropKey, string, string];
     let v = valueAt(l, k, S.time);
     if (i !== undefined && i !== '') v = v ? v[+i] : 0;
+    // Size shows the size you see: the shape's own size times its scale
+    if (k === 'sz' && i !== undefined && i !== '') v = v * sizeScale(l)[+i];
     if (propKind(l, k) === 'c') {
       if (inp.type === 'color') {
         inp.value = toHex(v) || '#000000';
@@ -456,6 +458,8 @@ export function parseField(l: Layer, inp: HTMLInputElement): [PropKey, any] | nu
       if (p && p.param.scale === 100) v = Math.min(1, v);
     }
     if (k === 'sw' || k === 'sz') v = Math.max(0, v);
+    // Size fields show the size times the scale: back to the shape's own size
+    if (k === 'sz' && i !== undefined && i !== '') v = v / sizeScale(l)[+i];
     v = r3(v);
   }
   if (i !== undefined && i !== '') {
@@ -467,6 +471,11 @@ export function parseField(l: Layer, inp: HTMLInputElement): [PropKey, any] | nu
     v = cur;
   }
   return [k, v];
+}
+/** the scale Size fields are shown at (|scale|, never 0) */
+export function sizeScale(l: Layer): number[] {
+  const s = valueAt(l, 'scl', S.time) || [1, 1];
+  return [0, 1].map(j => (Math.abs(s[j]) > 1e-6 ? Math.abs(s[j]) : 1));
 }
 export function setField(l: Layer, k: PropKey, v: any) {
   return k === 'org' ? reOrigin(l, v) : setProp(l, k, v);
@@ -956,6 +965,8 @@ export function init(): void {
         const r = parseField(l, inp);
         if (r) {
           setField(l, r[0], r[1]);
+          // a value without keyframes (or a size) is drawn from the markup: redraw it as it changes
+          if (r[0] === 'sz' || !(l.t[r[0]] && l.t[r[0]].length)) renderStage();
           frame();
         }
       },

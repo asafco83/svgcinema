@@ -6,24 +6,11 @@
 // curve's handle reshapes both). The name column offers the same easing set as the Keyframe panel for
 // that segment. Colours, gradients, dash patterns and morphs have no graph. One undo step per drag.
 import type { Ease, Keyframe, Layer, PropKey } from '../model/types';
-import {
-  $,
-  EZFAM,
-  clamp,
-  clone,
-  esc,
-  fmt,
-  isFrozen,
-  layerTracks,
-  propKind,
-  propLabel,
-  r3,
-  valueAt,
-} from '../core/constants';
+import { $, clamp, esc, fmt, isFrozen, layerTracks, propKind, propLabel, r3, valueAt } from '../core/constants';
 import { S, doc, layerById, selLayer, sortTrack } from '../core/state';
 import { beginEdit } from '../core/history';
 import { TLB } from '../core/dom';
-import { bezOf, easeDir, easeFam, easeLabel, famName, sameEase, thumb } from './easing';
+import { bezOf } from './easing';
 import { toast } from '../io/open';
 import { frame } from '../render/stage';
 import { renderTimeline } from './timeline';
@@ -177,48 +164,29 @@ export function graphSVG(l: Layer, k: string, W: number, LW: number) {
   s += `<g class="gr-read" id="grRead" visibility="hidden"><rect rx="4" height="20"/><text y="14"></text></g></svg>`;
   return s;
 }
-/** easing presets for the selected segment, as in the Keyframe panel */
-function easeTiles(e: Ease) {
-  const dir = easeDir(e),
-    list: Array<[Ease, string]> = [
-      ['linear', 'Linear'],
-      ['ease', 'Ease'],
-      ['hold', 'Hold'],
-      ...EZFAM.map((f): [Ease, string] => [famName(f, dir), f === 'Standard' ? 'Basic' : f]),
-      ...(doc.ezPresets || []).map((p): [Ease, string] => [p.v, p.name]),
-    ];
-  const custom = Array.isArray(e) && !list.some(([v]) => sameEase(v, e));
-  return (
-    `<div class="gr-dir segc">${[
-      ['in', 'In'],
-      ['out', 'Out'],
-      ['inOut', 'In-Out'],
-    ]
-      .map(([v, n]) => `<button data-gdir="${v}" class="${dir === v ? 'on' : ''}">${n}</button>`)
-      .join('')}</div><div class="gr-ez">` +
-    list
-      .map(
-        ([v, n]) =>
-          `<button class="gr-ezb${sameEase(v, e) ? ' on' : ''}" data-gez="${esc(JSON.stringify(v))}" title="${esc(n)} (${esc(easeLabel(v))})" aria-label="${esc(n)}">${thumb(v)}</button>`,
-      )
-      .join('') +
-    (custom
-      ? `<button class="gr-ezb on" title="Custom (${esc(easeLabel(e))})" aria-label="Custom">${thumb(e)}</button>`
-      : '') +
-    `</div>`
-  );
-}
-/** the name column of the graph row: the usual controls, the curves' values, the easing set */
 export function graphNames(l: Layer, k: string, controls: string) {
   const tr = l.t[k],
     v = comps(valueAt(l, k, S.time)),
     seg = segIndex(tr),
     names = v.length > 1 ? ['X', 'Y'] : [''];
+  // easing presets live in the Keyframe panel (click a key): here, the values at the playhead
   return `<div class="gr-names">${controls}<div class="gr-leg">${v
-    .map((x, c) => `<span><i style="background:${COL[c]}"></i>${names[c]}<b>${fmt(x)}</b></span>`)
-    .join(
-      '',
-    )}</div>${seg >= 0 ? easeTiles(tr[seg][2] || 'ease') + `<p class="gr-note">The easing of the selected segment (${fmt(tr[seg][0])} → ${fmt(tr[seg + 1][0])} s); dragging a handle makes it Custom.</p>` : '<p class="gr-note">Add a second keyframe to shape the curve between them.</p>'}</div>`;
+    .map((x, c) => `<span><i style="background:${COL[c]}"></i>${names[c]}<b data-gv="${c}">${fmt(x)}</b></span>`)
+    .join('')}</div><p class="gr-note">${
+    seg >= 0
+      ? `Drag a key for its value and time, or a handle to shape the easing of the selected segment (${fmt(tr[seg][0])} → ${fmt(tr[seg + 1][0])} s). Click a key for the easing presets in the Keyframe panel.`
+      : 'Add a second keyframe to shape the curve between them.'
+  }</p></div>`;
+}
+/** the values beside the graph follow the playhead */
+export function updateGraphValues() {
+  const row = TLB.querySelector('.tl-graph') as HTMLElement;
+  if (!row) return;
+  const l = layerById(row.dataset.lid),
+    k = row.dataset.prop;
+  if (!l || !l.t[k]) return;
+  const v = comps(valueAt(l, k, S.time));
+  row.querySelectorAll<HTMLElement>('[data-gv]').forEach(b => (b.textContent = fmt(v[+b.dataset.gv])));
 }
 
 /* ---------- interaction ---------- */
@@ -309,15 +277,6 @@ function handleDrag(e0: PointerEvent, svg: SVGSVGElement, l: Layer, k: string, i
   addEventListener('pointermove', move);
   addEventListener('pointerup', up);
 }
-function setSegEase(l: Layer, k: string, v: Ease) {
-  const tr = l.t[k],
-    i = segIndex(tr);
-  if (i < 0) return;
-  const ed = beginEdit();
-  tr[i][2] = clone(v);
-  ed.end({ insp: true });
-}
-
 export function init(): void {
   toggleGraph(GRAPH.on);
   $('#tGraph').addEventListener('click', () => {
@@ -347,25 +306,7 @@ export function init(): void {
   );
   TLB.addEventListener('click', (e: MouseEvent) => {
     const t = e.target as HTMLElement;
-    const ez = t.closest('[data-gez]') as HTMLElement,
-      dir = t.closest('[data-gdir]') as HTMLElement,
-      row = t.closest('.tl-prop') as HTMLElement;
-    if ((ez || dir) && row) {
-      const l = layerById(row.dataset.lid),
-        k = row.dataset.prop;
-      if (!l || !l.t[k]) return;
-      if (ez) setSegEase(l, k, JSON.parse(ez.dataset.gez));
-      else {
-        const tr = l.t[k],
-          i = segIndex(tr),
-          cur = tr[i] ? tr[i][2] || 'ease' : 'ease',
-          fam = easeFam(cur);
-        S.ezDir = dir.dataset.gdir;
-        // a family easing switches direction; others pick the plain one of that direction
-        setSegEase(l, k, fam && EZFAM.includes(fam) ? famName(fam, dir.dataset.gdir) : dir.dataset.gdir);
-      }
-      return;
-    }
+    const row = t.closest('.tl-prop') as HTMLElement;
     if (!GRAPH.on) return;
     const nm = t.closest('.tl-pname') as HTMLElement;
     if (nm && row) {

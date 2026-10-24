@@ -94,3 +94,13 @@ describe('animation presets', () => {
     expect(valueAt(a, k, 0.6)).toBe(0);
   });
 });
+
+describe('preset tiles', () => {
+  it('name the tracks each preset animates', async () => {
+    const { presetTracks } = await import('../src/core/presets');
+    expect(presetTracks(presetById('slide-up'))).toEqual(['Position', 'Opacity']);
+    expect(presetTracks(presetById('blur-in'))).toEqual(['Blur']);
+    expect(presetTracks(presetById('lift'))).toEqual(['Position', 'Shadow']);
+    expect(PRESETS.length).toBeGreaterThanOrEqual(45);
+  });
+});

@@ -43,11 +43,11 @@ export const SCRIPTS: Array<[string, string]> = [
   ['symbols', 'Symbols'],
 ];
 const SAMPLE: Record<string, string> = {
-  hebrew: 'בוקר טוב',
-  latin: 'Good morning',
-  cyrillic: 'Доброе утро',
-  greek: 'Καλημέρα',
-  arabic: 'صباح الخير',
+  hebrew: 'דוגמה',
+  latin: 'Sample',
+  cyrillic: 'Пример',
+  greek: 'Δείγμα',
+  arabic: 'عينة',
   symbols: '★ ✦ ☀ ♥ ➜ ✿',
 };
 /** letters of each script, to tell which script a text is in */
@@ -255,7 +255,7 @@ function listHTML() {
     h += `<div class="fp-head" role="presentation">${esc(name.toUpperCase())}${note ? `<span>${esc(note)}</span>` : ''}<i></i></div>`;
     rows.forEach(r => {
       const on = fav.has(r.family);
-      h += `<div class="fp-opt${r.family === cur ? ' cur' : ''}" role="option" aria-selected="${r.family === cur}" data-font="${esc(r.family)}"${r.web ? ` data-sample="${esc(r.text)}"` : ''}><div class="fp-txt"><div class="fp-prev" dir="auto" style="font-family:${esc(familyCSS(r.family))}">${esc(r.text)}</div><div class="fp-meta">${esc(r.meta)}</div></div><button class="fp-star${on ? ' on' : ''}" data-fpstar="${esc(r.family)}" tabindex="-1" aria-label="${on ? 'Remove from favourites' : 'Add to favourites'}" title="${on ? 'Remove from favourites' : 'Add to favourites'}">${on ? STAR_ON : STAR_OFF}</button></div>`;
+      h += `<div class="fp-opt${r.family === cur ? ' cur' : ''}" role="option" aria-selected="${r.family === cur}" title="${esc(r.meta)}" data-font="${esc(r.family)}"${r.web ? ` data-sample="${esc(r.text)}"` : ''}><span class="fp-name">${esc(r.label)}</span><span class="fp-prev" dir="auto" style="font-family:${esc(familyCSS(r.family))}">${esc(r.text)}</span><button class="fp-star${on ? ' on' : ''}" data-fpstar="${esc(r.family)}" tabindex="-1" aria-label="${on ? 'Remove from favourites' : 'Add to favourites'}" title="${on ? 'Remove from favourites' : 'Add to favourites'}">${on ? STAR_ON : STAR_OFF}</button></div>`;
     });
     if (name === 'On this computer')
       h +=
@@ -341,7 +341,7 @@ export function openFontPicker(button: HTMLElement, l: Layer) {
       <div class="fp-scr"><span>Script</span><select class="sel" id="fpScript" aria-label="Script">${scriptHTML()}</select></div>
     </div>
     <div class="fp-list" id="fpList" role="listbox" aria-label="Fonts"></div>
-    <div class="fp-foot">Each font is previewed with the layer’s own text, or a sample in its script. ★ keeps a font at the top.</div>`;
+    <div class="fp-foot">Each font shows the layer’s own text, or “Sample” in its script. ★ keeps a font at the top.</div>`;
   document.body.appendChild(pop);
   place();
   fill();

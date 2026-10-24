@@ -4689,8 +4689,8 @@ select.sel {
 .fp-opt {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 40px;
+  gap: 10px;
+  height: 34px;
   padding: 0 10px 0 12px;
   cursor: pointer;
 }
@@ -4700,22 +4700,21 @@ select.sel {
 .fp-opt.cur {
   background: var(--accent-soft);
 }
-.fp-txt {
-  flex: 1;
+.fp-name {
+  flex: 1 1 auto;
   min-width: 0;
-}
-.fp-prev {
-  text-align: left;
-  font-size: 16px;
-  line-height: 20px;
+  font-size: 13.5px;
+  color: var(--fg);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.fp-meta {
-  font-size: 10.5px;
-  line-height: 13px;
-  color: var(--muted);
+.fp-prev {
+  flex: 0 1 auto;
+  max-width: 55%;
+  text-align: right;
+  font-size: 18px;
+  line-height: 22px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5120,59 +5119,6 @@ select.sel {
   color: var(--muted);
   font-weight: 400;
 }
-.gr-dir {
-  display: flex;
-  margin: 0 10px 0 18px;
-  height: 22px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  overflow: hidden;
-  background: var(--raised);
-}
-.gr-dir button {
-  flex: 1;
-  border: 0;
-  background: none;
-  color: var(--fg);
-  font: inherit;
-  font-size: 11px;
-  cursor: pointer;
-}
-.gr-dir button.on {
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 600;
-}
-.gr-ez {
-  display: grid;
-  grid-template-columns: repeat(5, 32px);
-  gap: 2px 3px;
-  padding-left: 16px;
-}
-.gr-ezb {
-  width: 32px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 5px;
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-}
-.gr-ezb svg {
-  width: 26px;
-  height: 18px;
-}
-.gr-ezb:hover {
-  background: var(--panel-2);
-}
-.gr-ezb.on {
-  background: var(--raised);
-  color: var(--accent);
-  box-shadow: 0 0 0 1.5px var(--accent);
-}
 .gr-note {
   margin: 0;
   padding: 0 10px 0 18px;
@@ -5225,12 +5171,6 @@ select.sel {
 }
 .tl-row.no-graph .tl-pname {
   opacity: 0.55;
-}
-.gr-ezb svg path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.2;
-  stroke-linecap: round;
 }
 
 /* Symbols (ui/symbols-ui), matched to the "Symbols" mockups */
@@ -5393,4 +5333,33 @@ select.sel {
   color: var(--muted);
   font-size: 11px;
   line-height: 15px;
+}
+/* presets: tracks under each tile, the preview shape, the replace warning */
+.pr-tile {
+  height: 104px;
+  gap: 4px;
+}
+.pr-tracks {
+  max-width: calc(100% - 12px);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 13px;
+  text-align: center;
+}
+.pr-tile .pv {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.pr-warn {
+  color: var(--head);
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pr-tile .pv {
+    animation-play-state: paused !important;
+  }
+  .pr-tile:hover .pv {
+    animation-play-state: running !important;
+  }
 }

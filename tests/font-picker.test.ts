@@ -12,10 +12,10 @@ describe('font list', () => {
   });
   it('previews the layer text when the font has its letters, else a sample in the script', () => {
     expect(previewText('Hello', webFont('Lora'), 'latin')).toBe('Hello');
-    expect(previewText('Hello', webFont('Lora'), 'cyrillic')).toBe('Доброе утро');
-    expect(previewText('שלום', webFont('Lora'))).toBe('Good morning');
+    expect(previewText('Hello', webFont('Lora'), 'cyrillic')).toBe('Пример');
+    expect(previewText('שלום', webFont('Lora'))).toBe('Sample');
     expect(previewText('שלום', webFont('Heebo'), 'hebrew')).toBe('שלום');
-    expect(previewText('', webFont('Heebo'), 'hebrew')).toBe('בוקר טוב');
+    expect(previewText('', webFont('Heebo'), 'hebrew')).toBe('דוגמה');
     expect(textScripts('Hi שלום')).toEqual(['hebrew', 'latin']);
   });
   it('groups the Google Fonts by script, a font in each of its scripts', () => {

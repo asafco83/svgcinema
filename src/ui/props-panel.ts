@@ -25,6 +25,7 @@ import { type ShapeParams, maxCornerRadius } from '../geometry/nodes';
 import { renderStage } from '../render/stage';
 import { textDir, visualAnchor } from '../render/text-layout';
 import { textConvertible } from '../core/layer-ops';
+import { spellOn } from '../core/spell';
 
 const PAINTED = ['rect', 'ellipse', 'path', 'text'];
 const I = {
@@ -266,7 +267,7 @@ const tbtnAct = (act: string, val: string, on: boolean, icon: string, label: str
 
 export function textSection(l: Layer) {
   const G = l.geo;
-  return `<section class="sec"><h3>Text</h3><textarea class="ta" data-g="text" id="g-text" spellcheck="true" dir="${textDir(G)}" rows="${Math.min(6, Math.max(2, String(G.text || '').split('\n').length))}" aria-label="Text">${esc(G.text)}</textarea>
+  return `<section class="sec"><h3>Text</h3><textarea class="ta" data-g="text" id="g-text" spellcheck="${spellOn()}" dir="${textDir(G)}" rows="${Math.min(6, Math.max(2, String(G.text || '').split('\n').length))}" aria-label="Text">${esc(G.text)}</textarea>
     ${nrow('Position', `<label class="nf"><span>X</span><input id="g-x" data-g="x" inputmode="decimal" aria-label="X"></label><label class="nf"><span>Y</span><input id="g-y" data-g="y" inputmode="decimal" aria-label="Y"></label>`)}
     ${nrow('Size', `<label class="nf ro"><span>W</span><input id="bb-w" data-bb="w" readonly tabindex="-1" aria-label="Width"></label><label class="nf ro"><span>H</span><input id="bb-h" data-bb="h" readonly tabindex="-1" aria-label="Height"></label>`)}
     ${textConvertible(l) ? '<div class="btns"><button class="btn" data-act="topath" id="txToPath">Convert to shapes</button></div>' : ''}
