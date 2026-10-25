@@ -1,0 +1,41 @@
+name: Player
+
+# Publishes the external player (player/: svgcinema-player on npm) when player/package.json has a
+# version npm doesn't have yet. Exports link to that exact version on jsDelivr, so a published
+# version never changes: to release player changes, raise the version in player/package.json.
+# Needs the repository secret NPM_TOKEN (an npm access token that can publish svgcinema-player).
+on:
+  push:
+    branches: [master]
+    paths: ['player/**', 'src/runtime/**', 'scripts/build-player.mjs', '.github/workflows/player.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - name: Build the player
+        run: node scripts/build-player.mjs
+      - name: Publish if this version is new
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          V=$(node -p "require('./player/package.json').version")
+          if npm view "svgcinema-player@$V" version >/dev/null 2>&1; then
+            echo "svgcinema-player@$V is already published"
+          elif [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::warning::NPM_TOKEN is not set: svgcinema-player@$V was not published"
+          else
+            npm publish ./player --access public
+          fi

@@ -227,6 +227,12 @@ export interface ExportSettings {
   rm?: 'play' | 'first' | 'last';
   /** carry the editable project inside the SVG (opening the SVG in SVGcinema restores it) */
   proj?: boolean;
+  /** JS export: the player inside the SVG (default) or linked from outside */
+  player?: 'embed' | 'external';
+  /** external player: from jsDelivr (default) or an address of your own */
+  playerSrc?: 'cdn' | 'own';
+  /** external player, your own address */
+  playerUrl?: string;
 }
 
 export interface Doc {

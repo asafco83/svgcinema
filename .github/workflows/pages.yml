@@ -25,6 +25,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # the thumbnail installers (built by thumbnailers.yml) go into the site's downloads/ folder
+      - name: Fetch the downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download thumbnails -R ${{ github.repository }} -D public/downloads --clobber || echo "no thumbnails release yet"
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

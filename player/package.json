@@ -1,0 +1,22 @@
+{
+  "name": "svgcinema-player",
+  "version": "1.0.0",
+  "description": "The player for animated SVGs exported from SVGcinema with Player › External.",
+  "main": "cin-player.min.js",
+  "browser": "cin-player.min.js",
+  "jsdelivr": "cin-player.min.js",
+  "unpkg": "cin-player.min.js",
+  "files": [
+    "cin-player.min.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "svg",
+    "animation",
+    "player",
+    "svgcinema"
+  ],
+  "homepage": "https://asafco83.github.io/svgcinema/",
+  "license": "SEE LICENSE IN LICENSE"
+}

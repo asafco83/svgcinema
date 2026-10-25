@@ -9,3 +9,6 @@ thumbnailers/windows/build
 thumbnailers/windows/Output
 thumbnailers/linux/dist
 tools/converter/dist
+player/cin-player.min.js
+player/LICENSE
+public/downloads
