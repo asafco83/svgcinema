@@ -1,11 +1,18 @@
-// SVGcinema — batch converter (tools/convert.html)
-// Turns many SVGs (SVGator exports, CSS-animated SVGs, plain artwork) into .SVGcinema projects. Not
-// linked from the editor or the website: a tool for converting a back catalogue.
-// The work is done by the editor itself, loaded in a hidden frame as index.html?batch (io/batch.ts):
-// each file goes through its Open SVG and Save, so a project comes out exactly as it would by hand,
-// first-frame thumbnail included, and nothing is kept in the browser's editor storage.
+// SVGcinema — batch converter (tools/converter)
+// Turns many SVGs (SVGator exports, CSS-animated SVGs, plain artwork) into .SVGcinema projects. A
+// standalone tool, kept apart from the site: `npm run build:converter` makes one HTML file,
+// SVGcinema-Converter.html, that carries the whole editor inside it and works opened from disk.
+// The work is done by that editor in a hidden frame (io/batch.ts, core/batch-mode.ts): each file goes
+// through its Open SVG and Save, so a project comes out exactly as it would by hand, first-frame
+// thumbnail included, and nothing is kept in the browser.
 import './convert.css';
 import type { BatchResult } from '../io/batch';
+
+/** the editor, built as one HTML file (tools/converter/build.mjs); empty in development */
+declare const __EDITOR_HTML__: string;
+const EDITOR = typeof __EDITOR_HTML__ === 'string' ? __EDITOR_HTML__ : '';
+/** the editor's page with a script that runs before it starts */
+const editorWith = (flag: string) => EDITOR.replace(/<head>/i, `<head><script>window.${flag}=1<\/script>`);
 
 type Status = 'wait' | 'run' | 'done' | 'notes' | 'fail' | 'skip';
 interface Row {
@@ -51,14 +58,18 @@ function loadEditor() {
   frame.setAttribute('aria-hidden', 'true');
   frame.tabIndex = -1;
   ready = new Promise(res => {
-    window.addEventListener('message', function on(e: MessageEvent) {
-      if (e.origin !== location.origin || !e.data || e.data.type !== 'cin-batch-ready') return;
-      window.removeEventListener('message', on);
-      api = (frame.contentWindow as any).cinBatch;
-      res();
-    });
+    const wait = () => {
+      const b = frame.contentWindow && (frame.contentWindow as any).cinBatch;
+      if (b) {
+        api = b;
+        res();
+      } else setTimeout(wait, 100);
+    };
+    wait();
   });
-  frame.src = new URL('../index.html?batch', location.href).href;
+  // the built tool carries the editor; during development the dev server's editor is used
+  if (EDITOR) frame.srcdoc = editorWith('__CIN_BATCH__');
+  else frame.src = new URL('/index.html?batch', location.href).href;
   document.body.appendChild(frame);
 }
 
@@ -328,14 +339,14 @@ async function pickFolder() {
 function openInEditor(row: Row) {
   const blob = row.r && row.r.project;
   if (!blob) return;
-  const w = window.open(new URL('../index.html?receive', location.href).href, '_blank');
+  // a new tab with the editor this tool carries, handed the project to open
+  if (!EDITOR) return; // (development: the dev server has no editor to hand over to)
+  const w = window.open('', '_blank') as any;
   if (!w) return;
-  const on = (e: MessageEvent) => {
-    if (e.origin !== location.origin || e.source !== w || !e.data || e.data.type !== 'cin-receive-ready') return;
-    window.removeEventListener('message', on);
-    w.postMessage({ type: 'cin-open', name: row.out || row.r.base + '.SVGcinema', blob }, location.origin);
-  };
-  window.addEventListener('message', on);
+  w.document.open();
+  w.document.write(editorWith('__CIN_RECEIVE__'));
+  w.document.close();
+  w.__cinOpenFile = { name: row.out || row.r.base + '.SVGcinema', blob };
 }
 function csv() {
   const q = (s: unknown) => `"${String(s ?? '').replace(/"/g, '""')}"`,

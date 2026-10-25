@@ -2,10 +2,14 @@ import asyncio, sys, json, os, io, zipfile
 from playwright.async_api import async_playwright
 OUT=os.environ.get('CIN_OUT','/tmp/svgcinema-shots/'); os.makedirs(OUT, exist_ok=True)
 FIX=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','fixtures','svg')
-# The batch converter (tools/convert.html): many SVGs become .SVGcinema projects through the editor's
-# own Open and Save (in a hidden frame), with thumbnails, without touching the editor's own storage.
+# The standalone batch converter (tools/converter → one HTML file, not part of the site): many SVGs
+# become .SVGcinema projects through the editor's own Open and Save (in a hidden frame inside the
+# file), with thumbnails, without touching the browser's editor storage. Built here, opened from disk.
+import subprocess
+ROOT=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..')
 async def main():
-    base=(sys.argv[1] if len(sys.argv)>1 else 'http://localhost:5199/')
+    subprocess.run(['node','tools/converter/build.mjs'], cwd=ROOT, check=True, capture_output=True)
+    tool='file://'+os.path.abspath(os.path.join(ROOT,'tools/converter/dist/SVGcinema-Converter.html'))
     async with async_playwright() as p:
         b=await p.chromium.launch(); ctx=await b.new_context(viewport={'width':1280,'height':860}, accept_downloads=True)
         pg=await ctx.new_page(); pg.set_default_timeout(20000)
@@ -15,11 +19,12 @@ async def main():
             R[n]=('ok' if c else 'FAIL')+('' if i is None else f' {i}')
             if not c: F.append(n)
         ev=pg.evaluate
-        # the person's own project in this browser must stay as it is
-        await pg.goto(base); await pg.wait_for_timeout(1500)
+        # what the browser keeps for editing must stay as it is
+        await pg.goto(tool); await pg.wait_for_timeout(300)
         mine=json.dumps({'name':'Keep me','w':320,'h':200,'layers':[]})
         await ev(f"localStorage.setItem('svgcinema:doc', {json.dumps(mine)}); localStorage.setItem('svgcinema:dirty','0')")
-        await pg.goto(base+'tools/convert.html'); await pg.wait_for_timeout(500)
+        await pg.reload(); await pg.wait_for_timeout(500)
+        check('one standalone file: the editor inside, nothing loaded from the site', await ev("(async()=>{await cinConvert.ready(); return !!document.getElementById('frame').srcdoc})()"))
         check('first open: the big drop zone', await pg.is_visible('#start .cv-drop.big') and await pg.is_hidden('#work'))
         tmp=os.path.join(OUT,'conv'); os.makedirs(tmp, exist_ok=True)
         open(os.path.join(tmp,'broken.svg'),'w').write('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="5"')
