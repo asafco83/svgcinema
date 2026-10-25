@@ -1,0 +1,66 @@
+name: Thumbnailers
+
+# Builds the file-manager thumbnail add-ons (Windows installer, Linux .deb and .tar.gz). On master
+# they are published to the rolling "thumbnails" release, so the download links stay the same:
+# https://github.com/asafco83/svgcinema/releases/download/thumbnails/<file>
+on:
+  push:
+    branches: [master]
+    paths: ['thumbnailers/**', '.github/workflows/thumbnailers.yml']
+  pull_request:
+    paths: ['thumbnailers/**', '.github/workflows/thumbnailers.yml']
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the handler (x64, ARM64)
+        shell: cmd
+        run: thumbnailers\windows\build.cmd
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null }
+          & $iscc /Othumbnailers\windows\Output thumbnailers\windows\installer.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: thumbnailers/windows/Output/SVGcinema-Thumbnails-Setup.exe
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package
+        run: sh thumbnailers/linux/package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            thumbnailers/linux/dist/svgcinema-thumbnails.deb
+            thumbnailers/linux/dist/svgcinema-thumbnails-linux.tar.gz
+
+  release:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish to the "thumbnails" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view thumbnails >/dev/null 2>&1 || gh release create thumbnails --latest=false \
+            --title "SVGcinema thumbnails" \
+            --notes "Shows the first frame of .SVGcinema projects as their thumbnail in your file manager. Windows: run SVGcinema-Thumbnails-Setup.exe (no administrator rights; Windows may warn that the publisher is unknown: choose More info, then Run anyway). Linux: install svgcinema-thumbnails.deb, or unpack the .tar.gz and run ./install.sh."
+          gh release upload thumbnails out/* --clobber

@@ -1,0 +1,21 @@
+#!/bin/sh
+# SVGcinema thumbnailer for Linux file managers (GNOME Files, Nemo, Caja, Thunar…).
+# Usage: svgcinema-thumbnailer INPUT OUTPUT [SIZE]
+# A .SVGcinema project is a zip whose thumbnail.png holds the animation's first frame; this copies it
+# out. The file manager scales it to the size it needs.
+in="$1"
+out="$2"
+[ -n "$in" ] && [ -n "$out" ] || { echo "usage: $0 INPUT OUTPUT [SIZE]" >&2; exit 2; }
+if command -v unzip >/dev/null 2>&1; then
+  unzip -p "$in" thumbnail.png > "$out" 2>/dev/null && [ -s "$out" ] && exit 0
+fi
+if command -v python3 >/dev/null 2>&1; then
+  python3 -I -c 'import sys, zipfile
+with zipfile.ZipFile(sys.argv[1]) as z, open(sys.argv[2], "wb") as f:
+    f.write(z.read("thumbnail.png"))' "$in" "$out" 2>/dev/null && [ -s "$out" ] && exit 0
+fi
+if command -v bsdtar >/dev/null 2>&1; then
+  bsdtar -xOf "$in" thumbnail.png > "$out" 2>/dev/null && [ -s "$out" ] && exit 0
+fi
+rm -f "$out"
+exit 1
