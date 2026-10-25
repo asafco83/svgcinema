@@ -4,8 +4,18 @@
 // - dist/downloads/ (when the editor has been built): cin-player.min.js (the latest) and
 //   cin-player-<version>.min.js for self-hosting, next to the thumbnail installers, with an index page.
 import { build } from 'esbuild';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const root = resolve(import.meta.dirname, '..'),
   pkg = JSON.parse(readFileSync(join(root, 'player/package.json'), 'utf8')),
@@ -33,10 +43,18 @@ if (existsSync(join(dist, 'index.html'))) {
   mkdirSync(dl, { recursive: true });
   copyFileSync(out, join(dl, 'cin-player.min.js'));
   copyFileSync(out, join(dl, `cin-player-${pkg.version}.min.js`));
+  // the Windows installer is offered zipped (many web hosts refuse to serve .exe files); the
+  // thumbnails release has the .zip, and an older .exe found here is zipped now
+  const exe = 'SVGcinema-Thumbnails-Setup.exe';
+  if (existsSync(join(dl, exe))) {
+    execFileSync('zip', ['-9', '-q', '-j', join(dl, 'SVGcinema-Thumbnails-Setup.zip'), join(dl, exe)]);
+    rmSync(join(dl, exe));
+  }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const kb = n => (n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');
   const what = {
-    'SVGcinema-Thumbnails-Setup.exe': 'Thumbnails in Windows File Explorer (Windows 10 and 11)',
+    'SVGcinema-Thumbnails-Setup.zip':
+      'Thumbnails in Windows File Explorer (Windows 10 and 11): unzip, then run the installer',
     'svgcinema-thumbnails.deb': 'Thumbnails in Linux file managers (.deb package)',
     'svgcinema-thumbnails-linux.tar.gz': 'Thumbnails in Linux file managers (with install.sh)',
     'cin-player.min.js': `The external player, latest (${pkg.version})`,

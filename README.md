@@ -358,7 +358,7 @@ A `.SVGcinema` file is a standard zip archive:
 
 **Thumbnails in your file manager:** optional add-ons read `thumbnail.png` so projects show their first frame instead of a plain icon:
 
-- **Windows** File Explorer: `SVGcinema-Thumbnails-Setup.exe`. It installs for you only, with no administrator rights. It's unsigned, so Windows may warn about an unknown publisher: choose _More info_, then _Run anyway_.
+- **Windows** File Explorer: `SVGcinema-Thumbnails-Setup.zip`, holding `SVGcinema-Thumbnails-Setup.exe` (zipped because many web hosts refuse to serve `.exe` files). It installs for you only, with no administrator rights. It's unsigned, so Windows may warn about an unknown publisher: choose _More info_, then _Run anyway_.
 - **Linux**: `svgcinema-thumbnails.deb`, or the `.tar.gz` with `install.sh`. Works in GNOME Files, Nemo, Caja and Thunar.
 
 The editor links to them from **Help › Thumbnails on your computer…** (hidden on a Mac, which isn't supported). It offers the download for the system you're on first, with the Windows warning highlighted. The website has a section with both. The build puts the downloads in the site's `downloads/` folder next to the editor (`editor/downloads/` in the deploy bundle). The Pages workflow fetches the installers from the `thumbnails` release first; for a local build, run `npm run fetch:downloads` (needs `gh`). The sources and how they work are in `thumbnailers/`.
