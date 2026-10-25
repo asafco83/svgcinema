@@ -7,7 +7,8 @@ stored uncompressed, 512 px on its long side. The add-ons only read it.
 Downloads (built by `.github/workflows/thumbnailers.yml`, published to the rolling `thumbnails`
 release):
 
-- Windows: `SVGcinema-Thumbnails-Setup.exe`
+- Windows: `SVGcinema-Thumbnails-Setup.zip` (the installer `SVGcinema-Thumbnails-Setup.exe`, zipped
+  because many web hosts refuse to serve `.exe` files)
 - Linux: `svgcinema-thumbnails.deb` or `svgcinema-thumbnails-linux.tar.gz`
 
 ## Windows (`windows/`)

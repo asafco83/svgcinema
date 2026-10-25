@@ -50,7 +50,7 @@ async def main():
         d=await ev("""(()=>{const m=document.getElementById('mThumbs');const a=[...m.querySelectorAll('a')].map(x=>x.href);
           return {open:!m.hidden, title:m.querySelector('h2').textContent, first:a[0], links:a.length, warn:!!m.querySelector('.th-warn'), files:m.querySelectorAll('.th-file').length}})()""")
         check('it opens the download window', d['open'] and d['title']=='Thumbnails on your computer', d)
-        check('Windows installer first, with the warning', d['first'].endswith('SVGcinema-Thumbnails-Setup.exe') and d['warn'], d['first'])
+        check('Windows installer first, with the warning', d['first'].endswith('SVGcinema-Thumbnails-Setup.zip') and d['warn'], d['first'])
         check('Linux downloads and All downloads on the small line', d['links']==4 and d['files']==3)
         await pg.locator('#mThumbs .dlg').screenshot(path=OUT+'thumbs-dialog.png')
         await pg.keyboard.press('Escape'); await pg.wait_for_timeout(150)

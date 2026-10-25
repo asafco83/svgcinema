@@ -60,7 +60,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+          # the Windows installer goes out zipped: many web hosts refuse to serve .exe files
+          (cd out && zip -9 -q SVGcinema-Thumbnails-Setup.zip SVGcinema-Thumbnails-Setup.exe && rm SVGcinema-Thumbnails-Setup.exe)
+          NOTES="Shows the first frame of .SVGcinema projects as their thumbnail in your file manager. Windows: unzip SVGcinema-Thumbnails-Setup.zip and run SVGcinema-Thumbnails-Setup.exe (no administrator rights; Windows may warn that the publisher is unknown: choose More info, then Run anyway). Linux: install svgcinema-thumbnails.deb, or unpack the .tar.gz and run ./install.sh."
           gh release view thumbnails >/dev/null 2>&1 || gh release create thumbnails --latest=false \
-            --title "SVGcinema thumbnails" \
-            --notes "Shows the first frame of .SVGcinema projects as their thumbnail in your file manager. Windows: run SVGcinema-Thumbnails-Setup.exe (no administrator rights; Windows may warn that the publisher is unknown: choose More info, then Run anyway). Linux: install svgcinema-thumbnails.deb, or unpack the .tar.gz and run ./install.sh."
+            --title "SVGcinema thumbnails" --notes "$NOTES"
+          gh release edit thumbnails --notes "$NOTES"
           gh release upload thumbnails out/* --clobber
+          gh release delete-asset thumbnails SVGcinema-Thumbnails-Setup.exe -y 2>/dev/null || true

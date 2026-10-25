@@ -11,7 +11,8 @@ import { IS_MAC } from '../core/keys';
 // the Pages workflow), so the links work wherever the site is hosted
 const DL = 'downloads/';
 export const THUMB_LINKS = {
-  windows: `${DL}SVGcinema-Thumbnails-Setup.exe`,
+  // zipped: many web hosts refuse to serve .exe files
+  windows: `${DL}SVGcinema-Thumbnails-Setup.zip`,
   deb: `${DL}svgcinema-thumbnails.deb`,
   tar: `${DL}svgcinema-thumbnails-linux.tar.gz`,
   all: DL,
@@ -49,15 +50,15 @@ export function thumbsHTML(linux = onLinux()) {
       `<div class="th-file"><svg width="112" height="70" viewBox="0 0 112 70">${svg}</svg><span>${n}.SVGcinema</span></div>`,
   ).join('');
   const windows = `<div class="th-main" data-os="windows">
-      <div class="th-dl">${a(THUMB_LINKS.windows, DL_ICON + 'Download for Windows', 'btn pri th-btn')}<span>2 MB · Windows 10 and 11</span></div>
-      <div class="th-warn" role="note">${WARN_ICON}<div><b>Windows will warn you. That's expected.</b><span>The installer isn't signed, so Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights; remove it any time in Settings › Apps.</span></div></div>
+      <div class="th-dl">${a(THUMB_LINKS.windows, DL_ICON + 'Download for Windows', 'btn pri th-btn')}<span>2 MB .zip · Windows 10 and 11</span></div>
+      <div class="th-warn" role="note">${WARN_ICON}<div><b>Windows will warn you. That's expected.</b><span>Unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights; remove it any time in Settings › Apps.</span></div></div>
     </div>`;
   const linuxMain = `<div class="th-main" data-os="linux">
       <div class="th-dl">${a(THUMB_LINKS.deb, DL_ICON + 'Download .deb package', 'btn pri th-btn')}${a(THUMB_LINKS.tar, '.tar.gz with install script', 'btn th-btn')}</div>
       <p class="th-note">For GNOME Files, Nemo, Caja and Thunar. The .tar.gz installs with <code>./install.sh</code> (asks for your password).</p>
     </div>`;
   const alt = linux
-    ? `<span class="th-k">Windows:</span>${a(THUMB_LINKS.windows, 'installer (.exe)')}`
+    ? `<span class="th-k">Windows:</span>${a(THUMB_LINKS.windows, 'installer (.zip)')}`
     : `<span class="th-k">Linux:</span>${a(THUMB_LINKS.deb, '.deb package')}<span class="th-dot">·</span>${a(THUMB_LINKS.tar, '.tar.gz with install script')}`;
   return `<p class="th-intro">Every project you save carries a picture of its first frame. Add this small helper and your file manager shows it instead of a plain file icon.</p>
     <div class="th-files" aria-hidden="true">${files}</div>
