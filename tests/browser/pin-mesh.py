@@ -149,7 +149,7 @@ async def main():
         # ---- the Export dialog: in CSS mode a note offers the much smaller JavaScript export
         await ev("st.doc.ex.mode='css'; B.openExport()"); await pg.wait_for_timeout(1200)
         note=await ev("(()=>{const n=document.getElementById('xShapeNote');return n.hidden?null:n.textContent})()")
-        stats=await ev("document.getElementById('xStats').textContent")
+        stats=await ev("document.getElementById('xFileSub').textContent")
         check('CSS mode: a note offers JavaScript', note is not None and 'times smaller' in note and 'as JavaScript' in stats, (note,stats))
         await pg.screenshot(path=OUT+'pin-mesh-export.png')
         await pg.click('#xUseJS'); await pg.wait_for_timeout(1200)

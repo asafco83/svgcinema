@@ -5532,3 +5532,255 @@ a.btn {
   color: var(--fg);
   text-decoration: none;
 }
+
+/* ---------- Export window: sections like the inspector (matched to the mockup) ---------- */
+.dlg.xdlg {
+  width: min(960px, 100%);
+  height: min(760px, calc(100vh - 32px));
+  max-height: none;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+.xdlg header {
+  height: 56px;
+  box-sizing: border-box;
+  padding: 0 12px 0 18px;
+  position: static;
+}
+.xdlg .xgrid {
+  grid-template-columns: 340px minmax(0, 1fr);
+  min-height: 0;
+}
+.xdlg .xopts {
+  display: block;
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+}
+.xopts .sec > h3 small {
+  font-weight: 500;
+}
+.xopts .sec:not(.closed) > h3 small {
+  display: none;
+}
+.xopts .row {
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 6px;
+}
+.xopts .segc button {
+  white-space: nowrap;
+  padding: 0 8px;
+}
+#mExport .sec p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+#mExport .sec p.xind {
+  margin-left: 96px;
+}
+.xwarn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--key) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--key) 32%, transparent);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.xwarn > svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--key);
+}
+.xwarn b {
+  font-weight: 600;
+}
+.xwarn > span > b:first-child {
+  color: var(--key-text);
+}
+.xabout summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.xabout summary::-webkit-details-marker {
+  display: none;
+}
+.xabout summary:hover {
+  color: var(--fg);
+}
+.xabout .xchev {
+  transform: rotate(-90deg);
+  transition: transform 0.15s;
+}
+.xabout[open] .xchev {
+  transform: none;
+}
+#mExport .xabout p {
+  line-height: 1.5;
+}
+.xpair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  min-width: 0;
+}
+.xtrio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 28px;
+  gap: 6px;
+  min-width: 0;
+}
+.xtrio select.sel {
+  grid-column: span 2;
+}
+#xPreset {
+  min-width: 0;
+}
+#xLink {
+  width: 28px;
+  height: 28px;
+}
+.xfps {
+  display: flex;
+  min-width: 0;
+}
+.xfps select.sel {
+  padding-right: 22px;
+  background-position: right 7px center;
+}
+#mExport .check {
+  min-height: 28px;
+}
+#mExport .check input {
+  margin: 0;
+  width: 14px;
+  height: 14px;
+}
+.xgrow {
+  flex: 1;
+}
+.xkb {
+  height: 20px;
+  line-height: 20px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+.xdlg .xside {
+  padding: 14px 16px 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.xtop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.xtop .segc {
+  flex: none;
+}
+.xtop .segc button {
+  flex: none;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+#xPanePrev {
+  gap: 10px;
+}
+#xPaneEmbed {
+  gap: 10px;
+}
+.xdlg .stats {
+  gap: 6px;
+  font-size: 11.5px;
+}
+.xdlg .stats span {
+  height: 22px;
+  line-height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--panel-2);
+}
+.xdlg .stats b {
+  font-weight: 600;
+}
+.xdlg .xnote {
+  padding: 10px 12px;
+}
+.xdlg .xnote p {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.xdlg .xnote .btn {
+  height: 28px;
+}
+#xPaneEmbed textarea.code {
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+#xPaneEmbed .btns {
+  justify-content: flex-end;
+  gap: 8px;
+}
+.xdlg footer {
+  height: 56px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.xdlg footer .btn,
+#xPaneEmbed .btns .btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12.5px;
+}
+.xsize {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.xsize b {
+  font-size: 14px;
+  font-weight: 600;
+}
+.xsize span {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 860px) {
+  .xdlg .xgrid {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+  .xdlg .xopts,
+  .xdlg .xside {
+    overflow: visible;
+  }
+}
+.xopts .sec-tg {
+  width: 12px;
+}
+.xdlg .xnote .btn {
+  font-size: 12px;
+}
