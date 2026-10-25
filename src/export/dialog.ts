@@ -58,13 +58,14 @@ export function syncExportUI() {
     .querySelectorAll('button')
     .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === (ext ? 'external' : 'embed')));
   $('#xPlayerNote').textContent = ext
-    ? `Uses the page’s player if it has one, otherwise loads svgcinema-player ${PLAYER_VERSION} from jsDelivr. Several animations share one player.`
-    : 'Plays anywhere, even offline. Adds about 24 KB to each SVG.';
+    ? `Uses the page’s player, else loads svgcinema-player ${PLAYER_VERSION} from jsDelivr. Saves about 24 KB per SVG.`
+    : 'Plays anywhere, even offline. Adds about 24 KB.';
   const wf = doc.layers.filter(
       l => l.type === 'text' && !l.hid && (webFont(l.geo.family) || isLocalFamily(l.geo.family)),
     ),
     fm = ex.fonts === 'embed' ? 'embed' : 'outline';
   $('#xFontRow').hidden = !wf.length;
+  $('#xSumText').textContent = fm === 'embed' ? 'Embedded fonts' : 'Outlines';
   $('#xFonts')
     .querySelectorAll('button')
     .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === fm));
@@ -99,7 +100,8 @@ export function syncExportUI() {
   const showOut = css ? ex.trigger === 'hover' : ['hover', 'click', 'scroll'].includes(ex.trigger);
   $('#xOutRow').hidden = !showOut;
   $('#xOutLbl').textContent =
-    ex.trigger === 'click' ? 'On second click' : ex.trigger === 'scroll' ? 'When scrolled away' : 'On mouse out';
+    ex.trigger === 'click' ? 'Second click' : ex.trigger === 'scroll' ? 'Scrolled away' : 'On mouse out';
+  $('#xOut').setAttribute('aria-label', $('#xOutLbl').textContent);
   $('#xFpsRow').hidden = css;
   $('#xIt').value = String(doc.it || 0);
   $('#xDir').value = doc.dir || 'normal';
@@ -113,9 +115,43 @@ export function syncExportUI() {
   $('#xProj').checked = !!ex.proj;
   $('#xProjKb').textContent = '+' + kb(new Blob([projectPayload(exportLayers())]).size);
   $('#xProjNote').hidden = !ex.proj;
+  $('#xAboutT').textContent = css ? 'What CSS can and can’t do' : 'What the JavaScript export supports';
   $('#xNote').innerHTML = !css
-    ? (ext ? 'The player supports' : 'The SVG carries a small built-in player that supports') +
-      ' every animator and easing, including morph, curved paths and custom curves. Images are embedded in the file. Scripts run when the SVG is inline, or placed with <code>&lt;object&gt;</code> or <code>&lt;embed&gt;</code>. The <b>Embed</b> tab has ready code for each framework.'
-    : 'Pure CSS keyframes with no script, so it animates even inside <code>&lt;img&gt;</code> and as a CSS background. CSS can start on load or on hover only. On mouse out it can pause (and resume on the next hover) or jump to the start (and replay from the beginning on the next hover); reversing back needs the JavaScript export. Shape changes (morph) play with SMIL, so they work in every browser; with the hover trigger they use CSS <code>d: path()</code> instead, which Safari does not support.';
+    ? 'Every animator and easing, including morph, curved paths and custom curves. Images are embedded in the file. Scripts run when the SVG is inline, or placed with <code>&lt;object&gt;</code> or <code>&lt;embed&gt;</code>. The <b>Embed</b> tab has ready code for each framework.'
+    : 'Pure CSS keyframes, no script: animates inside <code>&lt;img&gt;</code> and as a CSS background. Starts on load or on hover only. On mouse out it can pause or jump to the start; reversing needs JavaScript. Morph plays with SMIL; with the hover trigger it uses CSS <code>d: path()</code>, which Safari does not support.';
+  syncSummaries();
   renderSnippet();
+}
+
+const TRIG_SHORT: Record<string, string> = {
+  load: 'On load',
+  hover: 'On mouse over',
+  click: 'On click',
+  scroll: 'On scroll',
+  api: 'Programmatic',
+};
+/** the one-line summaries a closed section shows next to its title */
+export function syncSummaries() {
+  const ex = doc.ex,
+    css = ex.mode === 'css',
+    it = doc.it || 0;
+  $('#xSumFmt').textContent = css
+    ? 'CSS only'
+    : ex.player === 'external'
+      ? 'JavaScript · external player'
+      : 'JavaScript · embedded player';
+  $('#xSumPlay').textContent =
+    (TRIG_SHORT[ex.trigger] || 'On load') +
+    ' · ' +
+    (it === 0 ? 'loops forever' : it === 1 ? 'plays once' : `plays ${it} times`) +
+    ((ex.speed || 1) !== 1 ? ` · ×${fmt(ex.speed)}` : '');
+  $('#xSumSize').textContent = ex.size === 'fixed' ? `${$('#xW').value} × ${$('#xH').value} px` : 'Responsive';
+  const fmtSel = $('#xFmt') as HTMLSelectElement,
+    fmtTxt = fmtSel.selectedOptions && fmtSel.selectedOptions[0] ? fmtSel.selectedOptions[0].textContent : '';
+  $('#xSumImg').textContent =
+    ex.opt === false
+      ? 'Original files'
+      : (fmtTxt || '').replace(/ \(.*\)$/, '') + (ex.fmt === 'png' ? '' : ` · ${ex.q || 82}%`);
+  $('#xSumAdv').textContent =
+    (ex.ids === 'names' ? 'IDs from names' : 'Generated IDs') + ' · ' + ex.prefix + (ex.proj ? ' · project' : '');
 }

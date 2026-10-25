@@ -97,6 +97,7 @@ src/
   export/
     build.ts             Builds the exported SVG (JS player or CSS keyframes)
     dialog.ts            Export dialog controls
+    sections.ts          Export dialog sections: collapse, remembered, summaries
     snippets.ts          Embed code for HTML, React, Next.js, Vue, Angular, Svelte
     size.ts              Output size (responsive/fixed, W/H/%)
     images.ts            Image optimization (resize for output size, format, quality)
@@ -304,9 +305,11 @@ The guides are saved with the project; the other view settings are remembered in
 
 **File names in any language:** the project name (Hebrew, Russian, Japanese…) is used as typed for the `.SVGcinema` file and the exported `.svg`; only the characters file systems refuse (`\ / : * ? " < > |`) are left out. Code identifiers (component names in the embed code) still use a plain Latin form.
 
+**The Export window:** the options sit in sections that collapse like the inspector's: **Format** (JavaScript or CSS only, the player, and a folded-away note on what each supports), **Playback** (trigger, what happens when it ends, repeat, direction, after the end, speed and frame rate, less motion), **Size** (responsive or fixed, dimensions, scale, largest width), **Images** and **Text** (only when the canvas has images or web / local fonts) and **Advanced** (element IDs, ID prefix, the editable project), which starts closed. A closed section shows a one-line summary of its settings, and the sections you close stay closed (remembered in this browser). Only the options column scrolls: the preview, the file size and the Copy / Download buttons stay in view.
+
 **Less motion:** the Export dialog's _Less motion_ setting decides what visitors who ask their system for reduced motion see: _Play normally_ (the default, adds nothing), _Show the first frame_ or _Show the last frame_. The JS player then holds that frame and doesn't start (whatever the trigger); a CSS export pauses every animation on it (a few bytes of CSS). Shape morphs in a CSS export are held with the CSS `d` property, which Safari ignores, so there they keep playing.
 
-**SVGs exported by SVGcinema:** tick _Include the editable project_ in the Export dialog (off by default; it shows how much it adds, about a third more for a typical JS export before compression). The project goes into the SVG's metadata, the pictures stay the SVG's own, and opening the SVG in SVGcinema brings back the exact project (layers, keyframes, settings); exporting it again gives the same file. Added to another project, its layers come in a group. Without it, an exported SVG opens as its artwork (the first frame), not animated.
+**SVGs exported by SVGcinema:** tick _Include the editable project_ in the Export dialog's Advanced section (off by default; it shows how much it adds, about a third more for a typical JS export before compression). The project goes into the SVG's metadata, the pictures stay the SVG's own, and opening the SVG in SVGcinema brings back the exact project (layers, keyframes, settings); exporting it again gives the same file. Added to another project, its layers come in a group. Without it, an exported SVG opens as its artwork (the first frame), not animated.
 
 **Animated SVGs from SVGator** keep their animation as ordinary, editable keyframes (opened as a project, they also bring their length, repeat, direction, fill mode, speed, frame rate and start trigger; added to a project, they lengthen its timeline when they are longer).
 
@@ -316,7 +319,7 @@ The guides are saved with the project; the other view settings are remembered in
 
 ## The external player
 
-The Export dialog's **Player** row (JavaScript exports only) chooses **Embedded (+24 KB)**, the default (the player inside each SVG: plays anywhere, even offline), or **External**. An amber note under it reminds that a script export doesn't play as `<img>` or as a CSS background (export as CSS only for those); the stats line says _Player inside_ or _external_.
+The Export dialog's **Player** row (Format section, JavaScript exports only) chooses **Embedded**, the default (the player inside each SVG: plays anywhere, even offline, about 24 KB), or **External**. An amber note under it reminds that a script export doesn't play as `<img>` or as a CSS background (export as CSS only for those); the footer says _player inside_ or _external player_ beside the file size.
 
 SVGs exported with **External** carry only their artwork and animation, as JSON in `<script type="application/json" data-cin>`, plus a loader of under 1 KB. Once the page has loaded, the loader uses the page's own player (`window.CinPlayer`) if it has one; otherwise the first SVG on the page loads it from jsDelivr, `https://cdn.jsdelivr.net/npm/svgcinema-player@<version>/cin-player.min.js` (the version is fixed in the address, so later player releases never change files already exported). Either way every animation on the page shares one player. A standalone `.svg` (or one in `<object>`) loads its own copy from jsDelivr.
 

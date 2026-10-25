@@ -411,161 +411,205 @@
     </div>
 
     <div class="modal" id="mExport" hidden>
-      <div class="dlg wide" role="dialog" aria-modal="true" aria-labelledby="xTitle">
+      <div class="dlg wide xdlg" role="dialog" aria-modal="true" aria-labelledby="xTitle">
         <header>
           <h2 id="xTitle">Export animated SVG</h2>
           <button class="btn ghost ib" data-close aria-label="Close">✕</button>
         </header>
         <div class="xgrid">
           <div class="xopts">
-            <div class="row">
-              <span class="rl">Animation</span>
-              <div class="segc" id="xMode">
-                <button data-v="js">JavaScript</button><button data-v="css">CSS only</button>
+            <section class="sec" id="xSecFmt">
+              <h3>Format<small id="xSumFmt"></small></h3>
+              <div class="row">
+                <span class="rl">Animation</span>
+                <div class="segc" id="xMode">
+                  <button data-v="js">JavaScript</button><button data-v="css">CSS only</button>
+                </div>
               </div>
-            </div>
-            <div class="row" id="xPlayerRow">
-              <span class="rl">Player</span>
-              <div class="segc" id="xPlayer">
-                <button data-v="embed">Embedded (+24 KB)</button><button data-v="external">External</button>
+              <div class="row" id="xPlayerRow">
+                <span class="rl">Player</span>
+                <div class="segc" id="xPlayer">
+                  <button data-v="embed">Embedded</button><button data-v="external">External</button>
+                </div>
               </div>
-            </div>
-            <p class="note" id="xPlayerNote"></p>
-            <div class="th-warn" id="xImgWarn" role="note">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M10 3l8 14H2z"></path>
-                <path d="M10 8.5v3.5M10 14.6v.1"></path>
-              </svg>
-              <div>
-                <b>Doesn’t play as &lt;img&gt;</b
-                ><span
-                  >Browsers run no scripts in an SVG shown with &lt;img&gt; or as a CSS background. For those, export as
-                  <b>CSS only</b>.</span
+              <p class="note xind" id="xPlayerNote"></p>
+              <div class="xwarn" id="xImgWarn" role="note">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10 3l8 14H2z"></path>
+                  <path d="M10 8.5v3.5M10 14.6v.1"></path>
+                </svg>
+                <span
+                  ><b>Doesn’t play as &lt;img&gt;</b> or as a CSS background: browsers run no scripts there. Use
+                  <b>CSS only</b> for those.</span
                 >
               </div>
-            </div>
-            <div class="row">
-              <span class="rl">Starts</span
-              ><select class="sel" id="xTrig">
-                <option value="load">On load</option>
-                <option value="hover">On mouse over</option>
-                <option value="click">On click</option>
-                <option value="scroll">On scroll into view</option>
-                <option value="api">Programmatic</option>
-              </select>
-            </div>
-            <div class="row" id="xOutRow">
-              <span class="rl" id="xOutLbl">On mouse out</span
-              ><select class="sel" id="xOut">
-                <option value="pause">Pause</option>
-                <option value="reverse">Reverse back to start</option>
-                <option value="start">Jump to start</option>
-                <option value="restart">Restart</option>
-                <option value="none">Keep playing</option>
-              </select>
-            </div>
-            <div class="row">
-              <span class="rl">Repeat</span
-              ><select class="sel" id="xIt">
-                <option value="0">Loop forever</option>
-                <option value="1">Play once</option>
-                <option value="2">2 times</option>
-                <option value="3">3 times</option>
-                <option value="5">5 times</option>
-              </select>
-            </div>
-            <div class="row">
-              <span class="rl">Direction</span
-              ><select class="sel" id="xDir">
-                <option value="normal">Normal</option>
-                <option value="alternate">Alternate (ping-pong)</option>
-                <option value="reverse">Reverse</option>
-                <option value="alternate-reverse">Reverse, then alternate</option>
-              </select>
-            </div>
-            <div class="row">
-              <span class="rl">After the end</span
-              ><select class="sel" id="xFill">
-                <option value="forwards">Stay on the last frame</option>
-                <option value="backwards">Return to the first frame</option>
-              </select>
-            </div>
-            <div class="row" title="Visitors can ask for less motion in their system settings">
-              <span class="rl">Less motion</span
-              ><select class="sel" id="xRm" aria-label="For visitors who prefer less motion">
-                <option value="play">Play normally</option>
-                <option value="first">Show the first frame</option>
-                <option value="last">Show the last frame</option>
-              </select>
-            </div>
-            <div class="row">
-              <span class="rl">Speed</span
-              ><label class="nf"><span>×</span><input id="xSpeed" inputmode="decimal" /></label>
-            </div>
-            <div class="row" id="xFpsRow">
-              <span class="rl">Frame rate</span
-              ><select class="sel" id="xFps">
-                <option value="0">Smooth (screen rate)</option>
-                <option value="60">60 fps</option>
-                <option value="30">30 fps</option>
-                <option value="24">24 fps</option>
-                <option value="12">12 fps</option>
-              </select>
-            </div>
-            <div class="row">
-              <span class="rl">Size</span>
-              <div class="segc" id="xSize">
-                <button data-v="resp">Responsive</button><button data-v="fixed">Fixed</button>
-              </div>
-            </div>
-            <div class="row" id="xDimRow">
-              <span class="rl">Dimensions</span>
-              <div class="rf">
-                <label class="nf"><span>W</span><input id="xW" inputmode="numeric" /></label
-                ><label class="nf"><span>H</span><input id="xH" inputmode="numeric" /></label
-                ><button
-                  class="btn ib on"
-                  id="xLink"
-                  title="Keep proportions"
-                  aria-label="Keep proportions"
-                  aria-pressed="true"
-                ></button>
-              </div>
-            </div>
-            <div class="row" id="xPctRow">
-              <span class="rl">Scale</span>
-              <div class="rf">
-                <label class="nf" style="flex: 0 0 96px"><span>%</span><input id="xPct" inputmode="decimal" /></label
-                ><select class="sel" id="xPreset" aria-label="Scale presets">
-                  <option value="">Presets</option>
-                  <option value="25">25%</option>
-                  <option value="50">50%</option>
-                  <option value="75">75%</option>
-                  <option value="100">100%</option>
-                  <option value="150">150%</option>
-                  <option value="200">200%</option>
-                  <option value="300">300%</option>
+              <details class="xabout" id="xAbout">
+                <summary>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <path d="M12 11v5M12 8h.01"></path></svg
+                  ><span id="xAboutT"></span
+                  ><svg
+                    class="xchev"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 4.5l3 3 3-3"></path>
+                  </svg>
+                </summary>
+                <p class="note" id="xNote"></p>
+              </details>
+            </section>
+            <section class="sec" id="xSecPlay">
+              <h3>Playback<small id="xSumPlay"></small></h3>
+              <div class="row">
+                <span class="rl">Starts</span
+                ><select class="sel" id="xTrig" aria-label="Starts">
+                  <option value="load">On load</option>
+                  <option value="hover">On mouse over</option>
+                  <option value="click">On click</option>
+                  <option value="scroll">On scroll into view</option>
+                  <option value="api">Programmatic</option>
                 </select>
               </div>
-            </div>
-            <div class="row" id="xMaxRow">
-              <span class="rl">Largest width</span
-              ><label class="nf" title="The widest the animation will be shown on your site. Images are sized for it."
-                ><span>W</span><input id="xMaxW" inputmode="numeric" /><em>px</em></label
-              >
-            </div>
-            <div class="xgrp" id="xImgGrp">
-              <h4 class="xsub">Images</h4>
+              <div class="row" id="xOutRow">
+                <span class="rl" id="xOutLbl">On mouse out</span
+                ><select class="sel" id="xOut">
+                  <option value="pause">Pause</option>
+                  <option value="reverse">Reverse back to start</option>
+                  <option value="start">Jump to start</option>
+                  <option value="restart">Restart</option>
+                  <option value="none">Keep playing</option>
+                </select>
+              </div>
+              <div class="row">
+                <span class="rl">Repeat</span
+                ><select class="sel" id="xIt" aria-label="Repeat">
+                  <option value="0">Loop forever</option>
+                  <option value="1">Play once</option>
+                  <option value="2">2 times</option>
+                  <option value="3">3 times</option>
+                  <option value="5">5 times</option>
+                </select>
+              </div>
+              <div class="row">
+                <span class="rl">Direction</span
+                ><select class="sel" id="xDir" aria-label="Direction">
+                  <option value="normal">Normal</option>
+                  <option value="alternate">Alternate (ping-pong)</option>
+                  <option value="reverse">Reverse</option>
+                  <option value="alternate-reverse">Reverse, then alternate</option>
+                </select>
+              </div>
+              <div class="row">
+                <span class="rl">After the end</span
+                ><select class="sel" id="xFill" aria-label="After the end">
+                  <option value="forwards">Stay on the last frame</option>
+                  <option value="backwards">Return to the first frame</option>
+                </select>
+              </div>
+              <div class="row">
+                <span class="rl">Speed</span>
+                <div class="xpair">
+                  <label class="nf"><span>×</span><input id="xSpeed" inputmode="decimal" aria-label="Speed" /></label
+                  ><span class="xfps" id="xFpsRow"
+                    ><select class="sel" id="xFps" aria-label="Frame rate" title="Frame rate">
+                      <option value="0">Smooth</option>
+                      <option value="60">60 fps</option>
+                      <option value="30">30 fps</option>
+                      <option value="24">24 fps</option>
+                      <option value="12">12 fps</option>
+                    </select></span
+                  >
+                </div>
+              </div>
+              <div class="row" title="Visitors can ask for less motion in their system settings">
+                <span class="rl">Less motion</span
+                ><select class="sel" id="xRm" aria-label="For visitors who prefer less motion">
+                  <option value="play">Play normally</option>
+                  <option value="first">Show the first frame</option>
+                  <option value="last">Show the last frame</option>
+                </select>
+              </div>
+            </section>
+            <section class="sec" id="xSecSize">
+              <h3>Size<small id="xSumSize"></small></h3>
+              <div class="row">
+                <span class="rl">Fit</span>
+                <div class="segc" id="xSize">
+                  <button data-v="resp">Responsive</button><button data-v="fixed">Fixed</button>
+                </div>
+              </div>
+              <div class="row" id="xDimRow">
+                <span class="rl">Dimensions</span>
+                <div class="xtrio">
+                  <label class="nf"><span>W</span><input id="xW" inputmode="numeric" aria-label="Width" /></label
+                  ><label class="nf"><span>H</span><input id="xH" inputmode="numeric" aria-label="Height" /></label
+                  ><button
+                    class="btn ib on"
+                    id="xLink"
+                    title="Keep proportions"
+                    aria-label="Keep proportions"
+                    aria-pressed="true"
+                  ></button>
+                </div>
+              </div>
+              <div class="row" id="xPctRow">
+                <span class="rl">Scale</span>
+                <div class="xtrio">
+                  <label class="nf"><input id="xPct" inputmode="decimal" aria-label="Scale" /><span>%</span></label
+                  ><select class="sel" id="xPreset" aria-label="Scale presets">
+                    <option value="">Presets</option>
+                    <option value="25">25%</option>
+                    <option value="50">50%</option>
+                    <option value="75">75%</option>
+                    <option value="100">100%</option>
+                    <option value="150">150%</option>
+                    <option value="200">200%</option>
+                    <option value="300">300%</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row" id="xMaxRow">
+                <span class="rl">Largest width</span>
+                <div class="xpair">
+                  <label
+                    class="nf"
+                    title="The widest the animation will be shown on your site. Images are sized for it."
+                    ><span>W</span><input id="xMaxW" inputmode="numeric" aria-label="Largest width" /><em>px</em></label
+                  >
+                </div>
+              </div>
+            </section>
+            <section class="sec" id="xImgGrp">
+              <h3>Images<small id="xSumImg"></small></h3>
               <p class="note" id="xImgNone">
                 Your images are in Assets but not on the canvas, so there is nothing to optimize yet.
               </p>
@@ -574,7 +618,7 @@
               >
               <div class="row" id="xFmtRow">
                 <span class="rl">Format</span
-                ><select class="sel" id="xFmt"></select>
+                ><select class="sel" id="xFmt" aria-label="Image format"></select>
               </div>
               <div class="row" id="xQRow">
                 <span class="rl">Quality</span>
@@ -588,50 +632,72 @@
               <label class="check" id="xHiRow"
                 ><input type="checkbox" id="xHi" /> Sharp on high-density screens (2×)</label
               >
-              <details id="xImgDet">
-                <summary id="xImgSum">Image sizes</summary>
+              <details class="xabout" id="xImgDet">
+                <summary>
+                  <svg
+                    class="xchev"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 4.5l3 3 3-3"></path></svg
+                  ><span id="xImgSum">Image sizes</span>
+                </summary>
                 <div class="imglist" id="xImgList"></div>
               </details>
-            </div>
-            <div class="row" id="xFontRow" hidden>
-              <span class="rl">Web fonts</span>
-              <div class="segc" id="xFonts">
-                <button data-v="outline" title="Text becomes shapes: nothing to download, looks the same everywhere">
-                  Outlines</button
-                ><button data-v="embed" title="Keeps live, selectable text; the font files are embedded in the SVG">
-                  Embed font
-                </button>
-              </div>
-            </div>
-            <p class="note" id="xFontNote" hidden></p>
-            <div class="row">
-              <span class="rl">Element IDs</span>
-              <div class="segc" id="xIds">
-                <button data-v="gen">Generated</button><button data-v="names">From names</button>
-              </div>
-            </div>
-            <div class="row">
-              <span class="rl">ID prefix</span><input class="txt mono" id="xPre" spellcheck="false" />
-            </div>
-            <label class="check" id="xProjRow"
-              ><input type="checkbox" id="xProj" /> Include the editable project <span class="chip" id="xProjKb"></span
-            ></label>
-            <p class="note" id="xProjNote" hidden>
-              Opening this SVG in SVGcinema brings back the whole project: layers, keyframes and settings.
-            </p>
-            <p class="note" id="xNote"></p>
-          </div>
-          <div class="xside">
-            <div class="segc" id="xTab">
-              <button data-v="preview" class="on">Preview</button><button data-v="embed">Embed in your site</button>
-            </div>
-            <div id="xPanePrev" class="xpane">
-              <div class="prevbar">
-                <span id="xPrevLbl"></span>
-                <div class="segc" id="xPrevZoom">
-                  <button data-v="fit">Fit</button><button data-v="actual">Actual size</button>
+            </section>
+            <section class="sec" id="xFontRow" hidden>
+              <h3>Text<small id="xSumText"></small></h3>
+              <div class="row">
+                <span class="rl">Fonts</span>
+                <div class="segc" id="xFonts" role="group" aria-label="Fonts (web and local)">
+                  <button data-v="outline" title="Text becomes shapes: nothing to download, looks the same everywhere">
+                    Outlines</button
+                  ><button data-v="embed" title="Keeps live, selectable text; the font files are embedded in the SVG">
+                    Embed font
+                  </button>
                 </div>
               </div>
+              <p class="note xind" id="xFontNote" hidden></p>
+            </section>
+            <section class="sec" id="xSecAdv">
+              <h3>Advanced<small id="xSumAdv"></small></h3>
+              <div class="row">
+                <span class="rl">Element IDs</span>
+                <div class="segc" id="xIds">
+                  <button data-v="gen">Generated</button><button data-v="names">From names</button>
+                </div>
+              </div>
+              <div class="row">
+                <span class="rl">ID prefix</span
+                ><input class="txt mono" id="xPre" spellcheck="false" aria-label="ID prefix" />
+              </div>
+              <label class="check" id="xProjRow"
+                ><input type="checkbox" id="xProj" /><span class="xgrow">Include the editable project</span
+                ><span class="xkb" id="xProjKb"></span
+              ></label>
+              <p class="note" id="xProjNote" hidden>
+                Opening this SVG in SVGcinema brings back the whole project: layers, keyframes and settings.
+              </p>
+            </section>
+          </div>
+          <div class="xside">
+            <div class="xtop">
+              <div class="segc" id="xTab" role="tablist" aria-label="Preview or embed code">
+                <button data-v="preview" class="on">Preview</button><button data-v="embed">Embed in your site</button>
+              </div>
+              <div class="segc" id="xPrevZoom">
+                <button data-v="fit">Fit</button><button data-v="actual">Actual size</button>
+              </div>
+            </div>
+            <div id="xPanePrev" class="xpane">
+              <div class="prevbar" id="xPrevLbl"></div>
               <div id="xprev"></div>
               <div class="stats" id="xStats"></div>
               <div class="xnote" id="xShapeNote" role="note" hidden>
@@ -652,10 +718,6 @@
                 <p id="xShapeNoteT"></p>
                 <button type="button" class="btn" id="xUseJS">Use JavaScript</button>
               </div>
-              <details>
-                <summary>View SVG code</summary>
-                <textarea class="code" id="xCode" readonly spellcheck="false"></textarea>
-              </details>
             </div>
             <div id="xPaneEmbed" class="xpane" hidden>
               <div class="segc" id="xFw">
@@ -667,14 +729,45 @@
               <p class="note" id="xFwNote"></p>
               <textarea class="code tall" id="xSnip" readonly spellcheck="false" aria-label="Embed code"></textarea>
               <div class="btns">
-                <a class="btn" id="xPlayerDl" download hidden>Download the player</a
+                <a class="btn pri" id="xPlayerDl" download hidden
+                  ><svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg
+                  ><span id="xPlayerDlT">Download the player</span></a
                 ><button class="btn" id="xSnipCopy">Copy snippet</button>
               </div>
             </div>
           </div>
         </div>
         <footer>
-          <button class="btn" id="xCopy">Copy SVG code</button><button class="btn pri" id="xDl">Download .svg</button>
+          <div class="xsize"><b id="xFileSize"></b><span id="xFileSub"></span></div>
+          <span class="sp"></span>
+          <button class="btn" id="xCopy">Copy SVG code</button
+          ><button class="btn pri" id="xDl">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>
+            </svg>
+            Download .svg
+          </button>
         </footer>
       </div>
     </div>

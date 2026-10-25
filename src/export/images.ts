@@ -295,10 +295,6 @@ export async function runExport() {
     if (sv) bootExternal(sv as SVGSVGElement);
   }
   sizePreview();
-  $('#xCode').value =
-    r.code.length > 400000
-      ? r.code.slice(0, 400000) + '\n… (code view truncated, the copy and download contain everything)'
-      : r.code;
   const [w, h] = outDims(),
     size = new Blob([r.code]).size;
   // CSS stores every frame of a shape change (morphs, pins): offer the much smaller JavaScript export
@@ -317,8 +313,19 @@ export async function runExport() {
   if (!note.hidden)
     $('#xShapeNoteT').textContent =
       `This animation changes shapes. CSS stores every frame of them, so the JavaScript export is about ${Math.round(ratio)} times smaller.`;
+  $('#xFileSize').textContent = kb(size);
+  $('#xFileSub').textContent =
+    doc.ex.mode === 'css'
+      ? 'CSS only' + (!note.hidden ? ` · as JavaScript ${kb(jsSize)}` : '')
+      : `JavaScript · ${ext ? 'external player' : 'player inside'}`;
+  const chip = (k: string, v: string | number) => `<span>${k} <b>${v}</b></span>`;
   $('#xStats').innerHTML =
-    `<span>Size <b>${kb(size)}</b>${!note.hidden ? ` · as JavaScript ${kb(jsSize)}` : ''}</span>${doc.ex.mode !== 'css' ? `<span>Player <b>${ext ? 'external' : 'inside'}</b></span>` : ''}${doc.ex.size === 'fixed' ? `<span>Output <b>${w}×${h}</b></span>` : ''}<span>Layers <b>${doc.layers.filter(l => !isHidden(l)).length}</b></span><span>Animated <b>${r.anim}</b></span><span>Animators <b>${r.tracks}</b></span>${r.images ? `<span>Images <b>${r.images}</b></span>` : ''}<span>Length <b>${fmt(doc.dur)}s</b></span>`;
+    (doc.ex.size === 'fixed' ? chip('Output', `${w} × ${h}`) : '') +
+    chip('Layers', doc.layers.filter(l => !isHidden(l)).length) +
+    chip('Animated', r.anim) +
+    chip('Animators', r.tracks) +
+    (r.images ? chip('Images', r.images) : '') +
+    chip('Length', `${fmt(doc.dur)}s`);
   renderImgList(imgs);
 }
 export function slug(s: unknown) {
@@ -442,20 +449,25 @@ export function init(): void {
   });
   $('#xCopy').addEventListener('click', async () => {
     await expReady();
-    const ta = $('#xCode');
-    try {
-      navigator.clipboard.writeText(lastExport).then(
-        () => toast('SVG code copied.'),
-        () => {
-          ta.closest('details').open = true;
-          ta.select();
-          toast('Press Ctrl+C to copy the selected code.');
-        },
-      );
-    } catch (e) {
-      ta.closest('details').open = true;
+    // without clipboard access, copy through a hidden text box
+    const fallback = () => {
+      const ta = document.createElement('textarea');
+      ta.value = lastExport;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+      document.body.appendChild(ta);
       ta.select();
-      toast('Press Ctrl+C to copy the selected code.');
+      let ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch (_) {}
+      ta.remove();
+      toast(ok ? 'SVG code copied.' : 'Copying isn’t allowed here. Use Download .svg instead.');
+    };
+    try {
+      navigator.clipboard.writeText(lastExport).then(() => toast('SVG code copied.'), fallback);
+    } catch (e) {
+      fallback();
     }
   });
   $('#xDl').addEventListener('click', async () => {

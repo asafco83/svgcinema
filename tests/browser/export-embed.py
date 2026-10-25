@@ -19,6 +19,7 @@ async def main():
         kb=await ev("document.getElementById('xProjKb').textContent")
         check('it shows what it adds to the file', kb.startswith('+') and 'KB' in kb, kb)
         check('without it the SVG has no project inside', 'svgcinema-project' not in await ev("bx.buildExport(null).code"))
+        if await pg.is_hidden('#xProj'): await pg.click('#xSecAdv > h3')   # Advanced starts closed
         await pg.click('#xProj'); await pg.wait_for_timeout(800)
         check('ticking it is remembered in the project', await ev("st.doc.ex.proj===true"))
         check('its note shows', not await ev("document.getElementById('xProjNote').hidden"))

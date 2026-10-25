@@ -10,6 +10,7 @@ import { init as init6 } from './io/assets';
 import { init as init7 } from './export/snippets';
 import { init as init8 } from './export/size';
 import { init as init9 } from './export/images';
+import { init as initExportSections } from './export/sections';
 import { init as init10 } from './ui/topbar';
 import { init as init11 } from './ui/file-menu';
 import { init as init12 } from './io/save';
@@ -69,6 +70,7 @@ init6(); // io/assets
 init7(); // export/snippets
 init8(); // export/size
 init9(); // export/images
+initExportSections(); // export/sections (the Export dialog's collapsing sections)
 init10(); // ui/topbar
 init11(); // ui/file-menu
 init12(); // io/save

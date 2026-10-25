@@ -77,7 +77,7 @@ export function renderSnippet() {
     dl = $('#xPlayerDl') as HTMLAnchorElement;
   dl.hidden = !selfHost;
   dl.href = `downloads/cin-player-${PLAYER_VERSION}.min.js`;
-  dl.textContent = `Download the player (${PLAYER_VERSION})`;
+  dl.title = `svgcinema-player ${PLAYER_VERSION}`;
   $('#xFwNote').innerHTML =
     doc.ex.mode === 'css' && fwSel !== 'api'
       ? 'CSS-only exports are plain animated images, so a normal <code>&lt;img&gt;</code> is all you need.'
@@ -99,6 +99,7 @@ export function init(): void {
       .forEach((x: HTMLElement) => x.classList.toggle('on', x === b));
     $('#xPanePrev').hidden = b.dataset.v !== 'preview';
     $('#xPaneEmbed').hidden = b.dataset.v !== 'embed';
+    $('#xPrevZoom').hidden = b.dataset.v !== 'preview';
   });
   $('#xFw').addEventListener('click', (e: MouseEvent) => {
     const b = (e.target as any).closest('button');
