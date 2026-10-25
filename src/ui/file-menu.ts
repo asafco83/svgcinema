@@ -1,5 +1,5 @@
 // SVGcinema — ui/file-menu
-// The main menu (☰ in the top bar), laid out like SVGator's: New project, Open… · Edit ▸, Element ▸,
+// The main menu (☰ in the top bar): New project, Open… · Edit ▸, Element ▸,
 // Animate ▸ · Save, Save as…, Import files…, Export SVG… · View ▸, Help ▸. The file commands are fixed
 // buttons (wired up in topbar, io/open and io/save); the submenus are built each time the menu opens,
 // so they follow the selection: Element reuses the right-click menu's commands, Animate the Animate
