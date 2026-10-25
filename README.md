@@ -7,7 +7,7 @@
 
 (Formerly Keyline.)
 
-A browser-based SVG animation editor. You draw or import artwork, animate it on a keyframe timeline, and export **one self-contained animated SVG**. The SVG plays with a small built-in JavaScript player or with pure CSS.
+A browser-based SVG animation editor. You draw or import artwork, animate it on a keyframe timeline, and export **one self-contained animated SVG**. The SVG plays with a small JavaScript player (built in, or one shared player for pages with many animations: see [The external player](#the-external-player)) or with pure CSS.
 
 ## Getting started
 
@@ -32,6 +32,8 @@ src/
   styles/app.css         All styles and theme tokens (light and dark)
 
   runtime/engine.ts      The player that ships inside every exported SVG (typed, dependency-free)
+  runtime/boot.ts        Starts an SVG exported with the external player (JSON + trigger)
+  runtime/player.ts      The external player file (svgcinema-player on npm)
 
   core/
     constants.ts         Helpers ($, byId, rounding, escaping), property tables, icons, tool list
@@ -324,7 +326,7 @@ The player is `src/runtime/player.ts`; `src/runtime/boot.ts` reads the JSON and 
 
 **API:** each SVG's player is `svg.player` (also `svg.cinPlayer`), and the SVG fires `cinready` when it's ready. `window.CinPlayer` has `version`, `f` (the data format), `boot(svg)` (for SVGs added later by script) and `scan(root)`.
 
-**Publishing:** the package is `player/` (`svgcinema-player`). `.github/workflows/player.yml` publishes it when `player/package.json` has a version npm doesn't have yet; it needs the repository secret `NPM_TOKEN`. To release player changes, raise that version: exports then link to the new one.
+**Publishing:** the package is `player/` (`svgcinema-player`). `.github/workflows/player.yml` publishes it when `player/package.json` has a version npm doesn't have yet; it needs the repository secret `NPM_TOKEN`. To release player changes, raise that version: exports then link to the new one. npm holds a release published from GitHub until the owner approves it (npmjs.com ▸ Staged Packages, with 2FA). The README on npm changes only with a new release.
 
 ## Batch converter (standalone, not part of the site)
 

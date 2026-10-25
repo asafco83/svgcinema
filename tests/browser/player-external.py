@@ -91,6 +91,9 @@ async def main():
         check('…with Download the player (version)', await vis('#xPlayerDl') and (await pg.text_content('#xPlayerDl')).strip()=='Download the player (1.0.0)'
               and (await pg.get_attribute('#xPlayerDl','href')).endswith('downloads/cin-player-1.0.0.min.js'))
         await pg.screenshot(path=OUT+'export-player-embedtab.png')
+        await pg.click('#xFw [data-v=api]'); await pg.wait_for_timeout(100)
+        api=await ev("document.getElementById('xSnip').value")
+        check('Embed › Player API with External: waits for cinready, mentions CinPlayer.boot', 'cinready' in api and 'CinPlayer.boot' in api and 'player.seekTo' in api)
         await pg.click('#xFw [data-v=react]'); await pg.wait_for_timeout(100)
         check('other frameworks (they use <object>): no download button', await pg.is_hidden('#xPlayerDl'))
         await pg.click('#xTab [data-v=preview]'); await pg.click('#xMode [data-v=css]'); await pg.wait_for_timeout(1500)

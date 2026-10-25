@@ -2316,7 +2316,7 @@
           </div>
         </div>
         <p class="caption">
-          This is the editor’s sample scene, exported from SVGcinema as one 65&nbsp;KB file and playing live on this
+          This is the editor’s sample scene, exported from SVGcinema as one 66&nbsp;KB file and playing live on this
           page.
         </p>
       </div>
@@ -3232,7 +3232,8 @@
             <h3>Export one SVG</h3>
             <p>
               Out comes a single file with your images embedded, optionally resized and compressed, and a tiny player
-              built in. Copy the embed code for HTML, React, Next.js, Vue, Angular or Svelte.
+              built in (or one shared player for pages with many animations). Copy the embed code for HTML, React,
+              Next.js, Vue, Angular or Svelte.
             </p>
             <ul>
               <li><kbd>Ctrl E</kbd>Open the export dialog</li>
@@ -3376,12 +3377,25 @@
       </div>
       <div class="engines">
         <div class="eng">
-          <h3>Built-in player</h3>
-          <p>A small dependency-free script inside the SVG. Everything animates.</p>
+          <h3>JavaScript player</h3>
+          <p>A small dependency-free player, inside the SVG or shared by a page's animations. Everything animates.</p>
           <ul>
             <li>Morphs, motion paths, bones, gradients, masks and every filter parameter</li>
             <li>A player API to play, pause, seek, reverse and change speed, with events</li>
             <li>Repeat, ping-pong, speed and frame rate, set in the export dialog</li>
+            <li>
+              <span
+                >Inside each file, so it plays anywhere, even offline. Or external: pages with many animations load one
+                shared player from jsDelivr or your own server</span
+              >
+            </li>
+            <li>
+              <span
+                >Plays inline, in <code style="font-family: var(--f-code); font-size: 13px">&lt;object&gt;</code> or
+                <code style="font-family: var(--f-code); font-size: 13px">&lt;embed&gt;</code>; browsers run no scripts
+                in <code style="font-family: var(--f-code); font-size: 13px">&lt;img&gt;</code></span
+              >
+            </li>
           </ul>
           <div class="trig" aria-label="Start triggers">
             <span>On load</span><span>On hover</span><span>On click</span><span>When scrolled into view</span
@@ -3424,8 +3438,8 @@
       </div>
 
       <div class="sizes">
-        <div><b>64.6 KB</b><span>the sample scene, player included</span></div>
-        <div><b>16.7 KB</b><span>the same file, gzipped</span></div>
+        <div><b>65.6 KB</b><span>the sample scene, player included</span></div>
+        <div><b>16.8 KB</b><span>the same file, gzipped</span></div>
         <div><b>0</b><span>runtime dependencies</span></div>
       </div>
     </div>
@@ -4226,7 +4240,7 @@
     /* ---------- export code tabs ---------- */
     var SN = JSON.parse(d.getElementById('snips').textContent);
     var NOTES = {
-      html: 'Put the .svg file next to your page. <code>&lt;object&gt;</code> keeps the player working; pasting the SVG code straight into your HTML works too.',
+      html: 'Put the .svg file next to your page. <code>&lt;object&gt;</code> keeps the player working. Pasting the SVG code straight into your HTML works too, but inserting it with <code>innerHTML</code> doesn’t run its script.',
       react:
         'Put the .svg in your public folder. React doesn’t run scripts inside markup set with <code>dangerouslySetInnerHTML</code>, so use <code>&lt;object&gt;</code>.',
       next: 'Put the .svg in <code>public/</code>. The component needs <code>"use client"</code> because it talks to the player in the browser.',
@@ -4234,7 +4248,7 @@
       svelte: 'Put the .svg in <code>static/</code> (SvelteKit) or <code>public/</code>.',
       angular: 'Put the .svg in <code>src/assets/</code>, or <code>public/</code> on Angular 17 and later.',
       css: 'A CSS-only export has no script, so it works as a plain image or a background.',
-      api: 'Every method returns the player, so calls can be chained.',
+      api: 'Every method returns the player, so calls can be chained. The player is also available as <code>cinPlayer</code>.',
     };
     function esc(s) {
       return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
