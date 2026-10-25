@@ -16,8 +16,25 @@ What you may do:
    includes the parts of the Software that SVGcinema puts into those files (the animation
    player), as part of those files only.
 
-3. View the repository. While the repository is public on GitHub, you may view it and fork it on
+3. Use the external player. Exported files can rely on the SVGcinema player file
+   (cin-player.min.js, published as the npm package "svgcinema-player") instead of carrying the
+   player inside them. You may load that file from a public content delivery network such as
+   jsDelivr, and you may copy and host unmodified copies of it on your own servers, for the sole
+   purpose of playing files exported from SVGcinema. You may not modify it, or use or distribute
+   it for any other purpose.
+
+4. View the repository. While the repository is public on GitHub, you may view it and fork it on
    GitHub as GitHub's Terms of Service allow. That gives you no other rights to the Software.
+
+Changes, revocation and access. The copyright holder has the sole, unilateral and universal right,
+at any time, at their own discretion and without prior notice:
+- to modify, replace or add to these terms, which then apply from the time they are published
+  with the Software;
+- to suspend or revoke any permission given in these terms, for any person or for everyone;
+- to change, restrict, suspend or end access to the app, the player file, the npm package, the
+  repository and any other part of the Software or of the services through which it is published.
+Continuing to use the Software after a change means accepting the changed terms. No permission in
+these terms is irrevocable, and none limits these rights.
 
 Third-party components included with the Software (such as paper.js and opentype.js) remain under
 their own licenses.

@@ -13,7 +13,7 @@ Once the page has loaded, the loader inside each SVG:
    change:
 
    ```text
-   https://cdn.jsdelivr.net/npm/svgcinema-player@1.0.0/cin-player.min.js
+   https://cdn.jsdelivr.net/npm/svgcinema-player@1.0.1/cin-player.min.js
    ```
 
    The first SVG on the page loads it, and that one copy starts every SVG on the page.

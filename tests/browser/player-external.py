@@ -8,6 +8,7 @@ OUT=os.environ.get('CIN_OUT','/tmp/svgcinema-shots/'); os.makedirs(OUT, exist_ok
 # dialog's Player row, <img> warning, preview and Embed tab follow the choice.
 import subprocess
 ROOT=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..')
+PVER=json.load(open(os.path.join(ROOT,'player/package.json')))['version']
 async def main():
     subprocess.run(['node','scripts/build-player.mjs'], cwd=ROOT, check=True, capture_output=True)
     PLAYER=open(os.path.join(ROOT,'player/cin-player.min.js')).read()
@@ -80,7 +81,7 @@ async def main():
         cdn_hits.clear()
         await pg.click('#xPlayer [data-v=external]'); await pg.wait_for_timeout(2000)
         check('External: the choice is kept and the note names jsDelivr and the version', await ev("st.doc.ex.player")=='external'
-              and 'jsDelivr' in await pg.text_content('#xPlayerNote') and '1.0.0' in await pg.text_content('#xPlayerNote'))
+              and 'jsDelivr' in await pg.text_content('#xPlayerNote') and PVER in await pg.text_content('#xPlayerNote'))
         check('stats: Player external', 'Player external' in await pg.text_content('#xStats'))
         pv=await ev("(()=>{const s=document.querySelector('#xprev svg');return !!(s&&s.player)})()")
         check('the preview plays it with the editor’s player (nothing fetched)', pv and not cdn_hits, cdn_hits)
@@ -88,8 +89,8 @@ async def main():
         await pg.click('#xTab [data-v=embed]'); await pg.click('#xFw [data-v=html]'); await pg.wait_for_timeout(200)
         sn=await ev("document.getElementById('xSnip').value")
         check('Embed › HTML: the optional player line first, then the inline SVG', sn.startswith('<!-- Optional: your own copy of the player.') and 'YOUR-ADDRESS/cin-player.min.js' in sn and '<svg id=' in sn and 'cinready' in sn, sn[:120])
-        check('…with Download the player (version)', await vis('#xPlayerDl') and (await pg.text_content('#xPlayerDl')).strip()=='Download the player (1.0.0)'
-              and (await pg.get_attribute('#xPlayerDl','href')).endswith('downloads/cin-player-1.0.0.min.js'))
+        check('…with Download the player (version)', await vis('#xPlayerDl') and (await pg.text_content('#xPlayerDl')).strip()==f'Download the player ({PVER})'
+              and (await pg.get_attribute('#xPlayerDl','href')).endswith(f'downloads/cin-player-{PVER}.min.js'))
         await pg.screenshot(path=OUT+'export-player-embedtab.png')
         await pg.click('#xFw [data-v=api]'); await pg.wait_for_timeout(100)
         api=await ev("document.getElementById('xSnip').value")

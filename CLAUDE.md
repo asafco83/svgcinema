@@ -8,7 +8,8 @@ pure CSS). Live site: https://asafco83.github.io/svgcinema/ (GitHub Pages, deplo
 `featureSuggestions.md` lists features that are planned but not built yet.
 `LICENSE`: proprietary, all rights reserved (package.json `"license": "UNLICENSED"`). It lets people use
 the published app, and use their exported files (with the embedded player) for any purpose,
-including commercially. Earlier versions were PolyForm Noncommercial 1.0.0; the owner may reopen it later.
+including commercially, and load or host the external player file unmodified to play them. The owner keeps the
+unilateral right to modify the terms, revoke permissions and change or end access. Earlier versions were PolyForm Noncommercial 1.0.0; the owner may reopen it later.
 
 ## How we work (the owner's workflow)
 

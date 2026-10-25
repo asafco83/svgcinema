@@ -1,6 +1,6 @@
 {
   "name": "svgcinema-player",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The player for animated SVGs exported from SVGcinema with Player › External.",
   "main": "cin-player.min.js",
   "browser": "cin-player.min.js",
