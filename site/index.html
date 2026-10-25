@@ -45,6 +45,7 @@
     --accent-line: rgba(113, 137, 255, 0.32);
     --key: #f2b63d; /* keyframe amber */
     --key-soft: rgba(242, 182, 61, 0.28);
+    --key-text: #f2b63d; /* amber text that reads on the page ground */
     --head: #ff6b6f; /* playhead red */
     --on-accent: #0b0e13;
     --shade: rgba(0, 0, 0, 0.55);
@@ -75,6 +76,7 @@
       --accent-line: rgba(59, 91, 253, 0.26);
       --key: #cc8606;
       --key-soft: rgba(204, 134, 6, 0.26);
+      --key-text: #8a5a00; /* amber text that reads on the page ground */
       --head: #e5484d;
       --on-accent: #ffffff;
       --shade: rgba(20, 24, 40, 0.18);
@@ -99,6 +101,7 @@
     --accent-line: rgba(59, 91, 253, 0.26);
     --key: #cc8606;
     --key-soft: rgba(204, 134, 6, 0.26);
+    --key-text: #8a5a00; /* amber text that reads on the page ground */
     --head: #e5484d;
     --on-accent: #ffffff;
     --shade: rgba(20, 24, 40, 0.18);
@@ -1869,6 +1872,123 @@
     }
     .fact {
       padding-right: 0;
+    }
+  }
+
+  /* ---------- project thumbnails (downloads) ---------- */
+  .thumbs-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: stretch;
+  }
+  .th-folder {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .th-folder-bar {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  .th-files {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px 18px;
+    padding: 24px;
+  }
+  .th-file {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    min-width: 0;
+    font-size: 13px;
+  }
+  .th-file svg {
+    display: block;
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--line-2);
+  }
+  .th-file span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .th-cards {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+  }
+  .th-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    display: grid;
+    gap: 14px;
+  }
+  .th-card h3 {
+    margin: 0;
+    font: 600 17px/1.3 var(--f-ui);
+  }
+  .th-card p {
+    margin: 0;
+    color: var(--muted);
+  }
+  .th-card .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .th-warn {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--key) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--key) 38%, transparent);
+    font-size: 14px;
+  }
+  .th-warn svg {
+    flex: none;
+    margin-top: 1px;
+    color: var(--key);
+  }
+  .th-warn div {
+    display: grid;
+    gap: 4px;
+  }
+  .th-warn div > b {
+    color: var(--key-text);
+  }
+  .sec-head p code {
+    font: 13px var(--f-code);
+    color: var(--fg);
+    background: var(--panel-2);
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+  @media (max-width: 900px) {
+    .thumbs-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .th-files {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding: 16px;
     }
   }
 
@@ -4731,6 +4851,163 @@ var s=document.getElementById("hero-svg");if(!s)return;var P=CinEngine({"p":"her
         <div class="fact">
           <h3>Light or dark</h3>
           <p>The editor follows your system theme until you pick one. This page shares that choice.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= THUMBNAILS ======================= -->
+  <section class="sec" id="thumbnails">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="tc">0:24.00</div>
+          <h2>Your projects, at a glance.</h2>
+        </div>
+        <p>
+          Every <code>.SVGcinema</code> file carries a picture of its first frame. Add a small free helper and your file
+          manager shows it, so you find the right animation without opening it.
+        </p>
+      </div>
+      <div class="thumbs-grid">
+        <div class="th-folder" role="img" aria-label="A folder of SVGcinema projects showing their first frames">
+          <div class="th-folder-bar">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              aria-hidden="true"
+            >
+              <path d="M1.5 4.5h4l1.5 1.5h7.5v7.5h-13z" /></svg
+            >Animations
+          </div>
+          <div class="th-files">
+            <div class="th-file">
+              <svg width="180" height="112" viewBox="0 0 180 112" aria-hidden="true">
+                <rect width="180" height="112" fill="#14213d" />
+                <circle cx="126" cy="46" r="20" fill="#7189ff" />
+                <path d="M0 86q38-22 78-8t102-10v44H0z" fill="#2b4570" />
+                <circle cx="24" cy="18" r="2" fill="#fff" />
+                <circle cx="62" cy="12" r="1.5" fill="#fff" />
+                <circle cx="156" cy="16" r="1.5" fill="#fff" /></svg
+              ><span>Night intro.SVGcinema</span>
+            </div>
+            <div class="th-file">
+              <svg width="180" height="112" viewBox="0 0 180 112" aria-hidden="true">
+                <rect width="180" height="112" fill="#fff4e5" />
+                <rect x="30" y="30" width="52" height="52" rx="12" fill="#f2b63d" />
+                <circle cx="124" cy="56" r="27" fill="#e5484d" /></svg
+              ><span>Logo bounce.SVGcinema</span>
+            </div>
+            <div class="th-file">
+              <svg width="180" height="112" viewBox="0 0 180 112" aria-hidden="true">
+                <rect width="180" height="112" fill="#e9fbf3" />
+                <path
+                  d="M22 76c26-48 48-48 68 0s46 48 68 0"
+                  fill="none"
+                  stroke="#1f9d6b"
+                  stroke-width="8"
+                  stroke-linecap="round"
+                /></svg
+              ><span>Wave loader.SVGcinema</span>
+            </div>
+            <div class="th-file">
+              <svg width="180" height="112" viewBox="0 0 180 112" aria-hidden="true">
+                <rect width="180" height="112" fill="#1b1f28" />
+                <rect x="40" y="40" width="100" height="10" rx="5" fill="#343a48" />
+                <rect x="40" y="40" width="64" height="10" rx="5" fill="#7189ff" />
+                <rect x="40" y="62" width="60" height="8" rx="4" fill="#343a48" /></svg
+              ><span>Progress bar.SVGcinema</span>
+            </div>
+            <div class="th-file">
+              <svg width="180" height="112" viewBox="0 0 180 112" aria-hidden="true">
+                <rect width="180" height="112" fill="#f4f0ff" />
+                <path d="M90 26l9 19 21 3-15 15 4 21-19-10-19 10 4-21-15-15 21-3z" fill="#8a63d2" /></svg
+              ><span>Star badge.SVGcinema</span>
+            </div>
+            <div class="th-file">
+              <svg width="180" height="112" viewBox="0 0 180 112" aria-hidden="true">
+                <rect width="180" height="112" fill="#0f2a2e" />
+                <circle
+                  cx="90"
+                  cy="56"
+                  r="28"
+                  fill="none"
+                  stroke="#3fd0c9"
+                  stroke-width="6"
+                  stroke-dasharray="120 60"
+                  stroke-linecap="round"
+                /></svg
+              ><span>Spinner.SVGcinema</span>
+            </div>
+          </div>
+        </div>
+        <div class="th-cards">
+          <div class="th-card">
+            <h3>Windows</h3>
+            <p>Thumbnails in File Explorer. Windows 10 and 11, on regular and ARM PCs.</p>
+            <div>
+              <a
+                class="btn btn-pri"
+                href="https://github.com/asafco83/svgcinema/releases/download/thumbnails/SVGcinema-Thumbnails-Setup.exe"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M3 13h10" /></svg
+                >Download for Windows</a
+              >
+            </div>
+            <div class="th-warn" role="note">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M10 2.5l7 3v4.5c0 4-3 6.6-7 7.5-4-.9-7-3.5-7-7.5V5.5z" />
+                <path d="M10 7v3.5M10 13.2v.1" />
+              </svg>
+              <div>
+                <b>Windows will warn you. That’s expected.</b>
+                <span
+                  >The installer isn’t signed, so Windows says the publisher is unknown. Choose <b>More info</b>, then
+                  <b>Run anyway</b>. It installs for you only, with no administrator rights.</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="th-card">
+            <h3>Linux</h3>
+            <p>GNOME Files, Nemo, Caja and Thunar.</p>
+            <div class="btn-row">
+              <a
+                class="btn btn-ghost btn-sm"
+                href="https://github.com/asafco83/svgcinema/releases/download/thumbnails/svgcinema-thumbnails.deb"
+                >.deb package</a
+              >
+              <a
+                class="btn btn-ghost btn-sm"
+                href="https://github.com/asafco83/svgcinema/releases/download/thumbnails/svgcinema-thumbnails-linux.tar.gz"
+                >.tar.gz with install script</a
+              >
+            </div>
+          </div>
         </div>
       </div>
     </div>

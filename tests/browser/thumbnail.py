@@ -7,6 +7,8 @@ async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1440,'height':900}); pg.set_default_timeout(8000)
         errs=[]; pg.on('pageerror',lambda e: errs.append(str(e)))
+        # as on Windows (the download window leads with the download for the system you're on)
+        await pg.add_init_script("Object.defineProperty(Navigator.prototype,'platform',{get:()=>'Win32'})")
         await pg.goto(sys.argv[1] if len(sys.argv)>1 else 'http://localhost:5199/'); await pg.wait_for_timeout(2500)
         await pg.evaluate("""async()=>{ window.st=await import('/src/core/state.ts'); window.hi=await import('/src/core/history.ts');
           window.zp=await import('/src/io/zip.ts'); window.th=await import('/src/io/thumbnail.ts'); }""")
@@ -40,6 +42,19 @@ async def main():
         ok=await ev("""async()=>{ const o=await import('/src/io/open.ts'); const blob=await zp.buildProject(true);
           await o.loadProjectFile(new File([blob],'Thumb test.SVGcinema')); return st.doc.layers.length; }""")
         check('a project with a thumbnail opens', ok==n0, (ok,n0))
+        # Help › Thumbnails on your computer…: the download window
+        await pg.click('#bMenu'); await pg.hover('#fileMenu [data-sub=help] > button'); await pg.wait_for_timeout(200)
+        items=await ev("[...document.querySelectorAll('#fileMenu [data-sub=help] [data-lm]')].map(b=>b.dataset.lm)")
+        check('Help menu: Thumbnails on your computer…, right under Spell check', 'hp:thumbs' in items and items.index('hp:thumbs')==items.index('hp:spell')+1, items)
+        await pg.click('#fileMenu [data-lm="hp:thumbs"]'); await pg.wait_for_timeout(200)
+        d=await ev("""(()=>{const m=document.getElementById('mThumbs');const a=[...m.querySelectorAll('a')].map(x=>x.href);
+          return {open:!m.hidden, title:m.querySelector('h2').textContent, first:a[0], links:a.length, warn:!!m.querySelector('.th-warn'), files:m.querySelectorAll('.th-file').length}})()""")
+        check('it opens the download window', d['open'] and d['title']=='Thumbnails on your computer', d)
+        check('Windows installer first, with the warning', d['first'].endswith('SVGcinema-Thumbnails-Setup.exe') and d['warn'], d['first'])
+        check('Linux downloads and All downloads on the small line', d['links']==4 and d['files']==3)
+        await pg.locator('#mThumbs .dlg').screenshot(path=OUT+'thumbs-dialog.png')
+        await pg.keyboard.press('Escape'); await pg.wait_for_timeout(150)
+        check('Esc closes it', await ev("document.getElementById('mThumbs').hidden"))
         check('no page errors', not errs, errs[:3])
         print(json.dumps(R, indent=1, ensure_ascii=False)); print('FAILS', F)
         await b.close()
