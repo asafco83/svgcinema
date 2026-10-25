@@ -3,15 +3,18 @@
 // (thumbnail.png, saved in every project) as its picture in the file manager. The download for the
 // system you're on leads; the others sit on a small line. Mac isn't supported, so there the menu
 // item is hidden (see file-menu). The installers are built by .github/workflows/thumbnailers.yml.
+// The files download in place; All downloads opens the folder's list in a new tab.
 import { $ } from '../core/constants';
 import { IS_MAC } from '../core/keys';
 
-const REL = 'https://github.com/asafco83/svgcinema/releases';
+// the site's downloads/ folder, next to the editor (filled by the build: scripts/build-player.mjs and
+// the Pages workflow), so the links work wherever the site is hosted
+const DL = 'downloads/';
 export const THUMB_LINKS = {
-  windows: `${REL}/download/thumbnails/SVGcinema-Thumbnails-Setup.exe`,
-  deb: `${REL}/download/thumbnails/svgcinema-thumbnails.deb`,
-  tar: `${REL}/download/thumbnails/svgcinema-thumbnails-linux.tar.gz`,
-  all: `${REL}/tag/thumbnails`,
+  windows: `${DL}SVGcinema-Thumbnails-Setup.exe`,
+  deb: `${DL}svgcinema-thumbnails.deb`,
+  tar: `${DL}svgcinema-thumbnails-linux.tar.gz`,
+  all: DL,
 };
 const platform = () => (typeof navigator !== 'undefined' ? navigator.platform || navigator.userAgent || '' : '');
 /** the add-ons exist for Windows and Linux; on a Mac the menu item is hidden */
@@ -38,7 +41,7 @@ const EXAMPLES: Array<[string, string]> = [
   ],
 ];
 const a = (href: string, text: string, cls = '') =>
-  `<a href="${href}" target="_blank" rel="noopener"${cls ? ` class="${cls}"` : ''}>${text}</a>`;
+  `<a href="${href}"${/\/$/.test(href) ? ' target="_blank" rel="noopener"' : ' download'}${cls ? ` class="${cls}"` : ''}>${text}</a>`;
 
 export function thumbsHTML(linux = onLinux()) {
   const files = EXAMPLES.map(

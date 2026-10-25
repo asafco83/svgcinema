@@ -15,9 +15,7 @@ describe('Help › Thumbnails on your computer', () => {
     expect(h).not.toContain('Windows will warn you');
     expect(h.indexOf(THUMB_LINKS.deb)).toBeLessThan(h.indexOf(THUMB_LINKS.windows));
   });
-  it('every download opens from the fixed thumbnails release', () => {
-    Object.values(THUMB_LINKS).forEach(u =>
-      expect(u).toMatch(/^https:\/\/github\.com\/asafco83\/svgcinema\/releases\/.*thumbnails/),
-    );
+  it('every download comes from the site’s downloads folder next to the editor', () => {
+    Object.values(THUMB_LINKS).forEach(u => expect(u).toMatch(/^downloads\//));
   });
 });

@@ -312,6 +312,21 @@ The guides are saved with the project; the other view settings are remembered in
 - **CSS exports:** the groups SVGator wraps around an animated element (move / rotate / skew / scale) fold back into the one layer, the motion path comes back from `offset-path` with its curves, and the CSS keyframes (with their per-keyframe easing) become the same keyframes the JS export gives. SVGator's CSS writes the anchor point's offset twice, which shifts animated elements in browsers (in its own preview too); the import reads it once, so the result matches the JS export. Its CSS blur amounts are converted back as well. (SVGator can't export shape morphs as CSS.)
 - **Other CSS animations** in an SVG (`@keyframes` on elements) also become keyframes: opacity, fill and stroke, their opacities, stroke width and dashes, sizes, and transforms written as translate · rotate · skew · scale around a `transform-origin`.
 
+## The external player
+
+SVGs exported with **Player › External** carry only their artwork and animation, as JSON in `<script type="application/json" data-cin>`, plus one `<script href>` link to the player. Several animations on a page share one cached player.
+
+The player is `src/runtime/player.ts`; `src/runtime/boot.ts` reads the JSON and wires the start trigger as the embedded player does. `npm run build:player` (also part of `npm run build`) makes `player/cin-player.min.js`, about 24 KB minified.
+
+**Where exports load it from:**
+
+- **jsDelivr (the default):** `https://cdn.jsdelivr.net/npm/svgcinema-player@<version>/cin-player.min.js`. The version is fixed in the address, so later player releases never change files already exported.
+- **Your own address:** a copy you host yourself, taken from npm or from the site's `downloads/` folder (`cin-player.min.js` and `cin-player-<version>.min.js`, with an index page).
+
+**API:** each SVG's player is `svg.player` (also `svg.cinPlayer`), and the SVG fires `cinready` when it's ready. `window.CinPlayer` has `version`, `boot(svg)` and `scan(root)`.
+
+**Publishing:** the package is `player/` (`svgcinema-player`). `.github/workflows/player.yml` publishes it when `player/package.json` has a version npm doesn't have yet; it needs the repository secret `NPM_TOKEN`. To release player changes, raise that version: exports then link to the new one.
+
 ## Batch converter (standalone, not part of the site)
 
 `npm run build:converter` makes **`tools/converter/dist/SVGcinema-Converter.html`**: one HTML file with the converter and the whole editor inside it. It isn't deployed or linked anywhere. Open it from disk (Chrome or Edge to save into a folder) and it turns many SVGs into `.SVGcinema` projects at once: SVGator exports (JS or CSS), CSS-animated SVGs and plain artwork.
@@ -347,7 +362,7 @@ A `.SVGcinema` file is a standard zip archive:
 - **Windows** File Explorer: `SVGcinema-Thumbnails-Setup.exe`. It installs for you only, with no administrator rights. It's unsigned, so Windows may warn about an unknown publisher: choose _More info_, then _Run anyway_.
 - **Linux**: `svgcinema-thumbnails.deb`, or the `.tar.gz` with `install.sh`. Works in GNOME Files, Nemo, Caja and Thunar.
 
-The editor links to them from **Help › Thumbnails on your computer…** (hidden on a Mac, which isn't supported). It offers the download for the system you're on first, with the Windows warning highlighted. The website has a section with both. Downloads are in the [`thumbnails` release](https://github.com/asafco83/svgcinema/releases/tag/thumbnails); the sources and how they work are in `thumbnailers/`.
+The editor links to them from **Help › Thumbnails on your computer…** (hidden on a Mac, which isn't supported). It offers the download for the system you're on first, with the Windows warning highlighted. The website has a section with both. The build puts the downloads in the site's `downloads/` folder next to the editor (`editor/downloads/` in the deploy bundle). The Pages workflow fetches the installers from the `thumbnails` release first; for a local build, run `npm run fetch:downloads` (needs `gh`). The sources and how they work are in `thumbnailers/`.
 
 ## Typing
 

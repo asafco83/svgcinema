@@ -374,6 +374,13 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
 }
 /** visitors who ask for less motion: hold one frame (doc time 0, or just before the end) and don't
  *  start; the code after it (the trigger) runs only for everyone else */
+/** the external player's version (player/package.json) and its address on jsDelivr */
+export const PLAYER_VERSION = __PLAYER_VERSION__;
+export const PLAYER_CDN = `https://cdn.jsdelivr.net/npm/svgcinema-player@${PLAYER_VERSION}/cin-player.min.js`;
+/** where an export with Player › External loads the player from */
+export function playerURL(ex: { playerSrc?: string; playerUrl?: string }) {
+  return ex.playerSrc === 'own' && ex.playerUrl && ex.playerUrl.trim() ? ex.playerUrl.trim() : PLAYER_CDN;
+}
 export function reducedJS(rm: string | undefined) {
   if (rm !== 'first' && rm !== 'last') return '';
   return `if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)P.seekTo(${rm === 'first' ? 0 : Math.max(0, Math.round(doc.dur * 1000) - 1)});else{`;
@@ -704,7 +711,15 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
           return o;
         }),
       };
-      out += `<script><![CDATA[\n(function(){var CinEngine=${CinEngine.toString()};\nvar s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;var P=CinEngine(${JSON.stringify(data)},s);s.player=s.cinPlayer=P;P.stop();${reducedJS(ex.rm)}${triggerJS(ex.trigger, ex.out, /reverse/.test(doc.dir) ? -1 : 1)}${ex.rm === 'first' || ex.rm === 'last' ? '}' : ''}})();\n]]><\/script>`;
+      if (ex.player === 'external') {
+        // the animation as JSON for the external player (runtime/player.ts), and a link to it; JSON
+        // text is escaped so the XML parser can't read markup in it
+        const cfg: Record<string, unknown> = { d: data, t: ex.trigger, o: ex.out, b: /reverse/.test(doc.dir) ? -1 : 1 };
+        if (ex.rm === 'first' || ex.rm === 'last') cfg.rm = ex.rm;
+        const json = JSON.stringify(cfg).replace(/[<>&]/g, c => '\\u00' + c.charCodeAt(0).toString(16));
+        out += `<script type="application/json" data-cin="1">${json}</script><script href="${esc(playerURL(ex))}"></script>`;
+      } else
+        out += `<script><![CDATA[\n(function(){var CinEngine=${CinEngine.toString()};\nvar s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;var P=CinEngine(${JSON.stringify(data)},s);s.player=s.cinPlayer=P;P.stop();${reducedJS(ex.rm)}${triggerJS(ex.trigger, ex.out, /reverse/.test(doc.dir) ? -1 : 1)}${ex.rm === 'first' || ex.rm === 'last' ? '}' : ''}})();\n]]><\/script>`;
     }
   }
   H.lookup(id => layerById(id));

@@ -1,5 +1,6 @@
 // SVGcinema — export/images
 import { isLocalFamily, prepareFonts, webFont } from '../render/fonts';
+import { boot as bootExternal } from '../runtime/boot';
 import type { Asset, Layer } from '../model/types';
 import { $, byId, esc, fmt } from '../core/constants';
 import { save } from '../core/history';
@@ -279,12 +280,19 @@ export async function runExport() {
   if (old && old.player) old.player.destruct();
   box.innerHTML = r.code;
   box.querySelectorAll('script').forEach((sc: HTMLScriptElement) => {
+    // Player › External: the JSON and the link to the player aren't run here; the preview starts it
+    // with the editor's own copy of the player (runtime/boot)
+    if (sc.getAttribute('type') === 'application/json' || sc.hasAttribute('href')) return;
     const n = document.createElement('script');
     n.textContent = sc.textContent.replace('<![CDATA[', '').replace(']]>', '');
     sc.remove();
     document.body.appendChild(n);
     n.remove();
   });
+  if (doc.ex.mode !== 'css' && doc.ex.player === 'external') {
+    const sv = box.querySelector('svg');
+    if (sv) bootExternal(sv as SVGSVGElement);
+  }
   sizePreview();
   $('#xCode').value =
     r.code.length > 400000

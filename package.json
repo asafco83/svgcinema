@@ -5,7 +5,7 @@
   "description": "SVGcinema: browser-based SVG animation editor that exports a single self-contained animated SVG.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node scripts/build-player.mjs",
     "build:site": "node site/build.mjs",
     "build:deploy": "npm run build && node site/build.mjs && node site/bundle.mjs",
     "preview": "vite preview",
@@ -14,11 +14,14 @@
     "typecheck": "tsc",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "build:converter": "node tools/converter/build.mjs"
+    "build:converter": "node tools/converter/build.mjs",
+    "build:player": "node scripts/build-player.mjs",
+    "fetch:downloads": "gh release download thumbnails -R asafco83/svgcinema -D public/downloads --clobber"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/opentype.js": "^1.3.8",
+    "esbuild": "^0.21.5",
     "happy-dom": "^15.11.7",
     "prettier": "^3.3.3",
     "typescript": "^5.6.3",

@@ -34,8 +34,8 @@ async def main():
         anim=await ev("[...document.querySelectorAll('.spec')].filter(s=>!(s.querySelector('animate,animateMotion,animateTransform')||[...s.querySelectorAll('.spec-art *')].some(e=>getComputedStyle(e).animationName!=='none'))).map(s=>s.querySelector('h3').textContent)")
         check('every card animates (SMIL or CSS)', anim==[], anim)
         th=await ev("""(()=>{const s=document.getElementById('thumbnails');if(!s)return null;return {h:s.querySelector('h2').textContent, links:[...s.querySelectorAll('a')].map(a=>a.getAttribute('href')), files:s.querySelectorAll('.th-file').length, warn:!!s.querySelector('.th-warn')}})()""")
-        rel='https://github.com/asafco83/svgcinema/releases/download/thumbnails/'
-        check('project thumbnails section: Windows and Linux downloads from the thumbnails release, with the warning', bool(th) and th['links']==[rel+'SVGcinema-Thumbnails-Setup.exe', rel+'svgcinema-thumbnails.deb', rel+'svgcinema-thumbnails-linux.tar.gz'] and th['files']==6 and th['warn'], th)
+        rel='editor/downloads/'
+        check('project thumbnails section: Windows and Linux downloads from the site’s downloads folder, with the warning', bool(th) and th['links']==[rel+'SVGcinema-Thumbnails-Setup.exe', rel+'svgcinema-thumbnails.deb', rel+'svgcinema-thumbnails-linux.tar.gz'] and th['files']==6 and th['warn'], th)
         check('bones mention squash and stretch; masks mention brightness', await ev("document.getElementById('animate').textContent.includes('squash and stretch') && document.getElementById('animate').textContent.includes('opacity or brightness')"))
         imp=await ev("[...document.querySelectorAll('#import .fact h3')].map(h=>h.textContent)")
         check('an Import section: other tools, animated SVGs, CSS animations, own exports', len(imp)==6 and 'Animated SVGs' in imp and any('CSS' in x for x in imp), imp)
