@@ -1,11 +1,11 @@
 // SVGcinema — io/batch
-// Two small bridges for the batch converter (tools/convert.html), which is not part of the editor's
-// own interface:
-// - index.html?batch (in a hidden frame of the converter): `window.cinBatch.convert()` opens one SVG
-//   exactly as Open does and saves it exactly as Save does (layers, keyframes, the first-frame
-//   thumbnail), without keeping anything in this browser (core/batch-mode).
-// - index.html?receive (opened by the converter's "Open in editor"): takes one project file from the
-//   window that opened it and opens it, asking first if the current project has unsaved changes.
+// Two small bridges for the standalone batch converter (tools/converter: one HTML file that carries
+// this editor inside it; not part of the site):
+// - in its hidden frame (core/batch-mode): `window.cinBatch.convert()` opens one SVG exactly as Open
+//   does and saves it exactly as Save does (layers, keyframes, the first-frame thumbnail), without
+//   keeping anything in the browser.
+// - in the window its "Open in editor" writes (window.__CIN_RECEIVE__): opens the project the
+//   converter hands over (window.__cinOpenFile), asking first if there are unsaved changes.
 import { ASSETS, doc } from '../core/state';
 import { BATCH } from '../core/batch-mode';
 import { fileName } from '../export/images';
@@ -80,19 +80,20 @@ export function zipAll(files: Array<{ name: string; blob: Blob }>) {
 }
 
 export function initBatch() {
-  if (BATCH) {
-    (window as any).cinBatch = { convert, zipAll };
-    try {
-      window.parent.postMessage({ type: 'cin-batch-ready' }, location.origin);
-    } catch (_) {}
-  }
-  if (/[?&]receive(=|&|$)/.test(location.search) && window.opener) {
-    window.addEventListener('message', async (e: MessageEvent) => {
-      if (e.origin !== location.origin || !e.data || e.data.type !== 'cin-open') return;
+  const w = window as any;
+  if (BATCH) w.cinBatch = { convert, zipAll };
+  if (w.__CIN_RECEIVE__) {
+    let tries = 0;
+    const take = async () => {
+      const f = w.__cinOpenFile;
+      if (!f) {
+        if (++tries < 100) setTimeout(take, 100);
+        return;
+      }
+      w.__cinOpenFile = null;
       if (!(await confirmDiscard('Opening another project closes this one. Save your changes first?'))) return;
-      await loadProjectFile(new File([e.data.blob], e.data.name), null);
-      history.replaceState(null, '', location.pathname);
-    });
-    window.opener.postMessage({ type: 'cin-receive-ready' }, location.origin);
+      await loadProjectFile(new File([f.blob], f.name), null);
+    };
+    take();
   }
 }

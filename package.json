@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "build:converter": "node tools/converter/build.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -22,6 +23,7 @@
     "prettier": "^3.3.3",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
+    "vite-plugin-singlefile": "^2.0.3",
     "vitest": "^2.1.8"
   },
   "private": true,

@@ -8,3 +8,4 @@ deploy
 thumbnailers/windows/build
 thumbnailers/windows/Output
 thumbnailers/linux/dist
+tools/converter/dist

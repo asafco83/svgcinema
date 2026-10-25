@@ -312,21 +312,21 @@ The guides are saved with the project; the other view settings are remembered in
 - **CSS exports:** the groups SVGator wraps around an animated element (move / rotate / skew / scale) fold back into the one layer, the motion path comes back from `offset-path` with its curves, and the CSS keyframes (with their per-keyframe easing) become the same keyframes the JS export gives. SVGator's CSS writes the anchor point's offset twice, which shifts animated elements in browsers (in its own preview too); the import reads it once, so the result matches the JS export. Its CSS blur amounts are converted back as well. (SVGator can't export shape morphs as CSS.)
 - **Other CSS animations** in an SVG (`@keyframes` on elements) also become keyframes: opacity, fill and stroke, their opacities, stroke width and dashes, sizes, and transforms written as translate · rotate · skew · scale around a `transform-origin`.
 
-## Batch converter (not linked anywhere)
+## Batch converter (standalone, not part of the site)
 
-`tools/convert.html` (live at `…/svgcinema/tools/convert.html`, `editor/tools/convert.html` in the deploy bundle) turns many SVGs into `.SVGcinema` projects at once: SVGator exports (JS or CSS), CSS-animated SVGs and plain artwork.
+`npm run build:converter` makes **`tools/converter/dist/SVGcinema-Converter.html`**: one HTML file with the converter and the whole editor inside it. It isn't deployed or linked anywhere. Open it from disk (Chrome or Edge to save into a folder) and it turns many SVGs into `.SVGcinema` projects at once: SVGator exports (JS or CSS), CSS-animated SVGs and plain artwork.
 
 - **Adding files:** drop files or whole folders (subfolders included, other files left out), or choose them.
-- **Saving:** pick an output folder and each project is written as it's done (Chrome and Edge). If a project already exists there you can skip it, replace it or keep both. Elsewhere, or by choice, everything comes as one `.zip`.
+- **Saving:** pick an output folder and each project is written as it's done. If a project already exists there you can skip it, replace it or keep both. Or everything comes as one `.zip`.
 - **Project names:** from the SVG's title, else the file name.
 - **Each row shows:**
   - the first-frame thumbnail
   - what came in: layers, animated layers, length, repeat, images
   - the result: saved, saved with notes listing what the importer couldn't keep animated, skipped, or failed with the reason and Try again
-- **Open in editor** opens a converted project in a new editor tab, asking first if that tab has unsaved changes.
+- **Open in editor** opens a converted project in a new tab, in the editor the file carries.
 - **Save a report (.csv)** lists every file's result.
 
-The conversion runs in the editor itself, loaded in a hidden frame as `index.html?batch` (`src/io/batch.ts`). Each file goes through the same Open and Save as by hand, and nothing is kept in the browser's editor storage (`src/core/batch-mode.ts`). The page is `src/convert/`.
+The editor converts in a hidden frame inside the file (`src/io/batch.ts`). Each SVG goes through the same Open and Save as by hand, and nothing is kept in the browser (`src/core/batch-mode.ts`). Sources: `tools/converter/` (page and build) and `src/convert/` (its script and styles). Rebuild it after editor changes to pick them up.
 
 ## The `.SVGcinema` project format
 
