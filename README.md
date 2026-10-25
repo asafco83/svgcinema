@@ -331,7 +331,7 @@ A `.SVGcinema` file is a standard zip archive:
 - **Windows** File Explorer: `SVGcinema-Thumbnails-Setup.exe`. It installs for you only, with no administrator rights. It's unsigned, so Windows may warn about an unknown publisher: choose _More info_, then _Run anyway_.
 - **Linux**: `svgcinema-thumbnails.deb`, or the `.tar.gz` with `install.sh`. Works in GNOME Files, Nemo, Caja and Thunar.
 
-Downloads are in the [`thumbnails` release](https://github.com/asafco83/svgcinema/releases/tag/thumbnails); the sources and how they work are in `thumbnailers/`.
+The editor links to them from **Help › Thumbnails on your computer…** (hidden on a Mac, which isn't supported). It offers the download for the system you're on first, with the Windows warning highlighted. The website has a section with both. Downloads are in the [`thumbnails` release](https://github.com/asafco83/svgcinema/releases/tag/thumbnails); the sources and how they work are in `thumbnailers/`.
 
 ## Typing
 

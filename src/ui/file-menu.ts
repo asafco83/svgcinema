@@ -30,6 +30,7 @@ import {
 import { ANIM_GROUPS, animateProp } from './animate-menu';
 import { openPresets } from './presets-panel';
 import { setSpell, spellOn } from '../core/spell';
+import { openThumbs, thumbsAvailable } from './thumbs-dialog';
 import { toast } from '../io/open';
 import { ONION } from './onion';
 import { deleteSel, duplicate } from './layers-panel';
@@ -130,6 +131,7 @@ function helpItems(): Item[] {
     { id: 'hp:keys', label: 'Keyboard shortcuts', on: true, key: 'F1' },
     { id: 'hp:sample', label: 'Open the sample scene…', on: true },
     { id: 'hp:spell', label: 'Spell check', on: true, check: spellOn(), tip: SPELL_TIP },
+    ...(thumbsAvailable() ? [{ id: 'hp:thumbs', label: 'Thumbnails on your computer…', on: true } as Item] : []),
     ...(SITE ? [{ id: 'hp:site', label: 'SVGcinema website', on: true } as Item] : []),
     '-',
     { id: 'hp:about', label: 'About SVGcinema', on: true },
@@ -218,6 +220,7 @@ function run(id: string) {
     if (spellOn()) toast('Spell check is on. ' + SPELL_TIP, undefined, 7000);
     else toast('Spell check is off.');
   } else if (id === 'hp:site' && SITE) window.open(SITE, '_blank', 'noopener');
+  else if (id === 'hp:thumbs') openThumbs();
   else if (id === 'hp:about') openAbout();
   else runLayerCommand(id);
 }

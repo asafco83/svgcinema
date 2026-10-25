@@ -5403,3 +5403,122 @@ input.mixed::placeholder {
 .rng.mixed {
   opacity: 0.5;
 }
+
+/* Help › Thumbnails on your computer… */
+.dlg.thumbs {
+  width: min(440px, 100%);
+}
+.dlg.thumbs .body {
+  gap: 14px;
+  font-size: 12.5px;
+}
+.th-intro {
+  margin: 0;
+  line-height: 18px;
+}
+.th-files {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.th-file {
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+  min-width: 0;
+}
+.th-file svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+}
+.th-file span {
+  font-size: 11px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.th-main {
+  display: grid;
+  gap: 8px;
+}
+.th-dl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.th-dl > span,
+.th-note {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.th-note {
+  margin: 0;
+  line-height: 16px;
+}
+.btn.th-btn {
+  height: 34px;
+  padding: 0 14px;
+  gap: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.th-warn {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--key) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--key) 38%, transparent);
+  line-height: 16px;
+}
+.th-warn > svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--key);
+}
+.th-warn > div {
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+}
+.th-warn > div > b {
+  color: var(--key-text);
+  font-size: 12.5px;
+}
+.th-alt {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.th-alt a {
+  color: var(--accent-fg);
+}
+.th-k {
+  color: var(--muted);
+}
+.th-dot {
+  color: var(--line-2);
+}
+.th-sp {
+  flex: 1;
+}
+.th-alt .th-all {
+  font-size: 11.5px;
+}
+.btn.th-btn:not(.pri) {
+  color: var(--fg);
+}
