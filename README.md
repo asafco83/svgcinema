@@ -316,12 +316,13 @@ The guides are saved with the project; the other view settings are remembered in
 
 A `.SVGcinema` file is a standard zip archive:
 
-| Entry                      | Contents                                                                            |
-| -------------------------- | ----------------------------------------------------------------------------------- |
-| `manifest.json`            | `format: "svgcinema-project"`, version, name, save time, canvas size, counts        |
-| `project.json`             | The document: layers, keyframes, easing presets, export settings                    |
-| `assets/index.json`        | One entry per asset: id, name, kind, MIME type, size in pixels and bytes, file path |
-| `assets/<id>-<name>.<ext>` | Each image as its original file                                                     |
+| Entry                      | Contents                                                                                                              |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `thumbnail.png`            | The first frame, 512 px on its long side: the first entry, stored uncompressed, for file managers' thumbnail handlers |
+| `manifest.json`            | `format: "svgcinema-project"`, version, name, save time, canvas size, counts                                          |
+| `project.json`             | The document: layers, keyframes, easing presets, export settings                                                      |
+| `assets/index.json`        | One entry per asset: id, name, kind, MIME type, size in pixels and bytes, file path                                   |
+| `assets/<id>-<name>.<ext>` | Each image as its original file                                                                                       |
 
 `project.json` references assets by id, so images are stored once.
 

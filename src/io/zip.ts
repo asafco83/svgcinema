@@ -1,6 +1,7 @@
 // SVGcinema — io/zip
 import { ASSETS, doc } from '../core/state';
 import { slug } from '../export/images';
+import { THUMB_NAME, thumbnailPNG } from './thumbnail';
 
 export const CRC_T = (() => {
   const t = new Uint32Array(256);
@@ -198,7 +199,10 @@ export async function buildProject(includeAll?: boolean) {
     layers: doc.layers.length,
     assets: index.length,
   };
+  // the first frame, first in the zip and uncompressed, for file managers' thumbnail handlers
+  const thumb = await thumbnailPNG();
   return makeZip([
+    ...(thumb ? [{ name: THUMB_NAME, data: thumb }] : []),
     { name: 'manifest.json', data: enc.encode(JSON.stringify(manifest, null, 2)), compress: true },
     { name: 'project.json', data: enc.encode(JSON.stringify(doc)), compress: true },
     { name: 'assets/index.json', data: enc.encode(JSON.stringify(index, null, 2)), compress: true },
