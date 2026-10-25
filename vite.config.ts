@@ -24,6 +24,10 @@ export default defineConfig({
     // ES2019 keeps the embedded runtime (CinEngine.toString()) free of bundler helpers
     target: 'es2019',
     sourcemap: true,
+    rollupOptions: {
+      // the batch converter: a separate page, not linked from the editor (src/convert)
+      input: { main: 'index.html', convert: 'tools/convert.html' },
+    },
   },
   test: {
     environment: 'happy-dom',
