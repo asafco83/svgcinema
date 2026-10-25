@@ -314,16 +314,15 @@ The guides are saved with the project; the other view settings are remembered in
 
 ## The external player
 
-SVGs exported with **Player › External** carry only their artwork and animation, as JSON in `<script type="application/json" data-cin>`, plus one `<script href>` link to the player. Several animations on a page share one cached player.
+The Export dialog's **Player** row (JavaScript exports only) chooses **Embedded (+24 KB)**, the default (the player inside each SVG: plays anywhere, even offline), or **External**. An amber note under it reminds that a script export doesn't play as `<img>` or as a CSS background (export as CSS only for those); the stats line says _Player inside_ or _external_.
 
-The player is `src/runtime/player.ts`; `src/runtime/boot.ts` reads the JSON and wires the start trigger as the embedded player does. `npm run build:player` (also part of `npm run build`) makes `player/cin-player.min.js`, about 24 KB minified.
+SVGs exported with **External** carry only their artwork and animation, as JSON in `<script type="application/json" data-cin>`, plus a loader of under 1 KB. Once the page has loaded, the loader uses the page's own player (`window.CinPlayer`) if it has one; otherwise the first SVG on the page loads it from jsDelivr, `https://cdn.jsdelivr.net/npm/svgcinema-player@<version>/cin-player.min.js` (the version is fixed in the address, so later player releases never change files already exported). Either way every animation on the page shares one player. A standalone `.svg` (or one in `<object>`) loads its own copy from jsDelivr.
 
-**Where exports load it from:**
+**Self-hosting:** the Embed tab's HTML code (with External) starts with an optional `<script src="YOUR-ADDRESS/cin-player.min.js">` line before the SVG pasted inline, and **Download the player (version)** next to _Copy snippet_ gets that file from the site's `downloads/` folder (`cin-player.min.js` and `cin-player-<version>.min.js`, with an index page; also on npm).
 
-- **jsDelivr (the default):** `https://cdn.jsdelivr.net/npm/svgcinema-player@<version>/cin-player.min.js`. The version is fixed in the address, so later player releases never change files already exported.
-- **Your own address:** a copy you host yourself, taken from npm or from the site's `downloads/` folder (`cin-player.min.js` and `cin-player-<version>.min.js`, with an index page).
+The player is `src/runtime/player.ts`; `src/runtime/boot.ts` reads the JSON and wires the start trigger as the embedded player does. The JSON carries a data format number (`f`); a player only starts SVGs whose format it knows. `npm run build:player` (also part of `npm run build`) makes `player/cin-player.min.js`, about 24 KB minified.
 
-**API:** each SVG's player is `svg.player` (also `svg.cinPlayer`), and the SVG fires `cinready` when it's ready. `window.CinPlayer` has `version`, `boot(svg)` and `scan(root)`.
+**API:** each SVG's player is `svg.player` (also `svg.cinPlayer`), and the SVG fires `cinready` when it's ready. `window.CinPlayer` has `version`, `f` (the data format), `boot(svg)` (for SVGs added later by script) and `scan(root)`.
 
 **Publishing:** the package is `player/` (`svgcinema-player`). `.github/workflows/player.yml` publishes it when `player/package.json` has a version npm doesn't have yet; it needs the repository secret `NPM_TOKEN`. To release player changes, raise that version: exports then link to the new one.
 

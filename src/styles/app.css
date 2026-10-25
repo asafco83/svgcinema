@@ -5522,3 +5522,13 @@ input.mixed::placeholder {
 .btn.th-btn:not(.pri) {
   color: var(--fg);
 }
+
+/* Export › Player (Embedded / External) and the <img> warning for script exports */
+#xImgWarn > div > span {
+  color: var(--fg);
+  font-size: 11.5px;
+}
+a.btn {
+  color: var(--fg);
+  text-decoration: none;
+}

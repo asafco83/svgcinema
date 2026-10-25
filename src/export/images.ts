@@ -279,17 +279,18 @@ export async function runExport() {
     old = box.querySelector('svg');
   if (old && old.player) old.player.destruct();
   box.innerHTML = r.code;
+  const ext = doc.ex.mode !== 'css' && doc.ex.player === 'external';
   box.querySelectorAll('script').forEach((sc: HTMLScriptElement) => {
-    // Player › External: the JSON and the link to the player aren't run here; the preview starts it
-    // with the editor's own copy of the player (runtime/boot)
-    if (sc.getAttribute('type') === 'application/json' || sc.hasAttribute('href')) return;
+    // Player › External: the JSON and the loader aren't run here (the loader would fetch the player
+    // from jsDelivr); the preview starts it with the editor's own copy of the player (runtime/boot)
+    if (ext) return;
     const n = document.createElement('script');
     n.textContent = sc.textContent.replace('<![CDATA[', '').replace(']]>', '');
     sc.remove();
     document.body.appendChild(n);
     n.remove();
   });
-  if (doc.ex.mode !== 'css' && doc.ex.player === 'external') {
+  if (ext) {
     const sv = box.querySelector('svg');
     if (sv) bootExternal(sv as SVGSVGElement);
   }
@@ -317,7 +318,7 @@ export async function runExport() {
     $('#xShapeNoteT').textContent =
       `This animation changes shapes. CSS stores every frame of them, so the JavaScript export is about ${Math.round(ratio)} times smaller.`;
   $('#xStats').innerHTML =
-    `<span>Size <b>${kb(size)}</b>${!note.hidden ? ` · as JavaScript ${kb(jsSize)}` : ''}</span>${doc.ex.size === 'fixed' ? `<span>Output <b>${w}×${h}</b></span>` : ''}<span>Layers <b>${doc.layers.filter(l => !isHidden(l)).length}</b></span><span>Animated <b>${r.anim}</b></span><span>Animators <b>${r.tracks}</b></span>${r.images ? `<span>Images <b>${r.images}</b></span>` : ''}<span>Length <b>${fmt(doc.dur)}s</b></span>`;
+    `<span>Size <b>${kb(size)}</b>${!note.hidden ? ` · as JavaScript ${kb(jsSize)}` : ''}</span>${doc.ex.mode !== 'css' ? `<span>Player <b>${ext ? 'external' : 'inside'}</b></span>` : ''}${doc.ex.size === 'fixed' ? `<span>Output <b>${w}×${h}</b></span>` : ''}<span>Layers <b>${doc.layers.filter(l => !isHidden(l)).length}</b></span><span>Animated <b>${r.anim}</b></span><span>Animators <b>${r.tracks}</b></span>${r.images ? `<span>Images <b>${r.images}</b></span>` : ''}<span>Length <b>${fmt(doc.dur)}s</b></span>`;
   renderImgList(imgs);
 }
 export function slug(s: unknown) {
@@ -389,6 +390,14 @@ export function init(): void {
     const b = (e.target as any).closest('button');
     if (!b) return;
     doc.ex.mode = b.dataset.v;
+    save();
+    syncExportUI();
+    updateExport();
+  });
+  $('#xPlayer').addEventListener('click', (e: MouseEvent) => {
+    const b = (e.target as any).closest('button');
+    if (!b) return;
+    doc.ex.player = b.dataset.v === 'external' ? 'external' : 'embed';
     save();
     syncExportUI();
     updateExport();

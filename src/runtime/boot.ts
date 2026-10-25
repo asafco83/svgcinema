@@ -6,7 +6,11 @@
 import { CinEngine, type CinPlayer, type EngineData } from './engine';
 
 /** what an exported SVG carries for the external player */
+/** the data format this player reads; SVGs exported for a newer format wait for a newer player */
+export const FORMAT = 1;
 export interface BootConfig {
+  /** data format (FORMAT) */
+  f?: number;
   /** the animation (the same data the embedded player gets) */
   d: EngineData;
   /** start trigger: load | click | hover | scroll | api */
@@ -77,6 +81,7 @@ export function boot(s: Booted, c?: BootConfig): CinPlayer | null {
       return null;
     }
   }
+  if ((c.f || 1) > FORMAT) return null;
   const P = CinEngine(c.d, s);
   s.player = s.cinPlayer = P;
   P.stop();

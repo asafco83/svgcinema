@@ -377,9 +377,19 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
 /** the external player's version (player/package.json) and its address on jsDelivr */
 export const PLAYER_VERSION = __PLAYER_VERSION__;
 export const PLAYER_CDN = `https://cdn.jsdelivr.net/npm/svgcinema-player@${PLAYER_VERSION}/cin-player.min.js`;
-/** where an export with Player › External loads the player from */
-export function playerURL(ex: { playerSrc?: string; playerUrl?: string }) {
-  return ex.playerSrc === 'own' && ex.playerUrl && ex.playerUrl.trim() ? ex.playerUrl.trim() : PLAYER_CDN;
+/** the external player's data format (runtime/boot FORMAT): a player only starts SVGs it can read */
+export const PLAYER_FORMAT = 1;
+/** Player › External: the tiny start-up script the SVG carries. Once the page has loaded it uses the
+ *  page's own player (window.CinPlayer, e.g. a self-hosted copy) when there is one; otherwise the first
+ *  SVG on the page loads the player from jsDelivr, and that copy starts every SVG still waiting. */
+export function playerLoader(svgId: string) {
+  return (
+    `(function(){var s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;` +
+    `function go(){var C=window.CinPlayer;if(C&&C.boot&&(C.f||0)>=${PLAYER_FORMAT}){C.boot(s);return}` +
+    `if(window.__cinL)return;window.__cinL=1;var e=document.createElementNS('http://www.w3.org/2000/svg','script');` +
+    `e.setAttribute('href',${JSON.stringify(PLAYER_CDN)});s.appendChild(e)}` +
+    `if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go()})();`
+  );
 }
 export function reducedJS(rm: string | undefined) {
   if (rm !== 'first' && rm !== 'last') return '';
@@ -712,12 +722,18 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
         }),
       };
       if (ex.player === 'external') {
-        // the animation as JSON for the external player (runtime/player.ts), and a link to it; JSON
-        // text is escaped so the XML parser can't read markup in it
-        const cfg: Record<string, unknown> = { d: data, t: ex.trigger, o: ex.out, b: /reverse/.test(doc.dir) ? -1 : 1 };
+        // the animation as JSON for the external player (runtime/player.ts) and the loader that finds
+        // or fetches it; JSON text is escaped so the XML parser can't read markup in it
+        const cfg: Record<string, unknown> = {
+          f: PLAYER_FORMAT,
+          d: data,
+          t: ex.trigger,
+          o: ex.out,
+          b: /reverse/.test(doc.dir) ? -1 : 1,
+        };
         if (ex.rm === 'first' || ex.rm === 'last') cfg.rm = ex.rm;
         const json = JSON.stringify(cfg).replace(/[<>&]/g, c => '\\u00' + c.charCodeAt(0).toString(16));
-        out += `<script type="application/json" data-cin="1">${json}</script><script href="${esc(playerURL(ex))}"></script>`;
+        out += `<script type="application/json" data-cin="1">${json}</script><script><![CDATA[\n${playerLoader(svgId)}\n]]><\/script>`;
       } else
         out += `<script><![CDATA[\n(function(){var CinEngine=${CinEngine.toString()};\nvar s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;var P=CinEngine(${JSON.stringify(data)},s);s.player=s.cinPlayer=P;P.stop();${reducedJS(ex.rm)}${triggerJS(ex.trigger, ex.out, /reverse/.test(doc.dir) ? -1 : 1)}${ex.rm === 'first' || ex.rm === 'last' ? '}' : ''}})();\n]]><\/script>`;
     }

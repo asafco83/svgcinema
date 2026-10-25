@@ -3,7 +3,7 @@ import { facesFor, isLocalFamily, needsShaping, webFont } from '../render/fonts'
 import { $, fmt } from '../core/constants';
 import { S, doc } from '../core/state';
 import { kb } from '../ui/inspector';
-import { projectPayload } from './build';
+import { PLAYER_VERSION, projectPayload } from './build';
 import type { Layer } from '../model/types';
 import { syncSizeUI } from './size';
 import { renderSnippet } from './snippets';
@@ -51,6 +51,15 @@ export function syncExportUI() {
     .querySelectorAll('button')
     .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === (ex.size || 'resp')));
   syncSizeUI();
+  // Player: inside the SVG, or the external player (page's own copy, else jsDelivr); JavaScript only
+  const ext = !css && ex.player === 'external';
+  $('#xPlayerRow').hidden = $('#xPlayerNote').hidden = $('#xImgWarn').hidden = css;
+  $('#xPlayer')
+    .querySelectorAll('button')
+    .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === (ext ? 'external' : 'embed')));
+  $('#xPlayerNote').textContent = ext
+    ? `Uses the page’s player if it has one, otherwise loads svgcinema-player ${PLAYER_VERSION} from jsDelivr. Several animations share one player.`
+    : 'Plays anywhere, even offline. Adds about 24 KB to each SVG.';
   const wf = doc.layers.filter(
       l => l.type === 'text' && !l.hid && (webFont(l.geo.family) || isLocalFamily(l.geo.family)),
     ),
@@ -105,7 +114,8 @@ export function syncExportUI() {
   $('#xProjKb').textContent = '+' + kb(new Blob([projectPayload(exportLayers())]).size);
   $('#xProjNote').hidden = !ex.proj;
   $('#xNote').innerHTML = !css
-    ? 'The SVG carries a small built-in player that supports every animator and easing, including morph, curved paths and custom curves. Images are embedded in the file. Scripts run when the SVG is inline, or placed with <code>&lt;object&gt;</code> or <code>&lt;embed&gt;</code>; an <code>&lt;img&gt;</code> tag shows the first frame. The <b>Embed</b> tab has ready code for each framework.'
+    ? (ext ? 'The player supports' : 'The SVG carries a small built-in player that supports') +
+      ' every animator and easing, including morph, curved paths and custom curves. Images are embedded in the file. Scripts run when the SVG is inline, or placed with <code>&lt;object&gt;</code> or <code>&lt;embed&gt;</code>. The <b>Embed</b> tab has ready code for each framework.'
     : 'Pure CSS keyframes with no script, so it animates even inside <code>&lt;img&gt;</code> and as a CSS background. CSS can start on load or on hover only. On mouse out it can pause (and resume on the next hover) or jump to the start (and replay from the beginning on the next hover); reversing back needs the JavaScript export. Shape changes (morph) play with SMIL, so they work in every browser; with the hover trigger they use CSS <code>d: path()</code> instead, which Safari does not support.';
   renderSnippet();
 }
