@@ -27,6 +27,9 @@ async def main():
         ta=await ev("(()=>{const t=document.querySelector('.cin-tedit');if(!t)return null;const b=t.getBoundingClientRect();return [b.x,b.y,b.width,b.height,document.activeElement===t]})()")
         check('double-click opens the editor on the canvas', ta and ta[4], ta)
         if ta: check('editor sits over the text', abs(ta[0]-r[2])<25 and abs(ta[1]+ta[3]/2-(r[3]+r[5]/2))<12, (ta,r[2:]))
+        # the second press lands in an editor that waited over the text, so the browser focuses it itself
+        # (Chrome then spell-checks the text at once) and puts the caret where the press was
+        check('double-click: the browser focuses the waiting editor, caret at the press', await ev("(()=>{const t=document.querySelector('.cin-tedit');return !t.classList.contains('armed') && t.selectionStart<4})()"), await ev("document.querySelector('.cin-tedit').selectionStart"))
         check('svg text stays visible under a see-through editor', not await ev(f"document.getElementById('e-{tid}-s').getAttribute('visibility')") and await ev("getComputedStyle(document.querySelector('.cin-tedit')).color")=='rgba(0, 0, 0, 0)')
         playing0=await ev("st.S.playing")
         await pg.keyboard.press('End'); await pg.keyboard.type(' big world')
@@ -37,6 +40,11 @@ async def main():
         check('Esc ends editing', await ev("!document.querySelector('.cin-tedit')") and await ev(f"!document.getElementById('e-{tid}-s').getAttribute('visibility')"))
         await pg.keyboard.press('Control+z')
         check('one undo step', await ev(f"{L}.geo.text")=='Good morning', await ev(f"{L}.geo.text"))
+        # a single click arms an editor for the double-click time only, then it goes away
+        await pg.mouse.click(r[0],r[1]); await pg.wait_for_timeout(50)
+        check('single click: an editor waits for a second press', await ev("!!document.querySelector('.cin-tedit.armed')"))
+        await pg.wait_for_timeout(500)
+        check('…and goes away after the double-click time', await ev("!document.querySelector('.cin-tedit')"))
         # inspector live typing
         await ev(f"hi.select('{tid}')")
         await pg.click('#g-text'); await pg.keyboard.press('End'); await pg.keyboard.type('!!')
