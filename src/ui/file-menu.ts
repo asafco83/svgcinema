@@ -122,11 +122,14 @@ function viewItems(): Item[] {
     { id: 'vw:theme', label: 'Dark theme', on: true, check: currentTheme() === 'dark' },
   ];
 }
+/** A page can't read or change the browser's own spell check setting, so we point to it. */
+const SPELL_TIP =
+  "No red underlines? Turn on spell check in your browser's settings (Chrome: Settings ▸ Languages ▸ Spell check).";
 function helpItems(): Item[] {
   return [
     { id: 'hp:keys', label: 'Keyboard shortcuts', on: true, key: 'F1' },
     { id: 'hp:sample', label: 'Open the sample scene…', on: true },
-    { id: 'hp:spell', label: 'Spell check', on: true, check: spellOn() },
+    { id: 'hp:spell', label: 'Spell check', on: true, check: spellOn(), tip: SPELL_TIP },
     ...(SITE ? [{ id: 'hp:site', label: 'SVGcinema website', on: true } as Item] : []),
     '-',
     { id: 'hp:about', label: 'About SVGcinema', on: true },
@@ -212,7 +215,8 @@ function run(id: string) {
   else if (id === 'hp:sample') openSample();
   else if (id === 'hp:spell') {
     setSpell(!spellOn());
-    toast(spellOn() ? 'Spell check is on for the text you type.' : 'Spell check is off.');
+    if (spellOn()) toast('Spell check is on. ' + SPELL_TIP, undefined, 7000);
+    else toast('Spell check is off.');
   } else if (id === 'hp:site' && SITE) window.open(SITE, '_blank', 'noopener');
   else if (id === 'hp:about') openAbout();
   else runLayerCommand(id);

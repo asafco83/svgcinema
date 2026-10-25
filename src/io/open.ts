@@ -145,7 +145,7 @@ export function normalizeDoc(d: Partial<Doc>): Doc {
 }
 export let toastT: ReturnType<typeof setTimeout> | 0 = 0;
 /** A short message at the bottom. With `act`, it carries a button (e.g. Undo) and stays a little longer. */
-export function toast(m: string, act?: { label: string; run: () => void }) {
+export function toast(m: string, act?: { label: string; run: () => void }, ms?: number) {
   const t = $('#toast');
   t.textContent = m;
   if (act) {
@@ -160,7 +160,7 @@ export function toast(m: string, act?: { label: string; run: () => void }) {
   }
   t.hidden = false;
   clearTimeout(toastT);
-  toastT = setTimeout(() => (t.hidden = true), act ? 6000 : 3000);
+  toastT = setTimeout(() => (t.hidden = true), ms || (act ? 6000 : 3000));
 }
 
 export function init(): void {

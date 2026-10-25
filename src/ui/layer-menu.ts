@@ -189,7 +189,9 @@ function saveHyperlink(remove?: boolean): void {
 /* ---------- the menu ---------- */
 
 /** A menu entry (also used by the main menu): `check` shows a tick column, `sub` a submenu. */
-export type Item = { id: string; label: string; on?: boolean; key?: string; check?: boolean; sub?: Item[] } | '-';
+export type Item =
+  | { id: string; label: string; on?: boolean; key?: string; check?: boolean; sub?: Item[]; tip?: string }
+  | '-';
 const M = () => $('#layermenu') as HTMLElement;
 export function closeLayerMenu() {
   const m = M();
@@ -313,7 +315,7 @@ function html(list: Item[]): string {
       chk = it.check !== undefined,
       role = chk ? `menuitemcheckbox" aria-checked="${it.check}` : 'menuitem';
     out.push(
-      `<div class="lm-it${it.sub ? ' has-sub' : ''}"><button role="${role}" data-lm="${it.id}"${dis ? ' disabled' : ''}${it.sub ? ' aria-haspopup="true"' : ''}>${chk ? `<span class="lm-chk">${it.check ? '✓' : ''}</span>` : ''}<span>${esc(it.label)}</span>${it.sub ? '<i class="lm-arrow">▸</i>' : `<kbd>${it.key || ''}</kbd>`}</button>${
+      `<div class="lm-it${it.sub ? ' has-sub' : ''}"><button role="${role}" data-lm="${it.id}"${it.tip ? ` title="${esc(it.tip)}"` : ''}${dis ? ' disabled' : ''}${it.sub ? ' aria-haspopup="true"' : ''}>${chk ? `<span class="lm-chk">${it.check ? '✓' : ''}</span>` : ''}<span>${esc(it.label)}</span>${it.sub ? '<i class="lm-arrow">▸</i>' : `<kbd>${it.key || ''}</kbd>`}</button>${
         it.sub && !dis ? `<div class="ctx lm-sub" role="menu">${html(it.sub)}</div>` : ''
       }</div>`,
     );
