@@ -2,6 +2,7 @@
 import type { Asset } from '../model/types';
 import { $, ICON, NOFILL, esc, r2 } from '../core/constants';
 import { AG } from '../core/dom';
+import { BATCH } from '../core/batch-mode';
 import { beginEdit } from '../core/history';
 import { ASSETS, S, URLS, doc, mkLayer, nextAid } from '../core/state';
 import { markDirty } from './file-state';
@@ -44,6 +45,7 @@ export const IDB = {
     });
   },
   async set(k: string, v: unknown): Promise<boolean> {
+    if (BATCH) return true; // the batch converter's frame keeps nothing in this browser
     const db = IDB.db || (await IDB.open());
     if (!db) return false;
     return new Promise<any>(res => {

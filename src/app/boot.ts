@@ -5,6 +5,8 @@ import { loop, updatePlayBtn } from '../core/playback';
 import { ASSETS, S, URLS, doc, setDoc, syncAidc, syncIdc } from '../core/state';
 import { IDB, assetURL } from '../io/assets';
 import { updateFileInfo } from '../io/file-state';
+import { BATCH } from '../core/batch-mode';
+import { initBatch } from '../io/batch';
 import { normalizeDoc } from '../io/open';
 import { sampleDoc } from '../model/sample';
 import { frame, renderAll } from '../render/stage';
@@ -29,7 +31,7 @@ export async function boot() {
   } catch (e) {}
   let saved = null;
   try {
-    saved = localStorage.getItem('svgcinema:doc');
+    if (!BATCH) saved = localStorage.getItem('svgcinema:doc');
   } catch (e) {}
   if (saved) {
     try {
@@ -40,7 +42,9 @@ export async function boot() {
   }
   if (!doc) setDoc(sampleDoc());
   try {
-    const a = await Promise.race([IDB.get('assets'), new Promise<any>(r => setTimeout(() => r(null), 1500))]);
+    const a = BATCH
+      ? null
+      : await Promise.race([IDB.get('assets'), new Promise<any>(r => setTimeout(() => r(null), 1500))]);
     if (a)
       Object.values<any>(a).forEach(x => {
         if (x && x.id) {
@@ -70,6 +74,7 @@ export async function boot() {
     S.last = t;
     loop(t);
   });
+  initBatch();
 }
 
 export function init(): void {

@@ -1,4 +1,5 @@
 // SVGcinema — core/history
+import { BATCH } from './batch-mode';
 import { syncSymbols } from './symbols';
 import { renderSymbols } from '../ui/symbols-ui';
 import type { Layer, PropKey, Tool } from '../model/types';
@@ -83,7 +84,7 @@ export function save() {
   clearTimeout(saveT);
   saveT = setTimeout(() => {
     try {
-      localStorage.setItem('svgcinema:doc', JSON.stringify(doc));
+      if (!BATCH) localStorage.setItem('svgcinema:doc', JSON.stringify(doc));
     } catch (e) {}
   }, 300);
   $('#pname').value = doc.name;

@@ -18,6 +18,7 @@ import { renderAll, renderStage } from '../render/stage';
 import { layerBox } from '../render/mesh';
 
 export { parseStyle } from './svg-paint';
+import { BATCH } from '../core/batch-mode';
 
 /** the <svg> element of SVG text, or null */
 export function parseSVG(text: string): Element | null {
@@ -316,8 +317,12 @@ export function centerOrigins(cv: Converter) {
   });
 }
 /** a toast when everything came across, else a short list of what didn't */
+/** what the last import couldn't bring across (read by the batch converter) */
+export let lastImportNotes: string[] = [];
 function report(title: string, cv: Converter, anim: AnimReader | null) {
   const notes = [...cv.notes, ...(anim ? anim.notes : [])];
+  lastImportNotes = notes;
+  if (BATCH) return;
   if (!notes.length) {
     toast(`${title}.`);
     return;
