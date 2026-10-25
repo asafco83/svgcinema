@@ -5,6 +5,7 @@ import { doc } from '../core/state';
 import { syncExportUI } from './dialog';
 import { fileName, slug, updateExport } from './images';
 import { outDims } from './size';
+import { PLAYER_VERSION } from './build';
 import { toast } from '../io/open';
 
 export const FW_NOTES: Record<string, string> = {
@@ -46,6 +47,9 @@ export function snippet(fw: string): string {
     )[fw];
   }
   const use = `player.ready((p) => {\n      p.on('end', () => console.log('finished'));\n      // p.play(); p.pause(); p.reverse(); p.seek(50); p.set('speed', 2);\n    });`;
+  // Player › External: inline SVGs share one player, the page's own copy when it loads one
+  if (fw === 'html' && ex.player === 'external')
+    return `<!-- Optional: your own copy of the player.\n     Without it, the SVG loads it from jsDelivr. -->\n<script src="YOUR-ADDRESS/cin-player.min.js"><\/script>\n\n<!-- The SVG code (Copy SVG code), pasted into the page -->\n<svg id="${id}" …>…</svg>\n\n<script>\n  const svg = document.getElementById('${id}');\n  const start = (player) => {\n    ${use.replace(/\n {4}/g, '\n  ')}\n  };\n  svg.player ? start(svg.player) : svg.addEventListener('cinready', (e) => start(e.detail));\n<\/script>`;
   if (fw === 'html')
     return `<object id="${pre}anim" type="image/svg+xml" data="${file}" aria-label="${label}" style="width:100%;max-width:${DW}px"></object>\n\n<script>\n  document.getElementById('${pre}anim').addEventListener('load', (e) => {\n    const player = e.target.contentDocument.getElementById('${id}').player;\n    ${use}\n  });\n<\/script>`;
   if (fw === 'react' || fw === 'next')
@@ -64,10 +68,18 @@ export function renderSnippet() {
     .querySelectorAll('button')
     .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === fwSel));
   $('#xSnip').value = snippet(fwSel);
+  // self-hosting the external player only helps SVGs inline in the page (the HTML snippet)
+  const selfHost = doc.ex.mode !== 'css' && doc.ex.player === 'external' && fwSel === 'html',
+    dl = $('#xPlayerDl') as HTMLAnchorElement;
+  dl.hidden = !selfHost;
+  dl.href = `downloads/cin-player-${PLAYER_VERSION}.min.js`;
+  dl.textContent = `Download the player (${PLAYER_VERSION})`;
   $('#xFwNote').innerHTML =
     doc.ex.mode === 'css' && fwSel !== 'api'
       ? 'CSS-only exports are plain animated images, so a normal <code>&lt;img&gt;</code> is all you need.'
-      : FW_NOTES[fwSel];
+      : selfHost
+        ? 'Paste the SVG code into your page: every animation on the page then shares one player. Download the player to host it yourself, or leave out the first line and the SVG loads it from jsDelivr. SVGs added later by script (<code>innerHTML</code> doesn’t run scripts) start with <code>CinPlayer.boot(svg)</code>.'
+        : FW_NOTES[fwSel];
 }
 export let lastExport = '';
 export function setLastExport(c: string) {

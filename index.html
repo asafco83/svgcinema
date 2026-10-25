@@ -424,6 +424,36 @@
                 <button data-v="js">JavaScript</button><button data-v="css">CSS only</button>
               </div>
             </div>
+            <div class="row" id="xPlayerRow">
+              <span class="rl">Player</span>
+              <div class="segc" id="xPlayer">
+                <button data-v="embed">Embedded (+24 KB)</button><button data-v="external">External</button>
+              </div>
+            </div>
+            <p class="note" id="xPlayerNote"></p>
+            <div class="th-warn" id="xImgWarn" role="note">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M10 3l8 14H2z"></path>
+                <path d="M10 8.5v3.5M10 14.6v.1"></path>
+              </svg>
+              <div>
+                <b>Doesn’t play as &lt;img&gt;</b
+                ><span
+                  >Browsers run no scripts in an SVG shown with &lt;img&gt; or as a CSS background. For those, export as
+                  <b>CSS only</b>.</span
+                >
+              </div>
+            </div>
             <div class="row">
               <span class="rl">Starts</span
               ><select class="sel" id="xTrig">
@@ -636,7 +666,10 @@
               </div>
               <p class="note" id="xFwNote"></p>
               <textarea class="code tall" id="xSnip" readonly spellcheck="false" aria-label="Embed code"></textarea>
-              <div class="btns"><button class="btn" id="xSnipCopy">Copy snippet</button></div>
+              <div class="btns">
+                <a class="btn" id="xPlayerDl" download hidden>Download the player</a
+                ><button class="btn" id="xSnipCopy">Copy snippet</button>
+              </div>
             </div>
           </div>
         </div>

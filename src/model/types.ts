@@ -229,10 +229,6 @@ export interface ExportSettings {
   proj?: boolean;
   /** JS export: the player inside the SVG (default) or linked from outside */
   player?: 'embed' | 'external';
-  /** external player: from jsDelivr (default) or an address of your own */
-  playerSrc?: 'cdn' | 'own';
-  /** external player, your own address */
-  playerUrl?: string;
 }
 
 export interface Doc {
