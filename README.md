@@ -417,4 +417,4 @@ SVGcinema targets current Chrome, Edge, Firefox and Safari.
 
 ## License
 
-SVGcinema is proprietary software: © 2026 asafco83, all rights reserved. You may use the app to make animations, and the files you export are yours to use for anything, including commercial work. The source code may not be copied, changed or redistributed without permission. See [LICENSE](LICENSE) for the full terms.
+SVGcinema is proprietary software: © 2026 asafco83, all rights reserved. You may use the app to make animations, and the files you export are yours to use for anything, including commercial work. The external player file (`svgcinema-player`) may be loaded from a CDN or hosted unmodified, only to play SVGcinema exports. The source code may not be copied, changed or redistributed without permission. The owner may change or revoke the terms, and change or end access, at any time. See [LICENSE](LICENSE) for the full terms.

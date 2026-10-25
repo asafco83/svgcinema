@@ -259,7 +259,7 @@ export function openAbout() {
       <dt>Version</dt><dd id="abVersion">${esc(APP_VERSION)}</dd>
       ${build ? `<dt>Build</dt><dd id="abBuild">${esc(build)}</dd>` : ''}
       <dt>Copyright</dt><dd id="abCopy">${esc(copyrightLine())}</dd>
-      <dt>Licence</dt><dd>Proprietary. You may use the app to create, save and export animations. The files you export, with the player inside them, are yours to use for any purpose, including commercially.</dd>
+      <dt>Licence</dt><dd>Proprietary. You may use the app to create, save and export animations. The files you export, with the player inside them, are yours to use for any purpose, including commercially; the external player may be loaded or hosted unmodified to play them. The owner may change or revoke these terms and access at any time.</dd>
     </dl>
     <details class="ab-lic"><summary>The full licence</summary><pre>${esc(LICENSE_TEXT.trim())}</pre></details>
     <div class="ab-oss">
