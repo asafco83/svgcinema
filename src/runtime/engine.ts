@@ -17,7 +17,7 @@ export interface EngineLayer {
   /** animated tracks, keyed by property */
   t: Record<string, Keyframe[]>;
   /** curved motion path */ sm?: boolean | 1;
-  /** even speed along curved motion-path segments (by length, as SVGator moves) */ ev?: boolean | 1;
+  /** even speed along curved motion-path segments (by their length) */ ev?: boolean | 1;
   /** orient along motion path */ or?: boolean | 1;
   /** polygon / star settings, so an animated corner radius ("rad") can rebuild the path */
   shape?: { kind: string; cx: number; cy: number; r: number; rot: number; n: number; ratio?: number };
@@ -109,7 +109,7 @@ export interface EngineData {
   fill?: number | string;
   L: EngineLayer[];
 }
-/** Public player API (SVGator compatible). */
+/** The public player API. */
 export interface CinPlayer {
   play(): CinPlayer;
   pause(): CinPlayer;
@@ -470,7 +470,7 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
       };
     });
   }
-  /** number lists (dash patterns), as SVGator and CSS blend them: an empty list counts as zeros, and
+  /** number lists (dash patterns), as CSS blends them: an empty list counts as zeros, and
    *  lists of different lengths repeat to their least common multiple */
   function mixA(a: number[], b: number[], p: number): number[] {
     a = a || [];
@@ -1324,7 +1324,7 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
         }
     }
   }
-  /* ---- player (SVGator-compatible API) ---- */
+  /* ---- player API ---- */
   var T = D.dur || 1,
     IT = D.it > 0 ? Math.floor(D.it) : 0,
     AL = /alternate/.test(D.dir || ''),

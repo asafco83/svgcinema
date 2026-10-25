@@ -139,7 +139,7 @@ export interface Layer {
   /** group: a mask group ('mask' = by opacity, 'clip' = by shape); its `maskSrc` child is the mask */
   mask?: 'mask' | 'clip';
   /** size anchor: the point an animated size grows around, as a share of the shape's box (0–1 on each
-   *  axis); unset = the origin. Imported SVGator animations grow from the shape's corner, as there. */
+   *  axis); unset = the origin. Imported animations that grow from the shape's corner use it. */
   sa?: [number, number];
   /** mask group: masks by brightness ('lum', luminance) instead of by opacity (the default) */
   mm?: 'lum';

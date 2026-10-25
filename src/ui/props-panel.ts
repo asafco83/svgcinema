@@ -1,5 +1,5 @@
 // SVGcinema — ui/props-panel
-// The SVGator-style property sections of the inspector: Transforms, Text, Text appearance, Fill & stroke,
+// The property sections of the inspector: Transforms, Text, Text appearance, Fill & stroke,
 // Appearance (compositing, line style, dashes) and Filters. Fields follow the inspector's conventions:
 //   data-f="prop[:index[:multiplier]]"  animatable value (keyframe button = data-kb)
 //   data-g="field"                      geometry (rect/ellipse/text…)

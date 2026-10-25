@@ -16,7 +16,7 @@ import { poseKeys, poseLabel, poseRowFor, rigTimes } from '../tools/rig';
 export function tln() {
   return parseFloat(getComputedStyle(TLB).getPropertyValue('--tln')) || 232;
 }
-/** Seconds the timeline shows: at least the animation, and enough to fill the panel (SVGator-style);
+/** Seconds the timeline shows: at least the animation, and enough to fill the panel;
  *  the time after the end is shaded and its end line can be dragged to change the length. */
 export function shownSpan() {
   const view = Math.max(0, (TLS.clientWidth || 800) - tln() - 24) / S.pps,

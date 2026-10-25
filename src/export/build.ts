@@ -704,7 +704,7 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
           return o;
         }),
       };
-      out += `<script><![CDATA[\n(function(){var CinEngine=${CinEngine.toString()};\nvar s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;var P=CinEngine(${JSON.stringify(data)},s);s.player=s.svgatorPlayer=P;P.stop();${reducedJS(ex.rm)}${triggerJS(ex.trigger, ex.out, /reverse/.test(doc.dir) ? -1 : 1)}${ex.rm === 'first' || ex.rm === 'last' ? '}' : ''}})();\n]]><\/script>`;
+      out += `<script><![CDATA[\n(function(){var CinEngine=${CinEngine.toString()};\nvar s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;var P=CinEngine(${JSON.stringify(data)},s);s.player=s.cinPlayer=P;P.stop();${reducedJS(ex.rm)}${triggerJS(ex.trigger, ex.out, /reverse/.test(doc.dir) ? -1 : 1)}${ex.rm === 'first' || ex.rm === 'last' ? '}' : ''}})();\n]]><\/script>`;
     }
   }
   H.lookup(id => layerById(id));

@@ -1,5 +1,5 @@
 // SVGcinema — ui/animate-menu
-// The Animate button at the bottom of the Layers panel (as in SVGator): pick a property and every
+// The Animate button at the bottom of the Layers panel: pick a property and every
 // selected layer that has it gets a keyframe at the playhead, so it joins the timeline.
 // Shortcuts: Shift + the letter shown next to each property.
 import { keyLower } from '../core/keys';
@@ -12,7 +12,7 @@ import { isLocked, kids, pidOf } from '../model/tree';
 import { canMask } from '../core/masks';
 import { openPresets } from './presets-panel';
 
-/** Menu sections, in SVGator's order. Letters are Shift shortcuts (Shift+C is the Convert Point tool). */
+/** Menu sections, in order. Letters are Shift shortcuts (Shift+C is the Convert Point tool). */
 export const ANIM_GROUPS: Array<Array<[PropKey, string, string?]>> = [
   [
     ['pos', 'Position', 'P'],

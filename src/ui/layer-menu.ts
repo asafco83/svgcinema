@@ -1,5 +1,5 @@
 // SVGcinema — ui/layer-menu
-// Right-click menu for layers, on the canvas and in the Layers panel (modelled on SVGator's), the
+// Right-click menu for layers, on the canvas and in the Layers panel, the
 // layer clipboard (cut / copy / paste / paste in place), and the Hyperlink dialog.
 import { detach, isInstance, makeSymbol } from '../core/symbols';
 import { enterSymbol } from './symbols-ui';
