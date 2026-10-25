@@ -5,3 +5,6 @@ dist
 .vite
 coverage
 deploy
+thumbnailers/windows/build
+thumbnailers/windows/Output
+thumbnailers/linux/dist

@@ -326,6 +326,13 @@ A `.SVGcinema` file is a standard zip archive:
 
 `project.json` references assets by id, so images are stored once.
 
+**Thumbnails in your file manager:** optional add-ons read `thumbnail.png` so projects show their first frame instead of a plain icon:
+
+- **Windows** File Explorer: `SVGcinema-Thumbnails-Setup.exe`. It installs for you only, with no administrator rights. It's unsigned, so Windows may warn about an unknown publisher: choose _More info_, then _Run anyway_.
+- **Linux**: `svgcinema-thumbnails.deb`, or the `.tar.gz` with `install.sh`. Works in GNOME Files, Nemo, Caja and Thunar.
+
+Downloads are in the [`thumbnails` release](https://github.com/asafco83/svgcinema/releases/tag/thumbnails); the sources and how they work are in `thumbnailers/`.
+
 ## Typing
 
 The document model lives in `src/model/types.ts`: `Doc`, `Layer`, `Geometry`, `BaseValues`, `Tracks`, `ExportSettings`, `Asset`, plus the transient `EditorState` (`S`) and `Drag`. The runtime's `EngineLayer` is the exported subset of `Layer`.

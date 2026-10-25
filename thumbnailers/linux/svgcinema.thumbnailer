@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=svgcinema-thumbnailer
+Exec=svgcinema-thumbnailer %i %o %s
+MimeType=application/x-svgcinema-project;
