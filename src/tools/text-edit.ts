@@ -38,14 +38,14 @@ function layout(l: Layer) {
     top = G.y - size * 0.8 - (lh - size) / 2;
   return { size, lh, w, left, top, h: Math.max(1, lines.length) * lh };
 }
-function place(l: Layer) {
+function place(l: Layer, box: HTMLTextAreaElement | null = ta) {
   const el = byId('e-' + l.id + '-s') as unknown as SVGGraphicsElement;
-  if (!ta || !el) return;
+  if (!box || !el) return;
   const G = l.geo,
     m = el.getScreenCTM(),
     L = layout(l),
     c = H.comp(l, S.time);
-  Object.assign(ta.style, {
+  Object.assign(box.style, {
     transform: `matrix(${m.a},${m.b},${m.c},${m.d},${m.e},${m.f}) translate(${L.left}px,${L.top}px)`,
     width: L.w + 'px',
     height: L.h + 'px',
@@ -61,25 +61,62 @@ function place(l: Layer) {
     caretColor: typeof c.fill === 'string' && c.fill !== 'none' && !/^url/.test(c.fill) ? c.fill : '#5b7cfa',
   });
 }
-/** Start typing into a text layer on the canvas. `selectAll` selects the current text (new layers). */
-export function startTextEdit(l: Layer, selectAll?: boolean) {
+function makeBox(l: Layer) {
+  const box = document.createElement('textarea');
+  box.className = 'cin-tedit';
+  // the browser's own spell check: it underlines misspelt words in the language of the person's browser
+  box.spellcheck = spellOn();
+  box.setAttribute('aria-label', 'Text');
+  box.value = String(l.geo.text || '');
+  document.body.appendChild(box);
+  return box;
+}
+
+// Chrome spell-checks the text already in a box only when the person focuses it (a click or a tap),
+// not when a script does. So after a press on a text layer, an invisible editor waits over it for the
+// rest of the double-click time: the second press lands in it, the browser focuses it itself (and puts
+// the caret where the press was), and the misspelt words are underlined straight away.
+let armed: HTMLTextAreaElement | null = null,
+  armTimer = 0;
+/** Wait `ms` for a second press on this text layer, in an editor the browser focuses itself. */
+export function armTextEdit(l: Layer, ms: number) {
+  disarmTextEdit();
+  if (editing || !l || l.type !== 'text' || ms <= 0) return;
+  const box = makeBox(l);
+  box.classList.add('armed');
+  place(l, box);
+  armed = box;
+  box.addEventListener('focus', () => {
+    if (armed !== box) return;
+    armed = null;
+    clearTimeout(armTimer);
+    startTextEdit(l, false, box);
+  });
+  armTimer = window.setTimeout(disarmTextEdit, ms);
+}
+export function disarmTextEdit() {
+  clearTimeout(armTimer);
+  if (armed) armed.remove();
+  armed = null;
+}
+/** Start typing into a text layer on the canvas. `selectAll` selects the current text (new layers).
+ *  `box`: an armed editor the browser has just focused (the caret is where the person pressed). */
+export function startTextEdit(l: Layer, selectAll?: boolean, box?: HTMLTextAreaElement) {
   if (!l || l.type !== 'text') return;
+  if (box !== armed) disarmTextEdit();
   if (editing) endTextEdit();
   editing = l.id;
   edit = beginEdit();
-  ta = document.createElement('textarea');
-  ta.className = 'cin-tedit';
-  // the browser's own spell check: it underlines misspelt words in the language of the person's browser
-  ta.spellcheck = spellOn();
-  ta.setAttribute('aria-label', 'Text');
-  ta.value = String(l.geo.text || '');
-  document.body.appendChild(ta);
+  ta = box || makeBox(l);
+  ta.classList.remove('armed');
   renderStage();
   frame();
   place(l);
-  ta.focus();
-  if (selectAll) ta.select();
-  else ta.setSelectionRange(ta.value.length, ta.value.length);
+  if (!box) {
+    ta.focus();
+    if (selectAll) ta.select();
+    else ta.setSelectionRange(ta.value.length, ta.value.length);
+  }
   ta.addEventListener('input', () => {
     const L = layerById(editing);
     if (!L) return endTextEdit();

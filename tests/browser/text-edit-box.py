@@ -37,7 +37,7 @@ async def main():
         g=await ev(f"[{L}.geo.wrap,{L}.geo.ww,document.querySelectorAll('#e-{tid}-s tspan').length,JSON.stringify({L}.b.scl)]")
         check('edit handle sets the width and Keep width', g[0] and g[2]>1 and g[3]=='[1,1]', g)
         check('still editing after resizing', await ev("document.activeElement && document.activeElement.className==='cin-tedit'"))
-        await pg.keyboard.press('End'); await pg.keyboard.type(' more')
+        await pg.keyboard.press('Control+End'); await pg.keyboard.type(' more')
         check('typing continues', (await ev(f"{L}.geo.text")).endswith(' more'))
         h=await handle('tbw'); right=await ev(f"{L}.geo.x+{L}.geo.ww")
         await drag(h,(h[0]-50,h[1]))

@@ -2833,6 +2833,10 @@ details summary {
   /* room under the last line, so the browser's spell check underline isn't clipped */
   padding-bottom: 0.4em;
 }
+/* waiting for the second press of a double-click: keep the pointer as it is on the canvas */
+.cin-tedit.armed {
+  cursor: default;
+}
 /* the browser's spell check underline: drawn a little heavier and lower, so it reads on the canvas */
 .cin-tedit::spelling-error {
   text-decoration: underline wavy var(--head);

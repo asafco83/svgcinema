@@ -1,7 +1,7 @@
 // SVGcinema — tools/stage-input
 import { enterSymbol, exitSymbol, isoChain } from '../ui/symbols-ui';
 import { gradHandleDrag } from './gradient-handles';
-import { startTextEdit } from './text-edit';
+import { armTextEdit, startTextEdit } from './text-edit';
 import { panDrag } from './hand';
 import type { Keyframe, Layer, XY } from '../model/types';
 import { motionHandleDrag, segmentDrag, straighten } from './motion-path';
@@ -141,6 +141,17 @@ const dragLayer = (l: Layer, p: XY, e: PointerEvent) => (e.altKey ? dupDrag(l, p
 let lastSeg: { id: string; i: number; t: number } | null = null,
   lastText: { id: string; t: number; x: number; y: number } | null = null,
   lastPress: { t: number; x: number; y: number } | null = null;
+/** After a press on a text layer that ends without moving, wait for the second press of a
+ *  double-click in an editor the browser focuses itself (so its spell check runs at once). */
+function armOnRelease(l: Layer, press: { t: number; x: number; y: number }) {
+  const up = (e: PointerEvent) => {
+    window.removeEventListener('pointerup', up, true);
+    const left = 400 - (Date.now() - press.t);
+    if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < 5 && S.tool === 'select' && S.sel === l.id)
+      armTextEdit(l, left);
+  };
+  window.addEventListener('pointerup', up, true);
+}
 export function init(): void {
   WRAP.addEventListener('pointerdown', (e: PointerEvent) => {
     if (e.button !== 0 && e.button !== 1) return;
@@ -304,6 +315,7 @@ export function init(): void {
           return startTextEdit(l);
         }
         lastText = { id, t: now, x: e.clientX, y: e.clientY };
+        if (t === 'select' && l.type === 'text') armOnRelease(l, lastText);
         if (t === 'select') dragLayer(l, p, e);
         return;
       }
