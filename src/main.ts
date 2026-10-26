@@ -35,6 +35,7 @@ import { init as initRanges } from './ui/ranges';
 import { initScaleBar } from './tools/bone-edit';
 import { initPinBar } from './tools/pins';
 import { initDrawOrderDrag } from './ui/inspector';
+import { initFilterDrag } from './ui/props-panel';
 import { initTlResize } from './ui/tl-resize';
 import { initShortcuts } from './ui/shortcuts';
 import { initScrub } from './ui/scrub';
@@ -47,6 +48,7 @@ init1(); // tools/stage-input
 initScaleBar(); // tools/bone-edit (Scale bone options)
 initPinBar(); // tools/pins (Pin tool options: Bind to bones)
 initDrawOrderDrag(); // ui/inspector (a rig's own draw order list)
+initFilterDrag(); // ui/props-panel (filter cards: drag to reorder, the Add filter menu)
 initHand(); // tools/hand
 initAnim(); // ui/animate-menu
 initZoom(); // ui/zoom-menu

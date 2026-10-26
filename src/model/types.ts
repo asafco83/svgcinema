@@ -164,9 +164,9 @@ export interface Layer {
   /** extra SVG attributes kept from import or tools */
   extra: Record<string, string>;
   /** filters, applied in order */
-  fx?: Array<{ id: string; type: string }>;
+  fx?: Array<{ id: string; type: string; name?: string; pos?: string }>;
   /** runtime map for animated filter parameters (derived from fx, see model/filters) */
-  fa?: Record<string, [string, string]>;
+  fa?: Record<string, [string, string] | [string, string, string?, string?][]>;
   /** compositing: CSS mix-blend-mode and isolation */
   blend?: string;
   iso?: boolean;

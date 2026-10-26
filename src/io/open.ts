@@ -2,6 +2,7 @@
 import { fitView, zoomAt } from '../tools/hand';
 import type { Asset, BaseValues, Doc, Layer, OpenFile } from '../model/types';
 import { $, clamp } from '../core/constants';
+import { syncFa } from '../model/filters';
 import { redo, save, setTime, undo } from '../core/history';
 import { togglePlay } from '../core/playback';
 import { ASSETS, S, URLS, blankDoc, doc, setDoc, syncAidc } from '../core/state';
@@ -140,6 +141,8 @@ export function normalizeDoc(d: Partial<Doc>): Doc {
     l.extra = l.extra || {};
     l.geo = l.geo || {};
     if (!l.parent || !ids.has(l.parent) || l.parent === l.id) l.parent = null;
+    // the runtime's filter map follows the filter chains (they gained steps over time)
+    if (l.fx && l.fx.length) syncFa(l);
   });
   return o;
 }

@@ -97,7 +97,7 @@ async def main():
         # miter row and filter note
         labels=await ev("[...document.querySelectorAll('#insp .rl')].map(r=>r.textContent)")
         check('miter limit sits in the line join row', 'Miter limit' not in labels and await ev("!!document.getElementById('x-miter')"), labels)
-        await pg.select_option('#fx-add','blur')
+        await pg.click('#fx-add'); await pg.click('#fxMenu [data-fxp=blur]')
         check('filters CSS note', 'CSS exports' in await ev("[...document.querySelectorAll('#insp .sec')].find(s=>s.querySelector('h3').textContent.startsWith('Filters')).textContent"))
         # fonts
         await pg.click('#g-family'); await pg.locator('#fontPop .fp-opt[data-font="Heebo"]').first.click()

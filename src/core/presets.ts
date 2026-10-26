@@ -1177,8 +1177,11 @@ export const PRESETS: Preset[] = [
     icon: ic.glow,
     applies: l => l.type !== 'bone',
     prep: l => {
-      if (!(l.fx || []).some(f => f.type === 'shadow'))
-        filterId(l, 'shadow', { dx: 0, dy: 0, sd: 8, col: '#ffffff', op: 0 });
+      if (!(l.fx || []).some(f => f.type === 'shadow')) {
+        filterId(l, 'shadow', { dx: 0, dy: 0, sd: 8, sp: 2, col: '#ffffff', op: 0 });
+        const g = l.fx.find(f => f.type === 'shadow');
+        if (g) g.name = 'Glow';
+      }
     },
     steps: c => {
       const k = fxk(c.l, 'shadow', 'op'),

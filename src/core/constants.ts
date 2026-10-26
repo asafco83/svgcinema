@@ -1,6 +1,6 @@
 // SVGcinema — core/constants
 import type { Layer, PropKey } from '../model/types';
-import { fxKeys, fxOf } from '../model/filters';
+import { fxKeys, fxName, fxOf } from '../model/filters';
 import { isPinKey, isPinRot, pinBase, pinKeys, pinLabel } from '../model/pins';
 import { CinEngine } from '../runtime/engine';
 
@@ -87,7 +87,7 @@ export function propLabel(l: Layer, k: string) {
   if ((PROPS as any)[k]) return (PROPS as any)[k][0] as string;
   if (isPinKey(k)) return pinLabel(k);
   const f = fxOf(l, k);
-  return f ? `${f.def.label} · ${f.param.label}` : k;
+  return f ? `${fxName(f.fx)} · ${f.param.label}` : k;
 }
 /** Value kind of a property: v = 2D vector, n = number, c = colour, m = path, a = number list. */
 export function propKind(l: Layer, k: string): 'v' | 'n' | 'c' | 'm' | 'a' {

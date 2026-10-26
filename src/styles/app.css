@@ -5784,3 +5784,185 @@ a.btn {
 .xdlg .xnote .btn {
   font-size: 12px;
 }
+
+/* ---------- Filters: cards like the draw order list (matched to the mockup) ---------- */
+.fx-add {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--panel-2)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%238a92a3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E")
+    no-repeat right 8px center;
+  padding: 0 26px 0 8px;
+  font-size: 12px;
+  text-align: left;
+  color: var(--fg);
+}
+.fx-add:hover,
+.fx-add[aria-expanded='true'] {
+  border-color: var(--line);
+}
+.fx-add[aria-expanded='true'] {
+  border-color: var(--accent);
+}
+.sec h3 .fx-all {
+  height: 22px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.sec h3 .fx-all:hover {
+  background: var(--panel-2);
+  color: var(--fg);
+}
+.fxl {
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.fxc {
+  display: grid;
+  border-radius: 6px;
+  background: var(--raised);
+  box-shadow: 0 0 0 1px var(--line-soft);
+}
+.fxc.dragging {
+  opacity: 0.5;
+}
+.fxc.drop-above {
+  box-shadow:
+    0 -2px 0 var(--accent),
+    0 0 0 1px var(--line-soft);
+}
+.fxc.drop-below {
+  box-shadow:
+    0 2px 0 var(--accent),
+    0 0 0 1px var(--line-soft);
+}
+.fxc-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 4px 0 2px;
+  cursor: grab;
+}
+.fxc-tg {
+  flex: none;
+  width: 16px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+}
+.fxc-tg:hover {
+  background: var(--panel-2);
+  color: var(--fg);
+}
+.fxc-tg svg {
+  width: 10px;
+  height: 10px;
+  transition: transform 0.15s;
+}
+.fxc.closed .fxc-tg svg {
+  transform: rotate(-90deg);
+}
+.fxc-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.fxc-name b {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.fxc-sum {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  color: var(--muted);
+}
+.fxc.closed .fxc-sum,
+.fxl.folded .fxc-sum {
+  display: inline-flex;
+}
+.fxc-k {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  border: 1.2px solid var(--key);
+  border-radius: 1px;
+}
+.fxc-sw {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 2.5px;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.fxc-head .dord-mv svg {
+  flex: none;
+}
+.fxc-body {
+  display: grid;
+  gap: 6px;
+  padding: 2px 6px 6px 2px;
+}
+.fxc.closed .fxc-body,
+.fxl.folded .fxc-body {
+  display: none;
+}
+.fxc-body .row {
+  grid-template-columns: 16px 62px minmax(0, 1fr);
+}
+.fxc-body .segc button {
+  height: 24px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.ctx.fxm {
+  min-width: 184px;
+}
+.ctx.fxm button {
+  padding: 5px 8px 5px 18px;
+  font-size: 12.5px;
+}
+.ctx.fxm kbd {
+  font: 400 11px var(--f-ui);
+}
+.ctx.fxm .ctx-h {
+  padding: 7px 8px 3px;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+}
+.sec h3 .h3b.fx-all {
+  width: auto;
+  white-space: nowrap;
+  flex: none;
+}
+.fxc-body .rf > .segc {
+  flex: 1;
+}
+.fxl.folded .fxc-tg svg {
+  transform: rotate(-90deg);
+}

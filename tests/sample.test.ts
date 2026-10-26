@@ -1,4 +1,5 @@
 // The sample scene doubles as a tour of the editor: check it keeps showing every built-in capability.
+import { FILTERS } from '../src/model/filters';
 import { describe, it, expect } from 'vitest';
 import { setDoc, doc } from '../src/core/state';
 import { sampleDoc } from '../src/model/sample';
@@ -80,6 +81,7 @@ describe('sample scene', () => {
     const fx = L.filter(l => l.fx && l.fx.length);
     expect(fx.some(l => l.fx!.some(f => f.type === 'blur'))).toBe(true);
     expect(fx.some(l => l.fx!.some(f => f.type === 'shadow'))).toBe(true);
+    expect(fx.some(l => l.fx!.some(f => FILTERS[f.type] && FILTERS[f.type].group === 'colour'))).toBe(true);
     expect(fx.some(l => Object.keys(l.t).some(k => k.startsWith('fx.')))).toBe(true);
     expect(some(l => !!l.blend && l.blend !== 'normal')).toBe(true);
     expect(some(l => !!l.link)).toBe(true);
