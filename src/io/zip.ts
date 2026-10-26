@@ -2,6 +2,7 @@
 import { ASSETS, doc } from '../core/state';
 import { slug } from '../export/images';
 import { THUMB_NAME, thumbnailPNG } from './thumbnail';
+import { extraFiles } from './extras';
 
 export const CRC_T = (() => {
   const t = new Uint32Array(256);
@@ -206,6 +207,8 @@ export async function buildProject(includeAll?: boolean) {
     { name: 'manifest.json', data: enc.encode(JSON.stringify(manifest, null, 2)), compress: true },
     { name: 'project.json', data: enc.encode(JSON.stringify(doc)), compress: true },
     { name: 'assets/index.json', data: enc.encode(JSON.stringify(index, null, 2)), compress: true },
+    // files other parts of the editor keep with the project (the design agent's chat)
+    ...extraFiles(),
     ...files,
   ]);
 }

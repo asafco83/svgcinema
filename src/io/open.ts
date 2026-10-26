@@ -10,6 +10,7 @@ import { assetURL, blobToData, saveAssets } from './assets';
 import { markClean, persistFile, updateFileInfo } from './file-state';
 import { confirmDiscard } from './guard';
 import { readZip } from './zip';
+import { readExtras, resetExtras } from './extras';
 import { addRecent } from './recent';
 import { artLabel, fit, frame } from '../render/stage';
 import { docField } from '../ui/inspector';
@@ -40,6 +41,8 @@ export function applyProject(d: Partial<Doc>, assets: Record<string, Asset> | nu
   syncAidc();
   saveAssets();
   setDoc(normalizeDoc(d));
+  // what belonged to the old project (the agent's chat) goes with it
+  resetExtras();
   S.undo = [];
   S.redo = [];
   S.file = file;
@@ -81,6 +84,7 @@ export async function loadProjectFile(f: File, handle: FileSystemFileHandle | nu
         assets[a.id] = o;
       }
       applyProject(d, assets, { name: f.name, handle: handle || null });
+      await readExtras(z);
       addRecent(f.name, handle || null, handle ? null : f);
       const missing = idx.length - Object.keys(assets).length;
       toast(`Opened ${f.name}${missing ? ` (${missing} image${missing > 1 ? 's' : ''} missing)` : ''}.`);

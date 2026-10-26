@@ -198,7 +198,12 @@ function tabs(): Tab[] {
           r('Zoom at the pointer', 'Ctrl + scroll'),
         ),
         sec('Pan', r('Pan the canvas', 'Space + drag', 'middle-drag', 'scroll')),
-        sec('Panels', r('Zoom the timeline', 'Ctrl + scroll'), r('Close or open all inspector sections', '/')),
+        sec(
+          'Panels',
+          r('Zoom the timeline', 'Ctrl + scroll'),
+          r('Close or open all inspector sections', '/'),
+          r('Open or close the agent', 'Alt A'),
+        ),
         sec(
           'Show and hide',
           r('Snapping', 'Alt S'),

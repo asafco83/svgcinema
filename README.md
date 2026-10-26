@@ -293,6 +293,16 @@ The guides are saved with the project; the other view settings are remembered in
 
 **Web fonts in exports:** Google Fonts are converted to outlines by default (no font download, identical everywhere, also inside `<img>`). _Embed font_ instead keeps live, selectable text and embeds only the alphabets the text uses, which is smaller for long text. Hebrew is drawn in its right-to-left order; Arabic-script text is always embedded so its letters join. Fonts from this computer are converted or embedded the same way once the browser has shared them (embedding includes the whole font file); otherwise the SVG only names the font.
 
+## Design agent
+
+Click **Agent** in the top bar (Alt A) to open a chat docked on the right. Describe what you want, for example “draw a cartoon rocket and make it launch”, and the agent draws, edits and animates in this project with the editor's own tools: shapes and SVG artwork, layer edits, groups, presets, keyframes and the project settings. Its steps are listed as it works, and **each request is one undo step**: Undo, or _Undo this request_ under its answer, rolls the whole request back.
+
+- **Your own key:** the first open asks which service to connect: OpenRouter (recommended: one key for many models), OpenAI, Anthropic, Google Gemini, Groq, or **Custom** (any OpenAI-compatible address, with a model name; a local server may need no key). Paste your API key in **Settings** and press **Test** to check that the service is reachable from the page, knows the model and can use tools. Requests use your own credit with that provider.
+- **Privacy:** keys are kept in this browser only and sent straight to the provider; SVGcinema has no server in between. _Settings › Privacy_ has **Clear chat** and **Remove keys**.
+- **While it works** editing is paused (play, scrub and zoom still work); **Stop** ends the request and keeps the steps already done. It asks before deleting layers (turn that off in Settings) and stops after 20 steps per request (changeable).
+- **The chat travels with the project:** it is saved inside the `.SVGcinema` file (text only) and kept in this browser between visits. New chat (the pencil button) starts over, with Undo in the notice.
+- Errors (a refused key, a busy or unreachable provider) show what happened, whether anything changed, and **Try again**.
+
 ## Opening and importing SVG
 
 **Open…** (Ctrl O) also opens `.svg` files: the SVG becomes a new project with its canvas (viewBox), its title as the project name, and its artwork as editable layers. It isn't saved yet (Save makes a `.SVGcinema` file). **Import files…**, dropping an SVG on the canvas, pasting SVG markup and placing an SVG from **Assets** read the file the same way into the current project, inside a group named after the file (the project's canvas and settings stay).
@@ -362,6 +372,7 @@ A `.SVGcinema` file is a standard zip archive:
 | `project.json`             | The document: layers, keyframes, easing presets, export settings                                                      |
 | `assets/index.json`        | One entry per asset: id, name, kind, MIME type, size in pixels and bytes, file path                                   |
 | `assets/<id>-<name>.<ext>` | Each image as its original file                                                                                       |
+| `agent-chat.json`          | The design agent's chat for this project (text only), when there is one                                               |
 
 `project.json` references assets by id, so images are stored once.
 

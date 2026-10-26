@@ -84,8 +84,11 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   own undo entries are folded into one); `schema.ts` = argument checks; `loop.ts` = runs a request (tool calls
   one by one, step cap, Stop, provider errors); `clients/` = streaming OpenAI-compatible and Anthropic clients
   (called from the browser with the user's key); `providers.ts` = the provider table and `makeClient`;
-  `prompt.ts` = the system prompt and the scene attached to each message. Tested by `tests/agent.test.ts`,
-  `tests/agent-loop.test.ts` (mocked `fetch`), `tests/browser/agent-tools.py` and `tests/browser/agent-loop.py`
+  `prompt.ts` = the system prompt and the scene attached to each message; `settings.ts` = provider, model and keys
+  (browser storage only); `chat.ts` = the chat (saved in the project as `agent-chat.json` through `io/extras.ts`);
+  `describe.ts` = how a step reads in the panel; `busy.ts` = editing paused while a request runs. The panel is
+  `ui/agent-panel.ts` (Alt+A, docked as the grid's fifth column). Tested by `tests/agent.test.ts`,
+  `tests/agent-loop.test.ts` (mocked `fetch`), `tests/browser/agent-tools.py`, `tests/browser/agent-loop.py` and `tests/browser/agent-panel.py`
   (Playwright answers the provider URLs with scripted streams). Tests never call a real model provider.
 
 ## UI conventions (from the UI refresh)

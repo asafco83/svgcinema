@@ -37,6 +37,8 @@ export function endRequest(r: AgentRequest): boolean {
     if (S.undo.length > 150) S.undo.shift();
     S.redo = [];
   }
+  // presets select the keys they write; after a request the Inspector shows the layer, not their easing
+  S.keys.clear();
   commit({ insp: true });
   return changed;
 }
