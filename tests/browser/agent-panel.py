@@ -65,7 +65,7 @@ async def main():
         check('Test with a refused key says so', 'refused' in await E("document.querySelector('#agBody').textContent"))
         await pg.fill('#agKey','test-key'); await pg.press('#agKey','Tab'); await pg.click('[data-act=test]'); await pg.wait_for_timeout(700)
         chk=await E("[...document.querySelectorAll('.ag-chk')].map(c=>c.className.split(' ')[1]+':'+c.textContent.trim().slice(0,22))")
-        check('Test with a working key: reachable, model found, can use tools', len(chk)==3 and all(c.startswith('ok:') for c in chk), chk)
+        check('Test with a working key: reachable, model found, can use tools, then whether it can see', len(chk)==4 and all(c.startswith('ok:') for c in chk[:3]) and 'see images' in chk[3], chk)
         check('the key is kept in this browser only', await E("JSON.parse(localStorage.getItem('svgcinema:agent.keys')||'{}').openrouter")=='test-key')
         await pg.click('[data-act=back]'); await pg.wait_for_timeout(200)
         check('the empty chat shows examples and the composer', await E("document.querySelectorAll('.ag-hello .ag-ex').length>=2 && !!document.querySelector('#agText').offsetParent"))

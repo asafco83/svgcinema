@@ -10,6 +10,8 @@ export interface PromptOptions {
   vector?: 'agent' | 'model';
   /** make artwork whose parts move as vector rather than a picture */
   preferVector?: boolean;
+  /** the model can see pictures (the snapshot tool is offered) */
+  see?: boolean;
 }
 
 export function systemPrompt(o: PromptOptions = {}) {
@@ -40,7 +42,11 @@ How to work
         } Don't generate the same image again after a cancel.`
       : 'No image model is set up, so you cannot make raster images. If the user asks for one, say so briefly and offer to draw it as vector shapes instead.'
   }
-- Filters (blur, glow, shadows…) only animate in the JavaScript export; mention it when you animate them.
+${
+  o.see
+    ? '- Check your work: after making or animating something visible, call snapshot once at the most telling moment and fix what looks wrong. At most 3 per request.\n'
+    : ''
+}- Filters (blur, glow, shadows…) only animate in the JavaScript export; mention it when you animate them.
 - Locked layers are refused: ask the user before unlocking one. If the user declines a delete, don't try again.
 - When a tool refuses, read the reason and correct the call; don't repeat the same call.
 

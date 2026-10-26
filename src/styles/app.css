@@ -6880,6 +6880,48 @@ button.ag-chip:hover {
   line-height: 16px;
 }
 
+/* snapshot thumbnails, the image Test (mockup "custom" settings board) */
+.ag-thumb {
+  display: block;
+  max-width: 100%;
+  max-height: 120px;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+}
+.ag-f.ind {
+  padding-left: 80px;
+}
+.ag-bad {
+  margin-left: auto;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 7px;
+  border-radius: 9px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.ag-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--danger-line);
+  background: var(--danger-soft);
+  line-height: 16px;
+  font-size: 11.5px;
+}
+.ag-alert svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--danger);
+}
+
 /* the Agent button in the top bar: pressed while the panel is open */
 .top .btn.ag-tb {
   height: 32px;

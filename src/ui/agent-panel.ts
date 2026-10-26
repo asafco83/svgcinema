@@ -27,6 +27,8 @@ import { describe, type StepIcon } from '../agent/describe';
 import { runAgent } from '../agent/loop';
 import {
   IMAGE_PROVIDERS,
+  finishTransparency,
+  generateImage,
   type ImageModel,
   defaultImageModel,
   imageCatalog,
@@ -39,7 +41,13 @@ import { type ImageAnswer, type ImageAsk, offeredTools } from '../agent/tools';
 import { PROVIDERS, type ProviderId, makeClient, providerById } from '../agent/providers';
 import { isLatest } from '../agent/request';
 import {
+  canSee,
   confirmImages,
+  imageKeyId,
+  imageSetup,
+  imageTest,
+  setCanSee,
+  setImageTest,
   currentChoice,
   getKeys,
   getSettings,
@@ -81,6 +89,7 @@ const ST = {
   /** setup: the provider picked on first open */
   pick: 'openrouter' as ProviderId,
   test: null as null | { running: boolean; checks: Check[]; at?: number },
+  imgTest: null as null | { running: boolean; checks: Check[]; at?: number },
   showKey: false,
   otherModel: false,
   /** older turns are folded to one line; ids of turns opened by hand */
@@ -191,7 +200,7 @@ function headHTML() {
 function stepHTML(s: Turn['steps'][number]) {
   return `<div class="ag-step i-${s.icon}">${svg(STEP[s.icon], 14)}<span class="ag-step-t">${esc(s.label)}${
     s.meta ? `<small>${esc(s.meta)}</small>` : ''
-  }</span></div>${
+  }${s.image ? `<img class="ag-thumb" src="data:${s.image.mime};base64,${s.image.data}" alt="What the agent saw">` : ''}</span></div>${
     s.costLine
       ? `<div class="ag-cost"><span>${esc(s.costLine)}${confirmImages() ? '' : ' ·'}</span>${
           confirmImages() ? '' : '<button class="ag-link" data-act="askimages">Ask first again</button>'
@@ -412,7 +421,10 @@ function settingsHTML() {
        Object.keys(getKeys()).length ? '' : ' disabled'
      }>Remove keys</button></div>`,
   );
-  return `<div class="ag-settings">${sec('Agent model', agent)}${sec('Images', imagesHTML(row))}${ask}${priv}</div>`;
+  const setup = imageSetup(),
+    it = setup && imageTest(setup),
+    imgTitle = `Images${it && !it.ok ? '<span class="ag-bad">Not working</span>' : ''}`;
+  return `<div class="ag-settings">${sec('Agent model', agent)}${sec(imgTitle, imagesHTML(row))}${ask}${priv}</div>`;
 }
 
 function imagesHTML(row: (label: string, ctl: string, forId?: string) => string) {
@@ -433,18 +445,21 @@ function imagesHTML(row: (label: string, ctl: string, forId?: string) => string)
     'agImgProv',
   );
   if (!ip) return h + `<p class="ag-small">Without an image service the agent draws everything as vector shapes.</p>`;
-  if (ip.id === 'custom')
+  // Custom: the agent's own Custom address and key, or ones of its own
+  const same = ip.id === 'custom' && s.provider === 'custom' && s.imgSame;
+  if (ip.id === 'custom' && s.provider === 'custom') h += sw('imgsame', s.imgSame, 'Same address and key as the agent');
+  if (ip.id === 'custom' && !same)
     h += row(
       'Address',
-      `<input class="txt" id="agImgBase" value="${esc(s.imgBase)}" placeholder="${esc(s.base || 'https://api.example.com/v1')}" spellcheck="false">`,
+      `<input class="txt" id="agImgBase" value="${esc(s.imgBase)}" placeholder="https://api.example.com/v1" spellcheck="false">`,
       'agImgBase',
     );
   // a service other than the agent's needs its own key (keys are kept per service)
-  if (ip.id !== s.provider)
+  if (ip.id !== s.provider && !same)
     h += row(
       'API key',
       `<span class="ag-key"><input class="txt" id="agImgKey" type="${ST.showKey ? 'text' : 'password'}" value="${esc(
-        getKeys()[ip.id] || '',
+        getKeys()[imageKeyId(s)] || '',
       )}" placeholder="${ip.id === 'custom' ? 'Not needed for some local servers' : `Your ${ip.label} key`}" autocomplete="off" spellcheck="false" aria-label="Image API key"><button class="ag-ib sm" data-act="showkey" aria-label="${ST.showKey ? 'Hide' : 'Show'} key" title="${ST.showKey ? 'Hide' : 'Show'} key">${svg(P.eye, 14, 1.3, 14)}</button></span>`,
       'agImgKey',
     );
@@ -470,6 +485,16 @@ function imagesHTML(row: (label: string, ctl: string, forId?: string) => string)
         'agImgSel',
       );
   h += sw('transparent', s.transparent, 'Transparent background');
+  const t = ST.imgTest;
+  h += `<div class="ag-f ind"><button class="ag-btn line" data-act="imgtest"${t && t.running ? ' disabled' : ''}>Test</button><span class="ag-small">Makes one small test image${
+    ip.id === 'custom' ? '' : ' (about a cent)'
+  }</span></div>`;
+  if (t)
+    h += `<div class="ag-checks">${t.running ? `<div class="ag-chk"><span>Testing…</span></div>` : t.checks.map(checkHTML).join('')}</div>`;
+  const setup = imageSetup(),
+    passed = setup && imageTest(setup);
+  if (ip.id === 'custom' && !(passed && passed.ok))
+    h += `<div class="ag-alert" role="alert">${svg(P.alert, 13, 1.6)}<span>The agent won’t make images until this test passes. Ask for one and it will say so and offer to draw vector shapes instead.</span></div>`;
   h += sw(
     'prefervector',
     s.preferVector,
@@ -588,9 +613,11 @@ async function send(text: string) {
       images: !!imageChoice(),
       vector: vectorChoice() ? 'model' : 'agent',
       preferVector: s.preferVector,
+      see: canSee(choice),
     }),
     ctx: {
       signal: ST.running.ctl.signal,
+      snapshots: { left: 3 },
       confirmDelete: s.askDelete
         ? names =>
             new Promise<boolean>(resolve => {
@@ -656,6 +683,77 @@ async function send(text: string) {
 
 /* ---------- settings actions ---------- */
 
+/** 8 × 8 red pixels, for the "Can see images" check */
+const RED_PNG =
+  'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAFElEQVR4nGN8JifHgA0wYRUdtBIA6BwBMvBKKSkAAAAASUVORK5CYII=';
+
+/** The image Test: one small image (about a cent), whether its background is transparent, and SVG
+ *  from the vector model when one is chosen. */
+async function runImageTest() {
+  const c = imageSetup(),
+    s = getSettings();
+  if (!c) {
+    ST.imgTest = { running: false, checks: [{ ok: false, text: 'Add the key, address and model first' }] };
+    return renderBody();
+  }
+  ST.imgTest = { running: true, checks: [] };
+  renderBody();
+  const checks: Check[] = [];
+  let ok = false,
+    vector: string | undefined;
+  const why = (e: unknown) => {
+    const ae = e instanceof AgentError ? e : new AgentError('provider', String(e));
+    if (ae.kind === 'network') return { ok: false, text: 'Can’t reach it from this page', sub: ae.message } as Check;
+    if (!checks.length) checks.push({ ok: true, text: 'Reachable from this page' });
+    if (ae.kind === 'auth') return { ok: false, text: 'The key was refused', sub: ae.message } as Check;
+    if (ae.status === 404)
+      return {
+        ok: false,
+        text: 'Can’t make images',
+        sub: c.provider === 'custom' ? `The service has no image endpoint (/images/generations: 404)` : ae.message,
+      } as Check;
+    return { ok: false, text: 'Can’t make images', sub: ae.message } as Check;
+  };
+  try {
+    const r = await generateImage(c, {
+      prompt: 'A small flat red circle, simple test image.',
+      transparent: s.transparent,
+      signal: AbortSignal.timeout ? AbortSignal.timeout(120000) : undefined,
+    });
+    checks.push({ ok: true, text: 'Reachable from this page' }, { ok: true, text: 'Makes images', sub: c.model });
+    ok = true;
+    if (s.transparent) {
+      const t = await finishTransparency(r, true);
+      checks.push(
+        t.transparent === true
+          ? { ok: true, text: 'Transparent background' }
+          : t.transparent === 'removed'
+            ? { ok: true, text: 'Transparent background', sub: 'the model can’t, so SVGcinema removes a flat one' }
+            : { ok: 'warn', text: 'Background not transparent', sub: 'Images will keep their background.' },
+      );
+    }
+  } catch (e) {
+    checks.push(why(e));
+    if (s.transparent)
+      checks.push({ ok: 'warn', text: 'Transparent background not checked', sub: 'Tested after images work' });
+  }
+  const v =
+    s.vector !== 'agent' && s.vector && (c.provider === 'openrouter' || c.provider === 'custom') ? s.vector : '';
+  if (v && ok) {
+    try {
+      await generateImage({ ...c, model: v }, { prompt: 'A simple flat star icon.', vector: true });
+      checks.push({ ok: true, text: 'Vector model makes SVG', sub: v });
+      vector = v;
+    } catch (e) {
+      const ae = e instanceof AgentError ? e : new AgentError('provider', String(e));
+      checks.push({ ok: false, text: 'The vector model didn’t send SVG', sub: ae.message });
+    }
+  }
+  setImageTest(c, { ok, vector });
+  ST.imgTest = { running: false, checks, at: Date.now() };
+  renderBody();
+}
+
 async function runTest() {
   const ch = currentChoice();
   const s = getSettings(),
@@ -688,6 +786,35 @@ async function runTest() {
             text: 'Didn’t use the tool',
             sub: 'This model may not support tools, so it can’t edit your project.',
           },
+    );
+    ST.test = { running: true, checks: [...checks] };
+    renderBody();
+    // a tiny red picture: a model that can see answers "red"
+    let see = false;
+    try {
+      const v = await makeClient(ch).send({
+        system: 'Answer with one word.',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: 'What colour is this square? One word.' },
+              { type: 'image', mime: 'image/png', data: RED_PNG },
+            ],
+          },
+        ],
+        tools: [],
+        signal: AbortSignal.timeout ? AbortSignal.timeout(45000) : undefined,
+      });
+      see = /red/i.test(v.text);
+    } catch (_) {
+      see = false;
+    }
+    setCanSee(ch, see);
+    checks.push(
+      see
+        ? { ok: true, text: 'Can see images', sub: 'it looks at its work with snapshots' }
+        : { ok: 'warn', text: 'Can’t see images', sub: 'It won’t look at its work; everything else works.' },
     );
   } catch (e) {
     const ae = e instanceof AgentError ? e : new AgentError('provider', String(e));
@@ -737,6 +864,7 @@ function onChange(e: Event) {
       ST.test = null;
       return renderBody();
     case 'agImgProv':
+      ST.imgTest = null;
       setSettings({ imgProvider: t.value as any, imgModel: '', vector: 'agent' });
       ST.imgOther = ST.vecOther = false;
       return renderBody();
@@ -749,12 +877,15 @@ function onChange(e: Event) {
       }
       return setSettings({ imgModel: t.value });
     case 'agImgModel':
-      return setSettings({ imgModel: t.value.trim() });
+      ST.imgTest = null;
+      return void setSettings({ imgModel: t.value.trim() });
     case 'agImgBase':
-      return setSettings({ imgBase: t.value.trim() });
+      ST.imgTest = null;
+      return void setSettings({ imgBase: t.value.trim() });
     case 'agImgKey': {
-      const id = imageProviderOf();
+      const id = imageKeyId();
       if (id) setKey(id, t.value);
+      ST.imgTest = null;
       return renderBody();
     }
     case 'agVecSel':
@@ -885,6 +1016,13 @@ function onClick(e: MouseEvent) {
       return renderBody();
     case 'prefervector':
       setSettings({ preferVector: !getSettings().preferVector });
+      return renderBody();
+    case 'imgtest':
+      runImageTest();
+      return;
+    case 'imgsame':
+      setSettings({ imgSame: !getSettings().imgSame });
+      ST.imgTest = null;
       return renderBody();
     case 'vecagent':
       ST.vecOther = false;

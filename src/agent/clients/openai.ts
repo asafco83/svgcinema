@@ -30,7 +30,8 @@ export interface OpenAIOptions {
 
 /** Our messages in the chat completions shape. */
 export function toOpenAI(system: string, messages: Msg[]) {
-  const out: any[] = [{ role: 'system', content: system }];
+  const out: any[] = [{ role: 'system', content: system }],
+    pics: Array<{ id: string; mime: string; data: string }> = [];
   for (const m of messages) {
     if (m.role === 'user')
       out.push({
@@ -58,7 +59,23 @@ export function toOpenAI(system: string, messages: Msg[]) {
             }
           : {}),
       });
-    else out.push({ role: 'tool', tool_call_id: m.id, content: m.content });
+    else {
+      out.push({ role: 'tool', tool_call_id: m.id, content: m.content });
+      // a tool message can only hold text, so a picture a tool returned (a snapshot) follows the tool
+      // results as a user message
+      if (m.image) pics.push({ id: m.id, ...m.image });
+    }
+    const next = messages[messages.indexOf(m) + 1];
+    if (pics.length && (!next || next.role !== 'tool')) {
+      out.push({
+        role: 'user',
+        content: pics.flatMap(p => [
+          { type: 'text', text: `The picture returned by tool call ${p.id}:` },
+          { type: 'image_url', image_url: { url: `data:${p.mime};base64,${p.data}` } },
+        ]),
+      });
+      pics.length = 0;
+    }
   }
   return out;
 }

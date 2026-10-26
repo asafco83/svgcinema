@@ -17,7 +17,14 @@ export interface ToolCall {
 export type Msg =
   | { role: 'user'; content: string | Part[] }
   | { role: 'assistant'; text: string; calls: ToolCall[] }
-  | { role: 'tool'; id: string; name: string; content: string; error?: boolean };
+  | {
+      role: 'tool';
+      id: string;
+      name: string;
+      content: string;
+      error?: boolean;
+      image?: { mime: string; data: string };
+    };
 
 export interface ToolSpec {
   name: string;
