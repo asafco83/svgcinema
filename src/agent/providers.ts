@@ -18,6 +18,9 @@ export interface Provider {
   /** a few models to start with; any other name can be typed. These are starting points: the
    *  panel's Test checks a model against the provider before it's used. */
   models: string[];
+  /** which of those models can see images (the snapshot tool is offered to them); the Test decides
+   *  for any other model */
+  vision: string[];
 }
 
 export const PROVIDERS: Provider[] = [
@@ -28,6 +31,7 @@ export const PROVIDERS: Provider[] = [
     kind: 'openai',
     images: true,
     models: ['anthropic/claude-sonnet-5.5', 'openai/gpt-5.5', 'google/gemini-3.8-flash'],
+    vision: ['anthropic/claude-sonnet-5.5', 'openai/gpt-5.5', 'google/gemini-3.8-flash'],
   },
   {
     id: 'openai',
@@ -36,6 +40,7 @@ export const PROVIDERS: Provider[] = [
     kind: 'openai',
     images: true,
     models: ['gpt-5.5', 'gpt-5.5-mini'],
+    vision: ['gpt-5.5', 'gpt-5.5-mini'],
   },
   {
     id: 'anthropic',
@@ -44,6 +49,7 @@ export const PROVIDERS: Provider[] = [
     kind: 'anthropic',
     images: false,
     models: ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-haiku-5-5'],
+    vision: ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-haiku-5-5'],
   },
   {
     id: 'gemini',
@@ -52,6 +58,7 @@ export const PROVIDERS: Provider[] = [
     kind: 'openai',
     images: true,
     models: ['gemini-3.8-flash', 'gemini-3.5-flash-lite'],
+    vision: ['gemini-3.8-flash', 'gemini-3.5-flash-lite'],
   },
   {
     id: 'groq',
@@ -60,8 +67,9 @@ export const PROVIDERS: Provider[] = [
     kind: 'openai',
     images: false,
     models: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'],
+    vision: [],
   },
-  { id: 'custom', label: 'Custom', chat: '', kind: 'openai', images: false, models: [] },
+  { id: 'custom', label: 'Custom', chat: '', kind: 'openai', images: false, models: [], vision: [] },
 ];
 
 export const providerById = (id: string) => PROVIDERS.find(p => p.id === id);

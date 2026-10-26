@@ -18,6 +18,8 @@ export interface StepEvent {
   ok: boolean;
   result?: any;
   error?: string;
+  /** a picture the tool returned (a snapshot), for the panel's thumbnail */
+  image?: { mime: string; data: string };
 }
 
 export type Outcome = 'done' | 'cap' | 'stopped' | 'error' | 'length';
@@ -118,6 +120,7 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
           args: c.args,
           ok: res.ok,
           ...('error' in res ? { error: res.error } : { result: res.result }),
+          ...('image' in res && res.image ? { image: res.image } : {}),
         };
         steps.push(ev);
         if (o.onStep) o.onStep(ev);
@@ -127,6 +130,7 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
           name: c.name,
           content: resultText(res) + (steps.length >= max ? CAP_NOTE : ''),
           error: !res.ok,
+          ...('image' in res && res.image ? { image: res.image } : {}),
         });
       }
       if (stopped) {
@@ -168,8 +172,11 @@ export function compactHistory(msgs: Msg[], turns = 10): Msg[] {
           JSON.stringify(c.args || {}).length > 2000 ? { ...c, args: { note: 'arguments shortened' } } : c,
         ),
       };
-    if (m.role === 'tool' && m.content.length > 300)
-      return { ...m, content: m.content.slice(0, 240) + '… (shortened)' };
+    // pictures (snapshots) are only sent within their own request
+    if (m.role === 'tool' && (m.content.length > 300 || m.image)) {
+      const { image, ...rest } = m;
+      return m.content.length > 300 ? { ...rest, content: m.content.slice(0, 240) + '… (shortened)' } : rest;
+    }
     return m;
   });
 }

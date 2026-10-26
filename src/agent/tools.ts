@@ -33,7 +33,8 @@ import {
   imageProviderById,
   modelInfo,
 } from './images';
-import { confirmImages, getSettings, imageChoice, setConfirmImages, vectorChoice } from './settings';
+import { canSee, confirmImages, getSettings, imageChoice, setConfirmImages, vectorChoice } from './settings';
+import { SNAP_MAX, snapshotPNG } from './snapshot';
 import { boxNow, layerDetail, sceneSummary } from './scene';
 
 export class ToolError extends Error {}
@@ -50,6 +51,8 @@ export interface ToolContext {
   generating?: (g: { kind: 'image' | 'vector'; name: string; model: string } | null) => void;
   /** the user's Stop */
   signal?: AbortSignal;
+  /** snapshots left in this request (at most 3: pictures cost the most tokens) */
+  snapshots?: { left: number };
 }
 
 /** What the confirm card shows before an image is made. */
@@ -82,7 +85,11 @@ export interface Tool {
   run(args: any, ctx: ToolContext): any;
 }
 
-export type ToolResult = { ok: true; result: any } | { ok: false; error: string };
+export type ToolResult =
+  | { ok: true; result: any; image?: { mime: string; data: string } }
+  | { ok: false; error: string };
+/** A tool result that carries a picture for the model (a snapshot): the picture goes beside the JSON. */
+export const IMAGE = Symbol('image');
 
 /* ---------- shared checks ---------- */
 
@@ -680,6 +687,32 @@ export const TOOLS: Tool[] = [
     },
   },
 
+  {
+    name: 'snapshot',
+    description:
+      'Look at your work: a picture of the canvas at `time` seconds (default: the playhead), the artwork only, at most `width` px wide (default and most 768). At most 3 per request, so look once near the end, at the most telling moment (for a launch: mid-launch).',
+    parameters: obj({
+      time: { type: 'number', minimum: 0 },
+      width: { type: 'number', minimum: 64, maximum: SNAP_MAX },
+    }),
+    mutates: false,
+    run: async (a, ctx) => {
+      if (ctx.snapshots) {
+        if (ctx.snapshots.left <= 0)
+          fail('No snapshots left in this request (at most 3). Finish from what you have seen.');
+        ctx.snapshots.left--;
+      }
+      const p = await snapshotPNG(isNum(a.time) ? a.time : S.time, a.width || SNAP_MAX);
+      return {
+        time: p.time,
+        w: p.w,
+        h: p.h,
+        note: 'The picture follows. Text in web fonts may show in a fallback font.',
+        [IMAGE]: { mime: p.mime, data: p.data },
+      };
+    },
+  },
+
   // animation
   {
     name: 'apply_preset',
@@ -920,7 +953,12 @@ export async function runTool(name: string, args: unknown, ctx: ToolContext = {}
   const bad = check(a, t.parameters);
   if (bad) return { ok: false, error: bad };
   try {
-    return { ok: true, result: await t.run(a, ctx) };
+    const result = await t.run(a, ctx);
+    if (result && result[IMAGE]) {
+      const { [IMAGE]: image, ...rest } = result;
+      return { ok: true, result: rest, image };
+    }
+    return { ok: true, result };
   } catch (e) {
     if (e instanceof ToolError) return { ok: false, error: e.message };
     return { ok: false, error: `${name} failed: ${(e && (e as Error).message) || e}` };
@@ -937,5 +975,8 @@ export function resultText(r: ToolResult, max = 8192) {
 export function offeredTools(): string[] {
   const img = !!imageChoice(),
     vec = !!vectorChoice();
-  return TOOLS.map(t => t.name).filter(n => (n !== 'generate_image' || img) && (n !== 'generate_vector' || vec));
+  const see = canSee();
+  return TOOLS.map(t => t.name).filter(
+    n => (n !== 'generate_image' || img) && (n !== 'generate_vector' || vec) && (n !== 'snapshot' || see),
+  );
 }

@@ -39,7 +39,7 @@ function lean(t: Turn): Turn {
   return {
     ...t,
     // the panel shows label and meta; the raw arguments and results (an SVG, a scene) aren't kept
-    steps: t.steps.map(s => ({ ...s, args: undefined, result: undefined })),
+    steps: t.steps.map(s => ({ ...s, args: undefined, result: undefined, image: undefined })),
     msgs: compactHistory(t.msgs, 1000).map(m =>
       m.role === 'tool' && m.content.length > 2000 ? { ...m, content: m.content.slice(0, 2000) + '…' } : m,
     ),

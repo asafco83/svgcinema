@@ -26,6 +26,8 @@ export interface AgentSettings {
   preferVector: boolean;
   /** vector artwork: 'agent' (it writes SVG) or a vector model on the image service */
   vector: string;
+  /** Custom images: use the agent's Custom address and key */
+  imgSame: boolean;
 }
 
 const SKEY = 'svgcinema:agent.settings',
@@ -43,6 +45,7 @@ export const DEFAULTS: AgentSettings = {
   transparent: true,
   preferVector: true,
   vector: 'agent',
+  imgSame: true,
 };
 
 function read<T>(k: string, d: T): T {
@@ -76,10 +79,10 @@ export function setSettings(p: Partial<AgentSettings>) {
   return s;
 }
 
-export function getKeys(): Partial<Record<ProviderId, string>> {
-  return read<Partial<Record<ProviderId, string>>>(KKEY, {});
+export function getKeys(): Record<string, string> {
+  return read<Record<string, string>>(KKEY, {});
 }
-export function setKey(p: ProviderId, key: string) {
+export function setKey(p: ProviderId | string, key: string) {
   const k = getKeys();
   if (key) k[p] = key.trim();
   else delete k[p];
@@ -110,19 +113,37 @@ export function imageProviderOf(s = getSettings()): ImageProviderId | null {
   if (s.imgProvider) return s.imgProvider;
   return s.provider === 'openrouter' || s.provider === 'openai' || s.provider === 'gemini' ? s.provider : null;
 }
-/** The image model to use now, or null when images aren't set up (no service, key, model or address). */
-export function imageChoice(): ImageChoice | null {
+/** Where a Custom image service's key is kept: the agent's own when it shares the agent's Custom
+ *  address, else a key of its own. */
+export function imageKeyId(s = getSettings()): string {
+  const id = imageProviderOf(s);
+  if (id !== 'custom') return id || '';
+  return s.provider === 'custom' && s.imgSame ? 'custom' : 'customImages';
+}
+/** The image setup in Settings, whether or not it has passed its Test (null: incomplete). */
+export function imageSetup(): ImageChoice | null {
   const s = getSettings(),
     id = imageProviderOf(s);
   if (!id) return null;
   const model = s.imgModel || defaultImageModel(id),
-    key = getKeys()[id] || '';
+    key = getKeys()[imageKeyId(s)] || '';
   if (!model) return null;
   if (id === 'custom') {
-    const base = s.imgBase || s.base;
+    const base = s.provider === 'custom' && s.imgSame ? s.base : s.imgBase;
     return base ? { provider: id, model, key, base } : null;
   }
   return key ? { provider: id, model, key } : null;
+}
+/** The image model to use now, or null when images aren't set up. A Custom service is used only once
+ *  its Test has passed (the panel says so). */
+export function imageChoice(): ImageChoice | null {
+  const c = imageSetup();
+  if (!c) return null;
+  if (c.provider === 'custom') {
+    const t = imageTest(c);
+    if (!t || !t.ok) return null;
+  }
+  return c;
 }
 /** The vector model to use, or null when the agent draws vector itself. Vector models run on the image
  *  service (OpenRouter's Recraft models, or a Custom service). */
@@ -130,7 +151,47 @@ export function vectorChoice(): ImageChoice | null {
   const s = getSettings(),
     c = imageChoice();
   if (!c || s.vector === 'agent' || !s.vector || (c.provider !== 'openrouter' && c.provider !== 'custom')) return null;
-  return { ...c, model: s.vector };
+  const v = { ...c, model: s.vector };
+  // a Custom vector model needs its Test to have found SVG
+  if (c.provider === 'custom' && (imageTest(c) || { vector: '' }).vector !== s.vector) return null;
+  return v;
+}
+
+/* ---------- what the Test found ---------- */
+
+const TKEY = 'svgcinema:agent.tested';
+interface Tested {
+  /** provider:model → can see images */
+  vision: Record<string, boolean>;
+  /** image service signature → its last image Test */
+  images: Record<string, { ok: boolean; vector?: string; at: number }>;
+  /** (vector: the vector model whose Test returned SVG) */
+}
+function tested(): Tested {
+  const t = read<Tested>(TKEY, { vision: {}, images: {} });
+  return { vision: t.vision || {}, images: t.images || {} };
+}
+/** Whether the agent's model can see images: what its Test found, else the provider's list. */
+export function canSee(c = currentChoice()): boolean {
+  if (!c) return false;
+  const t = tested().vision[`${c.provider}:${c.model}`];
+  if (t !== undefined) return t;
+  return (providerById(c.provider)?.vision || []).includes(c.model);
+}
+export function setCanSee(c: ModelChoice, ok: boolean) {
+  const t = tested();
+  t.vision[`${c.provider}:${c.model}`] = ok;
+  write(TKEY, t);
+}
+/** One image setup, so a Test result belongs to exactly the setup it tested. */
+export const imageSig = (c: ImageChoice) => [c.provider, c.base || '', c.model].join('|');
+export function imageTest(c: ImageChoice) {
+  return tested().images[imageSig(c)];
+}
+export function setImageTest(c: ImageChoice, r: { ok: boolean; vector?: string }) {
+  const t = tested();
+  t.images[imageSig(c)] = { ...r, at: Date.now() };
+  write(TKEY, t);
 }
 
 const CKEY = 'svgcinema:agent.confirmImages';

@@ -64,6 +64,9 @@ export function describe(e: StepEvent): StepView {
       if (!r.asked) costLine = ['Generated', model, cost || 'price unknown'].filter(Boolean).join(' · ');
       break;
     }
+    case 'snapshot':
+      [icon, label, meta] = ['look', 'Looked at the canvas', `at ${s(r.time ?? a.time ?? 0)}`];
+      break;
     case 'place_image': {
       const l = typeof r.id === 'string' ? layerById(r.id) : null,
         b = r.box;

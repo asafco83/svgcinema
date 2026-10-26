@@ -52,7 +52,19 @@ export function toAnthropic(messages: Msg[]) {
       if (!content.length) content.push({ type: 'text', text: '…' });
       out.push({ role: 'assistant', content });
     } else {
-      toUser([{ type: 'tool_result', tool_use_id: m.id, content: m.content, ...(m.error ? { is_error: true } : {}) }]);
+      toUser([
+        {
+          type: 'tool_result',
+          tool_use_id: m.id,
+          content: m.image
+            ? [
+                { type: 'text', text: m.content },
+                { type: 'image', source: { type: 'base64', media_type: m.image.mime, data: m.image.data } },
+              ]
+            : m.content,
+          ...(m.error ? { is_error: true } : {}),
+        },
+      ]);
     }
   }
   return out;
