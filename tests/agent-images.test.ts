@@ -8,6 +8,8 @@ import {
   money,
   needsKeying,
   pickImagePrice,
+  priceLines,
+  imageTokens,
   removeBackground,
 } from '../src/agent/images';
 import { imageChoice, setConfirmImages, confirmImages, setKey, setSettings, vectorChoice } from '../src/agent/settings';
@@ -62,13 +64,12 @@ group('design agent images: green-screen removal', () => {
 
 group('design agent images: prices and models', () => {
   it('reads the per-image price from an endpoints answer', () => {
+    const pick = (j: unknown) => pickImagePrice(priceLines(j));
     expect(
-      pickImagePrice({
-        data: { endpoints: [{ pricing: [{ billable: 'output_image', unit: 'image', cost_usd: 0.05 }] }] },
-      }),
+      pick({ data: { endpoints: [{ pricing: [{ billable: 'output_image', unit: 'image', cost_usd: 0.05 }] }] } }),
     ).toBe(0.05);
     expect(
-      pickImagePrice({
+      pick({
         endpoints: [
           {
             pricing: [
@@ -80,7 +81,36 @@ group('design agent images: prices and models', () => {
         ],
       }),
     ).toBe(0.04);
-    expect(pickImagePrice({ pricing: [{ billable: 'output_tokens', unit: 'token', cost_usd: 0.00001 }] })).toBe(null);
+    expect(pick({ pricing: [{ billable: 'output_tokens', unit: 'token', cost_usd: 0.00001 }] })).toBe(null);
+  });
+  it('estimates token-priced models (OpenAI, Google) by the tokens an image takes', () => {
+    // the shape OpenRouter answers for openai/gpt-image-2 (checked live)
+    const gpt = priceLines({
+      id: 'openai/gpt-image-2',
+      endpoints: [
+        {
+          pricing: [
+            { billable: 'input_image', unit: 'token', cost_usd: 0.000008 },
+            { billable: 'input_text', unit: 'token', cost_usd: 0.000005 },
+            { billable: 'output_image', unit: 'token', cost_usd: 0.00003 },
+          ],
+        },
+      ],
+    });
+    expect(gpt).toEqual({ token: 0.00003, text: 0.000005 });
+    expect(pickImagePrice(gpt, 'openai/gpt-image-2')).toBeCloseTo(1056 * 0.00003 + 150 * 0.000005, 6);
+    expect(pickImagePrice(gpt, 'openai/gpt-image-2', 'landscape')).toBeGreaterThan(
+      pickImagePrice(gpt, 'openai/gpt-image-2')!,
+    );
+    // several services: the cheapest
+    const gem = priceLines({
+      endpoints: [
+        { pricing: [{ billable: 'output_image', unit: 'token', cost_usd: 0.000066 }] },
+        { pricing: [{ billable: 'output_image', unit: 'token', cost_usd: 0.00006 }] },
+      ],
+    });
+    expect(pickImagePrice(gem, 'google/gemini-3.1-flash-image')).toBeCloseTo(1290 * 0.00006, 6);
+    expect(imageTokens('gpt-image-1')).toBe(1056);
   });
   it('asks OpenRouter for the price once a day, under the model’s OpenRouter name', async () => {
     const f = vi.fn(async () =>
@@ -108,7 +138,7 @@ group('design agent images: prices and models', () => {
       supported_parameters: { background: { values: ['transparent'] } },
     })!;
     expect(g.background).toBe(true);
-    expect(defaultImageModel('openrouter')).toBe('openai/gpt-image-2');
+    expect(defaultImageModel('openrouter')).toBe('openai/gpt-image-2.5-flare');
     expect(money(0.042)).toBe('$0.042');
     expect(money(0.04)).toBe('$0.04');
   });
@@ -119,14 +149,20 @@ group('design agent images: calling the services', () => {
     const f = vi.fn(async () => json({ data: [{ b64_json: PNG1, media_type: 'image/png' }], usage: { cost: 0.041 } }));
     vi.stubGlobal('fetch', f);
     const r = await generateImage(
-      { provider: 'openrouter', model: 'openai/gpt-image-2', key: 'test-key' },
+      { provider: 'openrouter', model: 'openai/gpt-image-2.5-flare', key: 'test-key' },
       { prompt: 'a rocket', transparent: true },
     );
     const [url, init] = f.mock.calls[0] as any,
       body = JSON.parse(init.body);
     expect(url).toBe('https://openrouter.ai/api/v1/images');
     expect(init.headers.authorization).toBe('Bearer test-key');
-    expect(body).toMatchObject({ model: 'openai/gpt-image-2', prompt: 'a rocket', n: 1, background: 'transparent' });
+    expect(body).toMatchObject({
+      model: 'openai/gpt-image-2.5-flare',
+      prompt: 'a rocket',
+      n: 1,
+      background: 'transparent',
+      quality: 'medium',
+    });
     expect(r.mime).toBe('image/png');
     expect(r.cost).toBe(0.041);
     expect(r.keyed).toBe(false);
@@ -150,7 +186,16 @@ group('design agent images: calling the services', () => {
     );
     const [url, init] = f.mock.calls[0] as any;
     expect(url).toBe('https://api.openai.com/v1/images/generations');
-    expect(JSON.parse(init.body)).toMatchObject({ size: '1536x1024', background: 'transparent', output_format: 'png' });
+    // gpt-image-2 can't make it transparent: no background parameter, a green one to remove instead
+    const b2 = JSON.parse(init.body);
+    expect(b2).toMatchObject({ size: '1536x1024', output_format: 'png', quality: 'medium' });
+    expect(b2.background).toBeUndefined();
+    expect(b2.prompt).toMatch(/#00FF00/);
+    await generateImage(
+      { provider: 'openai', model: 'gpt-image-1', key: 'test-key' },
+      { prompt: 'p', transparent: true },
+    );
+    expect(JSON.parse((f.mock.calls[1] as any)[1].body)).toMatchObject({ background: 'transparent', prompt: 'p' });
   });
   it('Gemini: generateContent, the image in inline data', async () => {
     const f = vi.fn(async () =>

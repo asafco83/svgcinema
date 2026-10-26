@@ -19,6 +19,8 @@ export interface ImageModel {
   aspects?: string[];
   /** output formats it takes (OpenRouter lists them) */
   formats?: string[];
+  /** takes quality: medium (asked for, so the price is predictable) */
+  quality?: boolean;
 }
 
 export interface ImageProvider {
@@ -36,7 +38,8 @@ export const IMAGE_PROVIDERS: ImageProvider[] = [
     label: 'OpenRouter',
     priceAs: '',
     models: [
-      { id: 'openai/gpt-image-2', name: 'OpenAI: GPT Image 2', background: true },
+      { id: 'openai/gpt-image-2.5-flare', name: 'OpenAI: GPT Image Flare', background: true, quality: true },
+      { id: 'openai/gpt-image-2', name: 'OpenAI: GPT Image 2', quality: true },
       { id: 'google/gemini-3.1-flash-image', name: 'Google: Gemini 3.1 Flash Image' },
       { id: 'black-forest-labs/flux.2-pro', name: 'Black Forest Labs: FLUX.2 Pro' },
       { id: 'recraft/recraft-v4.1-vector', name: 'Recraft: Recraft V4.1 Vector', vector: true, formats: ['svg'] },
@@ -47,9 +50,10 @@ export const IMAGE_PROVIDERS: ImageProvider[] = [
     label: 'OpenAI',
     priceAs: 'openai/',
     models: [
-      { id: 'gpt-image-2', name: 'GPT Image 2', background: true },
-      { id: 'gpt-image-1', name: 'GPT Image 1', background: true },
-      { id: 'gpt-image-1-mini', name: 'GPT Image 1 Mini', background: true },
+      // gpt-image-2 can't make transparent backgrounds (its background is auto or opaque)
+      { id: 'gpt-image-2', name: 'GPT Image 2', quality: true },
+      { id: 'gpt-image-1', name: 'GPT Image 1', background: true, quality: true },
+      { id: 'gpt-image-1-mini', name: 'GPT Image 1 Mini', background: true, quality: true },
     ],
   },
   {
@@ -105,7 +109,8 @@ export function catalogEntry(m: any): ImageModel | null {
   const sp = m.supported_parameters || {},
     vals = (p: any): string[] => (p && Array.isArray(p.values) ? p.values.map(String) : []);
   const formats = vals(sp.output_format),
-    bg = vals(sp.background);
+    bg = vals(sp.background),
+    q = vals(sp.quality);
   return {
     id: m.id,
     name: typeof m.name === 'string' ? m.name : m.id,
@@ -113,6 +118,7 @@ export function catalogEntry(m: any): ImageModel | null {
     background: bg.includes('transparent'),
     aspects: vals(sp.aspect_ratio),
     formats,
+    quality: q.includes('medium'),
   };
 }
 
@@ -154,10 +160,14 @@ export function modelInfo(p: ImageProviderId, id: string): ImageModel | undefine
 
 /* ---------- prices ---------- */
 
-/** The price of one image from an OpenRouter endpoints answer: the per-image output price (the
- *  medium / 1K / 1024 variant when it lists several, else the cheapest), or null when it is only
- *  priced by tokens. */
-export function pickImagePrice(j: unknown): number | null {
+/** The price lines of an OpenRouter endpoints answer that matter here: per image, or per output-image
+ *  token (OpenAI's and Google's models) plus per input-text token. The cheapest service of each. */
+export interface PriceLines {
+  image?: number;
+  token?: number;
+  text?: number;
+}
+export function priceLines(j: unknown): PriceLines {
   const lines: Array<{ billable: string; unit: string; usd: number; variant: string }> = [];
   const walk = (v: any) => {
     if (Array.isArray(v)) return v.forEach(walk);
@@ -168,39 +178,67 @@ export function pickImagePrice(j: unknown): number | null {
     Object.values(v).forEach(walk);
   };
   walk(j);
-  const per = lines.filter(l => /image/.test(l.unit) && /output|image/.test(l.billable) && !/input/.test(l.billable));
-  if (!per.length) return null;
-  const plain = per.find(l => !l.variant),
-    mid = per.find(l => /medium|standard|1k|1024/i.test(l.variant));
-  return (plain || mid || per.reduce((a, b) => (b.usd < a.usd ? b : a))).usd;
+  const min = (xs: typeof lines) => (xs.length ? xs.reduce((a, b) => (b.usd < a.usd ? b : a)).usd : undefined);
+  const out = lines.filter(l => /output/.test(l.billable) && /image/.test(l.billable)),
+    per = out.filter(l => /image/.test(l.unit)),
+    // several per-image variants (sizes, qualities): the medium / 1K one, else the cheapest
+    mid = per.find(l => !l.variant) || per.find(l => /medium|standard|1k|1024/i.test(l.variant));
+  const r: PriceLines = {};
+  if (per.length) r.image = mid ? mid.usd : min(per);
+  const tok = min(out.filter(l => /token/.test(l.unit))),
+    text = min(lines.filter(l => /input_text/.test(l.billable) && /token/.test(l.unit)));
+  if (tok !== undefined) r.token = tok;
+  if (text !== undefined) r.text = text;
+  return r;
 }
 
-const priceP = new Map<string, Promise<number | null>>();
+/** About how many output tokens one image takes, for models priced by token: OpenAI's image models at
+ *  medium quality (which SVGcinema asks for), Google's and others at their 1K size. */
+export function imageTokens(model: string, aspect: Aspect = 'square') {
+  if (/(^|\/)gpt-|openai\//.test(model)) return aspect === 'square' ? 1056 : 1584;
+  return 1290;
+}
+
+/** One image's price from its lines (null when it has none): per image, or by tokens. */
+export function pickImagePrice(l: PriceLines, model = '', aspect: Aspect = 'square'): number | null {
+  if (l.image !== undefined) return l.image;
+  if (l.token !== undefined) return l.token * imageTokens(model, aspect) + (l.text || 0) * 150;
+  return null;
+}
+
+type PriceCache = Record<string, { at: number; lines: PriceLines | null }>;
+const priceP = new Map<string, Promise<PriceLines | null>>();
 /** About how much one image from this model costs, in USD (null: price unknown). Read from OpenRouter's
  *  public list, cached for a day; OpenAI's and Google's own models are looked up under their names there. */
-export function imagePrice(c: Pick<ImageChoice, 'provider' | 'model'>): Promise<number | null> {
+export async function imagePrice(
+  c: Pick<ImageChoice, 'provider' | 'model'>,
+  aspect: Aspect = 'square',
+): Promise<number | null> {
   const p = imageProviderById(c.provider);
-  if (!p || p.priceAs === null || !c.model) return Promise.resolve(null);
+  if (!p || p.priceAs === null || !c.model) return null;
   const id = p.priceAs + c.model,
-    cache = load<Record<string, { at: number; usd: number | null }>>(PRICE_KEY) || {},
-    hit = cache[id];
-  if (hit && Date.now() - hit.at < DAY) return Promise.resolve(hit.usd);
-  if (!priceP.has(id))
-    priceP.set(
-      id,
-      fetch(`${OR}/images/models/${id.split('/').map(encodeURIComponent).join('/')}/endpoints`)
-        .then(r => (r.ok ? r.json() : r.status === 404 ? null : Promise.reject(new Error(String(r.status)))))
-        .then(j => {
-          const usd = j ? pickImagePrice(j) : null,
-            all = load<Record<string, { at: number; usd: number | null }>>(PRICE_KEY) || {};
-          all[id] = { at: Date.now(), usd };
-          save(PRICE_KEY, all);
-          return usd;
-        })
-        .catch(() => (hit ? hit.usd : null))
-        .finally(() => priceP.delete(id)),
-    );
-  return priceP.get(id)!;
+    hit = (load<PriceCache>(PRICE_KEY) || {})[id];
+  let lines: PriceLines | null;
+  if (hit && Date.now() - hit.at < DAY && 'lines' in hit) lines = hit.lines;
+  else {
+    if (!priceP.has(id))
+      priceP.set(
+        id,
+        fetch(`${OR}/images/models/${id.split('/').map(encodeURIComponent).join('/')}/endpoints`)
+          .then(r => (r.ok ? r.json() : r.status === 404 ? null : Promise.reject(new Error(String(r.status)))))
+          .then(j => {
+            const ls = j ? priceLines(j) : null,
+              all = load<PriceCache>(PRICE_KEY) || {};
+            all[id] = { at: Date.now(), lines: ls };
+            save(PRICE_KEY, all);
+            return ls;
+          })
+          .catch(() => (hit && 'lines' in hit ? hit.lines : null))
+          .finally(() => priceP.delete(id)),
+      );
+    lines = await priceP.get(id)!;
+  }
+  return lines ? pickImagePrice(lines, id, aspect) : null;
 }
 
 export function money(usd: number) {
@@ -267,8 +305,8 @@ function sniff(u: Uint8Array, fallback = 'image/png') {
  *  transparent one itself). */
 export function needsKeying(c: ImageChoice) {
   if (c.provider === 'gemini') return true;
-  if (c.provider === 'openai') return false;
   const m = modelInfo(c.provider, c.model);
+  if (c.provider === 'openai') return !!m && !m.background;
   return c.provider === 'openrouter' ? !(m && m.background) : false;
 }
 
@@ -302,6 +340,7 @@ export async function generateImage(c: ImageChoice, g: GenRequest): Promise<GenR
     if (g.vector) body.output_format = 'svg';
     else if (info && info.formats && info.formats.includes('png')) body.output_format = 'png';
     if (!g.vector && g.transparent && info && info.background) body.background = 'transparent';
+    if (!g.vector && info && info.quality) body.quality = 'medium';
   } else {
     // OpenAI, and Custom services that copy its images API
     url =
@@ -315,7 +354,8 @@ export async function generateImage(c: ImageChoice, g: GenRequest): Promise<GenR
     if (g.vector) body.output_format = 'svg';
     else if (c.provider === 'openai') {
       body.output_format = 'png';
-      if (g.transparent) body.background = 'transparent';
+      if (g.transparent && !key) body.background = 'transparent';
+      if (!info || info.quality) body.quality = 'medium';
     } else body.response_format = 'b64_json';
   }
   const f = guardedFetch(url, { method: 'POST', headers, body: JSON.stringify(body) }, g.signal, 180000);

@@ -170,7 +170,7 @@ async function makeImage(kind: 'image' | 'vector', c: ImageChoice, a: any, ctx: 
     soon = <T>(p: Promise<T>) => Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), 4000))]);
   // what the model takes (transparency, ratios) comes from OpenRouter's list; read it if it isn't cached
   if (c.provider === 'openrouter') await soon(imageCatalog());
-  const price = await soon(imagePrice(c));
+  const price = await soon(imagePrice(c, aspect));
   let prompt: string = a.prompt,
     asked = false;
   if (confirmImages() && ctx.confirmImage) {
