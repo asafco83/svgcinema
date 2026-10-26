@@ -81,8 +81,12 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
 - `src/agent/` — the design agent (in-app AI chat, being built in steps; spec: the "SVGcinema design agent — tool
   spec" doc). `tools.ts` = the tools a model calls, each a thin wrapper over an editor function (never edit `doc`
   by hand where one exists); `scene.ts` = the scene summary; `request.ts` = one request = one undo step (tools'
-  own undo entries are folded into one); `schema.ts` = argument checks. Tested by `tests/agent.test.ts` and
-  `tests/browser/agent-tools.py`. Tests never call a real model provider.
+  own undo entries are folded into one); `schema.ts` = argument checks; `loop.ts` = runs a request (tool calls
+  one by one, step cap, Stop, provider errors); `clients/` = streaming OpenAI-compatible and Anthropic clients
+  (called from the browser with the user's key); `providers.ts` = the provider table and `makeClient`;
+  `prompt.ts` = the system prompt and the scene attached to each message. Tested by `tests/agent.test.ts`,
+  `tests/agent-loop.test.ts` (mocked `fetch`), `tests/browser/agent-tools.py` and `tests/browser/agent-loop.py`
+  (Playwright answers the provider URLs with scripted streams). Tests never call a real model provider.
 
 ## UI conventions (from the UI refresh)
 
