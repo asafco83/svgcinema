@@ -7,7 +7,7 @@
 // (ids, names, what changed), never the whole document. A ToolError is a refusal the model can read
 // and correct; it never leaves the document half changed.
 import type { Ease, Keyframe, Layer, PropKey } from '../model/types';
-import { FONTS, isFrozen, propKind, propLabel, r2, r3 } from '../core/constants';
+import { FONTS, NOFILL, isFrozen, propKind, propLabel, r2, r3 } from '../core/constants';
 import { ASSETS, S, doc, layerById, mkLayer, sortTrack } from '../core/state';
 import { removeTrack, select, selectMany, setProp, setTime } from '../core/history';
 import { propOK } from '../core/keyframes';
@@ -20,7 +20,20 @@ import { darkBg } from '../tools/edit-tools';
 import { addLayer, setShape } from '../tools/shapes';
 import { arrangeEnd } from '../ui/layer-menu';
 import { arrange, copyLayer, deleteSel, groupSel, moveLayers, ungroup } from '../ui/layers-panel';
+import { addAsset, fileToAsset, renderAssets } from '../io/assets';
 import { check, type Schema } from './schema';
+import {
+  ASPECTS,
+  type Aspect,
+  type ImageChoice,
+  finishTransparency,
+  generateImage,
+  imageCatalog,
+  imagePrice,
+  imageProviderById,
+  modelInfo,
+} from './images';
+import { confirmImages, getSettings, imageChoice, setConfirmImages, vectorChoice } from './settings';
 import { boxNow, layerDetail, sceneSummary } from './scene';
 
 export class ToolError extends Error {}
@@ -31,6 +44,33 @@ const fail = (m: string): never => {
 export interface ToolContext {
   /** ask the user before deleting layers; resolves true to go ahead */
   confirmDelete?: (names: string[]) => Promise<boolean>;
+  /** ask the user before generating an image (while "Before generating images" is on) */
+  confirmImage?: (ask: ImageAsk) => Promise<ImageAnswer>;
+  /** an image is being made (null: done) */
+  generating?: (g: { kind: 'image' | 'vector'; name: string; model: string } | null) => void;
+  /** the user's Stop */
+  signal?: AbortSignal;
+}
+
+/** What the confirm card shows before an image is made. */
+export interface ImageAsk {
+  kind: 'image' | 'vector';
+  name: string;
+  prompt: string;
+  model: string;
+  /** the service, as shown ("OpenRouter") */
+  service: string;
+  size: string;
+  transparent: boolean;
+  /** about how much it costs (USD), null when unknown */
+  price: number | null;
+}
+export interface ImageAnswer {
+  go: boolean;
+  /** the prompt as the user edited it */
+  prompt?: string;
+  /** don't ask again */
+  dontAsk?: boolean;
 }
 
 export interface Tool {
@@ -114,6 +154,55 @@ const obj = (properties: Record<string, Schema>, required: string[] = []): Schem
   additionalProperties: false,
 });
 const VALUE: Schema = { description: 'A number, [x, y], a colour string, or a list of numbers' };
+
+/* ---------- images ---------- */
+
+/** A model's display name: the list's name without the maker ("OpenAI: GPT Image 2" → "GPT Image 2"). */
+export function modelName(c: ImageChoice) {
+  const m = modelInfo(c.provider, c.model);
+  return m ? m.name.replace(/^[^:]+:\s*/, '') : c.model.split('/').pop() || c.model;
+}
+
+/** Ask (when asking is on), then make the image or SVG. Returns null when the user cancelled. */
+async function makeImage(kind: 'image' | 'vector', c: ImageChoice, a: any, ctx: ToolContext) {
+  const aspect: Aspect = a.size || 'square',
+    transparent = kind === 'image' && (a.transparent ?? getSettings().transparent),
+    soon = <T>(p: Promise<T>) => Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), 4000))]);
+  // what the model takes (transparency, ratios) comes from OpenRouter's list; read it if it isn't cached
+  if (c.provider === 'openrouter') await soon(imageCatalog());
+  const price = await soon(imagePrice(c));
+  let prompt: string = a.prompt,
+    asked = false;
+  if (confirmImages() && ctx.confirmImage) {
+    const ans = await ctx.confirmImage({
+      kind,
+      name: a.name,
+      prompt,
+      model: modelName(c),
+      service: c.provider === 'custom' ? 'Custom' : imageProviderById(c.provider)!.label,
+      size: kind === 'vector' ? 'Vector (SVG)' : ASPECTS[aspect].label,
+      transparent,
+      price,
+    });
+    if (!ans.go) return null;
+    if (ans.prompt && ans.prompt.trim()) prompt = ans.prompt.trim();
+    if (ans.dontAsk) setConfirmImages(false);
+    asked = true;
+  }
+  if (ctx.generating) ctx.generating({ kind, name: a.name, model: modelName(c) });
+  try {
+    const r = await generateImage(c, { prompt, aspect, transparent, vector: kind === 'vector', signal: ctx.signal });
+    const cost =
+      r.cost !== undefined ? { usd: r.cost, exact: true } : price !== null ? { usd: price, exact: false } : null;
+    return { r, cost, asked, prompt, transparent };
+  } finally {
+    if (ctx.generating) ctx.generating(null);
+  }
+}
+const CANCELLED = {
+  cancelled: true,
+  note: 'The user cancelled. Do not generate it again unless they ask; offer vector shapes instead if that fits.',
+};
 
 /* ---------- the tools ---------- */
 
@@ -482,6 +571,115 @@ export const TOOLS: Tool[] = [
     },
   },
 
+  // images and vector
+  {
+    name: 'generate_image',
+    description:
+      'Make a raster image (PNG) with the image model and store it in the project as an asset; then put it on the canvas with place_image. prompt: what to draw, in detail (subject, style, view). size: square (default), landscape or portrait. transparent: a transparent background (default from Settings). The user may be asked first, since it costs them money; if they cancel, do not retry.',
+    parameters: obj(
+      {
+        prompt: { type: 'string', maxLength: 4000 },
+        name: { type: 'string', maxLength: 80 },
+        size: { type: 'string', enum: ['square', 'landscape', 'portrait'] },
+        transparent: { type: 'boolean' },
+      },
+      ['prompt', 'name'],
+    ),
+    mutates: true,
+    run: async (a, ctx) => {
+      const c = imageChoice();
+      if (!c) fail('No image model is set up (Settings › Images). Offer to draw it as vector shapes instead.');
+      const m = await makeImage('image', c!, a, ctx);
+      if (!m) return CANCELLED;
+      const t = await finishTransparency(m.r, m.transparent),
+        ext = /jpeg/.test(t.mime) ? 'jpg' : /webp/.test(t.mime) ? 'webp' : 'png';
+      const asset = addAsset(await fileToAsset(new File([t.bytes as BlobPart], `${a.name}.${ext}`, { type: t.mime })));
+      renderAssets();
+      return {
+        asset: asset.id,
+        name: asset.name,
+        w: asset.w,
+        h: asset.h,
+        transparent: t.transparent,
+        model: modelName(c!),
+        cost: m.cost,
+        asked: m.asked,
+        next: 'Place it with place_image.',
+      };
+    },
+  },
+  {
+    name: 'generate_vector',
+    description:
+      'Make detailed vector artwork with the vector model and bring it in as editable layers (like import_svg), grouped under name. x, y: where to centre it. Use it for illustrations; for simple shapes write the SVG yourself. The user may be asked first, since it costs them money; if they cancel, do not retry.',
+    parameters: obj(
+      { prompt: { type: 'string', maxLength: 4000 }, name: { type: 'string', maxLength: 80 }, x: NUM, y: NUM },
+      ['prompt', 'name'],
+    ),
+    mutates: true,
+    run: async (a, ctx) => {
+      const c = vectorChoice();
+      if (!c) fail('No vector model is set up: write the SVG yourself and call import_svg.');
+      const m = await makeImage('vector', c!, a, ctx);
+      if (!m) return CANCELLED;
+      const svg = cleanSVG(new TextDecoder().decode(m.r.bytes));
+      const before = new Set(doc.layers.map(l => l.id));
+      const ok = await importSVGWith(svg, { name: a.name, at: isNum(a.x) && isNum(a.y) ? { x: a.x, y: a.y } : null });
+      if (!ok) fail('The vector model sent SVG that could not be read.');
+      const made = doc.layers.filter(l => !before.has(l.id)),
+        top = made.filter(l => !l.parent || before.has(l.parent));
+      refresh();
+      return {
+        ids: top.map(l => l.id),
+        layers: made.length,
+        model: modelName(c!),
+        cost: m.cost,
+        asked: m.asked,
+        notes: lastImportNotes.slice(0, 10),
+      };
+    },
+  },
+  {
+    name: 'place_image',
+    description:
+      'Put an asset (from generate_image or list_assets) on the canvas as a new layer on top. x, y: its centre (default: the canvas centre). width: its width in px (default: fits 70% of the canvas; the height follows the picture). An SVG asset comes in as editable layers.',
+    parameters: obj(
+      {
+        asset: { type: 'string' },
+        x: NUM,
+        y: NUM,
+        width: { type: 'number', minimum: 1 },
+        name: { type: 'string', maxLength: 80 },
+      },
+      ['asset'],
+    ),
+    mutates: true,
+    run: async a => {
+      const x = ASSETS[a.asset];
+      if (!x) fail(`There is no asset "${a.asset}". Call list_assets for the ids.`);
+      const at = isNum(a.x) && isNum(a.y) ? { x: a.x, y: a.y } : null;
+      if (x.kind === 'svg') {
+        const before = new Set(doc.layers.map(l => l.id));
+        if (!(await importSVGWith(x.text || '', { name: a.name || x.name, at })))
+          fail('That SVG asset could not be read.');
+        const top = doc.layers.filter(l => !before.has(l.id) && (!l.parent || before.has(l.parent)));
+        refresh();
+        return { ids: top.map(l => l.id) };
+      }
+      const s = isNum(a.width)
+          ? a.width / (x.w || 1)
+          : Math.min(1, (0.7 * doc.w) / (x.w || 1), (0.7 * doc.h) / (x.h || 1)),
+        w = r2((x.w || 100) * s),
+        h = r2((x.h || 100) * s),
+        cx = at ? at.x : (doc.vx || 0) + doc.w / 2,
+        cy = at ? at.y : (doc.vy || 0) + doc.h / 2;
+      const l = mkLayer('image', a.name || x.name, { x: r2(cx - w / 2), y: r2(cy - h / 2), w, h, asset: x.id }, NOFILL);
+      addLayer(l);
+      refresh();
+      return { id: l.id, name: l.name, box: boxNow(l) };
+    },
+  },
+
   // animation
   {
     name: 'apply_preset',
@@ -733,4 +931,11 @@ export async function runTool(name: string, args: unknown, ctx: ToolContext = {}
 export function resultText(r: ToolResult, max = 8192) {
   const s = JSON.stringify('error' in r ? { error: r.error } : (r.result ?? { done: true }));
   return s.length <= max ? s : s.slice(0, max - 60) + `… (cut: ${s.length - max + 60} more characters)`;
+}
+
+/** The tools to offer now: image and vector generation only when Settings has a model for them. */
+export function offeredTools(): string[] {
+  const img = !!imageChoice(),
+    vec = !!vectorChoice();
+  return TOOLS.map(t => t.name).filter(n => (n !== 'generate_image' || img) && (n !== 'generate_vector' || vec));
 }

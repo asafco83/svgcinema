@@ -25,9 +25,33 @@ import {
 import { AgentError, type AgentErrorKind } from '../agent/clients/types';
 import { describe, type StepIcon } from '../agent/describe';
 import { runAgent } from '../agent/loop';
+import {
+  IMAGE_PROVIDERS,
+  type ImageModel,
+  defaultImageModel,
+  imageCatalog,
+  imageProviderById,
+  modelsOf,
+  money,
+} from '../agent/images';
+import { systemPrompt } from '../agent/prompt';
+import { type ImageAnswer, type ImageAsk, offeredTools } from '../agent/tools';
 import { PROVIDERS, type ProviderId, makeClient, providerById } from '../agent/providers';
 import { isLatest } from '../agent/request';
-import { currentChoice, getKeys, getSettings, removeKeys, setKey, setSettings, shortModel } from '../agent/settings';
+import {
+  confirmImages,
+  currentChoice,
+  getKeys,
+  getSettings,
+  imageChoice,
+  imageProviderOf,
+  removeKeys,
+  setConfirmImages,
+  setKey,
+  setSettings,
+  shortModel,
+  vectorChoice,
+} from '../agent/settings';
 
 type View = 'chat' | 'settings';
 interface Check {
@@ -40,6 +64,20 @@ const ST = {
   view: 'chat' as View,
   running: null as null | { id: number; ctl: AbortController; live: string },
   confirm: null as null | { id: number; names: string[]; resolve: (yes: boolean) => void },
+  /** the image confirm card: what it asks, the prompt as edited, Don't ask again */
+  imgAsk: null as null | {
+    id: number;
+    ask: ImageAsk;
+    prompt: string;
+    dontAsk: boolean;
+    resolve: (a: ImageAnswer) => void;
+  },
+  /** an image being made */
+  gen: null as null | { kind: 'image' | 'vector'; name: string; model: string; at: number },
+  /** OpenRouter's image models, once read */
+  cat: null as null | ImageModel[],
+  imgOther: false,
+  vecOther: false,
   /** setup: the provider picked on first open */
   pick: 'openrouter' as ProviderId,
   test: null as null | { running: boolean; checks: Check[]; at?: number },
@@ -89,6 +127,9 @@ const STEP: Record<StepIcon, string> = {
   time: '<path d="M8 2.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM8 5v3.2l2.1 1.3"/>',
   del: '<path d="M2.5 4.5h11M6 4.5V3h4v1.5M4 4.5l.7 9h6.6l.7-9"/>',
   err: '<path d="M8 2.2l6.2 11H1.8z"/><path d="M8 6.5v3M8 11.3v.1"/>',
+  image:
+    '<path d="M4 3h8a1.5 1.5 0 011.5 1.5v7A1.5 1.5 0 0112 13H4a1.5 1.5 0 01-1.5-1.5v-7A1.5 1.5 0 014 3zM2.5 11l3.5-3.5 3 3 1.8-1.8 2.7 2.7M10.5 5.8h.01"/>',
+  place: '<path d="M8 2v12M2 8h12M6 4l2-2 2 2M6 12l2 2 2-2M4 6L2 8l2 2M12 6l2 2-2 2"/>',
 };
 const EXAMPLES = [
   'Draw a cartoon rocket and make it launch',
@@ -150,7 +191,41 @@ function headHTML() {
 function stepHTML(s: Turn['steps'][number]) {
   return `<div class="ag-step i-${s.icon}">${svg(STEP[s.icon], 14)}<span class="ag-step-t">${esc(s.label)}${
     s.meta ? `<small>${esc(s.meta)}</small>` : ''
-  }</span></div>`;
+  }</span></div>${
+    s.costLine
+      ? `<div class="ag-cost"><span>${esc(s.costLine)}${confirmImages() ? '' : ' ·'}</span>${
+          confirmImages() ? '' : '<button class="ag-link" data-act="askimages">Ask first again</button>'
+        }</div>`
+      : ''
+  }`;
+}
+
+function imgAskHTML() {
+  const q = ST.imgAsk!,
+    a = q.ask,
+    n = a.kind === 'vector' ? 'vector artwork' : 'image';
+  return `<div class="ag-card ag-confirm ag-imgask" role="group" aria-label="Confirm ${n} generation"><div class="ag-card-h">${svg(
+    a.kind === 'vector' ? STEP.draw : STEP.image,
+    15,
+  )}<b>Generate ${a.kind === 'vector' ? 'vector artwork' : '1 image'}?</b></div>
+  <label class="ag-ip"><span class="vh">Image prompt</span><textarea id="agImgPrompt" rows="3" dir="auto">${esc(q.prompt)}</textarea></label>
+  <div class="ag-kv"><span>Model</span><span>${esc(a.model)} · ${esc(a.service)}</span><span>Size</span><span>${esc(a.size)}</span>${
+    a.kind === 'image' ? `<span>Background</span><span>${a.transparent ? 'Transparent' : 'As drawn'}</span>` : ''
+  }<span>Cost</span><b>${a.price === null ? 'price unknown' : 'about ' + money(a.price)}</b></div>
+  <label class="ag-chkbox"><input type="checkbox" id="agDontAsk"${q.dontAsk ? ' checked' : ''}><span>Don’t ask again <small>· turn it back on in Settings</small></span></label>
+  <div class="ag-card-b"><button class="ag-btn" data-act="imgcancel">Cancel</button><button class="ag-btn pri" data-act="imggo">Generate</button></div></div>`;
+}
+
+function genHTML() {
+  const g = ST.gen!,
+    secs = Math.round((Date.now() - g.at) / 1000);
+  return `<div class="ag-gen"><div class="ag-gen-h">${svg(g.kind === 'vector' ? STEP.draw : STEP.image, 15)}<span>Generating ${
+    g.kind === 'vector' ? 'vector' : 'image'
+  } “${esc(g.name)}”<small>${esc(g.model)} · ${secs}s</small></span></div><div class="ag-gen-b">${svg(
+    g.kind === 'vector' ? STEP.draw : STEP.image,
+    22,
+    1.2,
+  )}<span>Usually 20–40 seconds</span></div></div>`;
 }
 
 const ERR_TITLE: Record<AgentErrorKind, string> = {
@@ -197,9 +272,12 @@ function turnHTML(t: Turn, last: boolean) {
       ST.confirm.names.length,
       'layer',
     )}?</b></div><p>${esc(ST.confirm.names.join(', '))}</p><div class="ag-card-b"><button class="ag-btn" data-act="keep">Keep</button><button class="ag-btn pri" data-act="delete">Delete</button></div></div>`;
+  if (ST.imgAsk && ST.imgAsk.id === t.id) h += imgAskHTML();
+  if (running && ST.gen) h += genHTML();
   if (live && n) h += `<p class="ag-text" dir="auto">${esc(live)}</p>`;
   if (!running && t.reply && t.reply !== t.pre) h += `<p class="ag-text" dir="auto">${esc(t.reply)}</p>`;
-  if (running && !live && !ST.confirm) h += `<div class="ag-working"><i></i><i></i><i></i><span>Working…</span></div>`;
+  if (running && !live && !ST.confirm && !ST.imgAsk && !ST.gen)
+    h += `<div class="ag-working"><i></i><i></i><i></i><span>Working…</span></div>`;
   if (t.outcome === 'cap')
     h += `<p class="ag-note">Stopped after ${plural(n, 'step')}, the most for one request (Settings › Most steps per request).</p>`;
   if (t.outcome === 'stopped') h += `<p class="ag-note">Stopped · kept ${plural(n, 'step')}.</p>`;
@@ -322,20 +400,115 @@ function settingsHTML() {
     agent += `<p class="ag-small ind">Results depend on the model: smaller ones may get steps wrong. A local server must allow this site’s address (CORS).</p>`;
   const ask = sec(
     'Ask first',
-    `<div class="ag-sw-row"><span>Before deleting layers</span><button class="ag-sw" role="switch" data-act="askdelete" aria-checked="${s.askDelete}" aria-label="Ask before deleting layers"><i></i></button></div>
+    `<div class="ag-sw-row tall"><span>Before generating images<small>Shows the model and the price, since it uses your credit</small></span><button class="ag-sw" role="switch" data-act="askimg" aria-checked="${confirmImages()}" aria-label="Ask before generating images"><i></i></button></div>
+     <div class="ag-sw-row"><span>Before deleting layers</span><button class="ag-sw" role="switch" data-act="askdelete" aria-checked="${s.askDelete}" aria-label="Ask before deleting layers"><i></i></button></div>
      <div class="ag-sw-row"><label for="agSteps">Most steps per request</label><input class="txt ag-num" id="agSteps" inputmode="numeric" value="${s.maxSteps}"></div>`,
   );
   const priv = sec(
     'Privacy',
     `<p class="ag-small">Your keys stay in this browser and go straight to the provider; SVGcinema never sees them. The chat is saved with the project file.</p>
+     <p class="ag-small">What you may do with generated images is set by the provider’s terms.</p>
      <div class="ag-btns"><button class="ag-btn" data-act="clearchat"${CHAT.turns.length ? '' : ' disabled'}>Clear chat</button><button class="ag-btn danger" data-act="removekeys"${
        Object.keys(getKeys()).length ? '' : ' disabled'
      }>Remove keys</button></div>`,
   );
-  return `<div class="ag-settings">${sec('Agent model', agent)}${ask}${priv}</div>`;
+  return `<div class="ag-settings">${sec('Agent model', agent)}${sec('Images', imagesHTML(row))}${ask}${priv}</div>`;
 }
 
-let raf = 0;
+function imagesHTML(row: (label: string, ctl: string, forId?: string) => string) {
+  const s = getSettings(),
+    agentP = providerById(s.provider)!,
+    id = imageProviderOf(s),
+    ip = id ? imageProviderById(id)! : null;
+  const sw = (act: string, on: boolean, text: string, sub = '') =>
+    `<div class="ag-sw-row${sub ? ' tall' : ''}"><span>${text}${sub ? `<small>${sub}</small>` : ''}</span><button class="ag-sw" role="switch" data-act="${act}" aria-checked="${on}" aria-label="${text}"><i></i></button></div>`;
+  let h = '';
+  if (!agentP.images && (!id || id !== s.provider))
+    h += `<p class="ag-note-box">${agentP.id === 'custom' ? 'This service' : agentP.label} has no image models here, so images use a service of their own.</p>`;
+  h += row(
+    'Provider',
+    `<select class="sel" id="agImgProv"><option value="none"${id ? '' : ' selected'}>None</option>${IMAGE_PROVIDERS.map(
+      x => `<option value="${x.id}"${x.id === id ? ' selected' : ''}>${x.label}</option>`,
+    ).join('')}</select>`,
+    'agImgProv',
+  );
+  if (!ip) return h + `<p class="ag-small">Without an image service the agent draws everything as vector shapes.</p>`;
+  if (ip.id === 'custom')
+    h += row(
+      'Address',
+      `<input class="txt" id="agImgBase" value="${esc(s.imgBase)}" placeholder="${esc(s.base || 'https://api.example.com/v1')}" spellcheck="false">`,
+      'agImgBase',
+    );
+  // a service other than the agent's needs its own key (keys are kept per service)
+  if (ip.id !== s.provider)
+    h += row(
+      'API key',
+      `<span class="ag-key"><input class="txt" id="agImgKey" type="${ST.showKey ? 'text' : 'password'}" value="${esc(
+        getKeys()[ip.id] || '',
+      )}" placeholder="${ip.id === 'custom' ? 'Not needed for some local servers' : `Your ${ip.label} key`}" autocomplete="off" spellcheck="false" aria-label="Image API key"><button class="ag-ib sm" data-act="showkey" aria-label="${ST.showKey ? 'Hide' : 'Show'} key" title="${ST.showKey ? 'Hide' : 'Show'} key">${svg(P.eye, 14, 1.3, 14)}</button></span>`,
+      'agImgKey',
+    );
+  const list = ip.id === 'openrouter' && ST.cat ? ST.cat : modelsOf(ip.id),
+    raster = list.filter(m => !m.vector),
+    vec = list.filter(m => m.vector),
+    model = s.imgModel || defaultImageModel(ip.id),
+    other = ip.id === 'custom' || ST.imgOther || (!!s.imgModel && !raster.some(m => m.id === s.imgModel));
+  h += other
+    ? row(
+        'Image',
+        `<input class="txt" id="agImgModel" value="${esc(s.imgModel)}" placeholder="Model name, as the service writes it" spellcheck="false">`,
+        'agImgModel',
+      )
+    : row(
+        'Image',
+        `<select class="sel" id="agImgSel">${raster
+          .map(
+            m =>
+              `<option value="${esc(m.id)}"${m.id === model ? ' selected' : ''}>${esc(m.name.replace(/^[^:]+:\s*/, ''))}</option>`,
+          )
+          .join('')}<option value="__other">Other model…</option></select>`,
+        'agImgSel',
+      );
+  h += sw('transparent', s.transparent, 'Transparent background');
+  h += sw(
+    'prefervector',
+    s.preferVector,
+    'Prefer vector when parts move',
+    'Makes SVG and imports it as separate, editable layers',
+  );
+  // vector models run on OpenRouter (Recraft) or a Custom service; elsewhere the agent draws vector itself
+  if (ip.id === 'openrouter' || ip.id === 'custom') {
+    const vOther =
+      ST.vecOther ||
+      (s.vector !== 'agent' && !!s.vector && ip.id === 'openrouter' && !vec.some(m => m.id === s.vector));
+    h +=
+      vOther || (ip.id === 'custom' && s.vector !== 'agent')
+        ? row(
+            'Vector',
+            `<span class="ag-key"><input class="txt" id="agVecModel" value="${esc(s.vector === 'agent' ? '' : s.vector)}" placeholder="Vector model name" spellcheck="false"><button class="ag-ib sm" data-act="vecagent" aria-label="Let the agent draw vector" title="Let the agent draw vector">${svg(P.close, 12, 1.5, 12)}</button></span>`,
+            'agVecModel',
+          )
+        : row(
+            'Vector',
+            `<select class="sel" id="agVecSel"><option value="agent"${s.vector === 'agent' ? ' selected' : ''}>Drawn by the agent</option>${vec
+              .map(
+                m =>
+                  `<option value="${esc(m.id)}"${m.id === s.vector ? ' selected' : ''}>${esc(m.name.replace(/^[^:]+:\s*/, ''))}</option>`,
+              )
+              .join('')}<option value="__other">Other model…</option></select>`,
+            'agVecSel',
+          );
+  }
+  if (ip.id === 'openrouter' && !ST.cat)
+    imageCatalog().then(m => {
+      ST.cat = m;
+      if (ST.view === 'settings') renderBody();
+    });
+  return h;
+}
+
+let raf = 0,
+  genTimer: ReturnType<typeof setInterval> | undefined;
 function scheduleRender() {
   if (!raf) raf = requestAnimationFrame(() => ((raf = 0), renderBody()));
 }
@@ -371,11 +544,13 @@ function renderComposer() {
   const n = S.selSet.size,
     one = n === 1 ? layerById([...S.selSet][0]) : null;
   $('#agScopeT').textContent = n === 0 ? 'Scene' : one ? one.name : `${n} layers`;
-  $('#agFoot').textContent = ST.confirm
-    ? 'Waiting for you to confirm'
-    : running
-      ? 'Working · Stop keeps what is done so far'
-      : 'Uses your own API key · each request is one undo step';
+  $('#agFoot').textContent = ST.imgAsk
+    ? 'Waiting for you to confirm the image'
+    : ST.confirm
+      ? 'Waiting for you to confirm'
+      : running
+        ? 'Working · Stop keeps what is done so far'
+        : 'Uses your own API key · each request is one undo step';
 }
 export function render() {
   if (!ST.open) return;
@@ -408,15 +583,35 @@ async function send(text: string) {
     history,
     maxSteps: s.maxSteps,
     signal: ST.running.ctl.signal,
-    ctx: s.askDelete
-      ? {
-          confirmDelete: names =>
+    tools: offeredTools(),
+    system: systemPrompt({
+      images: !!imageChoice(),
+      vector: vectorChoice() ? 'model' : 'agent',
+      preferVector: s.preferVector,
+    }),
+    ctx: {
+      signal: ST.running.ctl.signal,
+      confirmDelete: s.askDelete
+        ? names =>
             new Promise<boolean>(resolve => {
               ST.confirm = { id: turn.id, names, resolve };
               scheduleRender();
-            }),
-        }
-      : {},
+            })
+        : undefined,
+      confirmImage: ask =>
+        new Promise<ImageAnswer>(resolve => {
+          ST.imgAsk = { id: turn.id, ask, prompt: ask.prompt, dontAsk: false, resolve };
+          renderBody();
+          const t = $('#agImgPrompt') as HTMLTextAreaElement | null;
+          if (t) t.focus();
+        }),
+      generating: g => {
+        ST.gen = g ? { ...g, at: Date.now() } : null;
+        clearInterval(genTimer);
+        if (g) genTimer = setInterval(scheduleRender, 1000);
+        scheduleRender();
+      },
+    },
     onText: d => {
       if (ST.running) ST.running.live += d;
       scheduleRender();
@@ -449,6 +644,10 @@ async function send(text: string) {
   if (r.request) REQUESTS.set(turn.id, r.request);
   if (ST.confirm) ST.confirm.resolve(false);
   ST.confirm = null;
+  if (ST.imgAsk) ST.imgAsk.resolve({ go: false });
+  ST.imgAsk = null;
+  ST.gen = null;
+  clearInterval(genTimer);
   ST.running = null;
   setBusy(false);
   persistChat();
@@ -537,6 +736,39 @@ function onChange(e: Event) {
       setKey(s.provider, t.value);
       ST.test = null;
       return renderBody();
+    case 'agImgProv':
+      setSettings({ imgProvider: t.value as any, imgModel: '', vector: 'agent' });
+      ST.imgOther = ST.vecOther = false;
+      return renderBody();
+    case 'agImgSel':
+      if (t.value === '__other') {
+        ST.imgOther = true;
+        setSettings({ imgModel: '' });
+        renderBody();
+        return ($('#agImgModel') as HTMLInputElement).focus();
+      }
+      return setSettings({ imgModel: t.value });
+    case 'agImgModel':
+      return setSettings({ imgModel: t.value.trim() });
+    case 'agImgBase':
+      return setSettings({ imgBase: t.value.trim() });
+    case 'agImgKey': {
+      const id = imageProviderOf();
+      if (id) setKey(id, t.value);
+      return renderBody();
+    }
+    case 'agVecSel':
+      if (t.value === '__other') {
+        ST.vecOther = true;
+        renderBody();
+        return ($('#agVecModel') as HTMLInputElement).focus();
+      }
+      return setSettings({ vector: t.value });
+    case 'agVecModel':
+      return setSettings({ vector: t.value.trim() || 'agent' });
+    case 'agDontAsk':
+      if (ST.imgAsk) ST.imgAsk.dontAsk = t.checked;
+      return;
     case 'agSteps':
       setSettings({ maxSteps: parseInt(t.value) || s.maxSteps });
       return renderBody();
@@ -627,6 +859,37 @@ function onClick(e: MouseEvent) {
     case 'test':
       runTest();
       return;
+    case 'imggo':
+    case 'imgcancel':
+      if (ST.imgAsk) {
+        const q = ST.imgAsk,
+          ta = $('#agImgPrompt') as HTMLTextAreaElement | null;
+        ST.imgAsk = null;
+        q.resolve(
+          b.dataset.act === 'imggo'
+            ? { go: true, prompt: ta ? ta.value : q.prompt, dontAsk: q.dontAsk }
+            : { go: false },
+        );
+        renderBody();
+      }
+      return;
+    case 'askimages':
+      setConfirmImages(true);
+      toast('The agent will ask before generating images.');
+      return renderBody();
+    case 'askimg':
+      setConfirmImages(!confirmImages());
+      return renderBody();
+    case 'transparent':
+      setSettings({ transparent: !getSettings().transparent });
+      return renderBody();
+    case 'prefervector':
+      setSettings({ preferVector: !getSettings().preferVector });
+      return renderBody();
+    case 'vecagent':
+      ST.vecOther = false;
+      setSettings({ vector: 'agent' });
+      return renderBody();
     case 'askdelete':
       setSettings({ askDelete: !getSettings().askDelete });
       return renderBody();
@@ -669,6 +932,11 @@ export function init(): void {
   $('#bAgent').innerHTML = svg(P.bubble, 15) + 'Agent';
   host.addEventListener('click', onClick);
   host.addEventListener('change', onChange);
+  // the image prompt keeps what was typed when the card is drawn again
+  host.addEventListener('input', e => {
+    const t = e.target as HTMLTextAreaElement;
+    if (t.id === 'agImgPrompt' && ST.imgAsk) ST.imgAsk.prompt = t.value;
+  });
   const ta = $('#agText') as HTMLTextAreaElement;
   ta.addEventListener('input', () => {
     ($('#agSend') as HTMLButtonElement).disabled = !ta.value.trim();

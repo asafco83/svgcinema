@@ -6716,6 +6716,170 @@ button.ag-chip:hover {
   width: 64px;
 }
 
+/* images: the confirm card, the generating card and the cost line (mockup screens confirm, generating, askoff) */
+.ag-imgask {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.ag-imgask .ag-card-h {
+  padding: 11px 12px 8px;
+}
+.ag-ip {
+  display: block;
+  margin: 0 12px;
+}
+.ag-ip textarea {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: var(--panel-2);
+  line-height: 17px;
+  color: var(--fg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ag-ip textarea:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+.ag-kv {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  row-gap: 5px;
+  column-gap: 8px;
+  padding: 10px 12px 2px;
+  line-height: 16px;
+}
+.ag-kv > span:nth-child(odd) {
+  color: var(--muted);
+}
+.ag-kv b {
+  font-weight: 600;
+}
+.ag-chkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 4px;
+  line-height: 16px;
+  cursor: pointer;
+}
+.ag-chkbox input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--accent);
+}
+.ag-chkbox small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-imgask .ag-card-b {
+  padding: 8px 12px 12px;
+}
+.ag-imgask .ag-card-b .ag-btn {
+  height: 30px;
+  padding: 0 12px;
+}
+.ag-imgask .ag-card-b .ag-btn.pri {
+  padding: 0 14px;
+}
+.ag-gen {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--raised);
+  overflow: hidden;
+}
+.ag-gen-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  line-height: 16px;
+}
+.ag-gen-h svg {
+  flex: none;
+  color: var(--accent-fg);
+}
+.ag-gen-h span {
+  flex: 1;
+}
+.ag-gen-h small {
+  display: block;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-gen-b {
+  margin: 0 10px 10px;
+  height: 150px;
+  border-radius: 7px;
+  background: repeating-conic-gradient(var(--check) 0 25%, var(--raised) 0 50%) 0 0 / 12px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-gen-b span {
+  padding: 2px 8px;
+  border-radius: 9px;
+  background: var(--raised);
+}
+.ag-cost {
+  margin: 4px 10px 6px 32px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 15px;
+}
+.ag-link {
+  all: unset;
+  margin-left: 4px;
+  color: var(--accent-fg);
+  font-weight: 600;
+  cursor: pointer;
+}
+.ag-link:hover {
+  text-decoration: underline;
+}
+.agent .ag-link:focus-visible {
+  outline: 2px solid var(--accent-line);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+.ag-note-box {
+  margin: 0 0 4px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.ag-sw-row.tall {
+  align-items: flex-start;
+}
+.ag-sw-row.tall .ag-sw {
+  margin-top: 1px;
+}
+.ag-sw-row small {
+  display: block;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.ag-sw-row.tall > span {
+  line-height: 16px;
+}
+
 /* the Agent button in the top bar: pressed while the panel is open */
 .top .btn.ag-tb {
   height: 32px;
