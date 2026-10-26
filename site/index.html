@@ -3795,11 +3795,11 @@ var s=document.getElementById("hero-svg");if(!s)return;var P=CinEngine({"p":"her
           <div class="spec-art mat">
             <svg viewBox="0 0 240 150" aria-hidden="true">
               <defs>
-                <filter id="fglow" x="-80%" y="-80%" width="260%" height="260%">
+                <filter id="fglow" x="-100%" y="-100%" width="300%" height="300%">
                   <feGaussianBlur stdDeviation="4">
                     <animate
                       attributeName="stdDeviation"
-                      values="4;16;4"
+                      values="3;9;3"
                       dur="3s"
                       repeatCount="indefinite"
                       calcMode="spline"
@@ -3808,34 +3808,58 @@ var s=document.getElementById("hero-svg");if(!s)return;var P=CinEngine({"p":"her
                     />
                   </feGaussianBlur>
                 </filter>
-                <filter id="fshadow" x="-50%" y="-50%" width="200%" height="220%">
+                <filter id="fshadow" x="-50%" y="-50%" width="200%" height="240%">
                   <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity=".5">
                     <animate
                       attributeName="dy"
-                      values="4;16;4"
+                      values="3;13;3"
                       dur="3s"
                       repeatCount="indefinite"
                       calcMode="spline"
                       keyTimes="0;.5;1"
                       keySplines=".45 0 .55 1;.45 0 .55 1"
                     />
-                    <animate attributeName="stdDeviation" values="2;7;2" dur="3s" repeatCount="indefinite" />
+                    <animate attributeName="stdDeviation" values="2;6;2" dur="3s" repeatCount="indefinite" />
                   </feDropShadow>
                 </filter>
+                <filter id="fhue" color-interpolation-filters="sRGB">
+                  <feColorMatrix type="hueRotate" values="0">
+                    <animate attributeName="values" values="0;360" dur="6s" repeatCount="indefinite" />
+                  </feColorMatrix>
+                </filter>
               </defs>
-              <circle cx="84" cy="75" r="28" fill="#ff6b6f" filter="url(#fglow)" />
-              <circle cx="84" cy="75" r="22" fill="#ffb3a7" />
-              <rect x="138" y="50" width="56" height="50" rx="12" fill="#7189ff" filter="url(#fshadow)" />
+              <!-- glow -->
+              <circle cx="50" cy="75" r="20" fill="#ffd27a" filter="url(#fglow)">
+                <animate attributeName="opacity" values=".55;1;.55" dur="3s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="50" cy="75" r="16" fill="#fff4cf" />
+              <!-- drop shadow -->
+              <rect x="100" y="55" width="40" height="40" rx="10" fill="#7189ff" filter="url(#fshadow)" />
+              <!-- outline moving out with its gap, colour turning with hue rotate -->
+              <g filter="url(#fhue)">
+                <circle cx="190" cy="75" r="16" fill="#9a7bff" />
+                <circle cx="190" cy="75" r="21" fill="none" stroke="#9a7bff" stroke-width="2.5">
+                  <animate
+                    attributeName="r"
+                    values="20;29;20"
+                    dur="3s"
+                    repeatCount="indefinite"
+                    calcMode="spline"
+                    keyTimes="0;.5;1"
+                    keySplines=".45 0 .55 1;.45 0 .55 1"
+                  />
+                </circle>
+              </g>
             </svg>
           </div>
           <div class="spec-tx">
             <div class="mini" style="--d: 3s">
               <i style="left: 0"></i><i style="left: 50%"></i><i style="left: 100%"></i><u></u>
             </div>
-            <h3>Blur and drop shadow</h3>
+            <h3>Filters</h3>
             <p>
-              Stack filters on any layer and reorder them. Every parameter, from radius to shadow offset, has its own
-              track.
+              Blur, shadows and glows, colour adjustments and outlines. Stack them on any layer, drag to reorder, and
+              every setting has its own track.
             </p>
           </div>
         </article>
