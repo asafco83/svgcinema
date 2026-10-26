@@ -20,6 +20,8 @@ async def main():
         async def route(r):
             q=r.request
             if q.method=='OPTIONS': return await r.fulfill(status=204,headers=CORS)
+            # the public image model / price lists (read by Settings): unreachable here, so the built-in list is used
+            if q.method=='GET': return await r.fulfill(status=404,headers=CORS,body='')
             if 'bad-key' in q.headers.get('authorization',''):
                 return await r.fulfill(status=401,headers={**CORS,'content-type':'application/json'},body=json.dumps({'error':{'message':'No auth credentials found'}}))
             body=json.loads(q.post_data); msgs=body['messages']
