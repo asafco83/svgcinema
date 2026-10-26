@@ -21,8 +21,9 @@ export interface EngineLayer {
   /** orient along motion path */ or?: boolean | 1;
   /** polygon / star settings, so an animated corner radius ("rad") can rebuild the path */
   shape?: { kind: string; cx: number; cy: number; r: number; rot: number; n: number; ratio?: number };
-  /** extra animated attributes: track key → [element id suffix, attribute] (filter parameters) */
-  fa?: Record<string, [string, string]>;
+  /** extra animated attributes (filter parameters): track key → [element id suffix, attribute], or a list
+   *  of [suffix, attribute, value kind?, other track?] (see fxv) */
+  fa?: Record<string, [string, string] | [string, string, string?, string?][]>;
   /** bones: rest angle (degrees), so scale runs along / across the bone (exported only when it matters) */
   ba?: number;
   /** editor layers: the bone's type and geometry give the rest angle */
@@ -159,6 +160,8 @@ export interface CinPlayer {
   /** a pin at t: [rest x, rest y, x, y, angle] (a pin bound to a bone follows it) */
   pinAt(L: EngineLayer, p: { n: number; x: number; y: number; bone?: string; bo?: number[] }, t: number): number[];
   get(L: EngineLayer, k: string, t: number): any;
+  /** a filter parameter as its attribute value: raw, or by kind (a colour matrix, a sum, a half…) */
+  fxv(kind: string | undefined, v: any, w?: number): string;
   dstr(sp: EngineSubPath[] | null | undefined): string;
   /** a dash pattern as stroke-dasharray ('none' for a solid line) */
   dashStr(a: number[]): string;
@@ -1158,6 +1161,35 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
   function f(n: number) {
     return Math.round(n * 1000) / 1000;
   }
+  /* filter parameters: colour matrices (amounts as fractions, 1 = 100%), the outline's ring radii */
+  var GRAY = [0.2126, 0.7152, 0.0722, 0.2126, 0.7152, 0.0722, 0.2126, 0.7152, 0.0722],
+    SEP = [0.393, 0.769, 0.189, 0.349, 0.686, 0.168, 0.272, 0.534, 0.131];
+  function fxv(k: string | undefined, v: any, w?: number) {
+    if (!k) return typeof v === 'number' ? String(f(v)) : String(v);
+    var a = Math.max(0, +v || 0),
+      m: number[];
+    if (k === 'add') return String(f(a + Math.max(0, +(w as number) || 0)));
+    if (k === 'half') return String(f(a / 2));
+    if (k === 'bri') m = [a, 0, 0, 0, 0, 0, a, 0, 0, 0, 0, 0, a, 0, 0];
+    else if (k === 'con') {
+      var o = 0.5 - 0.5 * a;
+      m = [a, 0, 0, 0, o, 0, a, 0, 0, o, 0, 0, a, 0, o];
+    } else if (k === 'inv') {
+      a = Math.min(1, a);
+      var d = 1 - 2 * a;
+      m = [d, 0, 0, 0, a, 0, d, 0, 0, a, 0, 0, d, 0, a];
+    } else {
+      // grayscale / sepia: between no change (identity) and the full matrix
+      a = Math.min(1, a);
+      var S = k === 'sep' ? SEP : GRAY;
+      m = [];
+      for (var r = 0; r < 3; r++) {
+        for (var c = 0; c < 3; c++) m.push(S[r * 3 + c] * a + (r === c ? 1 - a : 0));
+        m.push(0, 0);
+      }
+    }
+    return m.concat([0, 0, 0, 1, 0]).map(f).join(' ');
+  }
   /** matrices keep more digits, so neighbouring triangles meet exactly */
   function f6(n: number) {
     return Math.round(n * 1e6) / 1e6;
@@ -1318,9 +1350,15 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
       }
       if (L.fa)
         for (var fk in L.fa) {
-          var fe = el(D.p + L.id + L.fa[fk][0]),
-            fv = get(L, fk, t);
-          if (fe && fv != null) fe.setAttribute(L.fa[fk][1], typeof fv === 'number' ? String(f(fv)) : fv);
+          var fv = get(L, fk, t),
+            fl: any = L.fa[fk];
+          if (fv == null) continue;
+          if (typeof fl[0] === 'string') fl = [fl];
+          for (var fi = 0; fi < fl.length; fi++) {
+            var ft = fl[fi],
+              fe = el(D.p + L.id + ft[0]);
+            if (fe) fe.setAttribute(ft[1], fxv(ft[2], fv, ft[3] ? get(L, ft[3], t) : 0));
+          }
         }
     }
   }
@@ -1580,6 +1618,7 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
       return was;
     },
     get: get,
+    fxv: fxv,
     gAttrs: gAttrs,
     linP: linP,
     trimDash: trimDash,

@@ -14,12 +14,24 @@ import { FONTS, ICON, byId, clone, esc, fmt, ic, parseDash, r2, valueAt } from '
 import { INSP } from '../core/dom';
 import { beginEdit, setProp, setTime } from '../core/history';
 import { type NodeType, currentNode, nodeType, setNodePos, setNodeType } from '../tools/motion-path';
-import { S, layerById } from '../core/state';
+import { S, layerById, selLayer } from '../core/state';
 import { familyCSS, localFamilies, pickWeight, webFont } from '../render/fonts';
 import { fontLabel } from './font-picker';
-import { FILTERS, addFilter, fxKey, removeFilter, syncFa } from '../model/filters';
+import {
+  FILTERS,
+  FX_GROUPS,
+  FX_MENU,
+  addFilter,
+  fxKey,
+  fxName,
+  fxParams,
+  fxSummary,
+  moveFilter,
+  removeFilter,
+  syncFa,
+} from '../model/filters';
 import { H9 } from '../tools/edit-tools';
-import { colf, gnum, krow, nrow, num, renderInspector } from './inspector';
+import { DCHEV, GRIP, colf, gnum, krow, nrow, num, renderInspector } from './inspector';
 import { isLine, liveShape, setShape } from '../tools/shapes';
 import { type ShapeParams, maxCornerRadius } from '../geometry/nodes';
 import { renderStage } from '../render/stage';
@@ -397,33 +409,178 @@ export function appearanceSection(l: Layer) {
 
 /* ---------- Filters ---------- */
 
+/** filter cards the person closed (this session only: never saved, never an undo step) */
+const fxClosed = new Set<string>();
+const fxCK = (l: Layer, id: string) => l.id + '/' + id;
+const TRASH = ic('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>', 13);
 export function filtersSection(l: Layer) {
   if (l.type === 'bone') return '';
-  const list = l.fx || [];
-  let h = `<section class="sec"><h3>Filters</h3><div class="row nk"><span class="rl">Add</span><div class="rf">${sel(
-    'data-fxadd id="fx-add" aria-label="Add filter"',
-    [['', '+ Add filter…'], ...Object.entries(FILTERS).map(([k, d]) => [k, d.label] as [string, string])],
-    '',
-  )}</div></div>`;
-  if (!list.length) h += `<p class="muted">No filters</p>`;
-  else h += `<p>Filter animation plays in JavaScript exports. CSS exports keep the filters but can't animate them.</p>`;
+  const list = (l.fx || []).filter(f => FILTERS[f.type]),
+    anyOpen = list.some(f => !fxClosed.has(fxCK(l, f.id)));
+  let h = `<section class="sec"><h3>Filters${
+    list.length
+      ? `<button type="button" class="h3b fx-all" data-act="fxall" title="${anyOpen ? 'Collapse every filter' : 'Expand every filter'}">${anyOpen ? 'Collapse all' : 'Expand all'}</button>`
+      : ''
+  }</h3><div class="row nk"><span class="rl">Add</span><div class="rf"><button type="button" class="fx-add" id="fx-add" data-act="fxmenu" aria-haspopup="menu" aria-expanded="false">+ Add filter…</button></div></div>`;
+  if (!list.length) return h + `<p class="muted">No filters</p></section>`;
+  h += `<p>Filter animation plays in JavaScript exports. CSS exports keep the filters but can't animate them.</p>`;
+  h += `<div class="fxl" role="list" aria-label="Filters, applied top to bottom">`;
   list.forEach((f, i) => {
-    const def = FILTERS[f.type];
-    if (!def) return;
-    h += `<div class="fx-head"><b>${def.label}</b><span class="sp"></span>
-      <button class="btn ib" data-act="fxmove" data-fx="${f.id}" data-d="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${def.label} up" title="Move up">${I.up}</button>
-      <button class="btn ib" data-act="fxmove" data-fx="${f.id}" data-d="1" ${i === list.length - 1 ? 'disabled' : ''} aria-label="Move ${def.label} down" title="Move down">${I.down}</button>
-      <button class="btn ib" data-act="fxdel" data-fx="${f.id}" aria-label="Remove ${def.label}" title="Remove">${ICON.trash}</button></div>`;
-    def.params.forEach(p => {
+    const def = FILTERS[f.type],
+      name = esc(fxName(f)),
+      shut = fxClosed.has(fxCK(l, f.id)),
+      keys = def.params.map(p => fxKey(f.id, p.key)),
+      anim = keys.some(k => l.t[k] && l.t[k].length),
+      col = def.params.find(p => typeof p.def === 'string'),
+      sw = col ? valueAt(l, fxKey(f.id, col.key) as PropKey, S.time) : '',
+      sum = fxSummary(l, f, k => valueAt(l, k as PropKey, S.time));
+    h += `<div class="fxc${shut ? ' closed' : ''}" role="listitem" data-fxc="${f.id}">
+      <div class="fxc-head" draggable="true" data-fxh="${f.id}" title="Drag to reorder">
+        <span class="dord-grip" aria-hidden="true">${GRIP}</span>
+        <button type="button" class="fxc-tg" data-act="fxtg" data-fx="${f.id}" aria-expanded="${!shut}" aria-label="${shut ? 'Expand' : 'Collapse'} ${name}">${DCHEV('M3 4.5l3 3 3-3')}</button>
+        <span class="fxc-name"><b>${name}</b><span class="fxc-sum">${anim ? '<i class="fxc-k" title="Animated"></i>' : ''}${sw && typeof sw === 'string' ? `<i class="fxc-sw" style="background:${esc(sw)}"></i>` : ''}${esc(sum)}</span></span>
+        <button type="button" class="dord-mv" data-act="fxmove" data-fx="${f.id}" data-d="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${name} up" title="Move up">${DCHEV('M3 7.5l3-3 3 3')}</button>
+        <button type="button" class="dord-mv" data-act="fxmove" data-fx="${f.id}" data-d="1" ${i === list.length - 1 ? 'disabled' : ''} aria-label="Move ${name} down" title="Move down">${DCHEV('M3 4.5l3 3 3-3')}</button>
+        <button type="button" class="dord-mv" data-act="fxdel" data-fx="${f.id}" aria-label="Remove ${name}" title="Remove">${TRASH}</button>
+      </div><div class="fxc-body">`;
+    if (def.choice) {
+      const c = def.choice,
+        v = (f as any)[c.key] || c.def;
+      h += `<div class="row"><span></span><span class="rl">${c.label}</span><div class="rf"><div class="segc" role="radiogroup" aria-label="${c.label}">${c.opts
+        .map(
+          ([k, t]) =>
+            `<button type="button" role="radio" aria-checked="${k === v}" class="${k === v ? 'on' : ''}" data-act="fxpos" data-fx="${f.id}" data-v="${k}">${t}</button>`,
+        )
+        .join('')}</div></div></div>`;
+    }
+    fxParams(f).forEach(p => {
       const k = fxKey(f.id, p.key);
       h += krow(
         k,
         p.label,
-        typeof p.def === 'string' ? colf(k) : num(k + (p.scale ? '::' + p.scale : ''), p.label[0], p.unit),
+        typeof p.def === 'string' ? colf(k) : num(k + (p.scale ? '::' + p.scale : ''), p.pre || p.label[0], p.unit),
       );
     });
+    h += `</div></div>`;
   });
-  return h + `</section>`;
+  return h + `</div></section>`;
+}
+/** the Add filter menu, below its button */
+function closeFxMenu() {
+  const m = document.getElementById('fxMenu');
+  if (m) m.remove();
+  const b = document.getElementById('fx-add');
+  if (b) b.setAttribute('aria-expanded', 'false');
+}
+function openFxMenu(btn: HTMLElement) {
+  closeFxMenu();
+  const m = document.createElement('div');
+  m.className = 'ctx fxm';
+  m.id = 'fxMenu';
+  m.setAttribute('role', 'menu');
+  m.setAttribute('aria-label', 'Add filter');
+  m.innerHTML = FX_GROUPS.map(
+    ([g, t]) =>
+      `<div class="ctx-h">${t}</div>` +
+      FX_MENU.filter(p => p.group === g)
+        .map(
+          p =>
+            `<button type="button" role="menuitem" data-fxp="${p.id}" data-fxt="${p.type}"><span>${p.label}</span>${p.of ? `<kbd>${p.of}</kbd>` : ''}</button>`,
+        )
+        .join(''),
+  ).join('');
+  document.body.appendChild(m);
+  btn.setAttribute('aria-expanded', 'true');
+  const r = btn.getBoundingClientRect(),
+    mr = m.getBoundingClientRect();
+  const below = r.bottom + 4 + mr.height <= innerHeight - 4;
+  m.style.left = Math.max(4, Math.min(r.left, innerWidth - mr.width - 4)) + 'px';
+  m.style.top = (below ? r.bottom + 4 : Math.max(4, r.top - mr.height - 4)) + 'px';
+  (m.querySelector('button') as HTMLElement).focus();
+  m.addEventListener('click', (e: MouseEvent) => {
+    const it = (e.target as HTMLElement).closest<HTMLElement>('[data-fxp]'),
+      l = selLayer();
+    if (!it || !l) return;
+    closeFxMenu();
+    const ed = beginEdit(),
+      f = addFilter(l, it.dataset.fxt, it.dataset.fxp);
+    if (f) fxClosed.delete(fxCK(l, f.id));
+    ed.end({ insp: true });
+  });
+  m.addEventListener('keydown', (e: KeyboardEvent) => {
+    const items = [...m.querySelectorAll<HTMLElement>('button')],
+      i = items.indexOf(document.activeElement as HTMLElement);
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      closeFxMenu();
+      btn.focus();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
+    }
+  });
+}
+/** drag a filter card onto another to reorder; every card folds to its one-row head while dragging */
+export function initFilterDrag() {
+  let dragId: string | null = null;
+  const clear = () =>
+    INSP.querySelectorAll('.fxc').forEach((x: Element) => x.classList.remove('dragging', 'drop-above', 'drop-below'));
+  INSP.addEventListener('dragstart', (e: DragEvent) => {
+    const hd = (e.target as HTMLElement).closest<HTMLElement>('.fxc-head');
+    if (!hd) return;
+    const list = hd.closest('.fxl') as HTMLElement,
+      card = hd.parentElement as HTMLElement,
+      y0 = hd.getBoundingClientRect().top;
+    dragId = hd.dataset.fxh;
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragId);
+      e.dataTransfer.setDragImage(hd, e.clientX - hd.getBoundingClientRect().left, e.clientY - y0);
+    }
+    // fold after the drag image is taken, and keep the grabbed card where it was on screen
+    requestAnimationFrame(() => {
+      list.classList.add('folded');
+      card.classList.add('dragging');
+      INSP.scrollTop += hd.getBoundingClientRect().top - y0;
+    });
+  });
+  INSP.addEventListener('dragover', (e: DragEvent) => {
+    const c = (e.target as HTMLElement).closest<HTMLElement>('.fxc');
+    if (!c || !dragId) return;
+    e.preventDefault();
+    INSP.querySelectorAll('.fxc.drop-above, .fxc.drop-below').forEach((x: Element) =>
+      x.classList.remove('drop-above', 'drop-below'),
+    );
+    const b = c.getBoundingClientRect();
+    if (c.dataset.fxc !== dragId) c.classList.add(e.clientY < b.top + b.height / 2 ? 'drop-above' : 'drop-below');
+  });
+  INSP.addEventListener('drop', (e: DragEvent) => {
+    const c = (e.target as HTMLElement).closest<HTMLElement>('.fxc'),
+      l = selLayer();
+    if (!c || !dragId || !l || !l.fx) return;
+    e.preventDefault();
+    const above = c.classList.contains('drop-above'),
+      from = l.fx.findIndex(f => f.id === dragId),
+      at = l.fx.findIndex(f => f.id === c.dataset.fxc);
+    if (from >= 0 && at >= 0 && c.dataset.fxc !== dragId) {
+      let to = above ? at : at + 1;
+      if (from < to) to--;
+      const ed = beginEdit();
+      moveFilter(l, dragId, to);
+      ed.end({ insp: true });
+    }
+    dragId = null;
+  });
+  INSP.addEventListener('dragend', () => {
+    dragId = null;
+    clear();
+    INSP.querySelectorAll('.fxl.folded').forEach((x: Element) => x.classList.remove('folded'));
+  });
+  document.addEventListener('mousedown', (e: MouseEvent) => {
+    const m = document.getElementById('fxMenu');
+    if (m && !m.contains(e.target as Node) && !(e.target as HTMLElement).closest('#fx-add')) closeFxMenu();
+  });
 }
 
 /* ---------- refresh and events ---------- */
@@ -563,16 +720,32 @@ export function propsClick(a: string, b: HTMLElement, l: Layer) {
   if (a === 'fxdel' || a === 'fxmove') {
     const ed = beginEdit();
     if (a === 'fxdel') removeFilter(l, b.dataset.fx);
-    else {
-      const i = l.fx.findIndex(f => f.id === b.dataset.fx),
-        j = i + +b.dataset.d;
-      if (i >= 0 && j >= 0 && j < l.fx.length) {
-        const fx = l.fx.slice();
-        [fx[i], fx[j]] = [fx[j], fx[i]];
-        l.fx = fx;
-        syncFa(l);
-      }
-    }
+    else moveFilter(l, b.dataset.fx, l.fx.findIndex(f => f.id === b.dataset.fx) + +b.dataset.d);
+    ed.end({ insp: true });
+    return true;
+  }
+  if (a === 'fxmenu') {
+    if (document.getElementById('fxMenu')) closeFxMenu();
+    else openFxMenu(b);
+    return true;
+  }
+  if (a === 'fxtg' || a === 'fxall') {
+    const ids = (l.fx || []).map(f => f.id),
+      open = ids.some(id => !fxClosed.has(fxCK(l, id)));
+    if (a === 'fxtg') {
+      const k = fxCK(l, b.dataset.fx);
+      if (fxClosed.has(k)) fxClosed.delete(k);
+      else fxClosed.add(k);
+    } else ids.forEach(id => (open ? fxClosed.add(fxCK(l, id)) : fxClosed.delete(fxCK(l, id))));
+    renderInspector();
+    return true;
+  }
+  if (a === 'fxpos') {
+    const f = (l.fx || []).find(x => x.id === b.dataset.fx);
+    if (!f || f.pos === b.dataset.v) return true;
+    const ed = beginEdit();
+    f.pos = b.dataset.v;
+    syncFa(l);
     ed.end({ insp: true });
     return true;
   }
@@ -698,13 +871,6 @@ export function propsChange(t: HTMLInputElement | HTMLSelectElement, l: Layer) {
       nv = q[1].slice();
     nv[k] = v - o[k];
     setNodePos(l, i, nv as [number, number]);
-    ed.end({ insp: true });
-    return true;
-  }
-  if (t.dataset.fxadd !== undefined) {
-    if (!t.value) return true;
-    const ed = beginEdit();
-    addFilter(l, t.value);
     ed.end({ insp: true });
     return true;
   }

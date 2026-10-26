@@ -75,7 +75,7 @@ async def main():
         await pg.click('[data-tx="x:stroke-linejoin"][data-v=round]')
         check('miter greyed out for round join', await ev("document.getElementById('x-miter').disabled"))
         # filters
-        await pg.select_option('#fx-add','blur'); await pg.select_option('#fx-add','shadow')
+        await pg.click('#fx-add'); await pg.click('#fxMenu [data-fxp=blur]'); await pg.click('#fx-add'); await pg.click('#fxMenu [data-fxp=shadow]')
         fl=await ev(f"document.querySelector('#{ 'e-'+tid } filter') && document.querySelector('#e-{tid} filter').innerHTML")
         check('filters rendered', fl and 'feGaussianBlur' in fl and 'feDropShadow' in fl, fl)
         await pg.fill('#i-fx_f1_sd','9'); await pg.press('#i-fx_f1_sd','Tab')

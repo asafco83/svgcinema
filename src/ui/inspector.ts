@@ -1033,9 +1033,9 @@ export function init(): void {
 
 /* ---------- a rig's own draw order (Bone section of its top bone) ---------- */
 
-const DCHEV = (d: string) =>
+export const DCHEV = (d: string) =>
   `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-const GRIP =
+export const GRIP =
   '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><circle cx="4.5" cy="3" r="1"/><circle cx="7.5" cy="3" r="1"/><circle cx="4.5" cy="6" r="1"/><circle cx="7.5" cy="6" r="1"/><circle cx="4.5" cy="9" r="1"/><circle cx="7.5" cy="9" r="1"/></svg>';
 function drawOrderBlock(l: Layer) {
   const order = drawOrder(l, doc.layers);

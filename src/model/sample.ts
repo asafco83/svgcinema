@@ -418,6 +418,14 @@ export function sampleDoc(): any {
     [1.2, 0, 'inOutSine'],
     [2, 3, 'ease'],
   ];
+  // a colour filter: the pennant brightens as the wind catches it
+  const bright = addFilter(pennant, 'bright');
+  pennant.b['fx.' + bright.id + '.a'] = 1;
+  pennant.t['fx.' + bright.id + '.a'] = [
+    [1.2, 1, 'inOutSine'],
+    [1.8, 1.25, 'inOutSine'],
+    [2.4, 1, 'ease'],
+  ];
   // the whole flag bends in the wind through a triangle mesh (Pin tool): pin 1 holds the foot of the
   // pole, pin 2 sways its top
   flag.pins = [

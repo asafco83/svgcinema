@@ -5,7 +5,7 @@
 import type { Layer } from '../model/types';
 import { H, byId } from '../core/constants';
 import { S, doc, eng } from '../core/state';
-import { fxKey } from '../model/filters';
+import { fxKey, fxReach } from '../model/filters';
 import { type Box, MESH_DEFAULT, buildMesh, hashStr, meshable } from '../model/mesh';
 import { isPinKey } from '../model/pins';
 import { descendants, isBox, isHidden } from '../model/tree';
@@ -30,9 +30,7 @@ function strokePad(l: Layer) {
 function fxPad(l: Layer) {
   let pad = 0;
   (l.fx || []).forEach(f => {
-    const v = (p: string, def: number) => maxNum(values(l, fxKey(f.id, p)), def);
-    if (f.type === 'blur') pad += v('sd', 4) * 2.5;
-    else if (f.type === 'shadow') pad += Math.max(v('dx', 4), v('dy', 6)) + v('sd', 6) * 2.5;
+    pad += fxReach(f, (p, def) => maxNum(values(l, fxKey(f.id, p)), def));
   });
   return pad;
 }
