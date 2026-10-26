@@ -423,7 +423,7 @@ export function filtersSection(l: Layer) {
       : ''
   }</h3><div class="row nk"><span class="rl">Add</span><div class="rf"><button type="button" class="fx-add" id="fx-add" data-act="fxmenu" aria-haspopup="menu" aria-expanded="false">+ Add filter…</button></div></div>`;
   if (!list.length) return h + `<p class="muted">No filters</p></section>`;
-  h += `<p>Filter animation plays in JavaScript exports. CSS exports keep the filters but can't animate them.</p>`;
+  h += `<div class="xwarn fx-warn" role="note"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3l8 14H2z"/><path d="M10 8.5v3.5M10 14.6v.1"/></svg><span><b>Doesn’t animate in CSS exports.</b> The filters are kept but stay still; use <b>JavaScript</b> to animate them.</span></div>`;
   h += `<div class="fxl" role="list" aria-label="Filters, applied top to bottom">`;
   list.forEach((f, i) => {
     const def = FILTERS[f.type],
