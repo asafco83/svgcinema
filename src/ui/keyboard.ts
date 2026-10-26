@@ -2,6 +2,8 @@
 import { zoomShortcut } from './zoom-menu';
 import { animateShortcut } from './animate-menu';
 import { viewShortcut } from './view-menu';
+import { agentShortcut } from './agent-panel';
+import { BUSY } from '../agent/busy';
 import {
   arrangeEnd,
   clearLayerClip,
@@ -114,6 +116,15 @@ export function init(): void {
     }
     if (typing) return;
     if ([...(document.querySelectorAll as any)('.modal')].some(x => !x.hidden)) return;
+    if (agentShortcut(e)) {
+      e.preventDefault();
+      return;
+    }
+    // while the agent works, editing waits (its request stays one undo step): play and zoom still work
+    if (BUSY.on) {
+      if (zoomShortcut(e)) e.preventDefault();
+      else if (e.code !== 'Space' && e.key !== 'Home') return;
+    }
     if (zoomShortcut(e)) {
       e.preventDefault();
       return;

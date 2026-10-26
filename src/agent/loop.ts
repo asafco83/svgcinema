@@ -2,7 +2,7 @@
 // Runs one request: send the conversation and tools to the model, run the tool calls it makes one by
 // one, send the results back, and repeat until it answers without tools, the step cap is reached,
 // the user presses Stop, or the provider fails. However it ends, the request is one undo step.
-import type { AgentError, Client, Msg } from './clients/types';
+import type { AgentError, Client, ModelReply, Msg } from './clients/types';
 import { AgentError as Err } from './clients/types';
 import { systemPrompt, userTurn } from './prompt';
 import { type AgentRequest, beginRequest, endRequest } from './request';
@@ -36,6 +36,8 @@ export interface RunOptions {
   ctx?: ToolContext;
   onText?: (delta: string) => void;
   onStep?: (s: StepEvent) => void;
+  /** each model answer once it is complete (its text, and whether it asked for tools) */
+  onReply?: (r: ModelReply) => void;
   /** test hooks: how tools run, and how the undo step opens and closes */
   run?: (name: string, args: any, ctx: ToolContext) => Promise<ToolResult>;
   begin?: () => AgentRequest;
@@ -86,6 +88,7 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
       const capped = steps.length >= max;
       const r = await o.client.send({ system, messages: msgs, tools: specs, signal: o.signal, onText: o.onText });
       if (r.text) reply = r.text;
+      if (o.onReply) o.onReply(r);
       // past the cap nothing more runs, so no calls are recorded either (each call needs a result)
       push({ role: 'assistant', text: r.text, calls: capped ? [] : r.calls });
       if (capped) {
@@ -157,6 +160,14 @@ export function compactHistory(msgs: Msg[], turns = 10): Msg[] {
       if (typeof c === 'string') return { ...m, content: c.replace(/\n*<project note=[\s\S]*?<\/project>\s*$/, '') };
       return { ...m, content: c.filter(p => p.type === 'text') };
     }
+    // big arguments (an SVG the model wrote) don't need sending again
+    if (m.role === 'assistant' && m.calls.some(c => JSON.stringify(c.args || {}).length > 2000))
+      return {
+        ...m,
+        calls: m.calls.map(c =>
+          JSON.stringify(c.args || {}).length > 2000 ? { ...c, args: { note: 'arguments shortened' } } : c,
+        ),
+      };
     if (m.role === 'tool' && m.content.length > 300)
       return { ...m, content: m.content.slice(0, 240) + '… (shortened)' };
     return m;

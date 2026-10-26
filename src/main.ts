@@ -39,6 +39,7 @@ import { initFilterDrag } from './ui/props-panel';
 import { initTlResize } from './ui/tl-resize';
 import { initShortcuts } from './ui/shortcuts';
 import { initScrub } from './ui/scrub';
+import { init as initAgent } from './ui/agent-panel';
 
 // Same order as the original single-file build
 initTheme(); // ui/theme (before the rail renders its button)
@@ -78,5 +79,6 @@ init11(); // ui/file-menu
 init12(); // io/save
 init13(); // io/guard
 init14(); // io/open
+initAgent(); // ui/agent-panel (the design agent, docked on the right)
 init15(); // ui/keyboard
 init16(); // app/boot
