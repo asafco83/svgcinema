@@ -20,7 +20,8 @@ if (!existsSync(join(dist, 'index.html'))) throw new Error('dist/ is missing: ru
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync(page, join(out, 'index.html'));
-cpSync(dist, join(out, 'editor'), { recursive: true });
+// source maps would publish the full source: never ship them, even from an older dist/
+cpSync(dist, join(out, 'editor'), { recursive: true, filter: src => !src.endsWith('.map') });
 
 let n = 0,
   bytes = 0;
