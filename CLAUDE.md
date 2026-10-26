@@ -78,6 +78,11 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   `layers-panel.ts`, `layer-menu.ts` (right-click), `color-picker.ts` (the colour window), …
 - `src/export/build.ts` — export (JS or CSS mode), `dialog.ts` the Export dialog.
 - `src/io/` — open/save `.SVGcinema` projects (zip), SVG import, assets.
+- `src/agent/` — the design agent (in-app AI chat, being built in steps; spec: the "SVGcinema design agent — tool
+  spec" doc). `tools.ts` = the tools a model calls, each a thin wrapper over an editor function (never edit `doc`
+  by hand where one exists); `scene.ts` = the scene summary; `request.ts` = one request = one undo step (tools'
+  own undo entries are folded into one); `schema.ts` = argument checks. Tested by `tests/agent.test.ts` and
+  `tests/browser/agent-tools.py`. Tests never call a real model provider.
 
 ## UI conventions (from the UI refresh)
 
