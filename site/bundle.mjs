@@ -5,7 +5,7 @@
 // Run `npm run build:deploy`, which builds both first. Usage on its own:
 //   node site/bundle.mjs              # → deploy/
 //   node site/bundle.mjs --out=/path  # → somewhere else
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,6 +22,15 @@ mkdirSync(out, { recursive: true });
 cpSync(page, join(out, 'index.html'));
 // source maps would publish the full source: never ship them, even from an older dist/
 cpSync(dist, join(out, 'editor'), { recursive: true, filter: src => !src.endsWith('.map') });
+// …and the scripts' pointers to them go too (the GitHub Pages build keeps both, for debugging)
+(function strip(d) {
+  for (const f of readdirSync(d)) {
+    const p = join(d, f);
+    if (statSync(p).isDirectory()) strip(p);
+    else if (/\.(js|css)$/.test(f))
+      writeFileSync(p, readFileSync(p, 'utf8').replace(/\n?\/[/*]# sourceMappingURL=\S+?(?: \*\/)?\s*$/, '\n'));
+  }
+})(join(out, 'editor'));
 
 let n = 0,
   bytes = 0;
