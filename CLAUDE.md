@@ -6,8 +6,8 @@ pure CSS). Live site: https://asafco83.github.io/svgcinema/ (GitHub Pages, deplo
 
 `README.md` is the user-facing feature list; keep it up to date with every feature.
 `featureSuggestions.md` lists features that are planned but not built yet.
-Builds ship **no source maps** (`sourcemap: false` in `vite.config.ts`; `site/bundle.mjs` also leaves out any
-`*.map`): they would expose the full source. Don't turn them back on for deployed builds.
+**Source maps:** the GitHub Pages build keeps them (`sourcemap: true` in `vite.config.ts`, for debugging there), but the
+hosting zip (`npm run build:deploy`, `site/bundle.mjs`) must never include any `*.map`: they would expose the full source.
 `LICENSE`: proprietary, all rights reserved (package.json `"license": "UNLICENSED"`). It lets people use
 the published app, and use their exported files (with the embedded player) for any purpose,
 including commercially, and load or host the external player file unmodified to play them. The owner keeps the

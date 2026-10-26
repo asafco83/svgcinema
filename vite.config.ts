@@ -26,8 +26,8 @@ export default defineConfig({
   build: {
     // ES2019 keeps the embedded runtime (CinEngine.toString()) free of bundler helpers
     target: 'es2019',
-    // no source maps: they would publish the full original source next to the build
-    sourcemap: false,
+    // source maps stay on for debugging the GitHub Pages build; site/bundle.mjs leaves them out of the zip
+    sourcemap: true,
   },
   test: {
     environment: 'happy-dom',
