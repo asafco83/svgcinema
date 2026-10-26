@@ -86,9 +86,10 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   (called from the browser with the user's key); `providers.ts` = the provider table and `makeClient`;
   `prompt.ts` = the system prompt and the scene attached to each message; `settings.ts` = provider, model and keys
   (browser storage only); `chat.ts` = the chat (saved in the project as `agent-chat.json` through `io/extras.ts`);
-  `describe.ts` = how a step reads in the panel; `busy.ts` = editing paused while a request runs. The panel is
+  `images.ts` = image and vector generation (OpenRouter's live model list and prices, OpenAI, Gemini, Custom;
+  the green-background removal); `describe.ts` = how a step reads in the panel; `busy.ts` = editing paused while a request runs. The panel is
   `ui/agent-panel.ts` (Alt+A, docked as the grid's fifth column). Tested by `tests/agent.test.ts`,
-  `tests/agent-loop.test.ts` (mocked `fetch`), `tests/browser/agent-tools.py`, `tests/browser/agent-loop.py` and `tests/browser/agent-panel.py`
+  `tests/agent-loop.test.ts` and `tests/agent-images.test.ts` (mocked `fetch`), `tests/browser/agent-tools.py`, `tests/browser/agent-loop.py`, `tests/browser/agent-panel.py` and `tests/browser/agent-images.py`
   (Playwright answers the provider URLs with scripted streams). Tests never call a real model provider.
 
 ## UI conventions (from the UI refresh)

@@ -8,6 +8,8 @@ export interface PromptOptions {
   images?: boolean;
   /** vector artwork: drawn by the agent (writes SVG) or made by a vector model */
   vector?: 'agent' | 'model';
+  /** make artwork whose parts move as vector rather than a picture */
+  preferVector?: boolean;
 }
 
 export function systemPrompt(o: PromptOptions = {}) {
@@ -31,7 +33,11 @@ How to work
   }
 - ${
     o.images
-      ? 'Raster images: generate_image makes one (it may ask the user first, since it costs them money), then place_image puts it on the canvas. Prefer vector when parts need to move separately.'
+      ? `Raster images: generate_image makes one (it may ask the user first, since it costs them money), then place_image puts it on the canvas. A picture moves as one piece.${
+          o.preferVector !== false
+            ? ' When parts of the artwork need to move on their own (wings, wheels, a face), make it as vector instead, unless the user asks for an image.'
+            : ' Use an image when the user asks for a picture or a detailed illustration.'
+        } Don't generate the same image again after a cancel.`
       : 'No image model is set up, so you cannot make raster images. If the user asks for one, say so briefly and offer to draw it as vector shapes instead.'
   }
 - Filters (blur, glow, shadows…) only animate in the JavaScript export; mention it when you animate them.

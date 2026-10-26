@@ -5,13 +5,19 @@ import { propLabel, r3 } from '../core/constants';
 import { layerById } from '../core/state';
 import { presetById } from '../core/presets';
 import type { StepEvent } from './loop';
+import { money } from './images';
 
-export type StepIcon = 'look' | 'add' | 'draw' | 'edit' | 'key' | 'time' | 'del' | 'err';
+export type StepIcon = 'look' | 'add' | 'draw' | 'image' | 'place' | 'edit' | 'key' | 'time' | 'del' | 'err';
 export interface StepView extends StepEvent {
   icon: StepIcon;
   label: string;
   meta: string;
+  /** an image made without asking: the line under it with its cost (and "Ask first again") */
+  costLine?: string;
 }
+
+/** "$0.04" when the service reported it, "about $0.04" from the price list, '' when unknown. */
+export const costText = (c: any) => (c && typeof c.usd === 'number' ? (c.exact ? '' : 'about ') + money(c.usd) : '');
 
 const nm = (id: unknown) => {
   const l = typeof id === 'string' ? layerById(id) : null;
@@ -26,8 +32,50 @@ export function describe(e: StepEvent): StepView {
     r = e.result || {};
   let icon: StepIcon = 'edit',
     label = e.name.replace(/_/g, ' '),
-    meta = '';
+    meta = '',
+    costLine: string | undefined;
   switch (e.name) {
+    case 'generate_image':
+    case 'generate_vector': {
+      const v = e.name === 'generate_vector',
+        what = `${v ? 'vector' : 'image'} “${a.name}”`;
+      if (r.cancelled) {
+        [icon, label, meta] = ['look', `Didn’t generate the ${what}`, 'cancelled'];
+        break;
+      }
+      const cost = costText(r.cost),
+        model = r.model || '';
+      icon = v ? 'draw' : 'image';
+      label = `Generated ${what}`;
+      meta = [
+        model,
+        v
+          ? r.layers
+            ? `imported as ${r.layers} layers`
+            : ''
+          : r.transparent === 'removed'
+            ? 'background removed'
+            : '',
+        r.asked ? 'approved' : '',
+        r.asked ? cost : '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
+      if (!r.asked) costLine = ['Generated', model, cost || 'price unknown'].filter(Boolean).join(' · ');
+      break;
+    }
+    case 'place_image': {
+      const l = typeof r.id === 'string' ? layerById(r.id) : null,
+        b = r.box;
+      [icon, label, meta] = [
+        'place',
+        `Placed ${l ? `“${l.name}”` : 'the image'}`,
+        Array.isArray(b)
+          ? `x ${Math.round(b[0] + b[2] / 2)} · y ${Math.round(b[1] + b[3] / 2)} · ${Math.round(b[2])} × ${Math.round(b[3])}`
+          : '',
+      ];
+      break;
+    }
     case 'get_scene':
       [icon, label] = ['look', 'Looked at the project'];
       break;
@@ -123,5 +171,5 @@ export function describe(e: StepEvent): StepView {
       break;
   }
   if (!e.ok) [icon, meta] = ['err', e.error || 'It failed.'];
-  return { ...e, icon, label, meta };
+  return { ...e, icon, label, meta, ...(costLine ? { costLine } : {}) };
 }
