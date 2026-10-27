@@ -175,7 +175,9 @@ export function dataToBytes(d: string) {
 export function usedAssetIds() {
   return new Set<string>(doc.layers.filter(l => l.type === 'image').map(l => l.geo.asset));
 }
-export async function buildProject(includeAll?: boolean) {
+/** The project as a .SVGcinema zip. `skip`: extra files to leave out (the agent's chat, when the user
+ *  chose not to include it). */
+export async function buildProject(includeAll?: boolean, skip: string[] = []) {
   const enc = new TextEncoder(),
     used = usedAssetIds(),
     ids = Object.keys(ASSETS).filter(id => includeAll || used.has(id)),
@@ -208,7 +210,7 @@ export async function buildProject(includeAll?: boolean) {
     { name: 'project.json', data: enc.encode(JSON.stringify(doc)), compress: true },
     { name: 'assets/index.json', data: enc.encode(JSON.stringify(index, null, 2)), compress: true },
     // files other parts of the editor keep with the project (the design agent's chat)
-    ...extraFiles(),
+    ...extraFiles().filter(f => !skip.includes(f.name)),
     ...files,
   ]);
 }

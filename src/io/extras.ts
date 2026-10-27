@@ -12,6 +12,8 @@ export const EXTRAS = {
   read: [] as Array<(z: ZipReader) => Promise<void>>,
 };
 
+/** the design agent's chat, when the project has one (the Save dialog offers to leave it out) */
+export const CHAT_EXTRA = 'agent-chat.json';
 export function extraFiles(): ZipInput[] {
   return EXTRAS.write.map(f => f()).filter((x): x is ZipInput => !!x);
 }

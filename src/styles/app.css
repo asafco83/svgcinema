@@ -7049,17 +7049,24 @@ button.ag-chip:hover {
 #app.agent-busy :is(#tools, .side, #insp, #wrap, .tl-body, #bUndo, #bRedo, #bMenu) {
   pointer-events: none;
 }
-/* the paused editor shows an "agent at work" cursor (an arrow with the agent's badge, then the system's
-   progress cursor), so it reads as waiting for the agent, not frozen. Cursor images can't read CSS
-   tokens: the badge is the light theme's accent. */
+/* the paused editor shows the agent's animated "working" cursor (ui: agent/busy.ts draws it in a layer that
+   follows the pointer, since cursor images can't animate); the system's progress cursor is the fallback */
 #app.agent-busy {
-  cursor:
-    url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2732%27 height=%2732%27 viewBox=%270 0 32 32%27%3E%3Cpath d=%27M3 2v17l4.6-4.3 3 6.8 2.8-1.2-3-6.7H17z%27 fill=%27%23161a25%27 stroke=%27%23fff%27 stroke-width=%271.4%27 stroke-linejoin=%27round%27/%3E%3Crect x=%2715.5%27 y=%2716.5%27 width=%2715%27 height=%2712%27 rx=%273.5%27 fill=%27%233b5bfd%27 stroke=%27%23fff%27 stroke-width=%271.4%27/%3E%3Cpath d=%27M18 28.5v2.8l3-2.8%27 fill=%27%233b5bfd%27 stroke=%27%23fff%27 stroke-width=%271.4%27 stroke-linejoin=%27round%27/%3E%3Cpath d=%27M23 19l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z%27 fill=%27%23fff%27/%3E%3C/svg%3E')
-      3 2,
-    progress;
+  cursor: progress;
+}
+#app.agent-busy.agent-cursor {
+  cursor: none;
 }
 #app.agent-busy :is(.agent, .top) {
   cursor: auto;
+}
+#agCursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  pointer-events: none;
+  will-change: transform;
 }
 #app.agent-busy :is(#bUndo, #bRedo, #bMenu) {
   opacity: 0.45;
