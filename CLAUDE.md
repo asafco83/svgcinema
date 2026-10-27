@@ -88,9 +88,9 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   (browser storage only); `chat.ts` = the chat (saved in the project as `agent-chat.json` through `io/extras.ts`);
   `images.ts` = image and vector generation (OpenRouter's live model list and prices, OpenAI, Gemini, Custom;
   the green-background removal); `snapshot.ts` = the canvas as a PNG for the model (tool results can carry a picture: `IMAGE` in tools.ts, the
-  clients put it in the provider's format); `describe.ts` = how a step reads in the panel; `busy.ts` = editing paused while a request runs. The panel is
+  clients put it in the provider's format); `describe.ts` = how a step reads in the panel; `busy.ts` = editing paused while a request runs; `assist.ts` = "Your AI assistant": `window.svgcinema` (help/tools/start/call/batch/done) for the user's own browser assistant, sessions as one undo step, its image tools (`add_image`, `request_image` + the panel's drop card, `wait_image`) and the plain-text guide (`public/llms.txt` points assistants at `help()`). The panel is
   `ui/agent-panel.ts` (Alt+A, docked as the grid's fifth column). Tested by `tests/agent.test.ts`,
-  `tests/agent-loop.test.ts`, `tests/agent-images.test.ts` and `tests/agent-snapshot.test.ts` (mocked `fetch`), `tests/browser/agent-tools.py`, `tests/browser/agent-loop.py`, `tests/browser/agent-panel.py`, `tests/browser/agent-images.py` and `tests/browser/agent-snapshot.py`
+  `tests/agent-loop.test.ts`, `tests/agent-images.test.ts`, `tests/agent-snapshot.test.ts` and `tests/assist.test.ts` (mocked `fetch`), `tests/browser/agent-tools.py`, `tests/browser/agent-loop.py`, `tests/browser/agent-panel.py`, `tests/browser/agent-images.py`, `tests/browser/agent-snapshot.py` and `tests/browser/assist.py`
   (Playwright answers the provider URLs with scripted streams). Tests never call a real model provider.
 
 ## UI conventions (from the UI refresh)
@@ -98,7 +98,7 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
 - **Look:** panels sit flush, split by hairlines (`--line`); colour tokens live on `:root` in
   `src/styles/app.css`, with a dark set under `prefers-color-scheme` and `[data-theme='dark']`. Use the
   tokens (`--panel`, `--panel-2`, `--raised`, `--line`, `--line-2`, `--line-soft`, `--fg`, `--muted`,
-  `--accent`, `--accent-fg`, `--accent-soft`, `--accent-line`, `--key`, `--key-text`, `--key-soft`,
+  `--accent`, `--accent-fg`, `--ok`, `--accent-soft`, `--accent-line`, `--key`, `--key-text`, `--key-soft`,
   `--head`, `--mat`, `--dot`, `--shade`, `--shade-sm`), never raw colours. Later rules for the refresh
   are appended near the end of `app.css` ("UI refresh: details matched to the mockup", …).
 - **Fonts:** `--f-ui` Instrument Sans for everything, `--f-mark` Instrument Serif for the wordmark,

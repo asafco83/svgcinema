@@ -79,7 +79,7 @@ async def main():
         st=await E("""(()=>{const h=[...document.querySelectorAll('.ag-sec h3')].map(h=>h.textContent.trim());
           return {secs:h, prov:document.querySelector('#agImgProv').value, models:[...document.querySelectorAll('#agImgSel option')].map(o=>o.textContent.split(' · ')[0]),
             vec:[...document.querySelectorAll('#agVecSel option')].map(o=>o.textContent), key:!!document.querySelector('#agImgKey')}})()""")
-        check('Settings has an Images section after the agent model', st['secs'][:2]==['Agent model','Images'], st['secs'])
+        check('Settings has an Images section after the agent model', st['secs'][:3]==['How you connect','Agent model','Images'], st['secs'])
         check('…the agent’s OpenRouter key makes images too (no second key field)', st['prov']=='openrouter' and not st['key'], st)
         check('…image models come from OpenRouter’s live list, picture models only', st['models'][:2]==['GPT Image Flare','FLUX.2 Pro'] and 'Recraft V4 Vector' not in st['models'], st['models'])
         check('…vector: drawn by the agent, or a vector model', st['vec'][:2]==['Drawn by the agent','Recraft V4 Vector · about $0.08'], st['vec'])

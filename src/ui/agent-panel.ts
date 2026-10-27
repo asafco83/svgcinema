@@ -1,7 +1,9 @@
 // SVGcinema — ui/agent-panel
 // The design agent's panel, docked on the right at full height (layout A of the mockup): the chat
-// with each request's steps, Undo this request, first open (connect a model), settings with a Test,
-// and provider errors. Opened by the Agent button in the top bar or Alt+A.
+// with each request's steps, Undo this request, first open (an API key or your AI assistant), settings
+// with a Test, and provider errors. With "Your AI assistant" (agent/assist) the user's own assistant
+// works through window.svgcinema and the panel shows how to connect, its steps, Stop and Undo, and a
+// drop card for images it can't hand over. Opened by the Agent button in the top bar or Alt+A.
 import { $ } from '../core/constants';
 import { setTime, undo } from '../core/history';
 import { togglePlay } from '../core/playback';
@@ -12,6 +14,21 @@ import { EXTRAS } from '../io/extras';
 import { workAreaResized } from '../tools/hand';
 import { INSPECTOR_EVENT } from './inspector';
 import { BUSY, setBusy } from '../agent/busy';
+import {
+  ASSIST,
+  ASSIST_EVENT,
+  ASSIST_UI,
+  type Session,
+  STARTER,
+  answerWait,
+  canUndoSession,
+  cancelWait,
+  guide,
+  installAPI,
+  lastUsed,
+  stopSession,
+} from '../agent/assist';
+import { makeZip } from '../io/zip';
 import {
   CHAT,
   CHAT_FILE,
@@ -47,6 +64,9 @@ import { type ImageAnswer, type ImageAsk, modelName, offeredTools } from '../age
 import { PROVIDERS, type ProviderId, makeClient, providerById } from '../agent/providers';
 import { type AgentRequest, beginRequest, continueRequest, isLatest } from '../agent/request';
 import {
+  type AssistImages,
+  assistImages,
+  connectMode,
   canSee,
   confirmImages,
   imageKeyId,
@@ -117,6 +137,14 @@ const ST = {
   imgTest: null as null | { running: boolean; checks: Check[]; at?: number },
   showKey: false,
   otherModel: false,
+  /** first open: the way picked */
+  way: 'assistant' as 'key' | 'assistant',
+  /** Settings, while using your AI assistant: the API key's image model, opened from “Your image key” */
+  peek: false,
+  /** your AI assistant: the connect steps shown again after sessions (How to connect) */
+  howTo: false,
+  /** earlier assistant sessions opened by hand */
+  pastOpen: new Set<number>(),
   /** older turns are folded to one line; ids of turns opened by hand */
   unfolded: new Set<number>(),
   folded: new Set<number>(),
@@ -221,8 +249,16 @@ function headHTML() {
     return `<button class="ag-ib" data-act="back" aria-label="Back to the chat" title="Back to the chat">${svg(P.back, 14, 1.5, 14)}</button>
       <span class="ag-title">Agent settings</span><span class="sp"></span>
       <button class="ag-ib" data-act="close" aria-label="Close the agent (Alt+A)" title="Close (Alt+A)">${svg(P.close, 12, 1.5, 12)}</button>`;
+  if (assistView())
+    return `<span class="ag-logo">${svg(P.bubble)}</span><span class="ag-title">Agent</span><span class="ag-mode">Your AI assistant</span><span class="sp"></span>
+    <button class="ag-ib" data-act="settings" aria-label="Agent settings" title="Agent settings">${svg(P.gear, 15)}</button>
+    <button class="ag-ib" data-act="close" aria-label="Close the agent (Alt+A)" title="Close (Alt+A)">${svg(P.close, 12, 1.5, 12)}</button>`;
   return `<span class="ag-logo">${svg(P.bubble)}</span><span class="ag-title">Agent</span><span class="sp"></span>
-    <button class="ag-ib" data-act="new" aria-label="New chat" title="New chat"${CHAT.turns.length && !ST.running ? '' : ' disabled'}>${svg(P.newChat, 15)}</button>
+    ${
+      connectMode() === '' && !CHAT.turns.length
+        ? ''
+        : `<button class="ag-ib" data-act="new" aria-label="New chat" title="New chat"${CHAT.turns.length && !ST.running ? '' : ' disabled'}>${svg(P.newChat, 15)}</button>`
+    }
     <button class="ag-ib" data-act="settings" aria-label="Agent settings" title="Agent settings">${svg(P.gear, 15)}</button>
     <button class="ag-ib" data-act="close" aria-label="Close the agent (Alt+A)" title="Close (Alt+A)">${svg(P.close, 12, 1.5, 12)}</button>`;
 }
@@ -397,6 +433,13 @@ function imgAskHTML() {
   <div class="ag-card-b"><button class="ag-btn" data-act="imgcancel">Cancel</button><button class="ag-btn pri" data-act="imggo">Generate</button></div></div>`;
 }
 
+function confirmHTML() {
+  return `<div class="ag-card ag-confirm" role="group" aria-label="Confirm delete"><div class="ag-card-h">${svg(STEP.del, 15)}<b>Delete ${plural(
+    ST.confirm!.names.length,
+    'layer',
+  )}?</b></div><p>${esc(ST.confirm!.names.join(', '))}</p><div class="ag-card-b"><button class="ag-btn" data-act="keep">Keep</button><button class="ag-btn pri" data-act="delete">Delete</button></div></div>`;
+}
+
 function genHTML() {
   const g = ST.gen!,
     secs = Math.round((Date.now() - g.at) / 1000);
@@ -460,11 +503,7 @@ function turnHTML(t: Turn, last: boolean) {
       12,
     )}${plural(n, 'step')}${t.changed ? '<span>· one undo step</span>' : ''}</button>${open ? stepsHTML(t) : ''}</div>`;
   }
-  if (ST.confirm && ST.confirm.id === t.id)
-    h += `<div class="ag-card ag-confirm" role="group" aria-label="Confirm delete"><div class="ag-card-h">${svg(STEP.del, 15)}<b>Delete ${plural(
-      ST.confirm.names.length,
-      'layer',
-    )}?</b></div><p>${esc(ST.confirm.names.join(', '))}</p><div class="ag-card-b"><button class="ag-btn" data-act="keep">Keep</button><button class="ag-btn pri" data-act="delete">Delete</button></div></div>`;
+  if (ST.confirm && ST.confirm.id === t.id) h += confirmHTML();
   if (ST.imgAsk && ST.imgAsk.id === t.id) h += imgAskHTML();
   if (running && ST.gen) h += genHTML();
   if (live && n) h += `<p class="ag-text" dir="auto">${esc(live)}</p>`;
@@ -485,7 +524,14 @@ function turnHTML(t: Turn, last: boolean) {
   return h + '</div>';
 }
 
+/** The chat view shows your AI assistant: chosen in Settings, or one is at work right now. */
+function assistView() {
+  return ST.view === 'chat' && ((ASSIST.now && ASSIST.now.open) || connectMode() === 'assistant');
+}
+
 function chatHTML() {
+  if (assistView()) return assistHTML();
+  if (connectMode() === '' && !CHAT.turns.length) return chooseHTML();
   if (!currentChoice() && !CHAT.turns.length) return setupHTML();
   if (!CHAT.turns.length)
     return `<div class="ag-hello"><span class="ag-tile">${svg(P.bubble, 20, 1.3)}</span><p>Ask for artwork or animation. The agent works in this project, and each request is one undo step.</p>${EXAMPLES.map(
@@ -526,6 +572,285 @@ function setupHTML() {
   </div>`;
 }
 
+/* ---------- your AI assistant ---------- */
+
+const IC = {
+  key: '<path d="M4.5 9.5a3 3 0 113-3l5 5v2h-2v-1h-1v-1h-1.2L6.8 9.2a3 3 0 01-2.3.3zM4.6 6.4h.01"/>',
+  assist:
+    '<path d="M2.5 3.5h11a1 1 0 011 1v7a1 1 0 01-1 1h-11a1 1 0 01-1-1v-7a1 1 0 011-1zM1.5 6h13M10 7.8l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z"/>',
+  copy: '<rect x="5" y="5" width="8.5" height="8.5" rx="1.5"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5"/>',
+  down: '<path d="M8 2.5v8M4.5 7.5L8 11l3.5-3.5M3 13.5h10"/>',
+  doc: '<path d="M4 2.5h6l2.5 2.5v8.5h-8.5zM6 8h4.5M6 10.5h4.5"/>',
+  up: '<path d="M8 10.5V3M4.8 6.2L8 3l3.2 3.2M3 10.5v1.8A1.2 1.2 0 004.2 13.5h7.6a1.2 1.2 0 001.2-1.2v-1.8"/>',
+  stop: '<rect x="1.5" y="1.5" width="7" height="7" rx="1.5" fill="currentColor" stroke="none"/>',
+  spin: '<circle cx="8" cy="8" r="5.5" class="ag-spin-bg"/><path d="M8 2.5a5.5 5.5 0 015.5 5.5" class="ag-spin-fg"/>',
+};
+const WAYS = [
+  {
+    id: 'key' as const,
+    label: 'Your own API key',
+    d: IC.key,
+    note: 'Chat right here. OpenRouter, OpenAI, Anthropic, Gemini, Groq or any compatible service; you pay the provider per use.',
+    tags: ['Chat in this panel', 'Makes images'],
+  },
+  {
+    id: 'assistant' as const,
+    label: 'Your AI assistant',
+    d: IC.assist,
+    note: 'No key: Claude in Chrome, or another assistant in your browser, edits this project with its own subscription.',
+    tags: ['Chat in your assistant', 'No API key'],
+  },
+];
+
+/** First open: an API key (the chat here) or your AI assistant. */
+function chooseHTML() {
+  return `<div class="ag-setup">
+    <span class="ag-tile">${svg(P.bubble, 20, 1.3)}</span>
+    <h2>Make and animate by asking</h2>
+    <p class="muted">Describe what you want. An AI draws, brings in images and animates them in this project.</p>
+    <fieldset class="ag-ways"><legend>How do you want to connect?</legend>
+    ${WAYS.map(
+      w =>
+        `<label class="ag-radio ag-way${ST.way === w.id ? ' on' : ''}"><input type="radio" name="agWay" value="${w.id}"${
+          ST.way === w.id ? ' checked' : ''
+        }><span><b>${svg(w.d, 14)}${w.label}</b><small>${w.note}</small><span class="ag-tags">${w.tags
+          .map(t => `<i>${t}</i>`)
+          .join('')}</span></span></label>`,
+    ).join('')}
+    </fieldset>
+    <button class="ag-btn pri wide" data-act="way">Continue</button>
+    <p class="ag-small">You can switch later in the agent’s settings.</p>
+  </div>`;
+}
+
+const ago = (t: number) => {
+  const s = Math.max(0, Math.round((Date.now() - t) / 1000));
+  return s < 10
+    ? 'just now'
+    : s < 60
+      ? `${s} s ago`
+      : s < 3600
+        ? `${Math.round(s / 60)} min ago`
+        : `${Math.round(s / 3600)} h ago`;
+};
+const sw = (act: string, on: boolean, text: string, sub = '') =>
+  `<div class="ag-sw-row${sub ? ' tall' : ''}"><span>${text}${sub ? `<small>${sub}</small>` : ''}</span><button class="ag-sw" role="switch" data-act="${act}" aria-checked="${on}" aria-label="${text}"><i></i></button></div>`;
+
+const IMG_LABEL: Record<AssistImages, string> = {
+  own: 'Your assistant’s own',
+  key: 'Your image key',
+  vector: 'Vector shapes only',
+};
+/** The image model of the API key settings, as the Images choice shows it ('' when none is set up). */
+function keyImageLine() {
+  const c = imageChoice();
+  if (!c) return '';
+  const pr = imgPrice(c.provider, c.model);
+  return [
+    c.provider === 'custom' ? 'Custom' : imageProviderById(c.provider)!.label,
+    modelName(c),
+    pr ? pr + ' each' : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+/** Your AI assistant: how to connect (no session yet, or How to connect). */
+function connectHTML() {
+  const s = getSettings(),
+    img = assistImages(),
+    key = !!imageChoice();
+  return `<div class="ag-connect">
+  <div class="ag-status"><i class="wait"></i><span>Waiting for your assistant · no steps yet</span></div>
+  <h2>Use your AI assistant</h2>
+  <p class="muted">Your browser’s AI assistant edits this project through SVGcinema’s editing tools, using its own subscription. You chat with it in its own window; what it does shows up here.</p>
+  <ol class="ag-how">
+    <li><span class="ag-n">1</span><span><b>Open your assistant in this tab</b><small>Claude in Chrome, or any assistant that can run scripts on web pages. Allow it on this site if it asks.</small></span></li>
+    <li><span class="ag-n">2</span><span><b>Start with this message</b><span class="ag-msg"><span class="ag-msg-t">${esc(STARTER)}<em>[what to make]</em></span><span class="ag-msg-b"><span>Paste it in your assistant’s chat</span><button class="ag-btn pri sm" data-act="copystart">${svg(IC.copy, 12, 1.5)}Copy</button></span></span></span></li>
+    <li><span class="ag-n off">3</span><span><b>Using Claude?</b> <span class="muted">Optional</span><small>Add the SVGcinema skill once and skip step 2: just ask for what you want.</small><button class="ag-btn" data-act="skill">${svg(IC.down, 12, 1.5)}Download the skill</button></span></li>
+  </ol>
+  <div class="sp"></div>
+  <div class="ag-connect-f">
+  ${sw('assiston', s.assistOn, 'Let assistants edit this project', 'Off: the tools refuse every step')}
+  <div class="ag-f"><label class="ag-l short" for="agAsImg">Images</label><select class="sel" id="agAsImg">${(
+    ['own', 'key', 'vector'] as AssistImages[]
+  )
+    .map(
+      m =>
+        `<option value="${m}"${m === img ? ' selected' : ''}${m === 'key' && !key ? ' disabled' : ''}>${IMG_LABEL[m]}${
+          m === 'key' && !key ? ' (set up in Settings)' : ''
+        }</option>`,
+    )
+    .join('')}</select></div>
+  <p class="ag-small">Other assistants: <button class="ag-link" data-act="guide">the guide for AI assistants</button> explains the tools in plain text. Prefer the chat here? <button class="ag-link" data-act="usekey">Use an API key</button></p>
+  </div></div>`;
+}
+
+const sessionTitle = (s: Session) =>
+  s.summary || s.task || (s.steps.length ? s.steps[s.steps.length - 1].label : 'Nothing done');
+
+/** The drop card: the assistant made an image it can't hand over. */
+function dropHTML(s: Session) {
+  const w = s.wait!;
+  return `<div class="ag-card ag-dropcard" role="group" aria-label="Add your assistant’s image">
+  <div class="ag-card-h">${svg(STEP.image, 15)}<b>Add the image “${esc(w.name)}”</b></div>
+  <p>Your assistant made it in its own chat but can’t hand it over. Save it there (right-click › Save image), then drop it here.</p>
+  <div class="ag-drop" id="agDrop" tabindex="0" role="button" aria-label="Drop the image here, or press to choose the file">${svg(IC.up, 22, 1.3)}<b>Drop the image here</b><small>PNG, JPG, WebP or SVG · or paste it (Ctrl+V)</small></div>
+  <div class="ag-card-b"><button class="ag-btn" data-act="dropvector">Draw vector instead</button><button class="ag-btn pri" data-act="dropfile">Choose file…</button></div>
+  <input type="file" id="agDropFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden>
+</div>`;
+}
+
+function sessionStepsHTML(s: Session, open: boolean, running: boolean) {
+  const n = s.steps.length,
+    head = running
+      ? `<div class="ag-steps-h ag-run">${svg(IC.spin, 12, 1.6)}Working · ${plural(n, 'step')} so far<span>· one undo step</span></div>`
+      : `<button class="ag-steps-h" data-act="psteps" data-id="${s.id}" aria-expanded="${open}">${svg(
+          open ? P.chevDown : P.chevRight,
+          10,
+          1.6,
+          12,
+        )}${plural(n, 'step')}${s.open ? ' so far' : ''}${s.open || s.changed ? '<span>· one undo step</span>' : ''}</button>`;
+  return n || running
+    ? `<div class="ag-steps${running ? ' on' : ''}">${head}${open ? s.steps.map(st => stepHTML(st)).join('') : ''}</div>`
+    : '';
+}
+
+/** Your AI assistant at work (or done): earlier sessions, this one's steps, cards that ask the user. */
+function assistHTML() {
+  const s = ASSIST.now;
+  if (!s || (ST.howTo && !s.open)) return connectHTML();
+  const running = s.open,
+    waiting = running && !!s.wait && !s.wait.asset && !s.wait.cancelled;
+  let h = `<div class="ag-msgs ag-as">`;
+  for (const p of ASSIST.past.slice(-3)) {
+    const open = ST.pastOpen.has(p.id);
+    h += `<button class="ag-fold ag-past" data-act="past" data-id="${p.id}" aria-expanded="${open}">${svg(
+      open ? P.chevDown : P.chevRight,
+      10,
+      1.6,
+      12,
+    )}<span>${esc(sessionTitle(p))}</span><small>· ${plural(p.steps.length, 'step')} · ${ago(p.last)}</small></button>`;
+    if (open) h += `<div class="ag-past-steps">${p.steps.map(st => stepHTML(st)).join('')}</div>`;
+  }
+  h += `<div class="ag-turn"><div class="ag-who"><i></i>${esc(s.assistant)} · through SVGcinema’s tools</div>`;
+  h += sessionStepsHTML(s, (running && !waiting) || !ST.folded.has(-s.id), running && !waiting);
+  if (ST.confirm && ST.confirm.id === -1) h += confirmHTML();
+  if (ST.imgAsk && ST.imgAsk.id === -1) h += imgAskHTML();
+  if (running && ST.gen) h += genHTML();
+  if (waiting) h += dropHTML(s);
+  if (!running && s.summary) h += `<p class="ag-text" dir="auto">${esc(s.summary)}</p>`;
+  if (!running && s.stopped) h += `<p class="ag-note">Stopped · kept ${plural(s.steps.length, 'step')}.</p>`;
+  h += `<p class="ag-small">${
+    waiting
+      ? 'Assistants that can pass an image along (as data or a web address) add it themselves; this card is only for those that can’t. It places and animates it once you add it.'
+      : running
+        ? 'Editing is paused while it works, so its steps stay one undo step. The chat happens in your assistant’s window.'
+        : 'Ask your assistant for more in its own window; each request is one undo step here.'
+  }</p></div></div>`;
+  return h;
+}
+
+/** The bar under your AI assistant's steps: how it is doing, Stop, Undo. */
+function assistFootHTML() {
+  const s = ASSIST.now;
+  if (!s || (ST.howTo && !s.open)) return '';
+  const running = s.open,
+    waiting = running && !!s.wait && !s.wait.asset && !s.wait.cancelled,
+    undo = running ? s.steps.length > 0 : canUndoSession(s);
+  const st = waiting
+    ? '<i class="wait"></i>Waiting for your image'
+    : running
+      ? `<i class="ok"></i>Connected · last step ${ago(s.last)}`
+      : '<i class="wait"></i>Waiting for your assistant';
+  return `<span class="ag-as-st">${st}</span>${
+    running ? `<button class="ag-btn" data-act="asstop">${svg(IC.stop, 10, 1, 10)}Stop</button>` : ''
+  }${undo && !waiting ? `<button class="ag-btn" data-act="asundo">${svg(P.undo, 13, 1.5)}Undo</button>` : ''}${
+    running ? '' : `<button class="ag-btn" data-act="howto">How to connect</button>`
+  }`;
+}
+
+/** Settings › How you connect (both ways). */
+function connectSecHTML(mode: 'key' | 'assistant') {
+  return `<section class="ag-sec"><h3>How you connect</h3><div class="ag-seg" role="radiogroup" aria-label="How you connect">${(
+    [
+      ['key', 'API key'],
+      ['assistant', 'Your AI assistant'],
+    ] as const
+  )
+    .map(([v, t]) => `<button role="radio" aria-checked="${mode === v}" data-act="connect" data-v="${v}">${t}</button>`)
+    .join('')}</div><p class="ag-small">${
+    mode === 'assistant'
+      ? 'Your browser’s assistant edits through SVGcinema’s tools with its own subscription. The API key settings are kept for when you switch back.'
+      : 'Chat in this panel with your own API key; you pay the provider per use. Your assistant’s settings are kept for when you switch back.'
+  }</p></section>`;
+}
+
+/** Settings while using your AI assistant. */
+function assistSettingsHTML(sec: (title: string, body: string) => string) {
+  const s = getSettings(),
+    img = assistImages(),
+    line = keyImageLine(),
+    last = lastUsed();
+  const opt = (m: AssistImages, note: string, extra = '') => {
+    const off = m === 'key' && !line;
+    return `<label class="ag-iopt${m === img ? ' on' : ''}${off ? ' off' : ''}"><input type="radio" name="agAsImgR" value="${m}"${
+      m === img ? ' checked' : ''
+    }${off ? ' disabled' : ''}><span><b>${IMG_LABEL[m]}</b><small>${note}</small>${extra}</span></label>`;
+  };
+  const images = `<fieldset class="ag-iopts"><legend>Images</legend>${opt(
+    'own',
+    'When it can make images; any cost is on your assistant’s plan. If it can’t hand one over, you drop it in; if it can’t make one, it draws vector shapes.',
+  )}${opt(
+    'key',
+    line
+      ? 'The image model from your API key settings, with your credit. Asks first, with the price.'
+      : 'The image model from your API key settings, with your credit.',
+    line
+      ? `<span class="ag-icfg"><span>${esc(line)}</span><button class="ag-link" data-act="peekimg">Change ›</button></span>`
+      : `<span class="ag-inone">No image model set up. <button class="ag-link" data-act="peekimg">Set one up in API key ›</button></span>`,
+  )}${opt('vector', 'Always works; every part stays editable and can move on its own.')}</fieldset>`;
+  const you = `${sw('assiston', s.assistOn, 'Let assistants edit this project', 'Off: the tools refuse every step')}${images}${
+    last
+      ? `<div class="ag-last"><i></i><span>Last used by <b>${esc(last.assistant)}</b> · ${ago(last.at)}</span></div>`
+      : ''
+  }<div class="ag-start"><span>Get started</span><div><button class="ag-btn line" data-act="copystart">${svg(IC.copy, 12, 1.5)}Copy the starting message</button><button class="ag-btn line" data-act="skill">${svg(
+    IC.down,
+    12,
+    1.5,
+  )}Claude skill</button><button class="ag-btn line" data-act="guide">${svg(IC.doc, 12, 1.5)}Guide for AI assistants</button></div></div>`;
+  const ask = sec(
+    'Ask first',
+    `${
+      img === 'key'
+        ? sw(
+            'askimg',
+            confirmImages(),
+            'Before generating images',
+            'Shows the model and the price in this panel, since it uses your credit',
+          )
+        : ''
+    }${sw('askdelete', s.askDelete, 'Before deleting layers', 'This panel asks you, whichever AI is working')}`,
+  );
+  const priv = sec(
+    'Privacy',
+    `<p class="ag-small">Your assistant reads the scene and edits it in this tab. SVGcinema sends nothing anywhere; your assistant’s own privacy terms apply to what it sees.</p>
+     <p class="ag-small">With “Your image key”, images an assistant asks for use your credit, and Ask first applies. Its own images are billed by your assistant, if at all.</p>`,
+  );
+  return `${connectSecHTML('assistant')}${sec('Your AI assistant', you)}${ask}${priv}`;
+}
+
+/** “Your image key”: the API key settings' image model, opened from your AI assistant's settings. */
+function peekHTML(
+  sec: (title: string, body: string) => string,
+  row: (label: string, ctl: string, forId?: string) => string,
+) {
+  return `${connectSecHTML('assistant')}<div class="ag-peek"><button class="ag-link" data-act="peekback">‹ Back to Your AI assistant</button><p class="ag-small">The image model of the API key settings: “Your image key” makes your assistant’s images with it. You keep using your AI assistant.</p></div>${sec(
+    'Images',
+    imagesHTML(row),
+  )}`;
+}
+
 function checkHTML(c: Check) {
   return `<div class="ag-chk ${c.ok === true ? 'ok' : c.ok === 'warn' ? 'warn' : 'no'}">${svg(
     c.ok === true ? P.ok : c.ok === 'warn' ? P.warn : P.no,
@@ -546,6 +871,8 @@ function settingsHTML() {
     `<section class="ag-sec"><h3>${svg(P.chevDown, 10, 1.6, 12)}${title}</h3><div class="ag-rows">${body}</div></section>`;
   const row = (label: string, ctl: string, forId = '') =>
     `<div class="ag-f"><label class="ag-l"${forId ? ` for="${forId}"` : ''}>${label}</label>${ctl}</div>`;
+  if (connectMode() === 'assistant')
+    return `<div class="ag-settings">${ST.peek ? peekHTML(sec, row) : assistSettingsHTML(sec)}</div>`;
   let agent = row(
     'Provider',
     `<select class="sel" id="agProv">${PROVIDERS.map(
@@ -622,7 +949,7 @@ function settingsHTML() {
   const setup = imageSetup(),
     it = setup && imageTest(setup),
     imgTitle = `Images${it && !it.ok ? '<span class="ag-bad">Not working</span>' : ''}`;
-  return `<div class="ag-settings">${sec('Agent model', agent)}${sec(imgTitle, imagesHTML(row))}${ask}${priv}</div>`;
+  return `<div class="ag-settings">${connectSecHTML('key')}${sec('Agent model', agent)}${sec(imgTitle, imagesHTML(row))}${ask}${priv}</div>`;
 }
 
 interface POpt {
@@ -785,6 +1112,8 @@ function renderBody() {
   const focus =
     document.activeElement && b.contains(document.activeElement) ? (document.activeElement as HTMLElement).id : '';
   b.innerHTML = ST.view === 'settings' ? settingsHTML() : chatHTML();
+  b.classList.toggle('as', assistView());
+  $('#agHead').innerHTML = headHTML();
   if (focus) {
     const f = document.getElementById(focus) as HTMLInputElement | null;
     if (f) {
@@ -797,8 +1126,12 @@ function renderBody() {
 }
 function renderComposer() {
   const c = $('#agComp') as HTMLElement,
-    inSetup = !currentChoice() && !CHAT.turns.length;
-  c.hidden = ST.view !== 'chat' || inSetup;
+    inSetup = !currentChoice() && !CHAT.turns.length,
+    as = assistView(),
+    foot = $('#agAsFoot') as HTMLElement;
+  c.hidden = ST.view !== 'chat' || inSetup || as || (connectMode() === '' && !CHAT.turns.length);
+  foot.innerHTML = as ? assistFootHTML() : '';
+  foot.hidden = !foot.innerHTML;
   const running = !!ST.running,
     t = $('#agText') as HTMLTextAreaElement;
   t.placeholder = running ? 'Add to your next request…' : 'Describe what to make or change…';
@@ -1231,6 +1564,70 @@ async function runTest() {
   renderBody();
 }
 
+/* ---------- your AI assistant: actions ---------- */
+
+function stopAssist() {
+  if (ST.confirm && ST.confirm.id === -1) {
+    ST.confirm.resolve(false);
+    ST.confirm = null;
+  }
+  if (ST.imgAsk && ST.imgAsk.id === -1) {
+    ST.imgAsk.resolve({ go: false });
+    ST.imgAsk = null;
+  }
+  stopSession();
+  toast('Stopped your assistant. What it did so far is kept, as one undo step.');
+}
+async function dropIn(f: File | Blob) {
+  if (f.type && !/^image\//.test(f.type)) return toast('That isn’t an image: drop a PNG, JPG, WebP or SVG.');
+  try {
+    await answerWait(f);
+    toast('Added the image. Your assistant places it next.');
+  } catch (e) {
+    toast(`The image couldn’t be read: ${(e && (e as Error).message) || e}`);
+  }
+}
+async function copyStarter() {
+  try {
+    await navigator.clipboard.writeText(STARTER);
+    toast('Copied. Paste it in your assistant’s chat and add what to make.');
+  } catch (_) {
+    toast('Couldn’t copy here: select the message and copy it.');
+  }
+}
+/** The Claude skill: a folder with SKILL.md that points Claude at window.svgcinema. */
+export const SKILL_MD = `---
+name: svgcinema
+description: Make, edit and animate artwork in SVGcinema (an animated SVG editor open in a browser tab) through its window.svgcinema tools. Use when the user asks for drawing or animation in SVGcinema, or in an svgcinema tab.
+---
+
+# SVGcinema
+
+SVGcinema runs in the user's browser tab and has a JavaScript API for assistants: \`window.svgcinema\`.
+
+1. In the SVGcinema tab, run \`window.svgcinema.help()\` with your page-script tool and read all of it: it explains how to work, the rules and every tool, and it follows the user's current settings (for example how to handle images).
+2. Follow it: \`svgcinema.start({ task, assistant })\`, then \`await svgcinema.call(name, args)\` (or \`svgcinema.batch([...])\`), then \`svgcinema.done(summary)\`. Everything between start and done is one undo step for the user.
+3. Look at your work with a screenshot of the tab, and fix what looks wrong.
+
+If \`window.svgcinema\` is missing, the tab isn't SVGcinema (or it is still loading): ask the user to open their project at https://asafco83.github.io/svgcinema/.
+`;
+async function downloadSkill() {
+  const blob = await makeZip([{ name: 'svgcinema/SKILL.md', data: new TextEncoder().encode(SKILL_MD) }]);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'svgcinema-skill.zip';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('Downloaded the skill. Add it in Claude’s settings, under Skills.');
+}
+function openGuide() {
+  const url = URL.createObjectURL(new Blob([guide()], { type: 'text/plain;charset=utf-8' }));
+  if (!window.open(url, '_blank', 'noopener')) toast('Allow pop-ups for this site to open the guide.');
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
 function onChange(e: Event) {
   const t = e.target as HTMLInputElement;
   const s = getSettings();
@@ -1317,6 +1714,20 @@ function onChange(e: Event) {
       setSettings({ maxSteps: parseInt(t.value) || s.maxSteps });
       return renderBody();
   }
+  if (t.id === 'agAsImg' || t.name === 'agAsImgR') {
+    setSettings({ assistImages: t.value as AssistImages });
+    return renderBody();
+  }
+  if (t.name === 'agWay') {
+    ST.way = t.value as 'key' | 'assistant';
+    return renderBody();
+  }
+  if (t.id === 'agDropFile') {
+    const f = t.files && t.files[0];
+    t.value = '';
+    if (f) dropIn(f);
+    return;
+  }
   if (t.name === 'agProv') {
     ST.pick = t.value as ProviderId;
     renderBody();
@@ -1334,6 +1745,10 @@ function onClick(e: MouseEvent) {
       ST.view = 'settings';
       return render();
     case 'back':
+      if (ST.peek) {
+        ST.peek = false;
+        return renderBody();
+      }
       ST.view = 'chat';
       return render();
     case 'new': {
@@ -1476,6 +1891,65 @@ function onClick(e: MouseEvent) {
     case 'askdelete':
       setSettings({ askDelete: !getSettings().askDelete });
       return renderBody();
+    case 'way':
+      setSettings({ connect: ST.way });
+      return render();
+    case 'connect':
+      setSettings({ connect: b.dataset.v as 'key' | 'assistant' });
+      ST.peek = false;
+      return render();
+    case 'usekey':
+      setSettings({ connect: 'key' });
+      return render();
+    case 'assiston':
+      setSettings({ assistOn: !getSettings().assistOn });
+      return renderBody();
+    case 'peekimg':
+      ST.peek = true;
+      renderBody();
+      ($('#agBody') as HTMLElement).scrollTop = 0;
+      return;
+    case 'peekback':
+      ST.peek = false;
+      return renderBody();
+    case 'copystart':
+      copyStarter();
+      return;
+    case 'skill':
+      downloadSkill();
+      return;
+    case 'guide':
+      openGuide();
+      return;
+    case 'howto':
+      ST.howTo = true;
+      return renderBody();
+    case 'past':
+      ST.pastOpen.has(id) ? ST.pastOpen.delete(id) : ST.pastOpen.add(id);
+      return renderBody();
+    case 'psteps':
+      ST.folded.has(-id) ? ST.folded.delete(-id) : ST.folded.add(-id);
+      return renderBody();
+    case 'asstop':
+      stopAssist();
+      return;
+    case 'asundo': {
+      const s = ASSIST.now;
+      if (!s) return;
+      if (s.open) stopAssist();
+      if (canUndoSession(s)) {
+        undo();
+        s.changed = false;
+        toast('Undid what your assistant did.');
+      }
+      return render();
+    }
+    case 'dropvector':
+      cancelWait();
+      return;
+    case 'dropfile':
+      ($('#agDropFile') as HTMLInputElement).click();
+      return;
     case 'clearchat': {
       clearChat();
       return render();
@@ -1495,6 +1969,7 @@ export function init(): void {
   host.innerHTML = `<div class="ag-grip" title="Drag to resize" aria-hidden="true"></div>
     <div class="ag-head" id="agHead"></div>
     <div class="ag-body" id="agBody"></div>
+    <div class="ag-as-foot" id="agAsFoot" hidden></div>
     <div class="ag-comp" id="agComp">
       <div class="ag-box">
         <label class="vh" for="agText">Message the agent</label>
@@ -1591,6 +2066,82 @@ export function init(): void {
   });
   // the selection chip follows the selection, wherever it changes (canvas, Layers panel, keys, the agent)
   document.addEventListener(INSPECTOR_EVENT, () => ST.open && renderComposer());
+
+  // your AI assistant: window.svgcinema, and the cards its tools show here
+  installAPI();
+  ASSIST_UI.opened = () => {
+    ST.howTo = false;
+    ST.view = 'chat';
+    ST.peek = false;
+    if (!ST.open) toggleAgent(true);
+  };
+  ASSIST_UI.confirmDelete = names =>
+    new Promise<boolean>(resolve => {
+      ST.confirm = { id: -1, names, resolve };
+      scheduleRender();
+    });
+  ASSIST_UI.confirmImage = ask =>
+    new Promise<ImageAnswer>(resolve => {
+      ST.imgAsk = { id: -1, ask, prompt: ask.prompt, dontAsk: false, kind: ask.kind, resolve };
+      scheduleRender();
+    });
+  ASSIST_UI.generating = g => {
+    ST.gen = g ? { ...g, at: Date.now() } : null;
+    clearInterval(genTimer);
+    if (g) genTimer = setInterval(scheduleRender, 1000);
+    scheduleRender();
+  };
+  document.addEventListener(ASSIST_EVENT, () => {
+    const s = ASSIST.now;
+    if (s && !s.open) {
+      // a closed session: its cards go
+      if (ST.confirm && ST.confirm.id === -1) ST.confirm.resolve(false), (ST.confirm = null);
+      if (ST.imgAsk && ST.imgAsk.id === -1) ST.imgAsk.resolve({ go: false }), (ST.imgAsk = null);
+      ST.gen = null;
+    }
+    if (ST.open) scheduleRender();
+  });
+  // the "last step 2 min ago" line keeps up
+  setInterval(() => ST.open && assistView() && renderComposer(), 15000);
+  // the drop card: drop or paste the image your assistant made
+  host.addEventListener('dragover', e => {
+    const d = (e.target as HTMLElement).closest('#agDrop');
+    if (!d) return;
+    e.preventDefault();
+    d.classList.add('over');
+  });
+  host.addEventListener('dragleave', e => {
+    const d = (e.target as HTMLElement).closest('#agDrop');
+    if (d) d.classList.remove('over');
+  });
+  host.addEventListener('drop', e => {
+    const d = (e.target as HTMLElement).closest('#agDrop');
+    if (!d) return;
+    e.preventDefault();
+    e.stopPropagation();
+    d.classList.remove('over');
+    const f = e.dataTransfer && e.dataTransfer.files[0];
+    if (f) dropIn(f);
+  });
+  host.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && (e.target as HTMLElement).id === 'agDrop') {
+      e.preventDefault();
+      ($('#agDropFile') as HTMLInputElement).click();
+    }
+  });
+  window.addEventListener(
+    'paste',
+    e => {
+      const s = ASSIST.now;
+      if (!s || !s.open || !s.wait || s.wait.asset || s.wait.cancelled) return;
+      const f = [...((e.clipboardData && e.clipboardData.files) || [])].find(x => /^image\//.test(x.type));
+      if (!f) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      dropIn(f);
+    },
+    true,
+  );
 
   restoreChat();
   try {

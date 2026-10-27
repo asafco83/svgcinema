@@ -28,7 +28,14 @@ export interface AgentSettings {
   vector: string;
   /** Custom images: use the agent's Custom address and key */
   imgSame: boolean;
+  /** how the agent is used: the chat here with an API key, or the user's own AI assistant ('' = not chosen yet) */
+  connect: '' | 'key' | 'assistant';
+  /** let AI assistants edit the project through window.svgcinema (off: every call is refused) */
+  assistOn: boolean;
+  /** images an assistant asks for: its own, made with the image model of the API key settings, or vector only */
+  assistImages: AssistImages;
 }
+export type AssistImages = 'own' | 'key' | 'vector';
 
 const SKEY = 'svgcinema:agent.settings',
   KKEY = 'svgcinema:agent.keys';
@@ -46,6 +53,9 @@ export const DEFAULTS: AgentSettings = {
   preferVector: true,
   vector: 'agent',
   imgSame: true,
+  connect: '',
+  assistOn: true,
+  assistImages: 'own',
 };
 
 function read<T>(k: string, d: T): T {
@@ -70,6 +80,8 @@ export function getSettings(): AgentSettings {
   const s = read<AgentSettings>(SKEY, { ...DEFAULTS });
   if (!providerById(s.provider)) s.provider = DEFAULTS.provider;
   if (s.imgProvider && s.imgProvider !== 'none' && !imageProviderById(s.imgProvider)) s.imgProvider = '';
+  if (s.connect !== 'key' && s.connect !== 'assistant') s.connect = '';
+  if (!['own', 'key', 'vector'].includes(s.assistImages)) s.assistImages = 'own';
   s.maxSteps = Math.max(1, Math.min(100, Math.round(Number(s.maxSteps) || DEFAULTS.maxSteps)));
   return s;
 }
@@ -105,6 +117,18 @@ export function currentChoice(): ModelChoice | null {
   if (!s.model) return null;
   if (s.provider === 'custom') return s.base ? { provider: 'custom', model: s.model, key, base: s.base } : null;
   return key ? { provider: s.provider, model: s.model, key } : null;
+}
+
+/** How the agent is used now: the chat with an API key, the user's AI assistant, or '' (first open: not
+ *  chosen yet). Someone who set up a key before the choice existed uses the key. */
+export function connectMode(): '' | 'key' | 'assistant' {
+  const s = getSettings();
+  return s.connect || (currentChoice() ? 'key' : '');
+}
+/** What assistants do for images now: 'key' only while an image model is set up (else their own). */
+export function assistImages(): AssistImages {
+  const m = getSettings().assistImages;
+  return m === 'key' && !imageChoice() ? 'own' : m;
 }
 
 /** The image service in use: the one chosen, else the agent's provider when it makes images. */

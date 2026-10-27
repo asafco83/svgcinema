@@ -29,6 +29,7 @@
   --check: #e6e9ef;
   /* errors and destructive actions (the agent's error card, Remove keys) */
   --danger: #c9363b;
+  --ok: #1f9d6a;
   --danger-soft: rgba(229, 72, 77, 0.07);
   --danger-line: rgba(229, 72, 77, 0.32);
   --on-accent: #ffffff;
@@ -68,6 +69,7 @@
     --dot: #1e222b;
     --check: #1b2029;
     --danger: #ff8a8d;
+    --ok: #4cc38a;
     --danger-soft: rgba(255, 107, 111, 0.1);
     --danger-line: rgba(255, 107, 111, 0.35);
     --on-accent: #0b0e13;
@@ -102,6 +104,7 @@
   --dot: #1e222b;
   --check: #1b2029;
   --danger: #ff8a8d;
+  --ok: #4cc38a;
   --danger-soft: rgba(255, 107, 111, 0.1);
   --danger-line: rgba(255, 107, 111, 0.35);
   --on-accent: #0b0e13;
@@ -7292,4 +7295,481 @@ button.ag-chip:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Agent — your AI assistant (window.svgcinema): first-open choice, how to connect, its steps, the drop
+   card, and its settings (mockup: "Agent — use your AI assistant, no API key") */
+.ag-mode {
+  height: 20px;
+  line-height: 20px;
+  padding: 0 7px;
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.ag-ways {
+  gap: 8px !important;
+}
+.ag-way {
+  padding: 11px 12px;
+  border-radius: 9px;
+  gap: 10px;
+}
+.ag-way input {
+  margin-top: 2px;
+}
+.ag-way > span {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ag-way b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ag-way b svg {
+  color: var(--accent-fg);
+}
+.ag-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 3px;
+}
+.ag-tags i {
+  height: 18px;
+  line-height: 18px;
+  padding: 0 7px;
+  border-radius: 9px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-style: normal;
+}
+.ag-connect {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 14px;
+}
+.ag-connect h2 {
+  margin: 2px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.ag-connect p.muted {
+  margin: 0;
+  line-height: 18px;
+  color: var(--muted);
+}
+.ag-connect .sp {
+  flex: 1;
+}
+.ag-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-status i,
+.ag-as-st i,
+.ag-last i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--key);
+}
+:is(.ag-status, .ag-as-st, .ag-last) i.ok,
+.ag-last i {
+  background: var(--ok);
+}
+.ag-how {
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ag-how li {
+  display: flex;
+  gap: 10px;
+}
+.ag-how li > span:last-child {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 17px;
+}
+.ag-how b {
+  font-weight: 600;
+}
+.ag-how b + .muted {
+  color: var(--muted);
+}
+.ag-how small {
+  display: block;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.ag-how li:last-child > span:last-child {
+  display: block;
+}
+.ag-how li:last-child .ag-btn {
+  height: 26px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+.ag-n {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+  font-size: 11px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+.ag-n.off {
+  background: var(--panel-2);
+  color: var(--muted);
+}
+.ag-msg {
+  align-self: stretch;
+  margin-top: 6px;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--raised);
+  overflow: hidden;
+}
+.ag-msg-t {
+  display: block;
+  padding: 8px 10px;
+  font-family: var(--f-code);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+.ag-msg-t em {
+  font-style: normal;
+}
+.ag-msg-b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 10px;
+  border-top: 1px solid var(--line-soft);
+  background: var(--panel-2);
+}
+.ag-msg-b > span {
+  flex: 1;
+  color: var(--muted);
+  font-size: 11px;
+}
+.ag-btn.pri.sm {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 6px;
+  gap: 5px;
+  font-size: 11.5px;
+}
+.ag-connect-f {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.ag-l.short {
+  width: auto;
+  color: var(--fg);
+}
+.ag-connect-f .ag-link,
+.ag-iopt .ag-link,
+.ag-peek .ag-link {
+  margin-left: 0;
+}
+.ag-body.as .ag-msgs {
+  gap: 12px;
+}
+.ag-as .ag-past {
+  flex: none;
+}
+.ag-step.i-image svg {
+  color: var(--accent-fg);
+}
+.ag-past-steps {
+  margin-top: -6px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--raised);
+}
+.ag-steps.on {
+  border-color: var(--accent-line);
+}
+.ag-steps-h.ag-run {
+  cursor: default;
+  border-bottom: 1px solid var(--line-soft);
+}
+.ag-spin-bg {
+  stroke: var(--line-2);
+}
+.ag-spin-fg {
+  stroke: var(--accent);
+}
+.ag-run svg {
+  animation: ag-spin 1s linear infinite;
+}
+@keyframes ag-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ag-run svg {
+    animation: none;
+  }
+}
+.ag-dropcard {
+  padding: 0;
+  gap: 0;
+  border: 1px solid var(--accent-line);
+  background: var(--raised);
+  box-shadow: 0 6px 18px -8px var(--shade);
+  overflow: hidden;
+}
+.ag-dropcard .ag-card-h {
+  gap: 8px;
+  padding: 11px 12px 6px;
+  font-size: 13px;
+}
+.ag-dropcard .ag-card-h svg {
+  color: var(--accent-fg);
+}
+.ag-dropcard p {
+  margin: 0 12px 8px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.ag-drop {
+  margin: 0 12px;
+  height: 112px;
+  box-sizing: border-box;
+  border: 1.5px dashed var(--accent-line);
+  border-radius: 8px;
+  background: var(--accent-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--accent-fg);
+  cursor: pointer;
+}
+.ag-drop.over {
+  border-color: var(--accent);
+  border-style: solid;
+}
+.ag-drop:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.ag-drop small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.ag-dropcard .ag-card-b {
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 10px 12px 12px;
+}
+.ag-dropcard .ag-btn {
+  height: 30px;
+  padding: 0 12px;
+}
+.ag-as-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+.ag-as-foot[hidden] {
+  display: none;
+}
+.ag-as-st {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 15px;
+}
+.ag-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.ag-seg button {
+  all: unset;
+  box-sizing: border-box;
+  height: 28px;
+  border-radius: 6px;
+  text-align: center;
+  line-height: 28px;
+  color: var(--muted);
+  font-weight: 500;
+  cursor: pointer;
+}
+.ag-seg button[aria-checked='true'] {
+  background: var(--raised);
+  box-shadow: 0 1px 2px var(--shade-sm);
+  color: var(--fg);
+  font-weight: 600;
+}
+.ag-seg button:focus-visible {
+  outline: 2px solid var(--accent);
+}
+.ag-seg + .ag-small {
+  margin-top: 8px;
+}
+.ag-iopts {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ag-iopts legend {
+  padding: 0;
+  margin-bottom: 6px;
+}
+.ag-iopt {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  line-height: 16px;
+  cursor: pointer;
+}
+.ag-iopt.on {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.ag-iopt input {
+  flex: none;
+  margin: 1px 0 0;
+  accent-color: var(--accent);
+}
+.ag-iopt > span {
+  flex: 1;
+  min-width: 0;
+}
+.ag-iopt b {
+  font-weight: 600;
+}
+.ag-iopt small {
+  display: block;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-iopt.off {
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+  cursor: default;
+}
+.ag-iopt.off :is(input, b, small) {
+  opacity: 0.45;
+}
+.ag-icfg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: var(--panel-2);
+  font-size: 11.5px;
+}
+.ag-icfg > span {
+  flex: 1;
+  min-width: 0;
+}
+.ag-icfg .ag-link {
+  white-space: nowrap;
+}
+.ag-inone {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-last {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: var(--panel-2);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.ag-last b {
+  font-weight: 600;
+}
+.ag-start {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ag-start > span {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-start > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 5px;
+}
+.ag-rows:has(> .ag-iopts) {
+  gap: 10px;
+}
+.ag-peek {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
 }

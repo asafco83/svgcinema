@@ -54,6 +54,9 @@ async def main():
         await pg.click('#bAgent'); await pg.wait_for_timeout(250)
         check('the Agent button opens it, docked as a fifth column', await E("""(()=>{const a=document.querySelector('#agent'), r=a.getBoundingClientRect();
           return !a.hidden && document.querySelector('#app').classList.contains('agent-on') && Math.round(r.right)===1440 && r.width>=300 && document.querySelector('#bAgent').getAttribute('aria-pressed')==='true'})()"""))
+        check('first open asks how to connect: an API key or your AI assistant (picked first)', await E("""[...document.querySelectorAll('input[name=agWay]')].map(i=>i.value+(i.checked?'*':'')).join()==='key,assistant*'"""))
+        check('…with no composer and no New chat', await E("document.querySelector('#agComp').hidden && !document.querySelector('[data-act=new]')"))
+        await pg.click('input[name=agWay][value=key]'); await pg.click('[data-act=way]'); await pg.wait_for_timeout(200)
         check('first open shows the setup, OpenRouter recommended', await E("""!!document.querySelector('.ag-setup') && document.querySelector('.ag-radio.on input').value==='openrouter'"""))
         check('…and the composer is hidden until a model is set up', await E("getComputedStyle(document.querySelector('#agComp')).display==='none' || document.querySelector('#agComp').hidden"))
         await pg.click('[data-act=continue]'); await pg.wait_for_timeout(200)
