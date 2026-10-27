@@ -13,6 +13,16 @@ the published app, and use their exported files (with the embedded player) for a
 including commercially, and load or host the external player file unmodified to play them. The owner keeps the
 unilateral right to modify the terms, revoke permissions and change or end access. Earlier versions were PolyForm Noncommercial 1.0.0; the owner may reopen it later.
 
+**Assistant API, guide and skill:** any tool or functional change that affects what an AI assistant can do or
+how it should work must be reflected in all three, in the same PR:
+
+- the API, `window.svgcinema` (`src/agent/assist.ts`, built on the agent's tools in `src/agent/tools.ts`),
+  including the guide that `help()` returns (`guide()` in `assist.ts`);
+- `public/llms.txt`;
+- the Claude skill (`SKILL_MD` in `src/ui/agent-panel.ts`, downloaded as `svgcinema-skill.zip`).
+
+Update `tests/assist.test.ts` and `tests/browser/assist.py` to match.
+
 ## How we work (the owner's workflow)
 
 For every feature or fix:
