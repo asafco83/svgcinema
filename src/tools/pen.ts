@@ -12,6 +12,7 @@
 //                   (cusp) · drag a segment: reshape it. With the Pen, Alt gives the same on points and handles.
 //  Pencil (N)       freehand; the stroke is simplified and smoothed. End near the start to close it.
 import type { Layer, PathData, PathNode, XY } from '../model/types';
+import { plainPath } from '../core/plain-path';
 import { H, clone, r2, xfp } from '../core/constants';
 import { WRAP } from '../core/dom';
 import { beginEdit, select, setProp } from '../core/history';
@@ -189,10 +190,7 @@ export function penHit(l: Layer, p: XY, handles = false): Hit | null {
 }
 /** Rectangles and ellipses become paths before their nodes are edited. */
 function ensurePath(l: Layer) {
-  if (l.type !== 'rect' && l.type !== 'ellipse') return;
-  l.b.d = l.type === 'rect' ? rectNodes(l.geo) : ellNodes(l.geo);
-  l.type = 'path';
-  l.geo = {};
+  if (l.type === 'rect' || l.type === 'ellipse') plainPath(l);
 }
 export function addNodeAt(l: Layer, h: Extract<Hit, { kind: 'seg' }>) {
   const ed = beginEdit();

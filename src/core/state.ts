@@ -2,6 +2,7 @@
 import { H, SWATCH } from './constants';
 import type { CinPlayer } from '../runtime/engine';
 import type { Asset, Doc, EditorState, Keyframe, Layer, LayerType, Geometry, BaseValues } from '../model/types';
+import { dropKeys } from './plain-path';
 
 export let doc: Doc;
 export let eng: CinPlayer;
@@ -81,6 +82,7 @@ export function layerById(id: string | null | undefined): Layer | undefined {
 }
 // the editor's composites find parent bones by id (child bones cancel their parent's scale)
 H.lookup(id => layerById(id));
+dropKeys.fn = q => S.keys.delete(q as any);
 export function selLayer(): Layer | null | undefined {
   return S.sel ? layerById(S.sel) : null;
 }

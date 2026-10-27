@@ -24,10 +24,12 @@ import {
   r3,
   xfp,
   valueAt,
+  sizeBox,
 } from '../core/constants';
 import { INSP } from '../core/dom';
 import { beginEdit, deleteKeys, setProp, setTool, toggleKey } from '../core/history';
-import { convertToPath, morphTo } from '../core/layer-ops';
+import { convertToPath, morphTo, shapeNodes } from '../core/layer-ops';
+import { plainPath } from '../core/plain-path';
 import { ASSETS, S, doc, layerById, selLayer, sortTrack } from '../core/state';
 import { subdivideAll } from '../geometry/nodes';
 import { toast } from '../io/open';
@@ -39,7 +41,7 @@ import { MESH_DEFAULT, MESH_MAX, MESH_MIN } from '../model/mesh';
 import { drawOrder, rigArtwork } from '../model/draw-order';
 import { addChildBone, boneTipL, shiftChildBones } from '../tools/bones';
 import { setAnchor } from '../tools/edit-tools';
-import { align, alignBar, motionPick, setMotionPath } from './align';
+import { align, alignBar, motionPick, selectionBox, setMotionPath, setSelectionBox } from './align';
 import { booleanOp } from '../core/booleans';
 import { openPicker, showSwatch, toValue, rgbaOf, isNone } from './color-picker';
 import {
@@ -57,6 +59,7 @@ import {
   textAppearanceSection,
   textSection,
   transformSection,
+  LINK_IC,
   pinsSection,
   sizeRow,
   szLocked,
@@ -111,8 +114,16 @@ function renderInspector0() {
     // several layers: only what they all have, edited on all of them (ui/multi)
     let m = `<div class="insp-head"><span class="ih-name ih-multi">${ms.length} layers</span><span class="chip">${commonType(ms)}</span></div>`;
     m += alignBar();
-    m += `<section class="sec"><h3>${ms.length} layers selected</h3><div class="btns"><button class="btn" data-act="grp">Group them</button><button class="btn danger" data-act="delsel">Delete all</button></div><p>Fields show the value the layers share, or “Mixed”. A change applies to all of them.</p></section>`;
     if (S.keys.size) m += keyPanel();
+    const sbn = (f: string, lab: string) =>
+        `<label class="nf"><span>${lab}</span><input id="sb-${f}" data-sb="${f}" inputmode="decimal" spellcheck="false" aria-label="Selection ${lab}"></label>`,
+      keep = S.sbLock !== false;
+    m += `<section class="sec"><h3>${ms.length} layers selected</h3>${nrow('Position', sbn('x', 'X') + sbn('y', 'Y'))}${nrow(
+      'Size',
+      sbn('w', 'W') +
+        sbn('h', 'H') +
+        `<button class="btn ib tg${keep ? ' on' : ''}" data-act="sblock" aria-pressed="${keep}" title="Keep proportions" aria-label="Keep proportions">${LINK_IC}</button>`,
+    )}<p>The box around the whole selection. Moving it moves every layer; resizing it scales them all from its corner. Each change keys the layers that are animated.</p><div class="btns"><button class="btn" data-act="grp">Group them</button><button class="btn danger" data-act="delsel">Delete all</button></div><p>Fields show the value the layers share, or “Mixed”. A change applies to all of them.</p></section>`;
     m += transformSection(l);
     if (allPainted(ms)) m += paintSection(l);
     m += appearanceSection(allPainted(ms) ? l : ({ ...l, type: 'group' } as Layer));
@@ -124,11 +135,12 @@ function renderInspector0() {
   }
   let h = `<div class="insp-head"><input class="txt ih-name" id="ln" data-name value="${esc(l.name)}" spellcheck="false" aria-label="Layer name"><span class="chip${l.sym ? ' sym' : ''}">${l.sym ? instanceChip(l) || l.type : l.type}</span></div>`;
   h += alignBar();
+  // the order: instance, keyframe easing, the layer's own section (its shape, text, image…), then the
+  // properties every layer shares, and Morph and Rig last
   h += instanceSection(l);
   if (S.keys.size) h += keyPanel();
   const painted = ['rect', 'ellipse', 'path', 'text'].includes(l.type);
-  if (l.type === 'text') h += textSection(l);
-  h += shapeSection(l);
+  h += typeSection(l);
   h += transformSection(l);
   h += pinsSection(l);
   const curve = l.t.pos && l.t.pos.length > 1,
@@ -139,53 +151,8 @@ function renderInspector0() {
   if (l.type === 'text') h += textAppearanceSection(l);
   if (painted) h += paintSection(l);
   if (l.type !== 'bone') h += appearanceSection(l) + filtersSection(l);
-  const G = l.geo;
-  if (l.type === 'group') {
-    const n = kids(l.id).length;
-    h += `<section class="sec"><h3>Group <small>${n} layer${n === 1 ? '' : 's'} inside</small></h3>${
-      l.mask === 'mask'
-        ? nrow(
-            'Mask by',
-            `<select class="sel" data-ly="mm" id="ly-mm" aria-label="Mask mode"><option value="">Opacity</option><option value="lum"${l.mm === 'lum' ? ' selected' : ''}>Brightness</option></select>`,
-          ) +
-          `<p>Opacity: the mask shows the layers where it is opaque. Brightness: where it is light (white shows, black hides).</p>`
-        : ''
-    }<p>Keyframes on a group move, turn, scale or fade everything inside it together. Layers inside keep their own keyframes.</p><div class="btns"><button class="btn" data-act="ungroup">Ungroup</button></div></section>`;
-  }
-  if (l.type === 'raw')
-    h += `<section class="sec"><h3>Imported element</h3><p>This element animates with position, rotation, scale and opacity. Its own styling is kept as imported.</p></section>`;
-  if (l.type === 'image') {
-    const a = ASSETS[G.asset];
-    h += `<section class="sec"><h3>Image <span class="chip">${a ? esc((a.mime || '').replace('image/', '').replace('x-icon', 'ico')) : 'missing'}</span></h3>
-      ${a ? `<p>${esc(a.name)} · ${a.w}×${a.h}px · ${kb(a.size || 0)}</p>` : '<p>The image file for this layer is missing. Add it again from the Assets tab.</p>'}
-      ${nrow('Position', gnum('x', 'X') + gnum('y', 'Y'))}${sizeRow(l)}
-      ${a ? '<div class="btns"><button class="btn" data-act="natural">Original size</button></div>' : ''}</section>`;
-  }
-  if (l.type === 'ellipse')
-    h += `<section class="sec"><h3>Ellipse</h3>${nrow('Center', gnum('cx', 'X') + gnum('cy', 'Y'))}${sizeRow(l)}<div class="btns"><button class="btn" data-act="topath">Convert to path</button></div></section>`;
-  if (l.type === 'path') {
-    const others = doc.layers.filter(o => o !== l && ['path', 'rect', 'ellipse'].includes(o.type));
-    const cnt = ((H.get(l, 'd', S.time) || []) as PathData).reduce((s, p) => s + p.n.length, 0);
-    h += `<section class="sec"><h3>Path & morph <small>${cnt} nodes</small></h3>
-      ${sizeRow(l)}
-      ${krow('d', 'Morph', `<button class="btn" data-act="nodes" style="flex:1">${S.tool === 'node' ? 'Done editing' : 'Edit nodes'}</button>`)}
-      <p>Add a Morph keyframe, move the playhead, then edit nodes. The shape blends between keyframes.</p>
-      ${nrow('Morph into', `<select class="sel" id="morphTo" aria-label="Morph into another shape"><option value="">Choose a shape…</option>${others.map(o => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select>`)}
-      <div class="btns"><button class="btn" data-act="subdiv">Add nodes (subdivide)</button></div></section>`;
-  }
-  if (l.type === 'bone') {
-    const n = kids(l.id).length,
-      pb0 = l.parent && layerById(l.parent);
-    h += `<section class="sec"><h3>Bone <small>${n} attached</small></h3>${nrow('Length', gnum('len', 'L'))}${nrow('Rest angle', gnum('ang', '∠', '°'))}
-      <label class="check"><input type="checkbox" data-flag="pin" id="fl-pin" ${l.pin ? 'checked' : ''}> Pin: IK stops at this bone</label>
-      <label class="check"><input type="checkbox" data-flag="lim" id="fl-lim" ${l.lim ? 'checked' : ''}> Limit rotation</label>
-      ${poseRowFor(l) ? `<label class="check sub-check"><input type="checkbox" data-flag="kr" id="fl-kr" ${l.kr !== false ? 'checked' : ''}><span>Key whole rig<span class="bsub">Moving any bone of this rig keys every bone, so each pose is stored whole. Turn off for overlapping action.</span></span></label>` : ''}
-      ${poseRowFor(l) ? drawOrderBlock(l) : ''}
-      ${pb0 && pb0.type === 'bone' ? `<label class="check sub-check"><input type="checkbox" data-flag="inh" id="fl-inh" ${l.inh ? 'checked' : ''}><span>Inherit scale<span class="bsub">Off: this bone follows the parent’s tip without being stretched by its scale.</span></span></label>` : ''}
-      ${l.lim ? nrow('Range', `<label class="nf"><span>min</span><input id="bl-min" data-bl="lmin" inputmode="decimal" value="${fmt(l.lmin != null ? l.lmin : -90)}"><em>°</em></label><label class="nf"><span>max</span><input id="bl-max" data-bl="lmax" inputmode="decimal" value="${fmt(l.lmax != null ? l.lmax : 90)}"><em>°</em></label>`) : ''}
-      <div class="btns"><button class="btn" data-act="childbone">Add child bone</button></div>
-      <p>Drag a bone to rotate it (forward kinematics). Drag its tip, or Alt+drag the bone, to pull the chain into place (inverse kinematics). The Edit bone tool (E) changes the rest pose; the Scale bone tool (S) scales along or across the bone. Attach artwork by dragging layers onto the bone in the Layers panel, with the Bind tool, or with “Attach to bone” on the layer.</p></section>`;
-  } else {
+  h += morphSection(l);
+  if (l.type !== 'bone') {
     const bones = doc.layers.filter(b => b.type === 'bone' && !descendants(l).includes(b));
     if (bones.length) {
       const pb = l.parent && layerById(l.parent),
@@ -197,6 +164,65 @@ function renderInspector0() {
   applyCollapse();
   refreshInspector(true);
   drawEz();
+}
+/** The layer's own section: its shape (with its size), text, image, group, imported element or bone. */
+function typeSection(l: Layer) {
+  const G = l.geo;
+  if (l.type === 'text') return textSection(l);
+  if (l.type === 'rect') return shapeSection(l);
+  // a path: polygon / star, line, or any other path (only its size)
+  if (l.type === 'path') return shapeSection(l) || `<section class="sec"><h3>Path</h3>${sizeRow(l)}</section>`;
+  if (l.type === 'ellipse')
+    return `<section class="sec"><h3>Ellipse</h3>${nrow('Center', gnum('cx', 'X') + gnum('cy', 'Y'))}${sizeRow(l)}<div class="btns"><button class="btn" data-act="topath">Convert to path</button></div></section>`;
+  if (l.type === 'group') {
+    const n = kids(l.id).length;
+    return `<section class="sec"><h3>Group <small>${n} layer${n === 1 ? '' : 's'} inside</small></h3>${
+      l.mask === 'mask'
+        ? nrow(
+            'Mask by',
+            `<select class="sel" data-ly="mm" id="ly-mm" aria-label="Mask mode"><option value="">Opacity</option><option value="lum"${l.mm === 'lum' ? ' selected' : ''}>Brightness</option></select>`,
+          ) +
+          `<p>Opacity: the mask shows the layers where it is opaque. Brightness: where it is light (white shows, black hides).</p>`
+        : ''
+    }<p>Keyframes on a group move, turn, scale or fade everything inside it together. Layers inside keep their own keyframes.</p><div class="btns"><button class="btn" data-act="ungroup">Ungroup</button></div></section>`;
+  }
+  if (l.type === 'raw')
+    return `<section class="sec"><h3>Imported element</h3>${sizeBox(l) ? sizeRow(l) : ''}<p>This element animates with position, size, rotation, scale and opacity. Its own styling is kept as imported; Size stretches it to the box, like Scale.</p></section>`;
+  if (l.type === 'image') {
+    const a = ASSETS[G.asset];
+    return `<section class="sec"><h3>Image <span class="chip">${a ? esc((a.mime || '').replace('image/', '').replace('x-icon', 'ico')) : 'missing'}</span></h3>
+      ${a ? `<p>${esc(a.name)} · ${a.w}×${a.h}px · ${kb(a.size || 0)}</p>` : '<p>The image file for this layer is missing. Add it again from the Assets tab.</p>'}
+      ${nrow('Position', gnum('x', 'X') + gnum('y', 'Y'))}${sizeRow(l)}
+      ${a ? '<div class="btns"><button class="btn" data-act="natural">Original size</button></div>' : ''}</section>`;
+  }
+  if (l.type === 'bone') {
+    const n = kids(l.id).length,
+      pb0 = l.parent && layerById(l.parent);
+    return `<section class="sec"><h3>Bone <small>${n} attached</small></h3>${nrow('Length', gnum('len', 'L'))}${nrow('Rest angle', gnum('ang', '∠', '°'))}
+      <label class="check"><input type="checkbox" data-flag="pin" id="fl-pin" ${l.pin ? 'checked' : ''}> Pin: IK stops at this bone</label>
+      <label class="check"><input type="checkbox" data-flag="lim" id="fl-lim" ${l.lim ? 'checked' : ''}> Limit rotation</label>
+      ${poseRowFor(l) ? `<label class="check sub-check"><input type="checkbox" data-flag="kr" id="fl-kr" ${l.kr !== false ? 'checked' : ''}><span>Key whole rig<span class="bsub">Moving any bone of this rig keys every bone, so each pose is stored whole. Turn off for overlapping action.</span></span></label>` : ''}
+      ${poseRowFor(l) ? drawOrderBlock(l) : ''}
+      ${pb0 && pb0.type === 'bone' ? `<label class="check sub-check"><input type="checkbox" data-flag="inh" id="fl-inh" ${l.inh ? 'checked' : ''}><span>Inherit scale<span class="bsub">Off: this bone follows the parent’s tip without being stretched by its scale.</span></span></label>` : ''}
+      ${l.lim ? nrow('Range', `<label class="nf"><span>min</span><input id="bl-min" data-bl="lmin" inputmode="decimal" value="${fmt(l.lmin != null ? l.lmin : -90)}"><em>°</em></label><label class="nf"><span>max</span><input id="bl-max" data-bl="lmax" inputmode="decimal" value="${fmt(l.lmax != null ? l.lmax : 90)}"><em>°</em></label>`) : ''}
+      <div class="btns"><button class="btn" data-act="childbone">Add child bone</button></div>
+      <p>Drag a bone to rotate it (forward kinematics). Drag its tip, or Alt+drag the bone, to pull the chain into place (inverse kinematics). The Edit bone tool (E) changes the rest pose; the Scale bone tool (S) scales along or across the bone. Attach artwork by dragging layers onto the bone in the Layers panel, with the Bind tool, or with “Attach to bone” on the layer.</p></section>`;
+  }
+  return '';
+}
+/** Morph: on paths, and on rectangles and ellipses (they become paths when they start morphing). */
+function morphSection(l: Layer) {
+  if (l.type !== 'path' && l.type !== 'rect' && l.type !== 'ellipse') return '';
+  const others = doc.layers.filter(o => o !== l && ['path', 'rect', 'ellipse'].includes(o.type)),
+    nodes = l.type === 'path' ? (H.get(l, 'd', S.time) as PathData) : shapeNodes(l),
+    cnt = (nodes || []).reduce((s, p) => s + p.n.length, 0),
+    box = l.type !== 'path';
+  return `<section class="sec"><h3>Morph <small>${cnt} nodes</small></h3>
+      ${krow('d', 'Morph', `<button class="btn" data-act="nodes" style="flex:1">${S.tool === 'node' ? 'Done editing' : 'Edit nodes'}</button>`)}
+      <p>Add a Morph keyframe, move the playhead, then edit nodes. The shape blends between keyframes.</p>
+      ${box ? `<p>Editing the nodes, or adding Morph keyframes, turns this ${l.type === 'rect' ? 'rectangle into a plain path. Radius keyframes are kept as Morph keyframes.' : 'ellipse into a plain path.'}</p>` : ''}
+      ${nrow('Morph into', `<select class="sel" id="morphTo" aria-label="Morph into another shape"><option value="">Choose a shape…</option>${others.map(o => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select>`)}
+      <div class="btns"><button class="btn" data-act="subdiv">Add nodes (subdivide)</button></div></section>`;
 }
 /** Fired after the Inspector is drawn again, which happens whenever the selection changes (the agent's
  *  composer shows what is selected). */
@@ -369,6 +395,13 @@ export function refreshInspector(full?: boolean) {
   if (td !== document.activeElement) td.value = fmt(doc.dur);
   const l = selLayer();
   if (!l) return;
+  const sbIn = INSP.querySelectorAll('[data-sb]');
+  if (sbIn.length) {
+    const B = selectionBox();
+    sbIn.forEach((inp: HTMLInputElement) => {
+      if (inp !== document.activeElement) inp.value = B ? fmt(B[inp.dataset.sb as 'x' | 'y' | 'w' | 'h']) : '';
+    });
+  }
   INSP.querySelectorAll('[data-paint]').forEach((b: HTMLElement) => showSwatch(b, valueAt(l, b.dataset.paint, S.time)));
   INSP.querySelectorAll('[data-f]').forEach((inp: HTMLInputElement) => {
     if (inp === document.activeElement) return;
@@ -640,6 +673,12 @@ export function init(): void {
     }
     if (t.dataset.doc !== undefined) return docField(t);
     if (!l) return;
+    if (t.dataset.sb) {
+      const v = parseFloat(t.value);
+      if (isFinite(v)) setSelectionBox(t.dataset.sb as 'x' | 'y' | 'w' | 'h', v, S.sbLock !== false);
+      else refreshInspector();
+      return;
+    }
     if (isMulti() && (t.dataset.x !== undefined || t.dataset.da !== undefined || t.dataset.ly !== undefined)) {
       multiEdit(t2 => propsChange(t, t2));
       return;
@@ -894,6 +933,12 @@ export function init(): void {
     const b = (e.target as any).closest('[data-act]');
     if (!b || !l) return;
     const a = b.dataset.act;
+    if (a === 'sblock') {
+      S.sbLock = S.sbLock === false;
+      b.classList.toggle('on', S.sbLock);
+      b.setAttribute('aria-pressed', String(S.sbLock));
+      return;
+    }
     if (propsClick(a, b, l)) return;
     if (a === 'flipx' || a === 'flipy') {
       const flip = (x: Layer) => {
@@ -925,10 +970,17 @@ export function init(): void {
       if (S.pinSel != null) removePin(l, S.pinSel);
     } else if (a === 'pinrmall') removeAllPins(l);
     else if (a === 'nodes') {
+      // a rectangle or ellipse shows its nodes as a path
+      if (S.tool !== 'node' && (l.type === 'rect' || l.type === 'ellipse')) {
+        const ed = beginEdit();
+        plainPath(l);
+        ed.end();
+      }
       setTool(S.tool === 'node' ? 'select' : 'node');
       renderInspector();
     } else if (a === 'subdiv') {
       const ed = beginEdit();
+      plainPath(l);
       subdivideAll(l);
       ed.end({ insp: true });
     } else if (a === 'delsel') deleteSel();

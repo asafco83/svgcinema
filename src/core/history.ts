@@ -15,6 +15,7 @@ import { renderInspector } from '../ui/inspector';
 import { renderLayers } from '../ui/layers-panel';
 import { renderTimeline } from '../ui/timeline';
 import { renderTools } from '../ui/tools-rail';
+import { plainPath } from './plain-path';
 
 export function trackSig() {
   const l = selLayer();
@@ -91,6 +92,9 @@ export function save() {
   markDirty();
 }
 export function setProp(l: Layer, k: PropKey, v: any) {
+  // new nodes for a polygon / star with an animated radius: it becomes a plain path first, or the
+  // radius would keep rebuilding the shape over the edited nodes
+  if (k === 'd' && l.shape && l.t.rad && l.t.rad.length) plainPath(l);
   const tr = l.t[k];
   if (tr && tr.length) {
     const kf = tr.find(q => Math.abs(q[0] - S.time) < 0.005);
@@ -123,8 +127,16 @@ export function toggleFreeze(l: Layer, k: PropKey) {
 }
 export function toggleKey(l: Layer, k: PropKey) {
   if (isFrozen(l, k)) return toast(`${propLabel(l, k)} is frozen. Unfreeze it in the timeline to add keyframes.`);
-  const ed = beginEdit(),
-    tr = l.t[k],
+  const ed = beginEdit();
+  // a Morph keyframe on a rectangle, ellipse, polygon or star: it becomes a plain path first (an
+  // animated radius turns into Morph keyframes)
+  // (when a baked keyframe already sits at the playhead, converting is the whole change)
+  if (k === 'd' && plainPath(l) && l.t.d && l.t.d.some(q => Math.abs(q[0] - S.time) < 0.005)) {
+    S.exp[l.id] = true;
+    ed.end({ insp: true });
+    return;
+  }
+  const tr = l.t[k],
     cur = clone(valueAt(l, k, S.time));
   if (!tr || !tr.length) l.t[k] = [[r3(S.time), cur, 'ease']];
   else {

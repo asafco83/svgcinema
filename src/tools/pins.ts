@@ -6,6 +6,7 @@
 // Bind to bones (the Pin tool's options bar): clicking a bone adds a pin at its joint that follows the
 // bone (its position and rotation), so the rig bends the artwork; bound pins mix with ordinary ones.
 import type { Layer, PropKey, XY } from '../model/types';
+import { plainPath } from '../core/plain-path';
 import { H, ICON, byId, clone, esc, fmt, r2, r3, valueAt, xfp } from '../core/constants';
 import { OV, svgEl } from '../core/dom';
 import { beginEdit, select, setProp } from '../core/history';
@@ -459,11 +460,7 @@ export function deleteSelectedPin() {
 }
 /** rectangles and ellipses become paths first (pins bend a path through its nodes) */
 function toPath(l: Layer) {
-  if (l.type === 'rect' || l.type === 'ellipse') {
-    l.b.d = l.type === 'rect' ? rectNodes(l.geo) : ellNodes(l.geo);
-    l.type = 'path';
-    l.geo = {};
-  }
+  if (l.type === 'rect' || l.type === 'ellipse') plainPath(l);
 }
 function addPin(l: Layer, p: XY) {
   const ed = beginEdit();

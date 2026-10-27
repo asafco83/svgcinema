@@ -600,6 +600,12 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
       k = get(L, 'skw', t) || [0, 0],
       tr = L.t && L.t.pos,
       op = get(L, 'op', t);
+    // an imported element with a size: stretched from its own box around its origin, like Scale
+    if (L.type === 'raw' && L.geo && L.geo.box) {
+      var z = get(L, 'sz', t),
+        zb = L.geo.box;
+      if (z && zb[2] > 0 && zb[3] > 0) s = [s[0] * (z[0] / zb[2]), s[1] * (z[1] / zb[3])];
+    }
     if (L.or && tr && tr.length > 1 && !RESTV) {
       var t0 = tr[0][0],
         t1 = tr[tr.length - 1][0],
