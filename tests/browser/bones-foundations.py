@@ -20,10 +20,10 @@ async def main():
         await ev("hi.setTime(1)")
         await ev("BO.boneCreate({x:80,y:320}); st.S.drag.move({x:140,y:320},{}); st.S.drag.up()")
         nb=await ev("(()=>{const l=st.layerById(st.S.sel);return l&&l.type==='bone'?JSON.stringify(l.t.rot):null})()")
-        check('drawn bone: Rotate key at 0 s', nb=='[[0,0,"ease"]]', nb)
+        check('drawn bone: Rotate key at 0 s', nb=='[[0,0,"linear"]]', nb)
         await ev(f"BO.addChildBone({byName('Stem 3')})")
         cb=await ev("JSON.stringify(st.layerById(st.S.sel).t.rot)")
-        check('child bone: Rotate key at 0 s', cb=='[[0,0,"ease"]]', cb)
+        check('child bone: Rotate key at 0 s', cb=='[[0,0,"linear"]]', cb)
         await ev("hi.undo(); hi.undo()")
         check('undo removes both bones', await ev("st.doc.layers.filter(l=>l.type==='bone').length")==3)
 
