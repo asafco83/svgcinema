@@ -5,6 +5,13 @@ properties on a timeline, and export one self-contained animated `.svg` (a JS pl
 pure CSS). Live site: https://asafco83.github.io/svgcinema/ (GitHub Pages, deployed from `master`).
 
 `README.md` is the user-facing feature list; keep it up to date with every feature.
+**Assistant API, guide and skill:** any tool or functional change that affects what an AI assistant can do or
+how it should work must be reflected in all three, in the same PR:
+- the API, `window.svgcinema` (`src/agent/assist.ts`, built on the agent's tools in `src/agent/tools.ts`),
+  including the guide that `help()` returns (`guide()` in `assist.ts`);
+- `public/llms.txt`;
+- the Claude skill (`SKILL_MD` in `src/ui/agent-panel.ts`, downloaded as `svgcinema-skill.zip`).
+Update `tests/assist.test.ts` and `tests/browser/assist.py` to match.
 `featureSuggestions.md` lists features that are planned but not built yet.
 **Source maps:** the GitHub Pages build keeps them (`sourcemap: true` in `vite.config.ts`, for debugging there), but the
 hosting zip (`npm run build:deploy`, `site/bundle.mjs`) must never include any `*.map`: they would expose the full source.
