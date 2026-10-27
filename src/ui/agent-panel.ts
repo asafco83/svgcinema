@@ -912,7 +912,8 @@ function onChange(e: Event) {
       }
       setSettings({ model: t.value });
       ST.test = null;
-      return renderComposer();
+      // drawn again so the menu's label (name and price) shows the new choice
+      return renderBody();
     case 'agModelName':
       setSettings({ model: t.value.trim() });
       ST.test = null;
@@ -937,7 +938,9 @@ function onChange(e: Event) {
         renderBody();
         return ($('#agImgModel') as HTMLInputElement).focus();
       }
-      return setSettings({ imgModel: t.value });
+      setSettings({ imgModel: t.value });
+      ST.imgTest = null;
+      return renderBody();
     case 'agImgModel':
       ST.imgTest = null;
       return void setSettings({ imgModel: t.value.trim() });
@@ -956,7 +959,8 @@ function onChange(e: Event) {
         renderBody();
         return ($('#agVecModel') as HTMLInputElement).focus();
       }
-      return setSettings({ vector: t.value });
+      setSettings({ vector: t.value });
+      return renderBody();
     case 'agVecModel':
       return setSettings({ vector: t.value.trim() || 'agent' });
     case 'agDontAsk':
