@@ -365,6 +365,8 @@ export interface EditorState {
   sclLock?: boolean;
   /** keep size proportions in the inspector (shapes; images use lockAR) */
   szLock?: boolean;
+  /** several layers: resizing the selection's box keeps its proportions (on unless turned off) */
+  sbLock?: boolean;
   /** the symbol instance being edited (isolation mode) */
   symEdit?: string | null;
   /** the Presets window's preview on the timeline (core/presets PresetPlan) */

@@ -3,6 +3,7 @@ import type { Layer, PropKey } from '../model/types';
 import { fxKeys, fxName, fxOf } from '../model/filters';
 import { isPinKey, isPinRot, pinBase, pinKeys, pinLabel } from '../model/pins';
 import { CinEngine } from '../runtime/engine';
+import { plainPath } from './plain-path';
 
 export function $(s: string): any {
   return document.querySelector(s);
@@ -118,6 +119,8 @@ function geoBase(l: Layer, k: string) {
   }
   if (k === 'rad') return l.type === 'rect' ? l.geo.rx || 0 : l.shape ? l.shape.rad || 0 : 0;
   if (k === 'sz') {
+    // an imported element keeps its own size (b.sz); without one it is its content's box
+    if (l.type === 'raw' && l.b.sz) return clone(l.b.sz);
     const b = sizeBox(l);
     return b ? [r3(b[2]), r3(b[3])] : null;
   }
@@ -133,9 +136,9 @@ export function parseDash(s: unknown): number[] {
     .map(parseFloat);
   return v.length && v.every(x => isFinite(x) && x >= 0) && v.some(x => x > 0) ? v : [];
 }
-/** Layers that have a size: rectangles, ellipses, images and paths. */
+/** Layers that have a size: rectangles, ellipses, images, paths and imported elements. */
 export function hasSize(l: Layer) {
-  return ['rect', 'ellipse', 'image', 'path'].includes(l.type);
+  return ['rect', 'ellipse', 'image', 'path', 'raw'].includes(l.type);
 }
 /** A layer's resting box [x, y, w, h] in its own space (paths: the box of their base shape). */
 export function sizeBox(l: Layer): number[] | null {
@@ -144,7 +147,21 @@ export function sizeBox(l: Layer): number[] | null {
   if (l.type === 'ellipse')
     return [(G.cx || 0) - (G.rx || 0), (G.cy || 0) - (G.ry || 0), 2 * (G.rx || 0), 2 * (G.ry || 0)];
   if (l.type === 'path' && l.b.d) return H.pathBox(l.b.d);
+  if (l.type === 'raw') return rawBox(l);
   return null;
+}
+/** An imported element's own box (its content, before its transform), measured once on the canvas and
+ *  kept in the layer: Size stretches the element from it, in the editor and in exports. */
+function rawBox(l: Layer): number[] | null {
+  const G = l.geo;
+  if (!G.box) {
+    const g = typeof document !== 'undefined' ? byId('e-' + l.id) : null;
+    try {
+      const b = g && g.getBBox();
+      if (b && b.width > 0 && b.height > 0) G.box = [r3(b.x), r3(b.y), r3(b.width), r3(b.height)];
+    } catch (_) {}
+  }
+  return G.box ? G.box.slice() : null;
 }
 /** Resize a layer's resting geometry to [w, h] around its origin (paths: every shape key too). */
 export function resizeBase(l: Layer, s: number[]) {
@@ -158,6 +175,11 @@ export function resizeBase(l: Layer, s: number[]) {
     X = (x: number) => r3(o[0] - (o[0] - x) * kx),
     Y = (y: number) => r3(o[1] - (o[1] - y) * ky),
     G = l.geo;
+  // an imported element is stretched to its size around its origin, like Scale (by the runtime)
+  if (l.type === 'raw') {
+    l.b.sz = [r3(w), r3(h)];
+    return;
+  }
   if (l.type === 'rect' || l.type === 'image') {
     G.x = X(G.x || 0);
     G.y = Y(G.y || 0);
@@ -172,22 +194,19 @@ export function resizeBase(l: Layer, s: number[]) {
     const sp = (d: any[]) =>
       d.map(p => ({ c: p.c, n: p.n.map((q: number[]) => q.map((v, i) => (i % 2 ? Y(v) : X(v)))) }));
     const uni = Math.abs(kx - ky) < 1e-9;
+    // a polygon / star stays one while it keeps its proportions; stretched, it becomes a plain path
+    // first (an animated radius turns into Morph keys, which are stretched with it below)
+    if (l.shape && !uni) plainPath(l);
     l.b.d = sp(l.b.d);
     if (l.t.d) l.t.d.forEach(q => (q[1] = sp(q[1])));
     (['p0', 'p1'] as const).forEach(k => l.t[k] && l.t[k].forEach(q => (q[1] = [X(q[1][0]), Y(q[1][1])])));
     if (l.shape) {
-      // a polygon / star stays one while it keeps its proportions; stretched, it is a plain path
-      if (uni) {
-        l.shape.cx = X(l.shape.cx);
-        l.shape.cy = Y(l.shape.cy);
-        l.shape.r = r3(l.shape.r * kx);
-        if (l.shape.rad) l.shape.rad = r3(l.shape.rad * kx);
-        if (l.t.rad) l.t.rad.forEach(q => (q[1] = r3(q[1] * kx)));
-        l.shape.sig = JSON.stringify(l.b.d);
-      } else {
-        delete l.shape;
-        delete l.t.rad;
-      }
+      l.shape.cx = X(l.shape.cx);
+      l.shape.cy = Y(l.shape.cy);
+      l.shape.r = r3(l.shape.r * kx);
+      if (l.shape.rad) l.shape.rad = r3(l.shape.rad * kx);
+      if (l.t.rad) l.t.rad.forEach(q => (q[1] = r3(q[1] * kx)));
+      l.shape.sig = JSON.stringify(l.b.d);
     }
   }
 }

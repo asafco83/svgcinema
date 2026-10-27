@@ -10,6 +10,7 @@ import { toast } from '../io/open';
 import { isHidden } from '../model/tree';
 import { localMatrix } from '../render/overlay';
 import { renderInspector } from '../ui/inspector';
+import { needsPlainPath, plainPath } from './plain-path';
 
 /** can this text layer be turned into shapes? (its font has to be one the app can read: a Google Font
  *  or a font on this computer, and Arabic-script letters would need joining) */
@@ -41,11 +42,9 @@ export function convertToPath(l: Layer) {
     textToPath(l);
     return;
   }
-  if (l.type !== 'rect' && l.type !== 'ellipse') return;
+  if (!needsPlainPath(l)) return;
   const ed = beginEdit();
-  l.b.d = l.type === 'rect' ? rectNodes(l.geo) : ellNodes(l.geo);
-  l.type = 'path';
-  l.geo = {};
+  plainPath(l);
   ed.end({ insp: true });
   toast('Converted to a path. You can now edit nodes and morph it.');
 }
@@ -74,6 +73,8 @@ export function morphTo(l: Layer, tg: Layer) {
     }),
   );
   const ed = beginEdit();
+  // rectangles, ellipses, polygons and stars morph as plain paths (an animated radius is kept)
+  plainPath(l);
   let t = S.time;
   if (t < 0.01) t = Math.min(doc.dur, 1);
   if (!l.t.d || !l.t.d.length) l.t.d = [[0, clone(l.b.d), 'inOut']];

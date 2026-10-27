@@ -251,7 +251,7 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
     for (let i = 0; i <= N; i++) fr.push(H.comp(l, (i / N) * doc.dur));
     const cpf = fr.find(c => !!c.cp),
       cq = cpf ? cpf.cp : null,
-      gt = !!(T.pos || T.rot || T.scl || T.org || T.skw || cq),
+      gt = !!(T.pos || T.rot || T.scl || T.org || T.skw || cq || (T.sz && l.type === 'raw')),
       go = !!T.op,
       bf = fr.some(c => !!c.ba && c.sx !== c.sy);
     if (gt || go)
@@ -284,7 +284,7 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
         k === 'd'
           ? (T.d || shapeAnim) && !smilShapes()
           : k === 'sz'
-            ? T.sz && l.type !== 'path'
+            ? T.sz && l.type !== 'path' && l.type !== 'raw'
             : k === 'rad'
               ? T.rad && !l.shape
               : k === 'trim'
@@ -697,7 +697,7 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
           // animated line ends move the nodes of the path; an animated corner radius rebuilds it
           if (l.t.p0 || l.t.p1) b.d = l.b.d;
           // an animated size resizes the shape's box (paths: from the box of their base shape)
-          if (l.t.sz) {
+          if (l.t.sz && l.type !== 'raw') {
             o.type = l.type;
             if (l.sa) o.sa = l.sa;
             if (l.type === 'path') b.d = l.b.d;
@@ -706,6 +706,12 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
               o.geo =
                 l.type === 'ellipse' ? { cx: G.cx, cy: G.cy, rx: G.rx, ry: G.ry } : { x: G.x, y: G.y, w: G.w, h: G.h };
             }
+          }
+          // an imported element's size stretches it from its own box (static or animated)
+          if (l.type === 'raw' && l.geo.box && (l.t.sz || l.b.sz)) {
+            o.type = 'raw';
+            o.geo = Object.assign(o.geo || {}, { box: l.geo.box });
+            if (l.b.sz) b.sz = l.b.sz;
           }
           if (l.t.rad && l.shape) {
             const { kind, cx, cy, r, rot, n, ratio } = l.shape;

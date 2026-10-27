@@ -214,13 +214,16 @@ export function shapeSection(l: Layer) {
     const star = sh.kind === 'star',
       mx = r2(maxCornerRadius(sh));
     return `<section class="sec"><h3>${star ? 'Star' : 'Polygon'}</h3>
+      ${sizeRow(l)}
       ${slide('n', star ? 'Points' : 'Sides', 3, 24, 1, sh.n)}
       ${star ? slide('ratio', 'Ratio', 5, 95, 1, Math.round((sh.ratio == null ? 0.45 : sh.ratio) * 100), '%', 100) : ''}
       ${slide('rad', 'Radius', 0, mx, 0.5, Math.min(valueAt(l, 'rad', S.time) || 0, mx), 'px', 1, 'rad')}
-      <p>Editing the nodes by hand, or adding Morph keyframes, turns this into a plain path.</p></section>`;
+      <p>Editing the nodes by hand, or adding Morph keyframes, turns this into a plain path.</p>
+      <div class="btns"><button class="btn" data-act="topath">Convert to path</button></div></section>`;
   }
   if (isLine(l))
     return `<section class="sec"><h3>Line</h3>
+      ${sizeRow(l)}
       ${krow('p0', 'From', `<label class="nf"><span>X</span><input id="ln-0-0" data-ln="0:0" inputmode="decimal" aria-label="From X"></label><label class="nf"><span>Y</span><input id="ln-0-1" data-ln="0:1" inputmode="decimal" aria-label="From Y"></label>`)}
       ${krow('p1', 'To', `<label class="nf"><span>X</span><input id="ln-1-0" data-ln="1:0" inputmode="decimal" aria-label="To X"></label><label class="nf"><span>Y</span><input id="ln-1-1" data-ln="1:1" inputmode="decimal" aria-label="To Y"></label>`)}
       <p>Key each end with ◆ so the line can grow, swing or swap ends over time.</p></section>`;
@@ -944,3 +947,6 @@ export function pinsSection(l: Layer) {
     <div class="btns pin-ind"><button class="btn" data-act="pinrm">Remove pin</button><button class="btn" data-act="pinrmall">Remove all pins</button></div>
     <p class="pin-ind">${mesh ? 'Pins bend the artwork through a mesh of triangles; a denser mesh bends more smoothly and makes CSS exports larger.' : 'Pins bend the path through its own nodes.'} Click with the Pin tool (W) to add pins; drag one to bend the ${mesh ? 'artwork' : 'path'} (keyed at the playhead). Bind to bones (in the Pin tool) adds pins that follow bones. Reach sets how far each pin pulls.</p></section>`;
 }
+
+/** the chain-link icon of the Keep proportions toggles */
+export const LINK_IC = I.link;

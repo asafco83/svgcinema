@@ -3,7 +3,7 @@
 // One selected layer aligns to the canvas; several align to the box around the selection.
 import type { Keyframe, Layer, PathData } from '../model/types';
 import { ellNodes, rectNodes } from '../geometry/nodes';
-import { H, byId, esc, ic, r2, r3, valueAt, xfp } from '../core/constants';
+import { H, byId, clone, esc, ic, r2, r3, valueAt, xfp } from '../core/constants';
 import { beginEdit, setProp } from '../core/history';
 import { S, doc, layerById } from '../core/state';
 import { parentMatrix, selectedRoots } from '../model/tree';
@@ -71,6 +71,44 @@ function nudge(l: Layer, dx: number, dy: number) {
     b = xfp(PMi, dx, dy),
     p = valueAt(l, 'pos', S.time) || [0, 0];
   setProp(l, 'pos', [r2(p[0] + b.x - a.x), r2(p[1] + b.y - a.y)]);
+}
+/* ---------- the selection's box (several layers) ---------- */
+
+/** The box around the selected layers, in document units (null when none can be measured). */
+export function selectionBox(): Box | null {
+  const boxes = targets()
+    .map(l => boxOf(l) as Box)
+    .filter(Boolean);
+  if (!boxes.length) return null;
+  const x0 = Math.min(...boxes.map(b => b.x)),
+    y0 = Math.min(...boxes.map(b => b.y)),
+    x1 = Math.max(...boxes.map(b => b.x + b.w)),
+    y1 = Math.max(...boxes.map(b => b.y + b.h));
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+/** Move the selection's box (every layer moves with it) or resize it (every layer is scaled from the
+ *  box's top-left corner: its origin moves and its Scale grows). Layers that are animated are keyed. */
+export function setSelectionBox(f: 'x' | 'y' | 'w' | 'h', v: number, keep: boolean) {
+  const ls = targets(),
+    B = selectionBox();
+  if (!B || !ls.length || !isFinite(v)) return;
+  const ed = beginEdit();
+  if (f === 'x' || f === 'y') ls.forEach(l => nudge(l, f === 'x' ? v - B.x : 0, f === 'y' ? v - B.y : 0));
+  else {
+    const cur = f === 'w' ? B.w : B.h;
+    if (cur < 1e-6 || v <= 0) return ed.end();
+    const k = v / cur,
+      kx = f === 'w' || keep ? k : 1,
+      ky = f === 'h' || keep ? k : 1;
+    ls.forEach(l => {
+      const c = H.comp(l, S.time),
+        P = xfp(parentMatrix(l), c.x, c.y);
+      nudge(l, B.x + (P.x - B.x) * kx - P.x, B.y + (P.y - B.y) * ky - P.y);
+      const s = clone(valueAt(l, 'scl', S.time) || [1, 1]);
+      setProp(l, 'scl', [r3(s[0] * kx), r3(s[1] * ky)]);
+    });
+  }
+  ed.end({ insp: true });
 }
 export function align(kind: string) {
   const ls = targets();
