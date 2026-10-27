@@ -103,7 +103,7 @@ async def main():
         await pg.click('#bMenu'); await pg.hover('#fileMenu [data-sub=help] > button'); await pg.click('#fileMenu [data-lm="hp:about"]'); await pg.wait_for_timeout(150)
         pkg=json.load(open(os.path.join(os.path.dirname(__file__),'..','..','package.json')))
         check('Help › About shows the version from package.json', not await ev("mAbout.hidden") and await ev("abVersion.textContent")==pkg['version'], await ev("abVersion.textContent"))
-        check('the build (commit and date)', await ev("!!document.getElementById('abBuild') && /\\d{4}-\\d{2}-\\d{2}/.test(abBuild.textContent)"))
+        check('the build (commit, date and time)', await ev("!!document.getElementById('abBuild') && /\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}/.test(abBuild.textContent)"), await ev("(document.getElementById('abBuild')||{}).textContent"))
         check('the copyright from LICENSE', (await ev("abCopy.textContent")).startswith('Copyright © 2026 asafco83') and 'All rights reserved' in await ev("abCopy.textContent"), await ev("abCopy.textContent"))
         check('the licence, in short and in full', 'yours to use' in await ev("aboutBody.textContent") and 'proprietary' in await ev("document.querySelector('.ab-lic pre').textContent"))
         check('and the open-source parts', 'Paper.js' in await ev("aboutBody.textContent") and 'opentype.js' in await ev("aboutBody.textContent"))
