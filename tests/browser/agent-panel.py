@@ -70,7 +70,22 @@ async def main():
         await pg.click('[data-act=back]'); await pg.wait_for_timeout(200)
         check('the Settings button is a cog (a closed toothed outline, not sun rays)', await E("(()=>{const p=document.querySelector('[data-act=settings] svg path'); return !!p && /Z$/.test(p.getAttribute('d')) && p.getAttribute('d').split('L').length>=32})()"))
         check('the empty chat shows examples and the composer', await E("document.querySelectorAll('.ag-hello .ag-ex').length>=2 && !!document.querySelector('#agText').offsetParent"))
-        check('…the model chip names the model', await E("document.querySelector('#agModelChip').textContent.trim()")=='claude-sonnet-5.5')
+        check('…the model chip names the model', await E("document.querySelector('#agModelChip .ag-chip-v').textContent.trim()")=='claude-sonnet-5.5')
+        # the model chip is a menu: pick another model, or open Settings
+        opts=await E("[...document.querySelectorAll('#agModelSel option')].map(o=>o.value)")
+        check('the model chip opens a menu of the provider’s models and Settings…', opts[:3]==['anthropic/claude-sonnet-5.5','openai/gpt-5.5','google/gemini-3.8-flash'] and opts[-1]=='__settings', opts)
+        await pg.select_option('#agModelSel','openai/gpt-5.5'); await pg.wait_for_timeout(100)
+        check('…picking one switches the agent’s model', await E("document.querySelector('#agModelChip .ag-chip-v').textContent.trim()")=='gpt-5.5' and await E("JSON.parse(localStorage.getItem('svgcinema:agent.settings')).model")=='openai/gpt-5.5')
+        await pg.select_option('#agModelSel','__settings'); await pg.wait_for_timeout(150)
+        check('…“Settings…” opens the settings', await E("!!document.querySelector('.ag-settings')"))
+        await pg.click('[data-act=back]'); await pg.wait_for_timeout(100)
+        await pg.select_option('#agModelSel','anthropic/claude-sonnet-5.5'); await pg.wait_for_timeout(100)
+        # the selection chip follows the selection without a click in the panel
+        await E("(async()=>{const hi=await import('/src/core/history.ts'); hi.select(st.doc.layers.find(l=>l.name==='Title').id)})()"); await pg.wait_for_timeout(100)
+        sc1=await E("document.querySelector('#agScopeT').textContent")
+        await E("(async()=>{const hi=await import('/src/core/history.ts'); hi.select(null)})()"); await pg.wait_for_timeout(100)
+        sc2=await E("document.querySelector('#agScopeT').textContent")
+        check('the selection chip updates live as the selection changes', sc1=='Title' and sc2=='Scene', [sc1,sc2])
 
         n0=await E("st.doc.layers.length"); u0=await E("st.S.undo.length")
         mode['delay']=0.6
@@ -78,6 +93,9 @@ async def main():
         busy=await E("""(()=>({busy: document.querySelector('#app').classList.contains('agent-busy'), stop: !document.querySelector('#agStop').hidden,
           tools: getComputedStyle(document.querySelector('#tools')).pointerEvents}))()""")
         check('while it runs, editing is paused and Stop shows', busy['busy'] and busy['stop'] and busy['tools']=='none', busy)
+        cur=await E("""(()=>{const r=document.querySelector('#wrap').getBoundingClientRect(); const e=document.elementFromPoint(r.x+r.width/2, r.y+r.height/2);
+          return {canvas:getComputedStyle(e).cursor, panel:getComputedStyle(document.querySelector('#agBody')).cursor}})()""")
+        check('…the canvas shows the agent-at-work cursor (not a frozen app); the panel keeps its own', 'url(' in cur['canvas'] and 'progress' in cur['canvas'] and 'url(' not in cur['panel'], cur)
         await pg.keyboard.press('r'); await pg.wait_for_timeout(50)
         check('…editing shortcuts do nothing', await E("st.S.tool")!='rect')
         await pg.wait_for_timeout(2400); mode['delay']=0

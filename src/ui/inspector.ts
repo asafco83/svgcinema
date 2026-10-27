@@ -98,7 +98,7 @@ export function nrow(label: string, body: string) {
 export function kb(n: number) {
   return n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
 }
-export function renderInspector() {
+function renderInspector0() {
   const l = selLayer();
   if (!l) {
     INSP.innerHTML = docPanel();
@@ -197,6 +197,13 @@ export function renderInspector() {
   applyCollapse();
   refreshInspector(true);
   drawEz();
+}
+/** Fired after the Inspector is drawn again, which happens whenever the selection changes (the agent's
+ *  composer shows what is selected). */
+export const INSPECTOR_EVENT = 'svgcinema:inspector';
+export function renderInspector() {
+  renderInspector0();
+  document.dispatchEvent(new Event(INSPECTOR_EVENT));
 }
 
 /* ---------- collapsible sections ---------- */

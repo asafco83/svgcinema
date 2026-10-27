@@ -47,6 +47,7 @@ async def main():
         async def openrouter(route):
             r=route.request
             if r.method=='OPTIONS': return await route.fulfill(status=204, headers=CORS)
+            if r.method=='GET': seen.append(('get', r.url, None)); return await route.fulfill(status=404, headers=CORS, body='')
             body=json.loads(r.post_data); seen.append(('openrouter', body, r.headers))
             if 'bad-key' in r.headers.get('authorization',''):
                 return await route.fulfill(status=401, headers={**CORS,'content-type':'application/json'}, body=json.dumps({'error':{'message':'No auth credentials found'}}))
@@ -77,6 +78,7 @@ async def main():
         check('the whole request is one undo step', await E("st.S.undo.length")==u0+1)
         a=[s for s in seen if s[0]=='anthropic']
         b1,h1=a[0][1],a[0][2]
+        check('the editor asks OpenRouter nothing until the agent is used', not [s for s in seen if s[0]=='get'])
         check('it sent the system prompt, all tools and the scene', 'design agent' in b1['system'] and len(b1['tools'])>=19 and '<project' in b1['messages'][0]['content'][0]['text'])
         check('…with the key and the browser-access header', h1.get('x-api-key')=='test-key' and h1.get('anthropic-dangerous-direct-browser-access')=='true')
         check('…and the tool results went back each time', len(a)==3 and a[2][1]['messages'][-1]['content'][0]['type']=='tool_result', len(a))
