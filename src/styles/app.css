@@ -6162,7 +6162,8 @@ a.btn {
 }
 .ag-step.i-err svg,
 .ag-step.i-err small {
-  color: var(--danger);
+  /* a refused step isn't an error of the request: the agent reads why and goes on (amber, not red) */
+  color: var(--key-text);
 }
 .ag-step-t {
   flex: 1;

@@ -91,3 +91,34 @@ describe('design agent: results sent back to the model', () => {
     expect(long).toMatch(/cut: \d+ more characters/);
   });
 });
+
+import { easeName } from '../src/agent/tools';
+import { gist } from '../src/agent/describe';
+describe('design agent: easing names from other tools', () => {
+  it('reads CSS, Penner and GSAP names', () => {
+    const cases: Record<string, string> = {
+      easeIn: 'in',
+      'ease-in-out': 'inOut',
+      'ease-out': 'out',
+      easeInOutCubic: 'inOutCubic',
+      EaseOutBack: 'outBack',
+      'power2.out': 'outCubic',
+      power3: 'outQuart',
+      'power1.in': 'inQuad',
+      'back.out(1.7)': 'outBack',
+      'sine.inOut': 'inOutSine',
+      'expo.in': 'inExpo',
+      'step-end': 'hold',
+      none: 'linear',
+      linear: 'linear',
+      inOutQuad: 'inOutQuad',
+      ease: 'ease',
+    };
+    for (const [k, v] of Object.entries(cases)) expect([k, easeName(k)]).toEqual([k, v]);
+    expect(easeName('wobbly')).toBe(null);
+  });
+  it('the panel shows the gist of a refusal', () => {
+    expect(gist('Unknown easing "easeIn2". Use one of linear, hold, ease, in, out.')).toBe('Unknown easing "easeIn2".');
+    expect(gist('"Logo" is locked. Ask the user whether to unlock it.')).toBe('"Logo" is locked.');
+  });
+});

@@ -27,6 +27,12 @@ const list = (xs: string[], n = 3) =>
   xs.length > n ? `${xs.slice(0, n).join(', ')} +${xs.length - n}` : xs.join(', ');
 const s = (n: number) => `${r3(n)} s`;
 
+/** The first sentence of a refusal, without the list of what would have been accepted. */
+export function gist(m: string) {
+  const first = m.split(/(?<=[.!?])\s+(?=[A-Z])/)[0].replace(/\s+(Use|Call|Try) .*$/, '');
+  return first.length > 140 ? first.slice(0, 138) + '…' : first;
+}
+
 export function describe(e: StepEvent): StepView {
   const a = e.args || {},
     r = e.result || {};
@@ -173,6 +179,7 @@ export function describe(e: StepEvent): StepView {
       ];
       break;
   }
-  if (!e.ok) [icon, meta] = ['err', e.error || 'It failed.'];
+  // a refused call: the model reads the whole reason (and usually corrects it); the panel shows its gist
+  if (!e.ok) [icon, meta] = ['err', 'Refused: ' + gist(e.error || 'It failed.')];
   return { ...e, icon, label, meta, ...(costLine ? { costLine } : {}) };
 }

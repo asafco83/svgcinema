@@ -117,9 +117,33 @@ function editable(l: Layer) {
   if (isLocked(l)) fail(`"${l.name}" is locked. Ask the user whether to unlock it.`);
   return l;
 }
+const EASE_BY_KEY = new Map(EASES.map(e => [e.toLowerCase(), e]));
+const FAMILY: Record<string, string> = { power1: 'Quad', power2: 'Cubic', power3: 'Quart', power4: 'Quint' };
+/**
+ * An easing name as the runtime spells it, from the names other tools use: CSS (ease-in-out, step-end),
+ * Penner (easeInOutCubic), GSAP (power2.out, back.out(1.7), sine.inOut) and any case. null: unknown.
+ */
+export function easeName(s: string): string | null {
+  const raw = s.trim().replace(/\(.*\)$/, ''),
+    key = raw.toLowerCase().replace(/[\s_.-]/g, '');
+  if (EASE_BY_KEY.has(key)) return EASE_BY_KEY.get(key)!;
+  if (/^(none|power0|linearnone)$/.test(key)) return 'linear';
+  if (/^(step|steps|stepend|stepstart|constant|hold)$/.test(key)) return 'hold';
+  // Penner / CSS: easeIn, easeInOutQuad, ease-in-out
+  const k2 = key.replace(/^ease(?=in|out)/, '');
+  if (EASE_BY_KEY.has(k2)) return EASE_BY_KEY.get(k2)!;
+  // family first (GSAP): quad.in, back.out, power2.inOut, power3 (out by default)
+  const m = /^(sine|quad|cubic|quart|quint|expo|circ|back|elastic|bounce|power[1-4])(inout|in|out)?$/.exec(k2);
+  if (m) {
+    const fam = FAMILY[m[1]] || m[1][0].toUpperCase() + m[1].slice(1),
+      dir = m[2] === 'in' ? 'in' : m[2] === 'inout' ? 'inOut' : 'out';
+    return dir + fam;
+  }
+  return null;
+}
 function easeOf(e: unknown): Ease {
   if (e === undefined) return 'ease';
-  if (typeof e === 'string' && EASES.includes(e)) return e;
+  if (typeof e === 'string' && easeName(e)) return easeName(e)!;
   if (Array.isArray(e) && e.length === 4 && e.every(n => typeof n === 'number' && isFinite(n))) return e as number[];
   return fail(`Unknown easing ${JSON.stringify(e)}. Use one of ${EASES.join(', ')} or a Bézier [x1, y1, x2, y2].`);
 }
@@ -161,6 +185,9 @@ const obj = (properties: Record<string, Schema>, required: string[] = []): Schem
   additionalProperties: false,
 });
 const VALUE: Schema = { description: 'A number, [x, y], a colour string, or a list of numbers' };
+const EASE: Schema = {
+  description: `How the move to the next key goes: ${EASES.join(', ')} (CSS / GSAP names like ease-in-out or power2.out work too), or a Bézier [x1, y1, x2, y2].`,
+};
 
 /* ---------- images ---------- */
 
@@ -761,7 +788,7 @@ export const TOOLS: Tool[] = [
           type: 'array',
           minItems: 1,
           maxItems: 200,
-          items: obj({ t: { type: 'number', minimum: 0, maximum: 600 }, v: VALUE, ease: VALUE }, ['t', 'v']),
+          items: obj({ t: { type: 'number', minimum: 0, maximum: 600 }, v: VALUE, ease: EASE }, ['t', 'v']),
         },
         mode: { type: 'string', enum: ['merge', 'replace'] },
         curved: { type: 'boolean' },
