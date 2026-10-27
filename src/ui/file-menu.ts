@@ -250,9 +250,28 @@ export function copyrightLine() {
   const m = /^Copyright[^\n]*/m.exec(LICENSE_TEXT);
   return m ? m[0].replace(/\(c\)/i, '©').replace(/\s*\(https?:[^)]*\)/, '') : '';
 }
+/** When the build was made, in the viewer's time zone: "2026-10-27 23:59 GMT+2" ('' when unknown). */
+export function buildTime(iso: string) {
+  const d = new Date(iso);
+  if (!iso || isNaN(d.getTime())) return '';
+  const p = (n: number) => String(n).padStart(2, '0');
+  let tz = '';
+  try {
+    tz = (
+      new Intl.DateTimeFormat(undefined, { timeZoneName: 'short' })
+        .formatToParts(d)
+        .find(x => x.type === 'timeZoneName') || { value: '' }
+    ).value;
+  } catch (_) {
+    /* no time zone name */
+  }
+  // a date-only stamp (older builds) has no time to show
+  if (!/T/.test(iso)) return iso;
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}${tz ? ' ' + tz : ''}`;
+}
 export function openAbout() {
   const logo = document.querySelector('.brand .logo'),
-    build = [__APP_BUILD__, __APP_DATE__].filter(Boolean).join(' · ');
+    build = [__APP_BUILD__, buildTime(__APP_DATE__)].filter(Boolean).join(' · ');
   $('#aboutBody').innerHTML = `
     <div class="ab-top">${logo ? logo.outerHTML : '<b>SVGcinema</b>'}<p>A browser editor for animated SVG.</p></div>
     <dl class="ab-facts">
