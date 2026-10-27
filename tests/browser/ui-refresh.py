@@ -79,7 +79,9 @@ async def main():
         hz=await ev("st.doc.layers.find(l=>l.name==='Horizon').id"); await ev(f"hi.select('{hz}')")
         check('Draw is gone; Trim path stays (the sample draws on with Trim End)', not await ev("!!document.querySelector('#insp [data-kb=draw]')") and await ev("!!document.querySelector('#insp [data-kb=te]') && document.querySelector('#insp [data-kb=te]').classList.contains('has')") and not await ev(f"'draw' in st.layerById('{hz}').b || 'draw' in st.layerById('{hz}').t"))
         await ev(f"hi.select('{sid}')")
-        check('line ends and joins: stroke shapes with the path knocked out', await ev("document.querySelectorAll('#insp .btns.lj').length")==2 and await ev("[...document.querySelectorAll('#insp .btns.lj .btn')].every(b=>b.querySelector('.knock'))"))
+        # line ends, line join and Align (closed shapes): drawn as the stroke with the path knocked out (Align's
+        # inside / outside icons are just the band, smaller or larger: the owner's icons)
+        check('line ends and joins: stroke shapes with the path knocked out', await ev("document.querySelectorAll('#insp .btns.lj').length")>=2 and await ev("[...document.querySelectorAll('#insp .btns.lj .btn:not([data-tx=al])')].every(b=>b.querySelector('.knock'))") and await ev("(()=>{const c=document.querySelector('#insp [data-tx=al][data-v=center]'); return !c || !!c.querySelector('.knock')})()"))
         check('a note says what the booleans need', await ev("(document.querySelector('.align-bar .ab-note')||{}).textContent")=='Booleans: select 2+ shapes')
         cf=await ev("(()=>{const c=document.getElementById('c-fill').closest('.cf');return [c.firstElementChild.className, [...c.firstElementChild.children].map(e=>e.id), [...c.children].slice(1).map(e=>e.dataset.act||'')]})()")
         check('colour field: swatch and value in one box, eyedropper beside it', cf[0]=='cbox' and cf[1]==['c-fill','t-fill'] and cf[2] in (['pick'],[]), cf)

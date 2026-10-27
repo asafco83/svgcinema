@@ -7,7 +7,7 @@
 //   data-ly="field"                     layer setting (blend, iso)
 //   data-tx="…" / data-act="…"          buttons
 import { layerBox } from '../render/mesh';
-import { meshOf } from '../render/markup';
+import { canAlign, meshOf } from '../render/markup';
 import { MESH_DEFAULT } from '../model/mesh';
 import type { Layer, PathData, PropKey } from '../model/types';
 import { FONTS, ICON, byId, clone, esc, fmt, ic, parseDash, r2, valueAt } from '../core/constants';
@@ -72,6 +72,20 @@ const I = {
   ),
   joinBevel: ic(
     '<path fill="currentColor" stroke="none" d="M3 22V8.5L9.5 2H23v10h-10v10z"/><path class="knock" fill="none" stroke-width="1.7" stroke-linecap="round" d="M8 22V7h15"/>',
+    18,
+  ),
+  // the owner's icons: the stroke band small (inside the path), medium with the path knocked out
+  // through it (centre), large (outside)
+  alCentre: ic(
+    '<path fill="currentColor" stroke="none" d="M4.287 4.287L19.713 4.287L19.713 19.713L4.287 19.713ZM9.686 9.686L9.686 14.314L14.314 14.314L14.314 9.686Z"/><path class="knock" fill="none" stroke-width="1.7" stroke-linecap="round" d="M6.986 6.986L17.014 6.986L17.014 17.014L6.986 17.014Z"/>',
+    18,
+  ),
+  alInside: ic(
+    '<path fill="currentColor" stroke="none" d="M6.133 6.133L17.867 6.133L17.867 17.867L6.133 17.867ZM9.623 9.623L9.623 14.377L14.377 14.377L14.377 9.623Z"/>',
+    18,
+  ),
+  alOutside: ic(
+    '<path fill="currentColor" stroke="none" d="M2.4 2.4L21.6 2.4L21.6 21.6L2.4 21.6ZM6.133 6.133L6.133 17.867L17.867 17.867L17.867 6.133Z"/>',
     18,
   ),
   orient: ic('<path d="M4 19c2-8 7-12 14-13"/><path d="M14 3.5l4.5 2.5-2.5 4.5"/><circle cx="4" cy="19" r="1.5"/>'),
@@ -386,6 +400,15 @@ export function appearanceSection(l: Layer) {
       'Line join',
       `<div class="btns tight lj">${tbtn('x:stroke-linejoin', 'miter', join === 'miter', I.joinMiter, 'Miter join')}${tbtn('x:stroke-linejoin', 'round', join === 'round', I.joinRound, 'Round join')}${tbtn('x:stroke-linejoin', 'bevel', join === 'bevel', I.joinBevel, 'Bevel join')}</div><label class="nf${join === 'miter' ? '' : ' ro'}" title="${join === 'miter' ? 'Miter limit: how far a sharp corner may stick out before it is cut flat, as a multiple of the stroke width' : 'Miter limit only applies to miter joins'}"><span>Miter</span><input data-x="stroke-miterlimit" id="x-miter" inputmode="decimal" value="${esc(X['stroke-miterlimit'] || '4')}" aria-label="Miter limit"${join === 'miter' ? '' : ' disabled'}></label>`,
     );
+    // inside / outside only mean something on a closed shape: hidden on open paths and lines
+    if (canAlign(l)) {
+      const al = l.al || 'center';
+      h += nrow(
+        // "Align stroke" doesn't fit the label column; under Stroke style "Align" says it
+        'Align',
+        `<div class="btns tight lj" role="group" aria-label="Align stroke">${tbtn('al', 'center', al === 'center', I.alCentre, 'Align stroke to centre')}${tbtn('al', 'in', al === 'in', I.alInside, 'Align stroke inside')}${tbtn('al', 'out', al === 'out', I.alOutside, 'Align stroke outside')}</div>`,
+      );
+    }
     h += krow(
       'da',
       'Dashes',
@@ -797,6 +820,9 @@ export function propsToggle(b: HTMLElement, l: Layer) {
       G.x = r2(G.x - shift(false));
       G.wrap = false;
     }
+  } else if (k === 'al') {
+    if (v === 'in' || v === 'out') l.al = v;
+    else delete l.al;
   } else if (k.startsWith('x:')) setExtra(l, k.slice(2), v);
   ed.end({ insp: true });
 }

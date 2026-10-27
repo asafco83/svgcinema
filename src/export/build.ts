@@ -14,7 +14,7 @@ import { markup } from '../render/markup';
 import { fontFaceCSS } from '../render/fonts';
 import { CinEngine } from '../runtime/engine';
 import { isPinKey } from '../model/pins';
-import { meshOf } from '../render/markup';
+import { alignOf, meshOf } from '../render/markup';
 import { drawOrder } from '../model/draw-order';
 
 export function roundV(v: any): any {
@@ -87,7 +87,8 @@ function reducedCSS(anim: Layer[], pre: string, svgId: string, rm: 'first' | 'la
   if (smilShapes()) {
     const t = rm === 'first' ? 0 : doc.dur;
     anim.forEach(l => {
-      if (shapeAnimated(l)) hold += `#${pre}${l.id}-s{d:path("${H.dstr(H.comp(l, t).d)}")}`;
+      if (shapeAnimated(l))
+        hold += `#${pre}${l.id}-s${alignOf(l) ? `,#${pre}${l.id}-sf` : ''}{d:path("${H.dstr(H.comp(l, t).d)}")}`;
     });
   }
   return (
@@ -202,6 +203,8 @@ export function smilFor(anim: Layer[], pre: string) {
       same = cmds.every(c => c === cmds[0]),
       fr = T.arrange(ds.map(d => (same ? H.dstr(d) : dstrC(d))));
     out += `<animate xlink:href="#${pre}${l.id}-s" attributeName="d" ${T.attrs} ${smilValues(fr)}/>`;
+    // an aligned stroke's copy of the shape moves with it
+    if (alignOf(l)) out += `<animate xlink:href="#${pre}${l.id}-sf" attributeName="d" ${T.attrs} ${smilValues(fr)}/>`;
   });
   return out;
 }
@@ -333,7 +336,7 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
                             : k === 'sz'
                               ? cssBox(l, c.gb, fr[0].gb)
                               : k === 'sw'
-                                ? `stroke-width:${r3(c.sw)}px`
+                                ? `stroke-width:${r3(c.sw * (alignOf(l) ? 2 : 1))}px`
                                 : k === 'rad'
                                   ? `rx:${r3(c.rad)}px;ry:${r3(c.rad)}px`
                                   : k === 'trim'
@@ -347,6 +350,29 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
           N,
         ) +
         `#${id}-s{${sk.includes('sz') && l.type === 'image' ? 'transform-box:view-box;transform-origin:0 0;' : ''}animation:${id}-s ${run}}`;
+    // an aligned stroke's copy of the shape: the same geometry and fill, never a stroke
+    const tk = sk.filter(k => k === 'fill' || k === 'fo' || k === 'sz' || k === 'rad' || k === 'd');
+    if (alignOf(l) && tk.length)
+      css +=
+        kfBlock(
+          id + '-sf',
+          fr.map(c =>
+            tk
+              .map(k =>
+                k === 'fill'
+                  ? `fill:${c.fill}`
+                  : k === 'fo'
+                    ? `fill-opacity:${r3(c.fo)}`
+                    : k === 'sz'
+                      ? cssBox(l, c.gb, fr[0].gb)
+                      : k === 'rad'
+                        ? `rx:${r3(c.rad)}px;ry:${r3(c.rad)}px`
+                        : `d:path("${H.dstr(c.d)}")`,
+              )
+              .join(';'),
+          ),
+          N,
+        ) + `#${id}-sf{animation:${id}-sf ${run}}`;
   });
   // a rig's own draw order: each wrapper follows the bones down to its artwork's bone
   wraps.forEach(([l, bone, up]) => {

@@ -1304,14 +1304,21 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
     for (var i = 0; i < D.L.length; i++) {
       var L = D.L[i],
         g = el(D.p + L.id),
-        s = el(D.p + L.id + '-s');
+        s = el(D.p + L.id + '-s'),
+        // an aligned stroke: a stroke-less copy of the shape that gives the clip / mask and the fill, and
+        // the stroke drawn twice as wide (half of it is cut away)
+        tw = el(D.p + L.id + '-sf');
       if (!g || !s) continue;
       var c = comp(L, t);
+      var both = function (k: string, v: string) {
+        s.setAttribute(k, v);
+        if (tw) tw.setAttribute(k, v);
+      };
       g.setAttribute('transform', tf(c));
       g.setAttribute('opacity', String(f(c.op)));
-      if (c.fill != null) s.setAttribute('fill', paint(s, D.p + L.id + '-gf', c.fill));
+      if (c.fill != null) both('fill', paint(s, D.p + L.id + '-gf', c.fill));
       if (c.stk != null) s.setAttribute('stroke', paint(s, D.p + L.id + '-gs', c.stk));
-      if (c.sw != null) s.setAttribute('stroke-width', String(f(c.sw)));
+      if (c.sw != null) s.setAttribute('stroke-width', String(f(tw ? c.sw * 2 : c.sw)));
       if (c.trim) {
         var td = trimDash(c.trim);
         s.setAttribute('pathLength', '100');
@@ -1321,20 +1328,20 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
         if (c.dof != null) s.setAttribute('stroke-dashoffset', String(f(c.dof)));
         if (c.da) s.setAttribute('stroke-dasharray', dashStr(c.da));
       }
-      if (c.fo != null) s.setAttribute('fill-opacity', String(f(c.fo)));
+      if (c.fo != null) both('fill-opacity', String(f(c.fo)));
       if (c.so != null) s.setAttribute('stroke-opacity', String(f(c.so)));
-      if (c.d) s.setAttribute('d', dstr(c.d));
+      if (c.d) both('d', dstr(c.d));
       if (c.gb) {
         var gb = c.gb,
           ga =
             L.type === 'ellipse'
               ? { cx: gb[0] + gb[2] / 2, cy: gb[1] + gb[3] / 2, rx: gb[2] / 2, ry: gb[3] / 2 }
               : { x: gb[0], y: gb[1], width: gb[2], height: gb[3] };
-        for (var gk in ga) s.setAttribute(gk, String(f((ga as Record<string, number>)[gk])));
+        for (var gk in ga) both(gk, String(f((ga as Record<string, number>)[gk])));
       }
       if (c.rad != null && !L.shape) {
-        s.setAttribute('rx', String(f(c.rad)));
-        s.setAttribute('ry', String(f(c.rad)));
+        both('rx', String(f(c.rad)));
+        both('ry', String(f(c.rad)));
       }
       if (L.dw) {
         var wb = layerOf(L.dw),

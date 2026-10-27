@@ -141,6 +141,10 @@ export interface Layer {
   /** size anchor: the point an animated size grows around, as a share of the shape's box (0–1 on each
    *  axis); unset = the origin. Imported animations that grow from the shape's corner use it. */
   sa?: [number, number];
+  /** stroke alignment on a closed shape: inside or outside its edge (unset = centred, as SVG draws it).
+   *  SVG has no stroke alignment, so it is drawn at twice the width, clipped to the shape (inside) or
+   *  masked to outside it, with a stroke-less copy of the shape (`-sf`) giving the clip and the fill. */
+  al?: 'in' | 'out';
   /** mask group: masks by brightness ('lum', luminance) instead of by opacity (the default) */
   mm?: 'lum';
   /** group: the folder holding a mask group's mask layers */
