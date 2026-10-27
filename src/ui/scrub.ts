@@ -1,6 +1,7 @@
 // SVGcinema — ui/scrub
 // Drag the label at the left of any number field (the "X" in "X 162") left or right to change its
-// value: one unit per pixel (Shift ×10, Alt ×0.1). The inspector scrubs its own animatable fields
+// value: one unit per pixel (Shift ×10, Alt ×0.1). In a number field, ↑ / ↓ step the value the same
+// way (Shift ×10, Alt ×0.1), live; holding the key down is one undo step. The inspector scrubs its own animatable fields
 // live (inspector.ts, `data-scrub`); this covers every other number field (shape geometry, text,
 // document, timeline length, colour stops, export…) by typing into the field and sending the same
 // input/change events typing would, so each field keeps its own rules. A whole drag is one undo step.
@@ -43,11 +44,103 @@ function locator(inp: HTMLInputElement): () => HTMLInputElement | null {
       .join('');
   return () => (inp.isConnected ? inp : (document.querySelector(sel) as HTMLInputElement | null));
 }
+/** what ↑ / ↓ add in fields whose unit is small (seconds, line height, easing handles); 1 elsewhere */
+const KEY_STEP: Record<string, number> = {
+  'g-lh': 0.05,
+  'g-ls': 0.1,
+  tDur: 0.1,
+  'd-dur': 0.1,
+  'kf-time': 0.05,
+  'ez-0': 0.05,
+  'ez-1': 0.05,
+  'ez-2': 0.05,
+  'ez-3': 0.05,
+  xSpeed: 0.1,
+};
+/** Is this a number field (asks for a numeric keyboard, and isn't a native number, range or checkbox)? */
+function numberField(t: EventTarget | null): HTMLInputElement | null {
+  const inp = t as HTMLInputElement | null;
+  if (!inp || inp.tagName !== 'INPUT' || inp.disabled || inp.readOnly) return null;
+  if (inp.type === 'number' || inp.type === 'range' || inp.type === 'checkbox') return null;
+  const mode = inp.getAttribute('inputmode');
+  return mode === 'decimal' || mode === 'numeric' ? inp : null;
+}
 export function scrubStep(lab: HTMLElement, inp: HTMLInputElement) {
   return +lab.dataset.scrubStep || STEP[inp.id] || 1;
 }
 
+/** ↑ / ↓ in a number field. Runs after the field's own handlers (a field that uses the arrows itself
+ *  prevents the default). A run of presses while the key is held is one undo step. */
+function initArrows() {
+  let run: { el: HTMLInputElement; undo0: string[]; snap0: string } | null = null,
+    keep: { refocus: () => void; until: number } | null = null;
+  const end = () => {
+    if (!run) return;
+    const r = run;
+    run = null;
+    if (doc && JSON.stringify(doc) !== r.snap0) {
+      S.undo = r.undo0;
+      S.undo.push(r.snap0);
+      if (S.undo.length > 150) S.undo.shift();
+      S.redo = [];
+    }
+  };
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if ((e.key !== 'ArrowUp' && e.key !== 'ArrowDown') || e.defaultPrevented || e.ctrlKey || e.metaKey) return;
+    const inp = numberField(e.target);
+    if (!inp) return;
+    e.preventDefault();
+    const numeric = inp.getAttribute('inputmode') === 'numeric',
+      k = e.shiftKey ? 10 : e.altKey ? 0.1 : 1,
+      step = (numeric ? 1 : KEY_STEP[inp.id] || 1) * k,
+      cur = parseFloat(inp.value),
+      start = isFinite(cur) ? cur : parseFloat(inp.placeholder) || 0;
+    let v = start + (e.key === 'ArrowUp' ? step : -step);
+    // keep the value's own decimals (2.37 + 1 = 3.37) without float noise (0.1 + 0.2)
+    v = numeric ? Math.round(v) : Math.round(v * 1e4) / 1e4;
+    if (!run || run.el !== inp) {
+      end();
+      run = { el: inp, undo0: S.undo.slice(), snap0: JSON.stringify(doc) };
+    }
+    const find = locator(inp),
+      caret = inp.selectionStart === 0 && inp.selectionEnd === inp.value.length;
+    inp.value = fmt(v);
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+    // the panel may draw the field again (now or on the next frame): keep typing in it
+    const refocus = () => {
+      const now = find();
+      if (!now) return;
+      if (document.activeElement !== now) {
+        now.focus();
+        if (caret) now.select();
+        else now.setSelectionRange(now.value.length, now.value.length);
+      }
+      if (run) run.el = now;
+    };
+    refocus();
+    keep = { refocus, until: performance.now() + 400 };
+  });
+  document.addEventListener('keyup', (e: KeyboardEvent) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') end();
+  });
+  // the field was drawn again a moment after a press (the old one, focused, was removed): focus the new one
+  document.addEventListener(
+    'focusout',
+    (e: FocusEvent) => {
+      const k = keep;
+      if (!k || performance.now() > k.until || e.relatedTarget) return;
+      setTimeout(() => {
+        if (!(e.target as Element).isConnected) k.refocus();
+      }, 0);
+    },
+    true,
+  );
+  window.addEventListener('blur', end);
+}
+
 export function initScrub(): void {
+  initArrows();
   // after a drag on a label (here or in the inspector), its click must not focus the field; a plain
   // click still does, as a label click would
   let down: { x: number; y: number } | null = null;
