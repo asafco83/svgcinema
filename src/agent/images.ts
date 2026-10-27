@@ -21,6 +21,8 @@ export interface ImageModel {
   formats?: string[];
   /** takes quality: medium (asked for, so the price is predictable) */
   quality?: boolean;
+  /** about how much one 1024 × 1024 image costs, USD (OpenRouter's model list) */
+  price?: number;
 }
 
 export interface ImageProvider {
@@ -130,17 +132,45 @@ export function imageCatalog(fresh = false): Promise<ImageModel[]> {
   if (!fresh && c && Date.now() - c.at < DAY && Array.isArray(c.models) && c.models.length)
     return Promise.resolve(c.models);
   if (!catP)
-    catP = fetch(`${OR}/images/models`)
-      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then(j => {
+    catP = Promise.all([
+      fetch(`${OR}/images/models`).then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status))))),
+      // the general model list carries each image model's price (per output-image token)
+      fetch(`${OR}/models?output_modalities=image`)
+        .then(r => (r.ok ? r.json() : null))
+        .catch(() => null),
+    ])
+      .then(([j, pj]) => {
         const models = ((j && j.data) || []).map(catalogEntry).filter(Boolean) as ImageModel[];
         if (!models.length) throw new Error('empty');
+        const prices = catalogPrices(pj);
+        for (const m of models) if (prices[m.id] !== undefined) m.price = prices[m.id];
         save(CAT_KEY, { at: Date.now(), models });
         return models;
       })
       .catch(() => (c && c.models && c.models.length ? c.models : imageProviderById('openrouter')!.models))
       .finally(() => (catP = null));
   return catP;
+}
+/** Each image model's price for one 1024 × 1024 image, from OpenRouter's general model list. */
+export function catalogPrices(j: any): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const m of (j && j.data) || []) {
+    const p = m && m.pricing,
+      tok = p && Number(p.image_output),
+      text = p && Number(p.prompt);
+    if (typeof m.id === 'string' && isFinite(tok) && tok > 0)
+      out[m.id] = pickImagePrice({ token: tok, text: isFinite(text) ? text : 0 }, m.id)!;
+  }
+  return out;
+}
+/** About how much one image from this model costs, for the Settings menu (null: unknown). OpenAI's and
+ *  Google's own models are looked up under their names in OpenRouter's list. */
+export function menuPrice(p: ImageProviderId, id: string): number | null {
+  const prov = imageProviderById(p);
+  if (!prov || prov.priceAs === null) return null;
+  const c = load<{ models: ImageModel[] }>(CAT_KEY),
+    m = ((c && c.models) || []).find(x => x.id === prov.priceAs + id);
+  return m && typeof m.price === 'number' ? m.price : null;
 }
 const PREFERRED = ['openai/gpt-image-2.5-flare', 'openai/gpt-image-2', 'google/gemini-3.1-flash-image'];
 /** The models to offer for a service now: OpenRouter's cached live list when there is one. */
@@ -193,10 +223,12 @@ export function priceLines(j: unknown): PriceLines {
 }
 
 /** About how many output tokens one image takes, for models priced by token: OpenAI's image models at
- *  medium quality (which SVGcinema asks for), Google's and others at their 1K size. */
+ *  medium quality (which SVGcinema asks for), Google's (1290 per image) and others at their 1K size. */
 export function imageTokens(model: string, aspect: Aspect = 'square') {
   if (/(^|\/)gpt-|openai\//.test(model)) return aspect === 'square' ? 1056 : 1584;
-  return 1290;
+  if (/(^|\/)gemini|google\//.test(model)) return 1290;
+  // most others count a 1024 × 1024 image as 4096 tokens (16 × 16 px each)
+  return aspect === 'square' ? 4096 : 6144;
 }
 
 /** One image's price from its lines (null when it has none): per image, or by tokens. */
