@@ -3,7 +3,8 @@
 // returned by the get_scene tool. It names everything the model may refer to (ids, names, types,
 // boxes, which properties are animated) and leaves out what it can't use, such as path nodes.
 import type { Layer } from '../model/types';
-import { PROPS, baseOf, r3 } from '../core/constants';
+import { H, PROPS, baseOf, r3 } from '../core/constants';
+import { ellNodes, rectNodes } from '../geometry/nodes';
 import { S, doc, layerById } from '../core/state';
 import { descendants, isBox, kids } from '../model/tree';
 import { fxName } from '../model/filters';
@@ -107,7 +108,15 @@ export function layerDetail(id: string) {
   const geo: Record<string, any> = { ...l.geo };
   delete geo.markup;
   o.geometry = geo;
-  if (l.type === 'path' && l.b.d) o.path = { subpaths: l.b.d.length, nodes: l.b.d.reduce((n, s) => n + s.n.length, 0) };
+  // rectangles and ellipses: their shape as a path too (Morph keys turn them into one)
+  const shape = l.type === 'rect' ? rectNodes(l.geo) : l.type === 'ellipse' ? ellNodes(l.geo) : l.b.d;
+  if ((l.type === 'path' || l.type === 'rect' || l.type === 'ellipse') && shape)
+    o.path = {
+      subpaths: shape.length,
+      nodes: shape.reduce((n, s) => n + s.n.length, 0),
+      // the shape as SVG path data (the base, before Morph keys), for writing Morph keys from it
+      d: (H as any).dstr(shape),
+    };
   const base: Record<string, any> = {};
   for (const k of Object.keys(PROPS)) {
     if (k === 'd') continue;

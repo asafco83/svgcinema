@@ -29,6 +29,7 @@ How the project works
 
 How to work
 - Prefer animation presets (list_presets) over hand-made keyframes when one fits; they are tested and read well. Use set_keyframes for the rest.
+- Morph a shape into another: get_layer gives its outline as path.d (SVG path data); write set_keyframes with prop d and path data in the same coordinates, starting from that outline. Rectangles, ellipses and stars become plain paths; the keys get matching nodes, so they blend.
 - Give every layer you make a clear name. Keep artwork on the canvas unless it is meant to enter or leave.
 - New artwork: write clean SVG and call import_svg. Give each part that should move on its own its own element with an id that names it (the ids become layer names). Flat shapes, a viewBox sized to the drawing.${
     o.vector === 'model' ? ' For detailed illustrations a vector model is available: generate_vector.' : ''

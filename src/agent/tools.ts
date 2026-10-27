@@ -12,7 +12,9 @@ import { ASSETS, S, doc, layerById, mkLayer, sortTrack } from '../core/state';
 import { removeTrack, select, selectMany, setProp, setTime } from '../core/history';
 import { propOK } from '../core/keyframes';
 import { PRESETS, PRESET_GROUPS, presetById, presetJSOnly, presetTargets, writePreset } from '../core/presets';
-import { N } from '../geometry/nodes';
+import { N, alignTo, equalizeTrack } from '../geometry/nodes';
+import { parsePath } from '../geometry/parse-path';
+import { needsPlainPath, plainPath } from '../core/plain-path';
 import { importSVGWith, lastImportNotes } from '../io/svg-import';
 import { descendants, isBox, isLocked, kids, pidOf } from '../model/tree';
 import { frame, renderStage } from '../render/stage';
@@ -164,8 +166,29 @@ const isNum = (v: unknown): v is number => typeof v === 'number' && isFinite(v);
 const isPaint = (v: unknown) =>
   typeof v === 'string' || (!!v && typeof v === 'object' && Array.isArray((v as any).s) && !!(v as any).g);
 
+/** A Morph value: SVG path data (the d attribute) in the layer's own coordinates, as nodes. */
+function morphValue(v: unknown) {
+  const d = typeof v === 'string' ? parsePath(v) : [];
+  if (!d.length || !d.some(sp => sp.n.length >= 2))
+    fail(
+      'Morph (d) takes SVG path data, such as "M0 0 C40 -20 80 20 120 0 L120 60 Z", in the coordinates get_layer gives as path.d.',
+    );
+  return d;
+}
+/** Write Morph keys or a new shape: the layer becomes a plain path first (rectangles, ellipses, stars), and
+ *  every key gets the same nodes, each turned to line up with the one before, so the shapes blend. */
+function evenMorph(l: Layer) {
+  equalizeTrack(l);
+  const tr = l.t.d || [];
+  for (let i = 0; i < tr.length; i++) tr[i][1] = alignTo(i ? tr[i - 1][1] : l.b.d, tr[i][1]);
+}
+
 /** Is `v` the right kind of value for property `k` of `l`? Throws a readable reason when it isn't. */
-function checkValue(l: Layer, k: string, v: unknown) {
+function checkValue(l: Layer, k: string, v: unknown): void {
+  if (k === 'd' && needsPlainPath(l)) {
+    morphValue(v);
+    return;
+  }
   if (!propOK(l, k as PropKey)) fail(`${l.name} (${l.type}) has no "${k}" property to set.`);
   if (isFrozen(l, k)) fail(`${propLabel(l, k)} of "${l.name}" is frozen. Ask the user to unfreeze it in the timeline.`);
   const kind = propKind(l, k),
@@ -175,7 +198,7 @@ function checkValue(l: Layer, k: string, v: unknown) {
   if (kind === 'c' && !isPaint(v)) fail(`${label} takes a colour such as "#ff8800", "none", or a gradient.`);
   if (kind === 'a' && !(Array.isArray(v) && v.every(n => isNum(n) && n >= 0)))
     fail(`${label} takes a list of dash and gap lengths ([] for solid).`);
-  if (kind === 'm') fail(`${label} can't be written by the agent: bring new shapes in with import_svg.`);
+  if (kind === 'm') morphValue(v);
 }
 
 /** Re-render after a change, so boxes measured by later calls are current. */
@@ -526,7 +549,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'update_layer',
     description:
-      'Change a layer. values: property → value (pos [x, y], rot degrees, scl [x, y] with 1 = 100%, skw [x, y], op 0–1, fill / stk colour, fo / so 0–1, sw, ts / te / to %, dof, da [dash, gap…], sz [w, h], rad). A property that is already animated gets a keyframe at the playhead instead of a new base value; `keyed` lists those. geometry: rect x, y, w, h, rx · ellipse cx, cy, rx, ry · text x, y, text, size, family, weight, anchor · image x, y, w, h · polygon / star cx, cy, r, n, inner, rotation.',
+      'Change a layer. values: property → value (pos [x, y], rot degrees, scl [x, y] with 1 = 100%, skw [x, y], op 0–1, fill / stk colour, fo / so 0–1, sw, ts / te / to %, dof, da [dash, gap…], sz [w, h], rad, d: SVG path data for a new shape, in the coordinates get_layer gives as path.d; a rectangle, ellipse or star becomes a plain path). A property that is already animated gets a keyframe at the playhead instead of a new base value; `keyed` lists those. geometry: rect x, y, w, h, rx · ellipse cx, cy, rx, ry · text x, y, text, size, family, weight, anchor · image x, y, w, h · polygon / star cx, cy, r, n, inner, rotation.',
     parameters: obj(
       {
         id: ID,
@@ -570,8 +593,14 @@ export const TOOLS: Tool[] = [
         l.name = a.name;
         changed.push('name');
       }
-      for (const [k, v] of Object.entries(a.values || {})) {
+      for (const [k, v0] of Object.entries(a.values || {})) {
+        let v = v0;
+        if (k === 'd') {
+          plainPath(l);
+          v = morphValue(v0);
+        }
         setProp(l, k as PropKey, v);
+        if (k === 'd') evenMorph(l);
         (l.t[k] && l.t[k].length ? keyed : changed).push(k);
       }
       if (a.geometry) changed.push(...Object.keys(a.geometry));
@@ -858,7 +887,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'set_keyframes',
     description:
-      'Write keyframes for one property: keys [{ t: seconds, v: value, ease? }]. The ease on a key shapes the move to the next key. mode merge (default) keeps other keys and replaces ones at the same time; replace drops the old track. curved: for pos, make the motion path curved. Keys past the end grow the animation length.',
+      'Write keyframes for one property: keys [{ t: seconds, v: value, ease? }]. The ease on a key shapes the move to the next key. Morph (prop d): each v is SVG path data in the coordinates get_layer gives as path.d (start from that shape); a rectangle, ellipse or star becomes a plain path first, and every key gets the same number of nodes so the shapes blend. mode merge (default) keeps other keys and replaces ones at the same time; replace drops the old track. curved: for pos, make the motion path curved. Keys past the end grow the animation length.',
     parameters: obj(
       {
         id: ID,
@@ -879,7 +908,8 @@ export const TOOLS: Tool[] = [
       const l = editable(need(a.id)),
         k = a.prop as string;
       a.keys.forEach((q: any) => checkValue(l, k, q.v));
-      const made: Keyframe[] = a.keys.map((q: any) => [r3(q.t), q.v, easeOf(q.ease)]);
+      if (k === 'd') plainPath(l);
+      const made: Keyframe[] = a.keys.map((q: any) => [r3(q.t), k === 'd' ? morphValue(q.v) : q.v, easeOf(q.ease)]);
       let tr: Keyframe[] = a.mode === 'replace' || !l.t[k] ? [] : l.t[k].slice();
       made.forEach(q => {
         tr = tr.filter(o => Math.abs(o[0] - q[0]) >= 0.005);
@@ -889,6 +919,7 @@ export const TOOLS: Tool[] = [
       // keyframes that were replaced can't stay selected in the timeline
       (l.t[k] || []).forEach(q => tr.includes(q) || S.keys.delete(q));
       l.t[k] = tr;
+      if (k === 'd') evenMorph(l);
       if (a.curved !== undefined) {
         if (k !== 'pos') fail('curved only applies to pos.');
         l.sm = a.curved;
