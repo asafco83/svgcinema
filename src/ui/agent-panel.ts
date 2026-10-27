@@ -33,10 +33,13 @@ import {
   defaultImageModel,
   imageCatalog,
   imageProviderById,
+  type ImageProviderId,
+  menuPrice,
   modelsOf,
   money,
 } from '../agent/images';
 import { systemPrompt } from '../agent/prompt';
+import { chatPrice, loadChatPrices, perMillion } from '../agent/prices';
 import { type ImageAnswer, type ImageAsk, offeredTools } from '../agent/tools';
 import { PROVIDERS, type ProviderId, makeClient, providerById } from '../agent/providers';
 import { isLatest } from '../agent/request';
@@ -85,6 +88,8 @@ const ST = {
   /** OpenRouter's image models, once read */
   cat: null as null | ImageModel[],
   imgOther: false,
+  /** the price lists were asked for while Settings was open */
+  pricesAsked: false,
   vecOther: false,
   /** setup: the provider picked on first open */
   pick: 'openrouter' as ProviderId,
@@ -389,12 +394,25 @@ function settingsHTML() {
   } else {
     agent += row(
       'Model',
-      `<select class="sel" id="agModel">${models
-        .map(m => `<option value="${esc(m)}"${m === s.model ? ' selected' : ''}>${esc(m)}</option>`)
-        .join('')}<option value="__other">Other model…</option></select>`,
+      pselect(
+        'agModel',
+        models.map(m => {
+          const pr = chatPrice(p.id, m);
+          return { value: m, label: m, short: shortModel(m), price: pr ? perMillion(pr) : undefined };
+        }),
+        s.model,
+        'Price per million tokens: input · output',
+        [OTHER],
+        'Price per million tokens, input · output, from OpenRouter’s list',
+      ),
       'agModel',
     );
   }
+  // a typed model name: its price under the field, when the list knows it
+  const typed = (custom || other) && s.model ? chatPrice(p.id, s.model) : null;
+  if (typed)
+    agent += `<p class="ag-small ind">${perMillion(typed).replace(' /M', '')} per million tokens (input · output)</p>`;
+  askPrices();
   agent += row(
     'API key',
     `<span class="ag-key"><input class="txt" id="agKey" type="${ST.showKey ? 'text' : 'password'}" value="${esc(key)}" placeholder="${
@@ -426,6 +444,51 @@ function settingsHTML() {
     it = setup && imageTest(setup),
     imgTitle = `Images${it && !it.ok ? '<span class="ag-bad">Not working</span>' : ''}`;
   return `<div class="ag-settings">${sec('Agent model', agent)}${sec(imgTitle, imagesHTML(row))}${ask}${priv}</div>`;
+}
+
+interface POpt {
+  value: string;
+  label: string;
+  price?: string;
+  /** a shorter name for the closed menu */
+  short?: string;
+}
+/**
+ * A model menu with prices (mockup: the name, and its price in muted text on the right). A native
+ * select, so the keyboard and the open list work as everywhere else: each option reads "name · price",
+ * and over the closed select a label shows the chosen name and its price apart.
+ */
+function pselect(id: string, opts: POpt[], value: string, group: string, extra: POpt[] = [], tip = '') {
+  const o = (x: POpt) =>
+    `<option value="${esc(x.value)}"${x.value === value ? ' selected' : ''}>${esc(x.label)}${x.price ? ` · ${esc(x.price)}` : ''}</option>`;
+  const priced = opts.some(x => x.price),
+    cur = [...opts, ...extra].find(x => x.value === value) || opts[0];
+  return `<span class="ag-ps"${tip ? ` title="${esc(tip)}"` : ''}><select class="sel" id="${id}">${extra
+    .filter(x => x.value !== '__other')
+    .map(o)
+    .join(
+      '',
+    )}${priced ? `<optgroup label="${esc(group)}">${opts.map(o).join('')}</optgroup>` : opts.map(o).join('')}${extra
+    .filter(x => x.value === '__other')
+    .map(o)
+    .join('')}</select><span class="ag-ps-v" aria-hidden="true"><span>${cur ? esc(cur.short || cur.label) : ''}</span>${
+    cur && cur.price ? `<small>${esc(cur.price)}</small>` : ''
+  }</span></span>`;
+}
+const OTHER: POpt = { value: '__other', label: 'Other model…' };
+const imgPrice = (p: ImageProviderId, id: string) => {
+  const usd = menuPrice(p, id);
+  // an estimate: two decimals read as one ("about $0.03", not "$0.033")
+  return usd === null ? undefined : 'about $' + (usd >= 0.01 ? usd.toFixed(2) : usd.toFixed(3));
+};
+/** Read the price lists once while Settings is open (both cached for a day). */
+function askPrices() {
+  if (ST.pricesAsked) return;
+  ST.pricesAsked = true;
+  Promise.all([loadChatPrices(), imageCatalog()]).then(([, cat]) => {
+    ST.cat = cat;
+    if (ST.view === 'settings') renderBody();
+  });
 }
 
 function imagesHTML(row: (label: string, ctl: string, forId?: string) => string) {
@@ -477,12 +540,14 @@ function imagesHTML(row: (label: string, ctl: string, forId?: string) => string)
       )
     : row(
         'Image',
-        `<select class="sel" id="agImgSel">${raster
-          .map(
-            m =>
-              `<option value="${esc(m.id)}"${m.id === model ? ' selected' : ''}>${esc(m.name.replace(/^[^:]+:\s*/, ''))}</option>`,
-          )
-          .join('')}<option value="__other">Other model…</option></select>`,
+        pselect(
+          'agImgSel',
+          raster.map(m => ({ value: m.id, label: m.name.replace(/^[^:]+:\s*/, ''), price: imgPrice(ip.id, m.id) })),
+          model,
+          'About per image, 1024 × 1024 (OpenRouter’s prices)',
+          [OTHER],
+          'About per 1024 × 1024 image, from OpenRouter’s price list',
+        ),
         'agImgSel',
       );
   h += sw('transparent', s.transparent, 'Transparent background');
@@ -516,20 +581,16 @@ function imagesHTML(row: (label: string, ctl: string, forId?: string) => string)
           )
         : row(
             'Vector',
-            `<select class="sel" id="agVecSel"><option value="agent"${s.vector === 'agent' ? ' selected' : ''}>Drawn by the agent</option>${vec
-              .map(
-                m =>
-                  `<option value="${esc(m.id)}"${m.id === s.vector ? ' selected' : ''}>${esc(m.name.replace(/^[^:]+:\s*/, ''))}</option>`,
-              )
-              .join('')}<option value="__other">Other model…</option></select>`,
+            pselect(
+              'agVecSel',
+              vec.map(m => ({ value: m.id, label: m.name.replace(/^[^:]+:\s*/, ''), price: imgPrice(ip.id, m.id) })),
+              s.vector,
+              'About per image (OpenRouter’s prices)',
+              [{ value: 'agent', label: 'Drawn by the agent' }, OTHER],
+            ),
             'agVecSel',
           );
   }
-  if (ip.id === 'openrouter' && !ST.cat)
-    imageCatalog().then(m => {
-      ST.cat = m;
-      if (ST.view === 'settings') renderBody();
-    });
   return h;
 }
 

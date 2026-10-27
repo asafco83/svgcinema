@@ -24,6 +24,12 @@ def oai(text=None, tools=None):
 CAT={'data':[{'id':'openai/gpt-image-2.5-flare','name':'OpenAI: GPT Image Flare','supported_parameters':{'background':{'type':'enum','values':['auto','transparent','opaque']},'output_format':{'type':'enum','values':['png','webp']}}},
             {'id':'black-forest-labs/flux.2-pro','name':'Black Forest Labs: FLUX.2 Pro','supported_parameters':{'aspect_ratio':{'type':'enum','values':['1:1','3:2','2:3']}}},
             {'id':'recraft/recraft-v4-vector','name':'Recraft: Recraft V4 Vector','supported_parameters':{'output_format':{'type':'enum','values':['svg']}}}]}
+# OpenRouter's general model list: chat prices per token, image models' price per output-image token
+PRICES={'data':[{'id':'anthropic/claude-sonnet-5.5','pricing':{'prompt':'0.000002','completion':'0.00001'}},
+               {'id':'openai/gpt-5.5','pricing':{'prompt':'0.000005','completion':'0.00003'}},
+               {'id':'openai/gpt-image-2.5-flare','pricing':{'prompt':'0.000008','completion':'0.000008','image_output':'0.00003'}},
+               {'id':'black-forest-labs/flux.2-pro','pricing':{'prompt':'0','completion':'0','image_output':'0.00000732421875'}},
+               {'id':'recraft/recraft-v4-vector','pricing':{'prompt':'0','completion':'0','image_output':'0.0000191616766467066'}}]}
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1440,'height':900}); pg.set_default_timeout(8000)
@@ -33,6 +39,7 @@ async def main():
             q=r.request; u=q.url
             if q.method=='OPTIONS': return await r.fulfill(status=204,headers=CORS)
             if u.endswith('/images/models'): return await r.fulfill(status=200,headers={**CORS,'content-type':'application/json'},body=json.dumps(CAT))
+            if '/api/v1/models' in u and q.method=='GET': return await r.fulfill(status=200,headers={**CORS,'content-type':'application/json'},body=json.dumps(PRICES))
             if '/endpoints' in u: return await r.fulfill(status=200,headers={**CORS,'content-type':'application/json'},body=json.dumps({'data':{'endpoints':[{'pricing':[{'billable':'output_image','unit':'image','cost_usd':0.04}]}]}}))
             if u.endswith('/api/v1/images'):
                 body=json.loads(q.post_data); calls.append(body); await asyncio.sleep(S['delay'])
@@ -70,12 +77,18 @@ async def main():
         await pg.click('#bAgent'); await pg.wait_for_timeout(200)
         await pg.click('[data-act=settings]'); await pg.wait_for_timeout(700)
         st=await E("""(()=>{const h=[...document.querySelectorAll('.ag-sec h3')].map(h=>h.textContent.trim());
-          return {secs:h, prov:document.querySelector('#agImgProv').value, models:[...document.querySelectorAll('#agImgSel option')].map(o=>o.textContent),
+          return {secs:h, prov:document.querySelector('#agImgProv').value, models:[...document.querySelectorAll('#agImgSel option')].map(o=>o.textContent.split(' · ')[0]),
             vec:[...document.querySelectorAll('#agVecSel option')].map(o=>o.textContent), key:!!document.querySelector('#agImgKey')}})()""")
         check('Settings has an Images section after the agent model', st['secs'][:2]==['Agent model','Images'], st['secs'])
         check('…the agent’s OpenRouter key makes images too (no second key field)', st['prov']=='openrouter' and not st['key'], st)
         check('…image models come from OpenRouter’s live list, picture models only', st['models'][:2]==['GPT Image Flare','FLUX.2 Pro'] and 'Recraft V4 Vector' not in st['models'], st['models'])
-        check('…vector: drawn by the agent, or a vector model', st['vec'][:2]==['Drawn by the agent','Recraft V4 Vector'], st['vec'])
+        check('…vector: drawn by the agent, or a vector model', st['vec'][:2]==['Drawn by the agent','Recraft V4 Vector · about $0.08'], st['vec'])
+        pr=await E("""(()=>{const v=s=>{const e=document.querySelector(s); return e&&e.closest('.ag-ps').querySelector('.ag-ps-v').textContent};
+          return {agent:v('#agModel'), img:v('#agImgSel'), vec:v('#agVecSel'), opts:[...document.querySelectorAll('#agModel option')].map(o=>o.textContent),
+            group:(document.querySelector('#agImgSel optgroup')||{}).label}})()""")
+        check('the agent model shows its price per million tokens (from OpenRouter’s list)', pr['agent']=='claude-sonnet-5.5$2 · $10 /M' and 'openai/gpt-5.5 · $5 · $30 /M' in pr['opts'], pr)
+        check('…image models show about how much one image costs', pr['img']=='GPT Image Flareabout $0.03' and 'per image' in (pr['group'] or ''), pr)
+        check('…a model the list has no price for shows none', 'Other model…' in pr['opts'] and all('·' not in o for o in pr['opts'] if o.startswith('Other')))
         await pg.select_option('#agImgProv','openai'); await pg.wait_for_timeout(150)
         check('another service asks for its own key and has no vector models', await E("!!document.querySelector('#agImgKey') && !document.querySelector('#agVecSel')"))
         await pg.select_option('#agImgProv','openrouter'); await pg.wait_for_timeout(150)
