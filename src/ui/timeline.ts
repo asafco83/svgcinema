@@ -9,7 +9,7 @@ import { S, doc, layerById, sortTrack } from '../core/state';
 import { ancestors, hasTracks, isHidden, treeRows } from '../model/tree';
 import { frame, tc } from '../render/stage';
 import { easeLabel } from './easing';
-import { renderInspector } from './inspector';
+import { focusProp, renderInspector } from './inspector';
 import { renderLayers } from './layers-panel';
 import { poseKeys, poseLabel, poseRowFor, rigTimes } from '../tools/rig';
 
@@ -114,7 +114,7 @@ export function renderTimeline() {
           keys += `<button class="kf${S.keys.has(q) ? ' sel' : ''}${q[2] === 'hold' ? ' hold' : ''}${pvRep.has(q) ? ' rep' : ''}" data-lid="${l.id}" data-prop="${k}" data-i="${i}" style="left:${q[0] * S.pps}px" aria-label="${propLabel(l, k)} keyframe at ${fmt(q[0])}s" title="${propLabel(l, k)} · ${fmt(q[0])}s · ${esc(easeLabel(q[2]))}"></button>`;
         }
         const nm = propLabel(l, k);
-        const ctrls = `<button class="tl-ic tl-fz${fz ? ' on' : ''}" data-act="freeze" aria-pressed="${fz}" aria-label="${fz ? 'Unfreeze' : 'Freeze'} ${nm}" title="${fz ? `Frozen: ${nm} holds its value and its keyframes are not used. Click to unfreeze.` : `Freeze ${nm}: hold its current value and set the keyframes aside`}">${ICON.freeze}</button><span class="tl-pname">${nm}</span>
+        const ctrls = `<button class="tl-ic tl-fz${fz ? ' on' : ''}" data-act="freeze" aria-pressed="${fz}" aria-label="${fz ? 'Unfreeze' : 'Freeze'} ${nm}" title="${fz ? `Frozen: ${nm} holds its value and its keyframes are not used. Click to unfreeze.` : `Freeze ${nm}: hold its current value and set the keyframes aside`}">${ICON.freeze}</button><span class="tl-pname" data-act="track" title="Select all ${nm} keyframes">${nm}</span>
         <button class="kb" data-act="key" ${fz ? 'disabled ' : ''}aria-label="Add or remove ${nm} keyframe at playhead"></button>
         <button class="tl-ic tl-x" data-act="rmtrack" aria-label="Remove ${nm} animation">${ICON.x}</button>`;
         // the graph editor opens this track into a value graph
@@ -256,7 +256,8 @@ export function dragWin(move: (e: PointerEvent) => void, up?: (e: PointerEvent) 
 export function selectKeyLayer(id: string) {
   if (S.sel !== id) {
     S.sel = id;
-    S.selSet = new Set<string>([id]);
+    // a layer of a multi-selection keeps the others selected
+    if (!S.selSet.has(id)) S.selSet = new Set<string>([id]);
     S.node = null;
   }
 }
@@ -520,6 +521,7 @@ export function init(): void {
         ks.forEach((q: Keyframe) => S.keys.add(q));
       }
       selectKeyLayer(kf.dataset.lid);
+      if (kf.dataset.prop) focusProp(kf.dataset.prop);
       TLB.querySelectorAll('.kf').forEach((el: KfEl) => el.classList.toggle('sel', S.keys.has(el._k)));
       if (!S.keys.size || (e.shiftKey && allIn)) {
         renderTimeline();

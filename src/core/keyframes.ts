@@ -11,7 +11,8 @@ import { toast } from '../io/open';
 import { isAnim } from '../model/tree';
 import { frame } from '../render/stage';
 import { applyEase } from '../ui/easing';
-import { renderInspector } from '../ui/inspector';
+import { focusProp, renderInspector } from '../ui/inspector';
+import { multiKey } from '../ui/multi';
 import { nameDblClick, renameInline, renderLayers } from '../ui/layers-panel';
 import { MENU, keyOwners, laneTime, renderTimeline, resolveCollisions, selectKeyLayer } from '../ui/timeline';
 
@@ -325,10 +326,31 @@ export function init(): void {
       S.exp[l.id] = !(S.exp[l.id] !== false);
       renderTimeline();
     } else if (a === 'sel') {
-      S.keys.clear();
-      select(l.id);
+      // Ctrl/Cmd adds or removes a layer, Shift selects the run of layers up to it
+      const mode = e.ctrlKey || e.metaKey ? 'toggle' : e.shiftKey ? 'range' : undefined;
+      if (!mode) S.keys.clear();
+      select(l.id, mode);
+    } else if (a === 'track') {
+      // a track's title: all its keyframes (Ctrl/Cmd or Shift add them to the ones selected)
+      const k = row.dataset.prop,
+        add = e.shiftKey || e.ctrlKey || e.metaKey;
+      if (!add) S.keys.clear();
+      (l.t[k] || []).forEach((q: any) => S.keys.add(q));
+      if (!S.selSet.has(l.id)) select(l.id, add ? 'toggle' : undefined);
+      else {
+        S.sel = l.id;
+        renderTimeline();
+        renderLayers();
+        renderInspector();
+        frame();
+      }
+      focusProp(k);
     } else if (a === 'key') {
-      toggleKey(l, row.dataset.prop);
+      const k = row.dataset.prop;
+      // several layers selected (this one among them): the key goes on each of them at the playhead
+      if (S.selSet.size > 1 && S.selSet.has(l.id)) multiKey(k, toggleKey);
+      else toggleKey(l, k);
+      focusProp(k);
     } else if (a === 'rmtrack') {
       removeTrack(l, row.dataset.prop);
     } else if (a === 'freeze') {

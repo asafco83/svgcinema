@@ -4,13 +4,14 @@
 // Shortcuts: Shift + the letter shown next to each property.
 import { keyLower } from '../core/keys';
 import type { Keyframe, Layer, PropKey } from '../model/types';
-import { $, H, ICON, clone, ic, isFrozen, r3, valueAt } from '../core/constants';
+import { $, DEFAULT_EASE, H, ICON, clone, ic, isFrozen, r3, valueAt } from '../core/constants';
 import { beginEdit } from '../core/history';
 import { propOK } from '../core/keyframes';
 import { S, layerById, sortTrack } from '../core/state';
 import { isLocked, kids, pidOf } from '../model/tree';
 import { canMask } from '../core/masks';
 import { openPresets } from './presets-panel';
+import { focusProp } from './inspector';
 
 /** Menu sections, in order. Letters are Shift shortcuts (Shift+C is the Convert Point tool). */
 export const ANIM_GROUPS: Array<Array<[PropKey, string, string?]>> = [
@@ -63,7 +64,7 @@ export function animateProp(k: PropKey) {
     const tr = l.t[k] || (l.t[k] = []);
     let q = tr.find(x => Math.abs(x[0] - t) < 0.005);
     if (!q) {
-      q = [t, clone(valueAt(l, k, S.time)), 'ease'];
+      q = [t, clone(valueAt(l, k, S.time)), DEFAULT_EASE];
       tr.push(q);
       sortTrack(tr);
     }
@@ -72,6 +73,7 @@ export function animateProp(k: PropKey) {
   });
   S.keys = new Set(made);
   ed.end({ insp: true });
+  focusProp(k);
   return true;
 }
 /** Shift+letter shortcuts. Returns true when handled. */

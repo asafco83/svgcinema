@@ -3,7 +3,21 @@ import { BATCH } from './batch-mode';
 import { syncSymbols } from './symbols';
 import { renderSymbols } from '../ui/symbols-ui';
 import type { Layer, PropKey, Tool } from '../model/types';
-import { $, H, HINTS, hintHTML, baseOf, clamp, clone, isFrozen, propLabel, r3, setBase, valueAt } from './constants';
+import {
+  $,
+  DEFAULT_EASE,
+  H,
+  HINTS,
+  hintHTML,
+  baseOf,
+  clamp,
+  clone,
+  isFrozen,
+  propLabel,
+  r3,
+  setBase,
+  valueAt,
+} from './constants';
 import { toast } from '../io/open';
 import { LP, WRAP } from './dom';
 import { S, doc, layerById, selLayer, setDoc, sortTrack, syncIdc } from './state';
@@ -100,7 +114,7 @@ export function setProp(l: Layer, k: PropKey, v: any) {
     const kf = tr.find(q => Math.abs(q[0] - S.time) < 0.005);
     if (kf) kf[1] = v;
     else {
-      tr.push([r3(S.time), v, 'ease']);
+      tr.push([r3(S.time), v, DEFAULT_EASE]);
       sortTrack(tr);
     }
     return;
@@ -138,7 +152,7 @@ export function toggleKey(l: Layer, k: PropKey) {
   }
   const tr = l.t[k],
     cur = clone(valueAt(l, k, S.time));
-  if (!tr || !tr.length) l.t[k] = [[r3(S.time), cur, 'ease']];
+  if (!tr || !tr.length) l.t[k] = [[r3(S.time), cur, DEFAULT_EASE]];
   else {
     const i = tr.findIndex(q => Math.abs(q[0] - S.time) < 0.005);
     if (i >= 0) {
@@ -149,7 +163,7 @@ export function toggleKey(l: Layer, k: PropKey) {
         setBase(l, k, cur);
       }
     } else {
-      tr.push([r3(S.time), cur, 'ease']);
+      tr.push([r3(S.time), cur, DEFAULT_EASE]);
       sortTrack(tr);
     }
   }

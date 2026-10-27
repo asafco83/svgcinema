@@ -265,6 +265,33 @@ export function applyCollapse() {
     );
   });
 }
+/** Show a property's row in the Inspector: open its section if it is closed, scroll it into view and
+ *  flash it (after a track was added or picked in the timeline). */
+export function focusProp(k: string) {
+  requestAnimationFrame(() => {
+    const kb = INSP.querySelector(`[data-kb="${CSS.escape(k)}"]`) as HTMLElement | null,
+      row = kb && (kb.closest('.row') as HTMLElement | null);
+    if (!row) return;
+    const sec = row.closest('.sec');
+    if (sec && sec.classList.contains('closed')) {
+      const h3 = sec.querySelector(':scope > h3');
+      if (h3) {
+        closedSet().delete(secTitle(h3));
+        try {
+          localStorage.setItem(CLOSED_STORE, JSON.stringify([...closedSet()]));
+        } catch (_) {}
+      }
+      sec.classList.remove('closed');
+      const b = sec.querySelector('.sec-tg');
+      if (b) b.setAttribute('aria-expanded', 'true');
+    }
+    row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    row.classList.remove('flash');
+    void row.offsetWidth;
+    row.classList.add('flash');
+    setTimeout(() => row.classList.remove('flash'), 1200);
+  });
+}
 /** "/": closes every section of the inspector, or opens them all when they are all closed already. */
 export function toggleAllSections() {
   const hs = [...INSP.querySelectorAll('.sec > h3')];
