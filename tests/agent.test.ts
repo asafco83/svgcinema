@@ -122,3 +122,26 @@ describe('design agent: easing names from other tools', () => {
     expect(gist('"Logo" is locked. Ask the user whether to unlock it.')).toBe('"Logo" is locked.');
   });
 });
+
+import { S, doc } from '../src/core/state';
+import { continueRequest } from '../src/agent/request';
+describe('design agent: Continue after the step limit is the same undo step', () => {
+  // (the whole cycle, with the editor's undo, is in tests/browser/agent-limit.py)
+  it('reopens the request when nothing else was edited, and starts a new one otherwise', () => {
+    setDoc(blankDoc(400, 300));
+    const before = JSON.stringify(doc);
+    S.redo = [];
+    S.undo = ['older', before];
+    const r = { snap: before, mark: 'older', depth: 1, open: false };
+    const c = continueRequest(r);
+    // its entry is off the stack again; it closes over the document before the first part
+    expect(S.undo).toEqual(['older']);
+    expect(c).toEqual({ snap: before, mark: 'older', depth: 1, open: true });
+    // something else edited since: a request of its own
+    S.undo = ['older', before, 'the user’s edit'];
+    const d = continueRequest(r);
+    expect(S.undo.length).toBe(3);
+    expect(d.mark).toBe('the user’s edit');
+    expect(continueRequest(undefined).open).toBe(true);
+  });
+});

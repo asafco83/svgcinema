@@ -21,6 +21,7 @@
   --key: #cc8606;
   --key-text: #8a5a00;
   --key-soft: rgba(204, 134, 6, 0.3);
+  --key-line: rgba(204, 134, 6, 0.42);
   --head: #e5484d;
   --graph-y: #e8820c;
   --mat: #e9ebf0;
@@ -59,6 +60,7 @@
     --key: #f2b63d;
     --key-text: #f2b63d;
     --key-soft: rgba(242, 182, 61, 0.32);
+    --key-line: rgba(242, 182, 61, 0.42);
     --head: #ff6b6f;
     --graph-y: #ffa24a;
     --graph-y: #ffa24a;
@@ -94,6 +96,7 @@
   --key: #f2b63d;
   --key-text: #f2b63d;
   --key-soft: rgba(242, 182, 61, 0.32);
+  --key-line: rgba(242, 182, 61, 0.42);
   --head: #ff6b6f;
   --mat: #0c0e12;
   --dot: #1e222b;
@@ -7070,4 +7073,111 @@ button.ag-chip:hover {
 }
 #app.agent-busy :is(#bUndo, #bRedo, #bMenu) {
   opacity: 0.45;
+}
+
+/* Agent: paused at the step limit (mockup "Agent — step limit reached") */
+.ag-limit {
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--key-line);
+  background: var(--raised);
+  box-shadow: 0 6px 18px -10px var(--shade);
+  overflow: hidden;
+}
+.ag-limit .ag-card-h {
+  padding: 10px 12px 8px;
+}
+.ag-limit .ag-card-h svg {
+  flex: none;
+  color: var(--key);
+}
+.ag-limit .ag-card-h b {
+  flex: 1;
+}
+.ag-limit .ag-card-h small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.ag-lim-bar {
+  display: flex;
+  gap: 3px;
+  padding: 0 12px 10px;
+}
+.ag-lim-bar i {
+  flex: 1;
+  height: 6px;
+  box-sizing: border-box;
+  border-radius: 3px;
+  border: 1px dashed var(--line-2);
+}
+.ag-lim-bar i.on {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+}
+.ag-lim-cap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px 2px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ag-lim-cap.done {
+  color: var(--accent-fg);
+}
+.ag-limit .ag-step {
+  padding: 6px 12px;
+}
+.ag-lim-left {
+  margin-top: 4px;
+  padding-bottom: 6px;
+  background: var(--panel-2);
+  border-top: 1px solid var(--line-soft);
+}
+.ag-lim-left .ag-lim-cap {
+  border-top: 0;
+}
+.ag-limit .ag-step.i-left {
+  padding: 5px 12px;
+  color: var(--muted);
+}
+.ag-limit .ag-card-b {
+  padding: 10px 12px 6px;
+  border-top: 1px solid var(--line-soft);
+}
+.ag-limit .ag-btn.pri {
+  height: 30px;
+  padding: 0 12px;
+}
+.ag-limit .ag-btn.pri span {
+  font-weight: 500;
+  opacity: 0.8;
+}
+.ag-limit .ag-card-b .ag-btn:not(.pri) {
+  height: 30px;
+}
+.ag-limit p.ag-lim-note {
+  padding: 0 12px 11px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.ag-cont {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.ag-cont::before,
+.ag-cont::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line-soft);
 }
