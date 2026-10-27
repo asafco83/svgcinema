@@ -27,6 +27,10 @@ export interface Turn {
   budget?: number;
   /** where each Continue started, as indexes into steps */
   cont?: number[];
+  /** "Make it as an image instead": this vector request was undone and redone as an image */
+  replaced?: boolean;
+  /** this request redoes the one before it as an image */
+  redo?: boolean;
   /** the request changed the project */
   changed?: boolean;
   /** the messages it added, for the next request's history */

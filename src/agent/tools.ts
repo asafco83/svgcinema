@@ -67,6 +67,17 @@ export interface ImageAsk {
   transparent: boolean;
   /** about how much it costs (USD), null when unknown */
   price: number | null;
+  /** an unclear request (vector or picture?): the user picks, for this request only. Vector is picked first. */
+  choice?: { image: KindOption; vector: KindOption };
+}
+export interface KindOption {
+  model: string;
+  service: string;
+  size: string;
+  transparent?: boolean;
+  price: number | null;
+  /** vector drawn by the agent itself: no model, no cost */
+  free?: boolean;
 }
 export interface ImageAnswer {
   go: boolean;
@@ -74,6 +85,8 @@ export interface ImageAnswer {
   prompt?: string;
   /** don't ask again */
   dontAsk?: boolean;
+  /** with a choice: what the user picked */
+  kind?: 'image' | 'vector';
 }
 
 export interface Tool {
@@ -197,23 +210,56 @@ export function modelName(c: ImageChoice) {
   return m ? m.name.replace(/^[^:]+:\s*/, '') : c.model.split('/').pop() || c.model;
 }
 
-/** Ask (when asking is on), then make the image or SVG. Returns null when the user cancelled. */
-async function makeImage(kind: 'image' | 'vector', c: ImageChoice, a: any, ctx: ToolContext) {
+const soonP = <T>(p: Promise<T>) => Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), 4000))]);
+const serviceOf = (c: ImageChoice) => (c.provider === 'custom' ? 'Custom' : imageProviderById(c.provider)!.label);
+
+/** The card for an unclear request: both kinds, with their models and prices. */
+async function choiceAsk(a: any, img: ImageChoice): Promise<ImageAsk> {
+  const aspect: Aspect = a.size || 'square',
+    vec = vectorChoice();
+  if (img.provider === 'openrouter' || (vec && vec.provider === 'openrouter')) await soonP(imageCatalog());
+  const [ip, vp] = await Promise.all([soonP(imagePrice(img, aspect)), vec ? soonP(imagePrice(vec, 'square')) : null]);
+  const image: KindOption = {
+    model: modelName(img),
+    service: serviceOf(img),
+    size: ASPECTS[aspect].label,
+    transparent: a.transparent ?? getSettings().transparent,
+    price: ip,
+  };
+  const vector: KindOption = vec
+    ? { model: modelName(vec), service: serviceOf(vec), size: 'Vector (SVG)', price: vp }
+    : { model: 'Drawn by the agent', service: '', size: 'Vector (SVG)', price: 0, free: true };
+  return {
+    kind: 'vector',
+    name: a.name,
+    prompt: a.prompt,
+    model: vector.model,
+    service: vector.service,
+    size: vector.size,
+    transparent: false,
+    price: vector.price,
+    choice: { image, vector },
+  };
+}
+
+/** Ask (when asking is on), then make the image or SVG. Returns null when the user cancelled.
+ *  `pre`: the user already confirmed (the choice card), with this prompt. */
+async function makeImage(kind: 'image' | 'vector', c: ImageChoice, a: any, ctx: ToolContext, pre?: { prompt: string }) {
   const aspect: Aspect = a.size || 'square',
     transparent = kind === 'image' && (a.transparent ?? getSettings().transparent),
-    soon = <T>(p: Promise<T>) => Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), 4000))]);
+    soon = soonP;
   // what the model takes (transparency, ratios) comes from OpenRouter's list; read it if it isn't cached
   if (c.provider === 'openrouter') await soon(imageCatalog());
   const price = await soon(imagePrice(c, aspect));
-  let prompt: string = a.prompt,
-    asked = false;
-  if (confirmImages() && ctx.confirmImage) {
+  let prompt: string = pre ? pre.prompt : a.prompt,
+    asked = !!pre;
+  if (!pre && confirmImages() && ctx.confirmImage) {
     const ans = await ctx.confirmImage({
       kind,
       name: a.name,
       prompt,
       model: modelName(c),
-      service: c.provider === 'custom' ? 'Custom' : imageProviderById(c.provider)!.label,
+      service: serviceOf(c),
       size: kind === 'vector' ? 'Vector (SVG)' : ASPECTS[aspect].label,
       transparent,
       price,
@@ -232,6 +278,37 @@ async function makeImage(kind: 'image' | 'vector', c: ImageChoice, a: any, ctx: 
   } finally {
     if (ctx.generating) ctx.generating(null);
   }
+}
+/** Vector artwork: by the vector model (imported as layers), or, with none, the agent is told to draw it. */
+async function makeVector(a: any, ctx: ToolContext, pre?: { prompt: string }, by = '') {
+  const c = vectorChoice(),
+    chosen = by ? { chosen: 'vector', by } : {};
+  if (!c)
+    return {
+      ...chosen,
+      drawn: false,
+      prompt: a.prompt,
+      next: `Make it as vector: write the SVG yourself (each part that should move its own element with an id that names it) and call import_svg with name "${a.name}". What to draw: ${a.prompt}`,
+    };
+  const m = await makeImage('vector', c, a, ctx, pre);
+  if (!m) return CANCELLED;
+  const svg = cleanSVG(new TextDecoder().decode(m.r.bytes));
+  const before = new Set(doc.layers.map(l => l.id));
+  const ok = await importSVGWith(svg, { name: a.name, at: isNum(a.x) && isNum(a.y) ? { x: a.x, y: a.y } : null });
+  if (!ok) fail('The vector model sent SVG that could not be read.');
+  const made = doc.layers.filter(l => !before.has(l.id)),
+    top = made.filter(l => !l.parent || before.has(l.parent));
+  refresh();
+  return {
+    ...chosen,
+    ids: top.map(l => l.id),
+    layers: made.length,
+    prompt: m.prompt,
+    model: modelName(c),
+    cost: m.cost,
+    asked: m.asked,
+    notes: lastImportNotes.slice(0, 10),
+  };
 }
 const CANCELLED = {
   cancelled: true,
@@ -609,13 +686,16 @@ export const TOOLS: Tool[] = [
   {
     name: 'generate_image',
     description:
-      'Make a raster image (PNG) with the image model and store it in the project as an asset; then put it on the canvas with place_image. prompt: what to draw, in detail (subject, style, view). size: square (default), landscape or portrait. transparent: a transparent background (default from Settings). The user may be asked first, since it costs them money; if they cancel, do not retry.',
+      "Make a raster image (PNG) with the image model and store it in the project as an asset; then put it on the canvas with place_image. prompt: what to draw, in detail (subject, style, view). size: square (default), landscape or portrait. transparent: a transparent background (default from Settings). either: true when the request does not say or imply whether it should be a picture or vector artwork; then the app decides from the user's settings or asks them, and the result says which was made (follow its next). The user may be asked first, since it costs them money; if they cancel, do not retry.",
     parameters: obj(
       {
         prompt: { type: 'string', maxLength: 4000 },
         name: { type: 'string', maxLength: 80 },
         size: { type: 'string', enum: ['square', 'landscape', 'portrait'] },
         transparent: { type: 'boolean' },
+        either: { type: 'boolean' },
+        x: NUM,
+        y: NUM,
       },
       ['prompt', 'name'],
     ),
@@ -623,7 +703,22 @@ export const TOOLS: Tool[] = [
     run: async (a, ctx) => {
       const c = imageChoice();
       if (!c) fail('No image model is set up (Settings › Images). Offer to draw it as vector shapes instead.');
-      const m = await makeImage('image', c!, a, ctx);
+      // an unclear request: vector when the user prefers it, else they pick (vector first)
+      let kind: 'image' | 'vector' = 'image',
+        pre: { prompt: string } | undefined,
+        by = '';
+      if (a.either) {
+        if (getSettings().preferVector) [kind, by] = ['vector', 'the Prefer vector setting'];
+        else if (ctx.confirmImage) {
+          const ans = await ctx.confirmImage(await choiceAsk(a, c!));
+          if (!ans.go) return CANCELLED;
+          kind = ans.kind || 'vector';
+          pre = { prompt: (ans.prompt && ans.prompt.trim()) || a.prompt };
+          by = 'the user';
+        }
+      }
+      if (kind === 'vector') return makeVector(pre ? { ...a, prompt: pre.prompt } : a, ctx, pre, by);
+      const m = await makeImage('image', c!, a, ctx, pre);
       if (!m) return CANCELLED;
       const t = await finishTransparency(m.r, m.transparent),
         ext = /jpeg/.test(t.mime) ? 'jpg' : /webp/.test(t.mime) ? 'webp' : 'png';
@@ -638,6 +733,7 @@ export const TOOLS: Tool[] = [
         model: modelName(c!),
         cost: m.cost,
         asked: m.asked,
+        ...(by ? { chosen: 'image', by } : {}),
         next: 'Place it with place_image.',
       };
     },
@@ -652,25 +748,8 @@ export const TOOLS: Tool[] = [
     ),
     mutates: true,
     run: async (a, ctx) => {
-      const c = vectorChoice();
-      if (!c) fail('No vector model is set up: write the SVG yourself and call import_svg.');
-      const m = await makeImage('vector', c!, a, ctx);
-      if (!m) return CANCELLED;
-      const svg = cleanSVG(new TextDecoder().decode(m.r.bytes));
-      const before = new Set(doc.layers.map(l => l.id));
-      const ok = await importSVGWith(svg, { name: a.name, at: isNum(a.x) && isNum(a.y) ? { x: a.x, y: a.y } : null });
-      if (!ok) fail('The vector model sent SVG that could not be read.');
-      const made = doc.layers.filter(l => !before.has(l.id)),
-        top = made.filter(l => !l.parent || before.has(l.parent));
-      refresh();
-      return {
-        ids: top.map(l => l.id),
-        layers: made.length,
-        model: modelName(c!),
-        cost: m.cost,
-        asked: m.asked,
-        notes: lastImportNotes.slice(0, 10),
-      };
+      if (!vectorChoice()) fail('No vector model is set up: write the SVG yourself and call import_svg.');
+      return makeVector(a, ctx);
     },
   },
   {

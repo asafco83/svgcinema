@@ -292,3 +292,67 @@ group('design agent images: settings decide what is offered', () => {
     ).toMatch(/Didn’t/);
   });
 });
+
+import { runTool as runToolV, type ImageAsk as Ask } from '../src/agent/tools';
+group('design agent: vector or image for an unclear request', () => {
+  const setup = (preferVector: boolean) => {
+    setSettings({ provider: 'openrouter', model: 'anthropic/claude-sonnet-5.5', preferVector, vector: 'agent' });
+    setKey('openrouter', 'test-key');
+  };
+  // no network here: an unknown price is fine
+  const nofetch = () =>
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('', { status: 404 })),
+    );
+  it('Prefer vector on: vector without asking (drawn by the agent, told to draw it)', async () => {
+    setup(true);
+    nofetch();
+    let asked = 0;
+    const r: any = await runToolV(
+      'generate_image',
+      { prompt: 'a cartoon rocket', name: 'Rocket', either: true },
+      { confirmImage: async () => (asked++, { go: true }) },
+    );
+    expect(asked).toBe(0);
+    expect(r.ok).toBe(true);
+    expect(r.result).toMatchObject({ chosen: 'vector', by: 'the Prefer vector setting', drawn: false });
+    expect(r.result.next).toMatch(/import_svg/);
+    expect(r.result.next).toMatch(/a cartoon rocket/);
+  });
+  it('Prefer vector off: the user picks, even with asking off; vector first, free when the agent draws it', async () => {
+    setup(false);
+    nofetch();
+    setConfirmImages(false);
+    let ask: Ask | null = null;
+    const r: any = await runToolV(
+      'generate_image',
+      { prompt: 'a cartoon rocket', name: 'Rocket', either: true },
+      { confirmImage: async a => ((ask = a), { go: true, kind: 'vector', prompt: 'a flat rocket' }) },
+    );
+    expect(ask!.choice).toBeTruthy();
+    expect(ask!.kind).toBe('vector');
+    expect(ask!.choice!.vector.free).toBe(true);
+    expect(ask!.choice!.image.model).toBeTruthy();
+    expect(r.result).toMatchObject({ chosen: 'vector', by: 'the user', drawn: false });
+    expect(r.result.next).toMatch(/a flat rocket/);
+  });
+  it('a cancel on the choice is a cancel; a clear request never asks which', async () => {
+    setup(false);
+    nofetch();
+    const r: any = await runToolV(
+      'generate_image',
+      { prompt: 'x', name: 'X', either: true },
+      { confirmImage: async () => ({ go: false }) },
+    );
+    expect(r.result.cancelled).toBe(true);
+    let seen: Ask | null = null;
+    await runToolV(
+      'generate_image',
+      { prompt: 'x', name: 'X' },
+      { confirmImage: async a => ((seen = a), { go: false }) },
+    );
+    expect(seen!.choice).toBeUndefined();
+    expect(seen!.kind).toBe('image');
+  });
+});

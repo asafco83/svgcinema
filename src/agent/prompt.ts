@@ -39,7 +39,7 @@ How to work
           o.preferVector !== false
             ? ' When parts of the artwork need to move on their own (wings, wheels, a face), make it as vector instead, unless the user asks for an image.'
             : ' Use an image when the user asks for a picture or a detailed illustration.'
-        } Don't generate the same image again after a cancel.`
+        } When the request doesn't say or imply whether it should be a picture or vector artwork, call generate_image with either: true and let the app decide (it follows the user's settings or asks them); then follow the result's next. Don't generate the same image again after a cancel.`
       : 'No image model is set up, so you cannot make raster images. If the user asks for one, say so briefly and offer to draw it as vector shapes instead.'
   }
 ${
