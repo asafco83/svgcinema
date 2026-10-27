@@ -7,7 +7,7 @@
 // (ids, names, what changed), never the whole document. A ToolError is a refusal the model can read
 // and correct; it never leaves the document half changed.
 import type { Ease, Keyframe, Layer, PropKey } from '../model/types';
-import { FONTS, NOFILL, isFrozen, propKind, propLabel, r2, r3 } from '../core/constants';
+import { DEFAULT_EASE, FONTS, NOFILL, isFrozen, propKind, propLabel, r2, r3 } from '../core/constants';
 import { ASSETS, S, doc, layerById, mkLayer, sortTrack } from '../core/state';
 import { removeTrack, select, selectMany, setProp, setTime } from '../core/history';
 import { propOK } from '../core/keyframes';
@@ -157,7 +157,7 @@ export function easeName(s: string): string | null {
   return null;
 }
 function easeOf(e: unknown): Ease {
-  if (e === undefined) return 'ease';
+  if (e === undefined) return DEFAULT_EASE;
   if (typeof e === 'string' && easeName(e)) return easeName(e)!;
   if (Array.isArray(e) && e.length === 4 && e.every(n => typeof n === 'number' && isFinite(n))) return e as number[];
   return fail(`Unknown easing ${JSON.stringify(e)}. Use one of ${EASES.join(', ')} or a Bézier [x1, y1, x2, y2].`);
@@ -887,7 +887,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'set_keyframes',
     description:
-      'Write keyframes for one property: keys [{ t: seconds, v: value, ease? }]. The ease on a key shapes the move to the next key. Morph (prop d): each v is SVG path data in the coordinates get_layer gives as path.d (start from that shape); a rectangle, ellipse or star becomes a plain path first, and every key gets the same number of nodes so the shapes blend. mode merge (default) keeps other keys and replaces ones at the same time; replace drops the old track. curved: for pos, make the motion path curved. Keys past the end grow the animation length.',
+      'Write keyframes for one property: keys [{ t: seconds, v: value, ease? (default linear) }]. The ease on a key shapes the move to the next key. Morph (prop d): each v is SVG path data in the coordinates get_layer gives as path.d (start from that shape); a rectangle, ellipse or star becomes a plain path first, and every key gets the same number of nodes so the shapes blend. mode merge (default) keeps other keys and replaces ones at the same time; replace drops the old track. curved: for pos, make the motion path curved. Keys past the end grow the animation length.',
     parameters: obj(
       {
         id: ID,

@@ -7773,3 +7773,23 @@ button.ag-chip:hover {
   padding: 12px 14px;
   border-bottom: 1px solid var(--line);
 }
+
+/* a property's row the timeline pointed at (focusProp): a short highlight */
+#insp .row.flash {
+  animation: insp-flash 1.2s ease-out;
+}
+@keyframes insp-flash {
+  0%,
+  35% {
+    background: var(--accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #insp .row.flash {
+    animation: none;
+    background: var(--accent-soft);
+  }
+}

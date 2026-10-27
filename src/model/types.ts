@@ -308,6 +308,8 @@ export interface Drag {
   /** where to draw the label */
   lp?: XY;
   rot?: any;
+  /** rotating several layers: the selection's box as it was, and the angle turned so far */
+  gbox?: { x: number; y: number; w: number; h: number; ang: number };
   /** snap the pointer to points / grid / guides while dragging (layers to leave out) */
   snapPt?: Set<string> | true;
   /** a pin drag (its label is drawn by the pin overlay) */

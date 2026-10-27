@@ -20,6 +20,7 @@ import { boneCreate, fkDrag, ikDrag } from './bones';
 import { bindDown, bindHover, boneEditDown, boneScaleDown } from './bone-edit';
 import { isPinTool, pinHandleDown, pinHover, pinsDown, shownPinDown } from './pins';
 import { createText, handleDrag, nodeDrag, toggleSmooth } from './edit-tools';
+import { groupHandleDrag } from './group-xform';
 import { addNodeDown, convertDown, delNodeDown, finishPen, penDown, penHover, pencilDown } from './pen';
 import { SHAPE_TOOLS, backToSelect, createDrag } from './shapes';
 
@@ -231,6 +232,8 @@ export function init(): void {
       e.preventDefault(); // no text selection / native drag while dragging handles
       return;
     }
+    const gx = (e.target as any).closest('[data-gx]');
+    if (gx) return groupHandleDrag(gx.dataset.gx, p);
     const h = (e.target as any).closest('[data-h]');
     if (h && (h.dataset.h === 'tbe' || h.dataset.h === 'tbw')) {
       e.preventDefault(); // keep typing after resizing the box

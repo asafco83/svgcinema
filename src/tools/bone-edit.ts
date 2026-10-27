@@ -4,7 +4,7 @@
 import { bindPinTo, pinChip, pinDocPoint, unbindPin } from './pins';
 import { toast } from '../io/open';
 import type { Layer, XY } from '../model/types';
-import { H, byId, clone, esc, fmt, r2, r3, xfp } from '../core/constants';
+import { DEFAULT_EASE, H, byId, clone, esc, fmt, r2, r3, xfp } from '../core/constants';
 import { beginEdit, select, setProp } from '../core/history';
 import { S, doc, layerById } from '../core/state';
 import { descendants, isHidden, isLocked, kids, pmOf } from '../model/tree';
@@ -576,7 +576,7 @@ export function boneScaleDown(e: PointerEvent, p: XY) {
     ed = beginEdit(),
     s0 = clone(H.get(b, 'scl', S.time) || [1, 1]) as number[];
   // Scale is keyed at the playhead: the drag makes the track when the bone has none yet
-  if (!(b.t.scl && b.t.scl.length)) b.t.scl = [[r3(S.time), [s0[0], s0[1]], 'ease']];
+  if (!(b.t.scl && b.t.scl.length)) b.t.scl = [[r3(S.time), [s0[0], s0[1]], DEFAULT_EASE]];
   let moved = false,
     last: { q: XY; shift: boolean } | null = null;
   const run = () => {

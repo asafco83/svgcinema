@@ -270,6 +270,8 @@ export const FONTS = [
 ];
 export const SWATCH = ['#5B7CFA', '#F2B63D', '#2EC4A6', '#F25F5C', '#A07BFF', '#FF8A3D'];
 export const KAPPA = 0.5523;
+/** The easing a new keyframe gets (presets keep their own). */
+export const DEFAULT_EASE = 'linear';
 export const NOFILL: Record<'fill' | 'stk' | 'sw', null> = { fill: null, stk: null, sw: null };
 export function ic(p: string, s = 16) {
   return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;

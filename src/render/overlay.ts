@@ -15,6 +15,7 @@ import { editBox, followTextEdit, textEditing } from '../tools/text-edit';
 import { drawGuides } from './guides';
 import { drawGradHandles } from '../tools/gradient-handles';
 import { onPicker } from '../ui/color-picker';
+import { groupBox, groupMode, groupTargets } from '../tools/group-xform';
 
 export function toDoc(x: number, y: number) {
   return new DOMPoint(x, y).matrixTransform(CONTENT.getScreenCTM().inverse());
@@ -203,6 +204,8 @@ function drawOverlayBody() {
     OV.append(svgEl('line', { x1: A.x, y1: A.y, x2: B.x, y2: B.y, class: 'ov-bdraft' }));
     OV.append(svgEl('circle', { cx: A.x, cy: A.y, r: 4.5 * u, class: 'ov-bj is-sel' }));
   }
+  // several layers: one box around them all, with handles that transform the whole selection
+  if (groupMode()) return drawGroupBox(u);
   S.selSet.forEach(id => {
     if (id === S.sel) return;
     const o = layerById(id);
@@ -351,6 +354,78 @@ function drawOverlayBody() {
     t.textContent = fmt(H.get(l, 'rot', S.time), 1) + '°';
     OV.append(t);
   }
+  if (S.drag && S.drag.lbl && S.drag.lp) {
+    const t = svgEl('text', {
+      x: S.drag.lp.x + 14 * u,
+      y: S.drag.lp.y - 12 * u,
+      class: 'ov-ang',
+      'font-size': 11 * u,
+      'stroke-width': 2.5 * u,
+    });
+    t.textContent = S.drag.lbl;
+    OV.append(t);
+  }
+}
+/** The selection's box (several layers): each layer's own box dashed, the box around them all with
+ *  side and corner handles and a rotate handle (while rotating, the box turns with the layers). */
+function drawGroupBox(u: number) {
+  groupTargets().forEach(o => {
+    const q = !isHidden(o) && obbOf(o);
+    if (q) OV.append(svgEl('polygon', { points: quadPts(q), class: 'ov-box', 'stroke-dasharray': '3 3' }));
+  });
+  const g = S.drag && S.drag.gbox,
+    B = g || groupBox();
+  if (!B) return;
+  const C = { x: B.x + B.w / 2, y: B.y + B.h / 2 },
+    a = ((g ? g.ang : 0) * Math.PI) / 180,
+    P = (x: number, y: number) => ({
+      x: C.x + (x - C.x) * Math.cos(a) - (y - C.y) * Math.sin(a),
+      y: C.y + (x - C.x) * Math.sin(a) + (y - C.y) * Math.cos(a),
+    }),
+    Q = [P(B.x, B.y), P(B.x + B.w, B.y), P(B.x + B.w, B.y + B.h), P(B.x, B.y + B.h)];
+  OV.append(svgEl('polygon', { points: Q.map(p => r2(p.x) + ',' + r2(p.y)).join(' '), class: 'ov-box ov-gbox' }));
+  const mid2 = (p: { x: number; y: number }, q: { x: number; y: number }) => ({
+      x: (p.x + q.x) / 2,
+      y: (p.y + q.y) / 2,
+    }),
+    hs = 8 * u;
+  if (!g)
+    (
+      [
+        ['nw', Q[0]],
+        ['n', mid2(Q[0], Q[1])],
+        ['ne', Q[1]],
+        ['e', mid2(Q[1], Q[2])],
+        ['se', Q[2]],
+        ['s', mid2(Q[2], Q[3])],
+        ['sw', Q[3]],
+        ['w', mid2(Q[3], Q[0])],
+      ] as Array<[string, { x: number; y: number }]>
+    ).forEach(([k, p]) => {
+      const edge = k.length === 1,
+        sz = edge ? hs * 0.8 : hs;
+      OV.append(
+        svgEl('rect', {
+          x: p.x - sz / 2,
+          y: p.y - sz / 2,
+          width: sz,
+          height: sz,
+          class: 'ov-h' + (edge ? ' ov-he' : ''),
+          'data-gx': k,
+          style: `cursor:${cursorFor(p.x - C.x, p.y - C.y)}`,
+        }),
+      );
+    });
+  const tm = mid2(Q[0], Q[1]),
+    nx = Math.sin(a),
+    ny = -Math.cos(a),
+    rx = tm.x + nx * 24 * u,
+    ry = tm.y + ny * 24 * u;
+  OV.append(svgEl('line', { x1: tm.x, y1: tm.y, x2: rx, y2: ry, class: 'ov-box' }));
+  OV.append(svgEl('circle', { cx: rx, cy: ry, r: 5 * u, class: 'ov-h ov-rot', 'data-gx': 'rot' }));
+  OV.append(
+    svgEl('path', { d: `M${C.x - 6 * u} ${C.y}H${C.x + 6 * u}M${C.x} ${C.y - 6 * u}V${C.y + 6 * u}`, class: 'ov-org' }),
+  );
   if (S.drag && S.drag.lbl && S.drag.lp) {
     const t = svgEl('text', {
       x: S.drag.lp.x + 14 * u,

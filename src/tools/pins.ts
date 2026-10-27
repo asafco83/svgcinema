@@ -7,7 +7,7 @@
 // bone (its position and rotation), so the rig bends the artwork; bound pins mix with ordinary ones.
 import type { Layer, PropKey, XY } from '../model/types';
 import { plainPath } from '../core/plain-path';
-import { H, ICON, byId, clone, esc, fmt, r2, r3, valueAt, xfp } from '../core/constants';
+import { DEFAULT_EASE, H, ICON, byId, clone, esc, fmt, r2, r3, valueAt, xfp } from '../core/constants';
 import { OV, svgEl } from '../core/dom';
 import { beginEdit, select, setProp } from '../core/history';
 import { S, doc, layerById, selLayer } from '../core/state';
@@ -402,10 +402,10 @@ function ensureTrack(l: Layer, k: string) {
   l.t[k] =
     S.time > 0.0005
       ? [
-          [0, clone(v), 'ease'],
-          [r3(S.time), v, 'ease'],
+          [0, clone(v), DEFAULT_EASE],
+          [r3(S.time), v, DEFAULT_EASE],
         ]
-      : [[0, v, 'ease']];
+      : [[0, v, DEFAULT_EASE]];
 }
 /** moves pin n at rest by (dx, dy): its keyed positions move with it, so its motion is kept */
 function moveRest(l: Layer, n: number, dx: number, dy: number) {

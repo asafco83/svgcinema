@@ -4,7 +4,7 @@
 // changing the motion: the easing of the segment they split is split with them.
 import type { Ease, Keyframe } from '../runtime/engine';
 import type { Layer } from '../model/types';
-import { H, clone, r3 } from '../core/constants';
+import { DEFAULT_EASE, H, clone, r3 } from '../core/constants';
 import { S, layerById } from '../core/state';
 import { descendants } from '../model/tree';
 import { beginEdit } from '../core/history';
@@ -88,12 +88,12 @@ export function insertKey(l: Layer, k: string, t: number): Keyframe {
   const v = clone(H.get(l, k, t)),
     i = tr.findIndex(q => q[0] > t);
   if (i < 0) {
-    const q: Keyframe = [r3(t), v, 'ease'];
+    const q: Keyframe = [r3(t), v, DEFAULT_EASE];
     tr.push(q);
     return q;
   }
   if (i === 0) {
-    const q: Keyframe = [r3(t), v, 'ease'];
+    const q: Keyframe = [r3(t), v, DEFAULT_EASE];
     tr.unshift(q);
     return q;
   }
@@ -115,7 +115,7 @@ export function keyRig(b: Layer, k: 'rot' | 'scl' | 'pos') {
   rigBones(rigRoot(b)).forEach(x => {
     if (!(x.t[k] && x.t[k].length)) {
       if (k !== 'rot') return;
-      x.t.rot = [[0, x.b.rot || 0, 'ease']];
+      x.t.rot = [[0, x.b.rot || 0, DEFAULT_EASE]];
     }
     insertKey(x, k, S.time);
   });
@@ -147,7 +147,7 @@ export function rigGaps(root: Layer) {
 export function fillRig(root: Layer) {
   const ts = rigTimes(root);
   rigBones(root).forEach(x => {
-    if (!(x.t.rot && x.t.rot.length)) x.t.rot = [[0, x.b.rot || 0, 'ease']];
+    if (!(x.t.rot && x.t.rot.length)) x.t.rot = [[0, x.b.rot || 0, DEFAULT_EASE]];
     missing(x, 'rot', ts).forEach(t => insertKey(x, 'rot', t));
     if (x.t.scl && x.t.scl.length) missing(x, 'scl', ts).forEach(t => insertKey(x, 'scl', t));
   });

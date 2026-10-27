@@ -1,6 +1,6 @@
 // SVGcinema — tools/bones
 import type { Geometry, Layer, XY } from '../model/types';
-import { H, NOFILL, byId, clamp, fmt, r2, xfp } from '../core/constants';
+import { DEFAULT_EASE, H, NOFILL, byId, clamp, fmt, r2, xfp } from '../core/constants';
 import { OV, svgEl } from '../core/dom';
 import { beginEdit, select, setProp } from '../core/history';
 import { S, doc, layerById, mkLayer } from '../core/state';
@@ -67,7 +67,7 @@ export function limitRot(b: Layer, r: number) {
 /** A new bone animates rotation from the start: a Rotate key at 0 s holds its rest value, so posing it
  *  with FK / IK adds keys instead of changing the rest pose (the Edit bone tool owns the rest pose). */
 export function keyRestRot(b: Layer) {
-  b.t.rot = [[0, b.b.rot || 0, 'ease']];
+  b.t.rot = [[0, b.b.rot || 0, DEFAULT_EASE]];
 }
 export function newBoneName() {
   return 'Bone ' + (doc.layers.filter(x => x.type === 'bone').length + 1);
