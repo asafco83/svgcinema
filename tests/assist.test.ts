@@ -35,6 +35,7 @@ describe('your AI assistant: window.svgcinema', () => {
     for (const n of assistToolNames()) expect(g).toContain(`- ${n}(`);
     expect(g).toMatch(/add_shape\(kind: /);
     expect(g).not.toContain('- snapshot(');
+    expect(g).toMatch(/Morph a shape .*path\.d/);
   });
   it('follows the Images setting: its own, vector only, or the image key (only once one is set up)', () => {
     expect(assistToolNames()).toEqual(expect.arrayContaining(['add_image', 'request_image', 'wait_image']));

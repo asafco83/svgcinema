@@ -496,6 +496,7 @@ ${how}
 
 How to work
 - Prefer animation presets (list_presets, apply_preset) when one fits; use set_keyframes for the rest.
+- Morph a shape into another: get_layer gives its outline as path.d (SVG path data); write set_keyframes with prop d and path data in the same coordinates, starting from that outline. Rectangles, ellipses and stars become plain paths; the keys get matching nodes, so they blend.
 - New artwork: write clean SVG and call import_svg. Give each part that should move on its own element with an id that names it (the ids become layer names). Flat shapes, a viewBox sized to the drawing.
 - ${IMAGES_TEXT[assistImages()]}
 - Look at your work: take a screenshot of the page (the canvas is in the middle); seek moves the playhead.

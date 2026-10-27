@@ -10,7 +10,7 @@ async def main():
         errs=[]; pg.on('pageerror',lambda e: errs.append(str(e)))
         await pg.goto((sys.argv[1] if len(sys.argv)>1 else 'http://localhost:5199/')); await pg.wait_for_timeout(2500)
         await pg.evaluate("""async()=>{ window.st=await import('/src/core/state.ts'); window.hi=await import('/src/core/history.ts');
-          window.ag=await import('/src/agent/tools.ts'); window.rq=await import('/src/agent/request.ts');
+          window.ag=await import('/src/agent/tools.ts'); window.K=await import('/src/core/constants.ts'); window.rq=await import('/src/agent/request.ts');
           window.run=async(n,a,c)=>await ag.runTool(n,a,c||{}); }""")
         ev=pg.evaluate; R={}; F=[]
         def check(n,c,i=None):
@@ -88,7 +88,7 @@ async def main():
         r=await run('update_layer',{'id':box,'values':{'pos':5}})
         check('a wrong kind of value is refused', not r['ok'] and '[x, y]' in r['error'], r)
         r=await run('set_keyframes',{'id':box,'prop':'d','keys':[{'t':0,'v':1}]})
-        check('a property the layer lacks is refused', not r['ok'] and 'no "d" property' in r['error'], r)
+        check('Morph on a rectangle takes path data only', not r['ok'] and 'SVG path data' in r['error'], r)
         r=await run('set_keyframes',{'id':box,'prop':'pos','keys':[{'t':0,'v':[1,1],'ease':'wobbly'}]})
         check('an unknown easing is refused', not r['ok'] and 'Unknown easing' in r['error'], r)
         r=await run('apply_preset',{'preset':'nope','ids':[box],'at':0})
@@ -105,6 +105,23 @@ async def main():
         await ev("window.req2=rq.beginRequest()")
         await run('get_scene',{}); await run('select',{'ids':[title]})
         check('a request that only reads adds no undo step', not await ev("rq.endRequest(req2)") and await ev("st.S.undo.length")==u0+1)
+        # Morph keys as SVG path data (a rectangle becomes a plain path; the keys get matching nodes)
+        await ev("window.req3=rq.beginRequest()")
+        r=await run('add_shape',{'kind':'rect','name':'Blobby','x':40,'y':300,'w':100,'h':60})
+        bid=r['result']['id']
+        g=(await run('get_layer',{'id':bid}))['result']
+        check('get_layer gives a rectangle’s shape as path data', g.get('path',{}).get('d','').startswith('M'), g.get('path'))
+        r=await run('set_keyframes',{'id':bid,'prop':'d','keys':[{'t':0,'v':g['path']['d']},{'t':1,'v':'M40 330 C60 280 120 280 140 330 C120 380 60 380 40 330 Z','ease':'inOut'}]})
+        info=await ev(f"(()=>{{const l=st.doc.layers.find(x=>x.id==='{bid}');return {{type:l.type,keys:l.t.d.map(q=>q[0]),nodes:l.t.d.map(q=>q[1][0].n.length)}}}})()")
+        check('set_keyframes writes Morph keys from SVG path data', r['ok'] and info['type']=='path' and info['keys']==[0,1] and info['nodes'][0]==info['nodes'][1], (r, info))
+        mid=await ev(f"K.H.dstr(K.H.comp(st.doc.layers.find(x=>x.id==='{bid}'),0.5).d)")
+        check('…and the shape blends between them', isinstance(mid,str) and mid.startswith('M'), mid)
+        r=await run('set_keyframes',{'id':bid,'prop':'d','keys':[{'t':2,'v':'not a path'}]})
+        check('…path data that can’t be read is refused with an example', not r['ok'] and 'SVG path data' in r['error'], r)
+        r=await run('update_layer',{'id':title,'values':{'d':'M0 0 L10 10'}})
+        check('…and text has no Morph', not r['ok'], r)
+        await ev("rq.endRequest(req3)")
+
         await pg.screenshot(path=OUT+'agent-tools.png')
         check('no page errors', not errs, errs[:3])
         print(json.dumps(R,indent=1)); print('FAILS',F)
