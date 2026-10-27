@@ -9,6 +9,7 @@ import { S, layerById } from '../core/state';
 import { toast } from '../io/open';
 import { EXTRAS } from '../io/extras';
 import { workAreaResized } from '../tools/hand';
+import { INSPECTOR_EVENT } from './inspector';
 import { BUSY, setBusy } from '../agent/busy';
 import {
   CHAT,
@@ -171,6 +172,8 @@ export function toggleAgent(open = !ST.open) {
   }
   if (open) {
     render();
+    // the model menu's prices (cached for a day; asked for only once the agent is used)
+    loadChatPrices().then(() => ST.open && renderComposer());
     setTimeout(() => {
       const t = $('#agText') as HTMLTextAreaElement | null;
       if (t && ST.view === 'chat' && !t.closest('[hidden]')) t.focus();
@@ -627,7 +630,22 @@ function renderComposer() {
   ($('#agStop') as HTMLElement).hidden = !running;
   ($('#agSend') as HTMLButtonElement).disabled = !t.value.trim();
   const ch = currentChoice();
-  $('#agModelChip').textContent = ch ? shortModel(ch.model) : 'Set up a model';
+  // the model chip: a menu of the provider's models (with prices), and Settings…
+  const chip = $('#agModelChip') as HTMLElement;
+  if (!ch) chip.innerHTML = `<button class="ag-chip-b" data-act="settings">Set up a model</button>`;
+  else {
+    const p = providerById(ch.provider)!,
+      list = p.models.includes(ch.model) ? p.models : [ch.model, ...p.models],
+      opt = (m: string) => {
+        const pr = chatPrice(p.id, m);
+        return `<option value="${esc(m)}"${m === ch.model ? ' selected' : ''}>${esc(m)}${pr ? ` · ${perMillion(pr)}` : ''}</option>`;
+      };
+    chip.innerHTML = `<select id="agModelSel" aria-label="Agent model" title="Agent model"${running ? ' disabled' : ''}>${list
+      .map(opt)
+      .join('')}<option value="__settings">Settings…</option></select><span class="ag-chip-v" aria-hidden="true">${esc(
+      shortModel(ch.model),
+    )}</span>`;
+  }
   const n = S.selSet.size,
     one = n === 1 ? layerById([...S.selSet][0]) : null;
   $('#agScopeT').textContent = n === 0 ? 'Scene' : one ? one.name : `${n} layers`;
@@ -966,6 +984,14 @@ function onChange(e: Event) {
     case 'agDontAsk':
       if (ST.imgAsk) ST.imgAsk.dontAsk = t.checked;
       return;
+    case 'agModelSel':
+      if (t.value === '__settings') {
+        ST.view = 'settings';
+        return render();
+      }
+      setSettings({ model: t.value });
+      ST.test = null;
+      return renderComposer();
     case 'agSteps':
       setSettings({ maxSteps: parseInt(t.value) || s.maxSteps });
       return renderBody();
@@ -1125,7 +1151,7 @@ export function init(): void {
             '<rect x="2.5" y="2.5" width="11" height="11" rx="1.5" stroke-dasharray="2.2 1.8"/>',
             12,
           )}<span id="agScopeT">Scene</span></span>
-          <button class="ag-chip" id="agModelChip" data-act="settings" title="Agent model (Settings)"></button>
+          <span class="ag-chip ag-chip-m" id="agModelChip"></span>
           <span class="sp"></span>
           <button class="ag-send" id="agSend" aria-label="Send" title="Send (Enter)">${svg(P.send, 13, 1.7, 14)}</button>
           <button class="ag-stop" id="agStop" aria-label="Stop" title="Stop" hidden><i></i></button>
@@ -1210,8 +1236,9 @@ export function init(): void {
     persistChat();
     render();
   });
-  // the selection chip follows the selection
-  document.addEventListener('click', () => ST.open && !ST.running && renderComposer(), true);
+  // the selection chip follows the selection, wherever it changes (canvas, Layers panel, keys, the agent)
+  document.addEventListener(INSPECTOR_EVENT, () => ST.open && renderComposer());
+
   restoreChat();
   try {
     const w = Number(localStorage.getItem(WIDTH_KEY));
