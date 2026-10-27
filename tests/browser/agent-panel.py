@@ -68,6 +68,7 @@ async def main():
         check('Test with a working key: reachable, model found, can use tools, then whether it can see', len(chk)==4 and all(c.startswith('ok:') for c in chk[:3]) and 'see images' in chk[3], chk)
         check('the key is kept in this browser only', await E("JSON.parse(localStorage.getItem('svgcinema:agent.keys')||'{}').openrouter")=='test-key')
         await pg.click('[data-act=back]'); await pg.wait_for_timeout(200)
+        check('the Settings button is a cog (a closed toothed outline, not sun rays)', await E("(()=>{const p=document.querySelector('[data-act=settings] svg path'); return !!p && /Z$/.test(p.getAttribute('d')) && p.getAttribute('d').split('L').length>=32})()"))
         check('the empty chat shows examples and the composer', await E("document.querySelectorAll('.ag-hello .ag-ex').length>=2 && !!document.querySelector('#agText').offsetParent"))
         check('…the model chip names the model', await E("document.querySelector('#agModelChip').textContent.trim()")=='claude-sonnet-5.5')
 
