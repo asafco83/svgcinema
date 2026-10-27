@@ -56,13 +56,26 @@ export interface RunResult {
   error?: AgentError;
   /** the last thing the model said */
   reply: string;
+  /** at the step cap: what the agent says is left, one step per line (undefined: it didn't say) */
+  left?: string[];
   /** the document changed (so there is an undo step) */
   changed: boolean;
   request: AgentRequest;
 }
 
 const CAP_NOTE =
-  ' (The step limit for this request is reached: do not call any more tools. Tell the user what you did and what is left.)';
+  ' (The step limit for this request is reached: do not call any more tools. In one or two sentences tell the user what you did, then list what is left inside <left></left>, one line per step (one tool call each), for example:\n<left>\n- Animate the star across the sky\n- Move it behind the planet\n</left>\nWrite an empty <left></left> if nothing is left. The user can press Continue to let you finish.)';
+
+/** Split a capped answer into what the user reads and the list of steps left. */
+export function parseLeft(text: string): { text: string; left?: string[] } {
+  const m = /<left>([\s\S]*?)(?:<\/left>|$)/i.exec(text || '');
+  if (!m) return { text };
+  const left = m[1]
+    .split('\n')
+    .map(l => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').trim())
+    .filter(Boolean);
+  return { text: (text.slice(0, m.index) + text.slice(m.index + m[0].length)).replace(/\n{3,}/g, '\n\n').trim(), left };
+}
 
 export async function runAgent(o: RunOptions): Promise<RunResult> {
   const run = o.run || runTool,
@@ -79,7 +92,8 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
   const req = (o.begin || beginRequest)();
   let outcome: Outcome = 'done',
     error: AgentError | undefined,
-    reply = '';
+    reply = '',
+    left: string[] | undefined;
   push({ role: 'user', content: (o.turn || userTurn)(o.text) });
   try {
     for (;;) {
@@ -88,13 +102,19 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
         break;
       }
       const capped = steps.length >= max;
-      const r = await o.client.send({ system, messages: msgs, tools: specs, signal: o.signal, onText: o.onText });
+      const r0 = await o.client.send({ system, messages: msgs, tools: specs, signal: o.signal, onText: o.onText });
+      // past the cap the answer is the last word (calls it still makes don't run); its list of what is
+      // left comes apart from the text
+      const cut = capped ? parseLeft(r0.text) : null,
+        r = cut ? { ...r0, text: cut.text, calls: [] } : r0;
+      if (cut) left = cut.left;
       if (r.text) reply = r.text;
       if (o.onReply) o.onReply(r);
       // past the cap nothing more runs, so no calls are recorded either (each call needs a result)
-      push({ role: 'assistant', text: r.text, calls: capped ? [] : r.calls });
+      push({ role: 'assistant', text: r0.text, calls: r.calls });
       if (capped) {
-        outcome = 'cap';
+        // it says nothing is left: the request is done after all
+        outcome = left && !left.length ? 'done' : 'cap';
         break;
       }
       if (!r.calls.length) {
@@ -147,7 +167,7 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
     }
   }
   const changed = (o.end || endRequest)(req);
-  return { added, steps, outcome, error, reply, changed, request: req };
+  return { added, steps, outcome, error, reply, changed, request: req, ...(left ? { left } : {}) };
 }
 
 /**

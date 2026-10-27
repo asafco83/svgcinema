@@ -47,3 +47,14 @@ export function endRequest(r: AgentRequest): boolean {
 export function isLatest(r: AgentRequest) {
   return !r.open && S.undo[S.undo.length - 1] === r.snap;
 }
+
+/**
+ * Continue a request that stopped at the step limit as the same undo step: when nothing else was
+ * edited since, its entry comes off the stack again and the continuation closes over the document as
+ * it was before the first part. Otherwise (or when the first part changed nothing) a new request.
+ */
+export function continueRequest(r: AgentRequest | undefined): AgentRequest {
+  if (!r || !isLatest(r)) return beginRequest();
+  S.undo.pop();
+  return { snap: r.snap, mark: S.undo[S.undo.length - 1], depth: S.undo.length, open: true };
+}

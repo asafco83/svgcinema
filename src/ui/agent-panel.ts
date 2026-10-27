@@ -23,7 +23,7 @@ import {
   persistChat,
   restoreChat,
 } from '../agent/chat';
-import { AgentError, type AgentErrorKind } from '../agent/clients/types';
+import { AgentError, type AgentErrorKind, type Msg } from '../agent/clients/types';
 import { describe, type StepIcon } from '../agent/describe';
 import { runAgent } from '../agent/loop';
 import {
@@ -43,7 +43,7 @@ import { systemPrompt } from '../agent/prompt';
 import { chatPrice, loadChatPrices, perMillion } from '../agent/prices';
 import { type ImageAnswer, type ImageAsk, offeredTools } from '../agent/tools';
 import { PROVIDERS, type ProviderId, makeClient, providerById } from '../agent/providers';
-import { isLatest } from '../agent/request';
+import { type AgentRequest, continueRequest, isLatest } from '../agent/request';
 import {
   canSee,
   confirmImages,
@@ -133,6 +133,8 @@ const P = {
   no: '<path d="M4 4l8 8M12 4l-8 8"/>',
   warn: '<path d="M8 3v6M8 12.5v.1"/>',
   alert: '<path d="M8 2.2l6.2 11H1.8z"/><path d="M8 6.5v3M8 11.3v.1"/>',
+  pause: '<circle cx="8" cy="8" r="6"/><path d="M6.4 5.6v4.8M9.6 5.6v4.8"/>',
+  left: '<circle cx="8" cy="8" r="5" stroke-dasharray="2 2"/>',
 };
 const STEP: Record<StepIcon, string> = {
   look: '<path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="1.8"/>',
@@ -218,6 +220,50 @@ function stepHTML(s: Turn['steps'][number]) {
   }`;
 }
 
+/** The steps, with a "Continued" line where each Continue picked up. */
+function stepsHTML(t: Turn) {
+  const at = new Set(t.cont || []);
+  return t.steps
+    .map((st, i) => (at.has(i) ? `<div class="ag-cont">${svg(P.play, 10, 1.4, 12)}Continued</div>` : '') + stepHTML(st))
+    .join('');
+}
+
+/** Paused at the step limit: what is done, what the agent says is left, and Continue. */
+function limitHTML(t: Turn, canUndo: boolean) {
+  const n = t.steps.length,
+    left = t.left,
+    more = continueBudget(t),
+    lim = getSettings().maxSteps;
+  let bar = '';
+  if (left && left.length) {
+    // one segment a step (scaled down past 30, so they stay visible)
+    const all = n + left.length,
+      k = all > 30 ? 30 / all : 1,
+      on = Math.max(n ? 1 : 0, Math.round(n * k)),
+      off = Math.max(1, Math.round(left.length * k));
+    bar = `<div class="ag-lim-bar" aria-hidden="true">${'<i class="on"></i>'.repeat(on)}${'<i></i>'.repeat(off)}</div>`;
+  }
+  const est = left && left.length ? `about ${plural(left.length, 'step')}` : '';
+  return `<div class="ag-card ag-limit" role="group" aria-label="Paused at the step limit">
+  <div class="ag-card-h">${svg(P.pause, 15, 1.5)}<b>Paused at the step limit</b><small>${n} of ${plural(t.budget || n, 'step')}</small></div>${bar}
+  ${n ? `<div class="ag-lim-cap done">${svg(P.ok, 11, 2)}Done · ${plural(n, 'step')}</div><div class="ag-lim-done">${stepsHTML(t)}</div>` : ''}${
+    left && left.length
+      ? `<div class="ag-lim-left"><div class="ag-lim-cap">${svg(P.left, 11, 1.6)}Left to do · ${est}</div>${left
+          .map(
+            l =>
+              `<div class="ag-step i-left">${svg(P.left, 14, 1.3)}<span class="ag-step-t" dir="auto">${esc(l)}</span></div>`,
+          )
+          .join('')}</div>`
+      : ''
+  }
+  <div class="ag-card-b left"><button class="ag-btn pri" data-act="more" data-id="${t.id}">${svg(P.play, 11, 1.4, 12)}Continue${
+    est ? `<span>· ${est}</span>` : ''
+  }</button>${canUndo ? `<button class="ag-btn" data-act="undo" data-id="${t.id}">${svg(P.undo, 13, 1.5)}Undo</button>` : ''}</div>
+  <p class="ag-lim-note">Continue allows up to ${plural(more, 'more step')}${
+    left && left.length ? ` (the estimate + ${CONTINUE_SPARE} spare)` : ''
+  } and stays part of this request: one undo step. Limit ${plural(lim, 'step')} ·<button class="ag-link" data-act="limit">Change</button></p></div>`;
+}
+
 function imgAskHTML() {
   const q = ST.imgAsk!,
     a = q.ask,
@@ -276,14 +322,16 @@ function turnHTML(t: Turn, last: boolean) {
   const live = running ? ST.running!.live : '';
   if (t.pre) h += `<p class="ag-text" dir="auto">${esc(t.pre)}</p>`;
   if (live && !n) h += `<p class="ag-text" dir="auto">${esc(live)}</p>`;
-  if (n) {
+  // stopped at the step limit (the last request): the steps move into the card with Continue
+  const paused = t.outcome === 'cap' && last && !running;
+  if (n && !paused) {
     const open = !ST.folded.has(t.id);
     h += `<div class="ag-steps"><button class="ag-steps-h" data-act="steps" data-id="${t.id}" aria-expanded="${open}">${svg(
       open ? P.chevDown : P.chevRight,
       10,
       1.6,
       12,
-    )}${plural(n, 'step')}${t.changed ? '<span>· one undo step</span>' : ''}</button>${open ? t.steps.map(stepHTML).join('') : ''}</div>`;
+    )}${plural(n, 'step')}${t.changed ? '<span>· one undo step</span>' : ''}</button>${open ? stepsHTML(t) : ''}</div>`;
   }
   if (ST.confirm && ST.confirm.id === t.id)
     h += `<div class="ag-card ag-confirm" role="group" aria-label="Confirm delete"><div class="ag-card-h">${svg(STEP.del, 15)}<b>Delete ${plural(
@@ -296,7 +344,8 @@ function turnHTML(t: Turn, last: boolean) {
   if (!running && t.reply && t.reply !== t.pre) h += `<p class="ag-text" dir="auto">${esc(t.reply)}</p>`;
   if (running && !live && !ST.confirm && !ST.imgAsk && !ST.gen)
     h += `<div class="ag-working"><i></i><i></i><i></i><span>Working…</span></div>`;
-  if (t.outcome === 'cap')
+  if (paused) h += limitHTML(t, !!(t.changed && req && isLatest(req)));
+  else if (t.outcome === 'cap')
     h += `<p class="ag-note">Stopped after ${plural(n, 'step')}, the most for one request (Settings › Most steps per request).</p>`;
   if (t.outcome === 'stopped') h += `<p class="ag-note">Stopped · kept ${plural(n, 'step')}.</p>`;
   if (t.outcome === 'length') h += `<p class="ag-note">The answer was cut short by the model’s length limit.</p>`;
@@ -304,7 +353,7 @@ function turnHTML(t: Turn, last: boolean) {
     h += `<div class="ag-card ag-err" role="alert"><div class="ag-card-h">${svg(P.alert, 15, 1.5)}<b>${ERR_TITLE[t.error.kind]}</b></div><p>${esc(
       t.error.message,
     )} ${t.changed ? `Kept the ${plural(n, 'step')} done before it.` : 'Nothing in your project changed.'}</p><div class="ag-card-b left"><button class="ag-btn pri" data-act="retry" data-id="${t.id}">Try again</button><button class="ag-btn line" data-act="settings">Settings</button></div></div>`;
-  if (!running && t.changed && last && req && isLatest(req))
+  if (!running && !paused && t.changed && last && req && isLatest(req))
     h += `<div class="ag-acts"><button class="ag-btn" data-act="play">${svg(P.play, 11, 1.4, 12)}Play</button><button class="ag-btn" data-act="undo" data-id="${t.id}">${svg(P.undo, 13, 1.5)}Undo this request</button></div>`;
   return h + '</div>';
 }
@@ -678,15 +727,55 @@ async function send(text: string) {
   CHAT.turns.push(turn);
   // the last request stays open; earlier ones fold to a line
   ST.unfolded.clear();
+  turn.budget = s.maxSteps;
+  await runTurn(turn, choice, { text: turn.user, history, maxSteps: s.maxSteps });
+}
+
+/** Steps Continue allows past the limit: the agent's estimate and 2 spare (the limit, with no estimate). */
+export const CONTINUE_SPARE = 2;
+export function continueBudget(t: Turn) {
+  return t.left ? Math.max(1, t.left.length + CONTINUE_SPARE) : getSettings().maxSteps;
+}
+
+/** Continue a request that stopped at the step limit: same turn, same undo step. */
+async function continueTurn(id: number) {
+  const choice = currentChoice(),
+    turn = CHAT.turns[CHAT.turns.length - 1];
+  if (!choice || ST.running || !turn || turn.id !== id || turn.outcome !== 'cap') return;
+  const more = continueBudget(turn),
+    prev = REQUESTS.get(turn.id);
+  (turn.cont = turn.cont || []).push(turn.steps.length);
+  turn.budget = (turn.budget || turn.steps.length) + more;
+  // what it said at the limit gives way to its next answer (the model still has it in the history)
+  turn.reply = '';
+  turn.left = undefined;
+  turn.outcome = undefined;
+  await runTurn(turn, choice, {
+    text: CONTINUE_TEXT,
+    history: chatHistory(),
+    maxSteps: more,
+    begin: () => continueRequest(prev),
+    merge: true,
+  });
+}
+const CONTINUE_TEXT = 'Continue: finish what is left of my request.';
+
+async function runTurn(
+  turn: Turn,
+  choice: NonNullable<ReturnType<typeof currentChoice>>,
+  o: { text: string; history: Msg[]; maxSteps: number; begin?: () => AgentRequest; merge?: boolean },
+) {
+  const s = getSettings();
   ST.running = { id: turn.id, ctl: new AbortController(), live: '' };
   setBusy(true);
   render();
   let final = '';
   const r = await runAgent({
     client: makeClient(choice),
-    text: turn.user,
-    history,
-    maxSteps: s.maxSteps,
+    text: o.text,
+    history: o.history,
+    maxSteps: o.maxSteps,
+    ...(o.begin ? { begin: o.begin } : {}),
     signal: ST.running.ctl.signal,
     tools: offeredTools(),
     system: systemPrompt({
@@ -745,9 +834,11 @@ async function send(text: string) {
   }));
   turn.reply = final;
   turn.outcome = r.outcome;
+  turn.left = r.outcome === 'cap' ? r.left : undefined;
   turn.error = r.error ? { kind: r.error.kind, message: r.error.message } : undefined;
-  turn.changed = r.changed;
-  turn.msgs = r.added;
+  // a continuation keeps the first part's changes (they are in its undo step)
+  turn.changed = r.changed || (!!o.merge && !!turn.changed);
+  turn.msgs = o.merge ? [...turn.msgs, ...r.added] : r.added;
   if (r.request) REQUESTS.set(turn.id, r.request);
   if (ST.confirm) ST.confirm.resolve(false);
   ST.confirm = null;
@@ -1058,6 +1149,21 @@ function onClick(e: MouseEvent) {
         ST.confirm = null;
         renderBody();
       }
+      return;
+    case 'more':
+      continueTurn(id);
+      return;
+    case 'limit':
+      ST.view = 'settings';
+      render();
+      requestAnimationFrame(() => {
+        const f = $('#agSteps') as HTMLInputElement | null;
+        if (f) {
+          f.scrollIntoView({ block: 'center' });
+          f.focus();
+          f.select();
+        }
+      });
       return;
     case 'retry': {
       const t = CHAT.turns.find(x => x.id === id);

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { openAIClient, toOpenAI } from '../src/agent/clients/openai';
 import { anthropicClient, toAnthropic } from '../src/agent/clients/anthropic';
 import { AgentError, type Client, type ModelReply, type Msg } from '../src/agent/clients/types';
-import { compactHistory, runAgent } from '../src/agent/loop';
+import { compactHistory, parseLeft, runAgent } from '../src/agent/loop';
 import { customChatUrl, makeClient } from '../src/agent/providers';
 import type { AgentRequest } from '../src/agent/request';
 
@@ -374,6 +374,57 @@ describe('the agent loop', () => {
     // the capped turn's own calls are dropped, so every recorded call has a result
     expect((r.added[r.added.length - 1] as any).calls).toEqual([]);
     expect(h.ended()).toBe(1);
+  });
+  it('at the cap the agent lists what is left: kept apart from the text it says', async () => {
+    const h = harness();
+    const c = scripted([
+      { text: '', calls: [call('1', 'a'), call('2', 'b')], stop: 'tools' },
+      {
+        text: 'I drew the star but ran out of steps.\n<left>\n- Animate it across the sky\n2. Move it behind the planet\n</left>',
+        calls: [call('3', 'c')],
+        stop: 'tools',
+      },
+    ]);
+    const replies: string[] = [];
+    const r = await runAgent({ client: c, text: 'x', ...h.hooks, maxSteps: 2, onReply: m => replies.push(m.text) });
+    expect(r.outcome).toBe('cap');
+    expect(r.reply).toBe('I drew the star but ran out of steps.');
+    expect(r.left).toEqual(['Animate it across the sky', 'Move it behind the planet']);
+    // the panel gets the last answer without its calls (they don't run), so it reads as the last word
+    expect(replies[replies.length - 1]).toBe('I drew the star but ran out of steps.');
+    // the model's own list stays in the history, so Continue knows the plan
+    expect((r.added[r.added.length - 1] as any).text).toMatch(/<left>/);
+    expect((c.sent[1].filter(m => m.role === 'tool') as any[])[1].content).toMatch(/<left><\/left>/);
+  });
+  it('at the cap with nothing left the request is done; with no list, nothing is guessed', async () => {
+    const h = harness();
+    let r = await runAgent({
+      client: scripted([
+        { text: '', calls: [call('1', 'a')], stop: 'tools' },
+        { text: 'All done.\n<left></left>', calls: [], stop: 'end' },
+      ]),
+      text: 'x',
+      ...h.hooks,
+      maxSteps: 1,
+    });
+    expect(r.outcome).toBe('done');
+    expect(r.reply).toBe('All done.');
+    r = await runAgent({
+      client: scripted([
+        { text: '', calls: [call('1', 'a')], stop: 'tools' },
+        { text: 'Out of steps.', calls: [], stop: 'end' },
+      ]),
+      text: 'x',
+      ...h.hooks,
+      maxSteps: 1,
+    });
+    expect(r.outcome).toBe('cap');
+    expect(r.left).toBeUndefined();
+  });
+  it('parseLeft: bullets, numbers and an unclosed list', () => {
+    expect(parseLeft('Hi')).toEqual({ text: 'Hi' });
+    expect(parseLeft('A.\n<left>\n* one\n• two\n3) three')).toEqual({ text: 'A.', left: ['one', 'two', 'three'] });
+    expect(parseLeft('<LEFT>- x</LEFT>\nThen more.')).toEqual({ text: 'Then more.', left: ['x'] });
   });
   it('Stop between tools: the rest are answered as stopped, and the request still closes', async () => {
     const h = harness(),

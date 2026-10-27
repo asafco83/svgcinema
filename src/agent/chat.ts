@@ -21,6 +21,12 @@ export interface Turn {
   steps: StepView[];
   outcome?: Outcome;
   error?: { kind: AgentErrorKind; message: string };
+  /** at the step limit: what the agent says is left, one step per line */
+  left?: string[];
+  /** steps allowed so far (the limit, plus what each Continue added) */
+  budget?: number;
+  /** where each Continue started, as indexes into steps */
+  cont?: number[];
   /** the request changed the project */
   changed?: boolean;
   /** the messages it added, for the next request's history */
