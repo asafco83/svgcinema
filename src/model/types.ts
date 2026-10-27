@@ -406,6 +406,8 @@ export interface EditorState {
   dirty?: boolean;
   loading?: boolean;
   saveAll?: boolean;
+  /** Save: include the design agent's chat in the file (default yes) */
+  saveChat?: boolean;
   pickPlace?: boolean;
   lastPt?: XY;
   /** work-area pan offset in screen px */

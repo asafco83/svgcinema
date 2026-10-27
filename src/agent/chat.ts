@@ -4,6 +4,7 @@
 // editable project never carry the chat), and kept in this browser between visits until then.
 // Text only: snapshots and images are never stored.
 import { BATCH } from '../core/batch-mode';
+import { CHAT_EXTRA } from '../io/extras';
 import type { AgentErrorKind, Msg } from './clients/types';
 import { type Outcome, compactHistory } from './loop';
 import type { StepView } from './describe';
@@ -26,7 +27,7 @@ export interface Turn {
   msgs: Msg[];
 }
 
-export const CHAT_FILE = 'agent-chat.json';
+export const CHAT_FILE = CHAT_EXTRA;
 const KEY = 'svgcinema:agent.chat',
   MAX_TURNS = 50;
 

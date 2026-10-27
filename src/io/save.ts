@@ -6,6 +6,7 @@ import { markClean, persistFile } from './file-state';
 import { addRecent } from './recent';
 import { toast } from './open';
 import { buildProject, usedAssetIds } from './zip';
+import { CHAT_EXTRA, extraFiles } from './extras';
 import { kb } from '../ui/inspector';
 
 export const PROJECT_TYPES = [
@@ -64,7 +65,7 @@ export async function downloadProject(name: string, blob: Blob) {
 }
 export async function saveProject() {
   if (!S.file || !S.file.name) return saveProjectAs();
-  const blob = await buildProject(S.saveAll !== false);
+  const blob = await buildProject(S.saveAll !== false, chatSkip());
   if (S.file.handle) {
     try {
       await writeHandle(S.file.handle, blob);
@@ -90,6 +91,8 @@ export async function saveProject() {
   }
   return false;
 }
+/** the extra files Save leaves out: the agent's chat unless the user keeps "Include AI agent chats" on */
+const chatSkip = () => (S.saveChat === false ? [CHAT_EXTRA] : []);
 export let saveResolve: ((v: boolean) => void) | null = null;
 export function saveProjectAs(): Promise<boolean> {
   return new Promise<boolean>(res => {
@@ -101,6 +104,9 @@ export function saveProjectAs(): Promise<boolean> {
     $('#sName').value = S.file && S.file.name ? S.file.name.replace(/\.svgcinema(\.zip)?$/i, '') : fileName(doc.name);
     $('#sAll').checked = S.saveAll !== false;
     $('#sAll').closest('label').hidden = !unused.length;
+    // only offered when there is a chat to include
+    $('#sChat').checked = S.saveChat !== false;
+    $('#sChat').closest('label').hidden = !extraFiles().some(f => f.name === CHAT_EXTRA);
     $('#sStats').innerHTML =
       `<span>Layers <b>${doc.layers.length}</b></span><span>Assets <b>${all}</b>${all ? ` · ${kb(size(Object.keys(ASSETS)))}` : ''}</span>${unused.length ? `<span>Unused <b>${unused.length}</b></span>` : ''}`;
     $('#sNote').innerHTML =
@@ -136,7 +142,8 @@ export function init(): void {
   $('#sGo').addEventListener('click', async () => {
     const name = fileName(($('#sName').value.trim() || doc.name).replace(/\.svgcinema(\.zip)?$/i, ''));
     S.saveAll = $('#sAll').checked;
-    const blob = await buildProject(S.saveAll);
+    if (!($('#sChat').closest('label') as HTMLElement).hidden) S.saveChat = $('#sChat').checked;
+    const blob = await buildProject(S.saveAll, chatSkip());
     if (canPick()) {
       try {
         const handle = await (window as any).showSaveFilePicker({
