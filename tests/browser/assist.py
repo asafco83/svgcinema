@@ -41,6 +41,7 @@ async def main():
 
         # a session through window.svgcinema
         await E("svgcinema.start({task:'Add a flame', assistant:'Claude in Chrome'})")
+        await pg.wait_for_timeout(150)
         check('a session pauses editing and shows its assistant', await E("document.querySelector('#app').classList.contains('agent-busy')") and 'Claude in Chrome' in await txt('.ag-who'))
         n0=await E("st.doc.layers.length")
         r=await E(f"svgcinema.batch([{{name:'get_scene'}},{{name:'import_svg',args:{{name:'Flame',svg:{json.dumps(SVG)}}}}},{{name:'add_image',args:{{name:'Dot',data:'data:image/png;base64,{PNG}',x:100,y:100,width:40}}}}])")

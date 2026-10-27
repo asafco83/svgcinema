@@ -597,7 +597,7 @@ const WAYS = [
     id: 'assistant' as const,
     label: 'Your AI assistant',
     d: IC.assist,
-    note: 'No key: Claude in Chrome, or another assistant in your browser, edits this project with its own subscription.',
+    note: 'No key: Claude in Chrome, or another assistant in your browser, edits this project with its own subscription. Works best with assistants that can run JavaScript on web pages.',
     tags: ['Chat in your assistant', 'No API key'],
   },
 ];
