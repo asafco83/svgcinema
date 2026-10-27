@@ -96,7 +96,28 @@ export function describe(e: StepEvent): StepView {
       break;
     }
     case 'get_scene':
-      [icon, label] = ['look', 'Looked at the project'];
+      [icon, label, meta] = [
+        'look',
+        'Looked at the project',
+        r.canvas ? `${(r.layers || []).length + (r.more || 0)} layers · ${s(r.canvas.length)} long` : '',
+      ];
+      break;
+    case 'add_image':
+      [icon, label, meta] = [
+        'image',
+        `Added the image “${a.name}”`,
+        r.from === 'address' ? 'from your assistant, by its address' : 'from your assistant',
+      ];
+      break;
+    case 'request_image':
+      [icon, label, meta] = [
+        'image',
+        `Made the image “${a.name}” in its chat`,
+        [a.model, 'needs you to add it'].filter(Boolean).join(' · '),
+      ];
+      break;
+    case 'wait_image':
+      [icon, label, meta] = ['place', `Got the image “${r.name || ''}”`, 'you added it'];
       break;
     case 'get_layer':
       [icon, label] = ['look', `Looked at ${nm(a.id)}`];
