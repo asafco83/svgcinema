@@ -96,7 +96,9 @@ async def main():
           const a=await L(s1,'a'),b=await L(s2,'b');let n=0;for(let i=0;i<a.length;i+=4)if(Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2])>40)n++;return [n,a.length/4]}""",
           ['data:image/png;base64,'+base64.b64encode(ja).decode(),'data:image/png;base64,'+base64.b64encode(ca).decode()])
         await q.close()
-        check('CSS export draws what the JS export draws', diff[0]<diff[1]*0.003, diff)
+        # the two are sampled a frame apart, so moving edges differ by a pixel; the sample's edges add up to
+        # about 0.3% (more since the Bloom's rim): a real mismatch is far larger
+        check('CSS export draws what the JS export draws', diff[0]<diff[1]*0.004, diff)
         # the bent image is in the export where the editor shows it
         async def exportBox(code):
             q=await b.new_page(); await q.set_viewport_size({'width':640,'height':400}); await q.set_content('<body style="margin:0;width:640px">'+code+'</body>'); await q.wait_for_timeout(300)
