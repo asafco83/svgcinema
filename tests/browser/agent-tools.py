@@ -48,6 +48,8 @@ async def main():
         check('update_layer sets base values, geometry and the name', r['ok'] and await ev(f"[st.layerById('{box}').b.op, st.layerById('{box}').b.rot, st.layerById('{box}').geo.w, st.layerById('{box}').name]")==[0.5,15,100,'Crate'], r)
         r=await run('set_keyframes',{'id':box,'prop':'pos','keys':[{'t':0,'v':[0,0]},{'t':1,'v':[200,0],'ease':'outBack'}]})
         check('set_keyframes writes a track', r['ok'] and r['result']['keys']==2 and await ev(f"st.layerById('{box}').t.pos[0][2]")=='ease', r)
+        r=await run('set_keyframes',{'id':box,'prop':'rot','keys':[{'t':0,'v':0,'ease':'easeIn'},{'t':0.5,'v':10,'ease':'power2.out'},{'t':1,'v':0}]})
+        check('…easing names from CSS / Penner / GSAP are understood (easeIn, power2.out)', r['ok'] and await ev(f"st.layerById('{box}').t.rot.map(k=>k[2]).join()")=='in,outCubic,ease', r)
         await ev("hi.setTime(0.5)")
         r=await run('update_layer',{'id':box,'values':{'pos':[100,50]}})
         check('…then a value on an animated property becomes a key at the playhead', r['result']['keyed']==['pos'] and await ev(f"st.layerById('{box}').t.pos.length")==3, r)
