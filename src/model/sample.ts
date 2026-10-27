@@ -341,12 +341,14 @@ export function sampleDoc(): any {
   ] as any;
   const leafR = mkLayer('ellipse', 'Leaf 2', { cx: 605, cy: 236, rx: 12, ry: 5 }, { fill: '#5FBF9F', rot: 30 });
   leafR.parent = b3.id;
+  // the bloom's light rim is a stroke aligned inside its edge (Appearance › Align)
   const bloom = mkLayer(
     'path',
     'Bloom',
     {},
-    { fill: '#FF8FB1', d: radial(592, 210, [11, 11, 11, 11, 11], [9, 9, 9, 9, 9]) },
+    { fill: '#FF8FB1', stk: '#FFD3E0', sw: 2, d: radial(592, 210, [11, 11, 11, 11, 11], [9, 9, 9, 9, 9]) },
   );
+  bloom.al = 'in';
   bloom.parent = b3.id;
   // a tendril beside the stalk, bent by the rig: its pins are bound to the three bones (Pin tool ›
   // Bind to bones), so it follows their joints and turns with them

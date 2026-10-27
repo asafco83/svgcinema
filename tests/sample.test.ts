@@ -29,6 +29,10 @@ describe('sample scene', () => {
     expect(inst.length).toBeGreaterThanOrEqual(2);
     expect(inst.some(l => l.symOff)).toBe(true);
   });
+  it('aligns a stroke inside a closed shape', () => {
+    expect(by('Bloom').al).toBe('in');
+    expect(by('Bloom').b.d.every((p: any) => p.c)).toBe(true);
+  });
   it('sets a letter case on a text layer', () => {
     expect(some(l => l.type === 'text' && !!l.geo.tcase)).toBe(true);
   });

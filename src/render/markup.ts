@@ -49,6 +49,35 @@ export function tfStr(c: Composite) {
       : '';
   return `${cs}translate(${r3(c.x)},${r3(c.y)}) rotate(${r3(c.r)})${sk} ${sc} translate(${r3(-c.ox)},${r3(-c.oy)})`;
 }
+/** A layer's stroke alignment where it applies: closed shapes (rectangles, ellipses, text, and paths
+ *  whose every part is closed). On open paths a stroke can only be centred. */
+export function canAlign(l: Layer) {
+  if (l.type === 'rect' || l.type === 'ellipse' || l.type === 'text') return true;
+  const d = l.type === 'path' ? l.b.d : null;
+  return Array.isArray(d) && d.length > 0 && d.every((p: any) => p && p.c);
+}
+export function alignOf(l: Layer): 'in' | 'out' | null {
+  return l.al && canAlign(l) ? l.al : null;
+}
+const HUGE = 'x="-100000" y="-100000" width="200000" height="200000"';
+/** A shape with an aligned stroke (its stroke drawn at twice the width): a stroke-less copy of the shape
+ *  (`-sf`, kept in step by the runtime), and the shape clipped to that copy (inside) or masked to
+ *  outside it (outside), with the copy drawing the fill so a see-through fill shows no stroke under it. */
+function alignedSVG(id: string, inner: string, al: 'in' | 'out') {
+  // the copy: the shape's own tag with its id and stroke attributes changed
+  const tw = inner.replace(new RegExp(`<(\\w+)([^>]*?) id="${id}-s"([^>]*?)(/?)>`), (_m, tag, a1, a2, sl) => {
+    const at = (a1 + a2).replace(/\s(?:stroke(?:-[a-z]+)?|pathLength)="[^"]*"/g, '');
+    return `<${tag}${at} id="${id}-sf" stroke="none"${sl}>`;
+  });
+  const own = tw.match(new RegExp(`<(\\w+)[^>]* id="${id}-sf"[\\s\\S]*?(?:/>|</\\1>)`)),
+    copy = own ? own[0] : '',
+    clip = `<clipPath id="${id}-sc"><use href="#${id}-sf"/></clipPath>`;
+  if (al === 'in') return `<defs>${copy}${clip}</defs><g clip-path="url(#${id}-sc)">${inner}</g>`;
+  return (
+    `<defs>${clip}<mask id="${id}-sm" maskUnits="userSpaceOnUse" ${HUGE}><rect ${HUGE} fill="#fff"/>` +
+    `<g clip-path="url(#${id}-sc)"><rect ${HUGE} fill="#000"/></g></mask></defs>${copy}<g mask="url(#${id}-sm)">${inner}</g>`
+  );
+}
 export function layerSVG(l: Layer, ctx: MarkupCtx, c: Composite, children?: string) {
   const id = ctx.pre + l.id,
     G = l.geo;
@@ -74,7 +103,10 @@ export function layerSVG(l: Layer, ctx: MarkupCtx, c: Composite, children?: stri
   };
   if (c.fill != null) a.fill = paint(c.fill, '-gf');
   if (c.stk != null) a.stroke = paint(c.stk, '-gs');
-  if (c.sw != null && (c.sw > 0 || (l.t.sw && l.t.sw.length))) a['stroke-width'] = r3(c.sw);
+  const al = alignOf(l);
+  // an aligned stroke is drawn twice as wide, and half of it cut away (alignedSVG)
+  if (c.sw != null && (c.sw > 0 || (l.t.sw && l.t.sw.length))) a['stroke-width'] = r3(c.sw * (al ? 2 : 1));
+  else if (al) a['stroke-width'] = 2;
   if (c.trim) {
     const td = H.trimDash(c.trim);
     a.pathLength = 100;
@@ -92,6 +124,13 @@ export function layerSVG(l: Layer, ctx: MarkupCtx, c: Composite, children?: stri
   if (css) a.style = a.style ? a.style.replace(/;?\s*$/, ';') + css : css;
   const fx = filterSVG(l, ctx.pre, k => H.get(l, k, ctx.t));
   if (fx) a.filter = `url(#${id}-fx)`;
+  // an aligned stroke: the filter and blending apply to the whole result (stroke, fill and copy)
+  let wrapA = '';
+  if (al && (a.filter || a.style)) {
+    wrapA = attrs({ filter: a.filter, style: a.style });
+    delete a.filter;
+    delete a.style;
+  }
   let inner: string;
   // an animated size: the box at this moment
   const gb = c.gb ? c.gb.map(r3) : null;
@@ -176,6 +215,10 @@ export function layerSVG(l: Layer, ctx: MarkupCtx, c: Composite, children?: stri
     }
   } else if (isBox(l)) inner = `<g${attrs(a)}>${children || ''}</g>`;
   else inner = `<g${attrs(a)}>${G.markup || ''}</g>`;
+  if (al && inner) {
+    inner = alignedSVG(id, inner, al);
+    if (wrapA) inner = `<g${wrapA}>${inner}</g>`;
+  }
   const mesh = meshOf(l);
   if (mesh) inner = meshSVG(l, id, inner, mesh, H.meshMats(l, ctx.t));
   return `<g id="${id}" transform="${tfStr(c)}" opacity="${r3(c.op)}"${ctx.editor ? ` data-lid="${l.id}"` : ''}>${fx}${grads}${inner}</g>`;
