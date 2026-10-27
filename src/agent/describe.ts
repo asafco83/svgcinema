@@ -43,10 +43,19 @@ export function describe(e: StepEvent): StepView {
   switch (e.name) {
     case 'generate_image':
     case 'generate_vector': {
-      const v = e.name === 'generate_vector',
+      // an unclear request resolved to vector (by the user or Prefer vector) reads as vector
+      const v = e.name === 'generate_vector' || r.chosen === 'vector',
         what = `${v ? 'vector' : 'image'} “${a.name}”`;
       if (r.cancelled) {
         [icon, label, meta] = ['look', `Didn’t generate the ${what}`, 'cancelled'];
+        break;
+      }
+      if (r.drawn === false) {
+        [icon, label, meta] = [
+          'draw',
+          `Chose vector for “${a.name}”`,
+          `${r.by === 'the user' ? 'your pick' : 'Prefer vector'} · drawn by the agent`,
+        ];
         break;
       }
       const cost = costText(r.cost),
@@ -62,6 +71,7 @@ export function describe(e: StepEvent): StepView {
           : r.transparent === 'removed'
             ? 'background removed'
             : '',
+        r.by === 'the user' ? 'your pick' : r.by ? 'Prefer vector' : '',
         r.asked ? 'approved' : '',
         r.asked ? cost : '',
       ]

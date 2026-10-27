@@ -5,7 +5,8 @@
 import { $ } from '../core/constants';
 import { setTime, undo } from '../core/history';
 import { togglePlay } from '../core/playback';
-import { S, layerById } from '../core/state';
+import { S, doc, layerById } from '../core/state';
+import { propLabel } from '../core/constants';
 import { toast } from '../io/open';
 import { EXTRAS } from '../io/extras';
 import { workAreaResized } from '../tools/hand';
@@ -35,15 +36,16 @@ import {
   imageCatalog,
   imageProviderById,
   type ImageProviderId,
+  imagePrice,
   menuPrice,
   modelsOf,
   money,
 } from '../agent/images';
 import { systemPrompt } from '../agent/prompt';
 import { chatPrice, loadChatPrices, perMillion } from '../agent/prices';
-import { type ImageAnswer, type ImageAsk, offeredTools } from '../agent/tools';
+import { type ImageAnswer, type ImageAsk, modelName, offeredTools } from '../agent/tools';
 import { PROVIDERS, type ProviderId, makeClient, providerById } from '../agent/providers';
-import { type AgentRequest, continueRequest, isLatest } from '../agent/request';
+import { type AgentRequest, beginRequest, continueRequest, isLatest } from '../agent/request';
 import {
   canSee,
   confirmImages,
@@ -71,6 +73,19 @@ interface Check {
   text: string;
   sub?: string;
 }
+interface RedoAsk {
+  /** the turn that made the vector */
+  id: number;
+  name: string;
+  prompt: string;
+  /** animation on parts (won't carry over) and on the whole artwork (kept) */
+  lost: string[];
+  kept: string[];
+  model: string;
+  service: string;
+  price: number | null;
+  transparent: boolean;
+}
 const ST = {
   open: false,
   view: 'chat' as View,
@@ -82,8 +97,12 @@ const ST = {
     ask: ImageAsk;
     prompt: string;
     dontAsk: boolean;
+    /** with a choice (an unclear request): the kind picked, vector first */
+    kind: 'image' | 'vector';
     resolve: (a: ImageAnswer) => void;
   },
+  /** "Make it as an image instead": the card before the vector is replaced */
+  redo: null as null | RedoAsk,
   /** an image being made */
   gen: null as null | { kind: 'image' | 'vector'; name: string; model: string; at: number },
   /** OpenRouter's image models, once read */
@@ -208,7 +227,7 @@ function headHTML() {
     <button class="ag-ib" data-act="close" aria-label="Close the agent (Alt+A)" title="Close (Alt+A)">${svg(P.close, 12, 1.5, 12)}</button>`;
 }
 
-function stepHTML(s: Turn['steps'][number]) {
+function stepHTML(s: Turn['steps'][number], asImage = 0) {
   return `<div class="ag-step i-${s.icon}">${svg(STEP[s.icon], 14)}<span class="ag-step-t">${esc(s.label)}${
     s.meta ? `<small>${esc(s.meta)}</small>` : ''
   }${s.image ? `<img class="ag-thumb" src="data:${s.image.mime};base64,${s.image.data}" alt="What the agent saw">` : ''}</span></div>${
@@ -217,14 +236,51 @@ function stepHTML(s: Turn['steps'][number]) {
           confirmImages() ? '' : '<button class="ag-link" data-act="askimages">Ask first again</button>'
         }</div>`
       : ''
+  }${
+    asImage
+      ? `<div class="ag-cost ag-asimg">${svg(STEP.image, 12)}<span>Wanted more detail?</span><button class="ag-link" data-act="asimage" data-id="${asImage}">Make it as an image instead</button></div>`
+      : ''
   }`;
+}
+
+/** A step that made vector artwork for the request (a vector model, or vector picked for an unclear one). */
+const vectorStep = (st: Turn['steps'][number]) => {
+  const r = st.result || {};
+  return !r.cancelled && (st.name === 'generate_vector' || (st.name === 'generate_image' && r.chosen === 'vector'));
+};
+/** The top layers a request's vector artwork made: from the vector step, or the import after it. */
+function vectorLayers(t: Turn) {
+  const i = t.steps.findIndex(vectorStep);
+  if (i < 0) return [];
+  const r = t.steps[i].result || {};
+  if (Array.isArray(r.ids)) return r.ids as string[];
+  const imp = t.steps.slice(i + 1).find(st => st.name === 'import_svg' && st.result && Array.isArray(st.result.ids));
+  return imp ? (imp.result.ids as string[]) : [];
+}
+/** Whether "Make it as an image instead" applies: the last request, untouched since, made vector. */
+function canAsImage(t: Turn) {
+  const req = REQUESTS.get(t.id);
+  return (
+    !ST.running &&
+    !ST.redo &&
+    !!imageChoice() &&
+    CHAT.turns[CHAT.turns.length - 1] === t &&
+    !!req &&
+    isLatest(req) &&
+    vectorLayers(t).length > 0
+  );
 }
 
 /** The steps, with a "Continued" line where each Continue picked up. */
 function stepsHTML(t: Turn) {
-  const at = new Set(t.cont || []);
+  const at = new Set(t.cont || []),
+    link = canAsImage(t) ? t.steps.findIndex(vectorStep) : -1;
   return t.steps
-    .map((st, i) => (at.has(i) ? `<div class="ag-cont">${svg(P.play, 10, 1.4, 12)}Continued</div>` : '') + stepHTML(st))
+    .map(
+      (st, i) =>
+        (at.has(i) ? `<div class="ag-cont">${svg(P.play, 10, 1.4, 12)}Continued</div>` : '') +
+        stepHTML(st, i === link ? t.id : 0),
+    )
     .join('');
 }
 
@@ -264,7 +320,68 @@ function limitHTML(t: Turn, canUndo: boolean) {
   } and stays part of this request: one undo step. Limit ${plural(lim, 'step')} ·<button class="ag-link" data-act="limit">Change</button></p></div>`;
 }
 
+const priceText = (o: { price: number | null; free?: boolean }) =>
+  o.free ? 'free' : o.price === null ? 'price unknown' : 'about ' + money(o.price);
+
+/** An unclear request: Vector | Image for this request (vector first), then that kind's details. */
+function kindAskHTML() {
+  const q = ST.imgAsk!,
+    c = q.ask.choice!,
+    o = c[q.kind],
+    vec = q.kind === 'vector';
+  const opt = (k: 'vector' | 'image') => {
+    const x = c[k];
+    return `<button class="ag-kind${q.kind === k ? ' on' : ''}" role="radio" aria-checked="${q.kind === k}" data-act="imgkind" data-v="${k}">
+      <span>${svg(k === 'vector' ? STEP.draw : STEP.image, 12, 1.5)}${k === 'vector' ? 'Vector' : 'Image'}</span><small>${
+        k === 'vector' ? 'moves in parts' : 'more detail'
+      } · ${x.free ? 'free' : x.price === null ? '?' : money(x.price)}</small></button>`;
+  };
+  return `<div class="ag-card ag-confirm ag-imgask" role="group" aria-label="Vector or image"><div class="ag-card-h">${svg(
+    vec ? STEP.draw : STEP.image,
+    15,
+  )}<b>Vector or image?</b></div>
+  <div class="ag-kinds" role="radiogroup" aria-label="Make it as">${opt('vector')}${opt('image')}</div>
+  <p class="ag-kind-hint">${
+    vec
+      ? 'Separate, editable layers: parts can move on their own, sharp at any size.'
+      : 'Richer detail and shading, but it moves as one piece.'
+  }</p>
+  <label class="ag-ip"><span class="vh">Prompt</span><textarea id="agImgPrompt" rows="3" dir="auto">${esc(q.prompt)}</textarea></label>
+  <div class="ag-kv">${
+    o.free
+      ? '<span>Made by</span><span>The agent draws it</span><span>Result</span><span>Editable layers</span>'
+      : `<span>Model</span><span>${esc(o.model)} · ${esc(o.service)}</span>${
+          vec
+            ? '<span>Result</span><span>Editable layers, imported as a group</span>'
+            : `<span>Size</span><span>${esc(o.size)}</span><span>Background</span><span>${o.transparent ? 'Transparent' : 'As drawn'}</span>`
+        }`
+  }<span>Cost</span><b>${priceText(o)}</b></div>
+  <div class="ag-card-b"><button class="ag-btn" data-act="imgcancel">Cancel</button><button class="ag-btn pri" data-act="imggo">${
+    vec ? (o.free ? 'Draw vector' : 'Generate vector') : 'Generate image'
+  }</button></div></div>`;
+}
+
+/** "Make it as an image instead": what won't carry over, then the image's details. Nothing changes until Generate. */
+function redoHTML(t: Turn) {
+  const r = ST.redo!;
+  return `<div class="ag-turn"><div class="ag-who"><i></i>Agent · ${esc(shortModel(t.model))} · redo as an image</div>
+  <p class="ag-text">I’ll replace the vector “${esc(r.name)}” with an image. Nothing changes until you press Generate image.</p>
+  <div class="ag-card ag-confirm ag-imgask" role="group" aria-label="Confirm image generation"><div class="ag-card-h">${svg(STEP.image, 15)}<b>Generate 1 image?</b></div>${
+    r.lost.length
+      ? `<div class="ag-lost" role="note">${svg(P.alert, 13, 1.6)}<span><b>Won’t carry over:</b> animation on ${esc(
+          r.lost.join(', '),
+        )}. An image moves as one piece.${r.kept.length ? `<small>Animation on ${esc(r.kept.join(', '))} is kept.</small>` : ''}</span></div>`
+      : ''
+  }
+  <label class="ag-ip"><span class="vh">Image prompt</span><textarea id="agRedoPrompt" rows="3" dir="auto">${esc(r.prompt)}</textarea></label>
+  <div class="ag-kv"><span>Model</span><span>${esc(r.model)} · ${esc(r.service)}</span><span>Size</span><span>1024 × 1024</span><span>Background</span><span>${
+    r.transparent ? 'Transparent' : 'As drawn'
+  }</span><span>Cost</span><b>${priceText(r)}</b></div>
+  <div class="ag-card-b"><button class="ag-btn" data-act="redokeep">Keep vector</button><button class="ag-btn pri" data-act="redogo">Generate image</button></div></div></div>`;
+}
+
 function imgAskHTML() {
+  if (ST.imgAsk!.ask.choice) return kindAskHTML();
   const q = ST.imgAsk!,
     a = q.ask,
     n = a.kind === 'vector' ? 'vector artwork' : 'image';
@@ -315,10 +432,20 @@ function turnHTML(t: Turn, last: boolean) {
       h +
       `<button class="ag-fold" data-act="unfold" data-id="${t.id}" aria-expanded="false">${svg(P.chevRight, 10, 1.6, 12)}<span>${esc(
         what.length > 60 ? what.slice(0, 58) + '…' : what,
-      )}</span>${n ? `<small>· ${plural(n, 'step')}</small>` : ''}</button>`
+      )}</span>${n ? `<small>· ${plural(n, 'step')}</small>` : ''}${t.replaced ? '<small>· replaced by an image</small>' : ''}</button>`
     );
   }
-  h += `<div class="ag-turn"><div class="ag-who"><i></i>Agent · ${esc(shortModel(t.model))}</div>`;
+  // "Make it as an image instead" asked: this request reads as one line, the card below it
+  if (ST.redo && ST.redo.id === t.id)
+    return (
+      h +
+      `<div class="ag-fold ag-redo-line">${svg(P.undo, 13, 1.5)}<span>Made it as vector</span><small>· ${plural(
+        n,
+        'step',
+      )} · replaced when you generate</small></div>` +
+      redoHTML(t)
+    );
+  h += `<div class="ag-turn"><div class="ag-who"><i></i>Agent · ${esc(shortModel(t.model))}${t.redo ? ' · redo as an image' : ''}</div>`;
   const live = running ? ST.running!.live : '';
   if (t.pre) h += `<p class="ag-text" dir="auto">${esc(t.pre)}</p>`;
   if (live && !n) h += `<p class="ag-text" dir="auto">${esc(live)}</p>`;
@@ -763,9 +890,18 @@ const CONTINUE_TEXT = 'Continue: finish what is left of my request.';
 async function runTurn(
   turn: Turn,
   choice: NonNullable<ReturnType<typeof currentChoice>>,
-  o: { text: string; history: Msg[]; maxSteps: number; begin?: () => AgentRequest; merge?: boolean },
+  o: {
+    text: string;
+    history: Msg[];
+    maxSteps: number;
+    begin?: () => AgentRequest;
+    merge?: boolean;
+    /** the first image ask is already confirmed, with this prompt */
+    approve?: string;
+  },
 ) {
   const s = getSettings();
+  let approved = false;
   ST.running = { id: turn.id, ctl: new AbortController(), live: '' };
   setBusy(true);
   render();
@@ -796,7 +932,12 @@ async function runTurn(
         : undefined,
       confirmImage: ask =>
         new Promise<ImageAnswer>(resolve => {
-          ST.imgAsk = { id: turn.id, ask, prompt: ask.prompt, dontAsk: false, resolve };
+          // redo as an image: the user already confirmed it on the redo card
+          if (o.approve !== undefined && !approved) {
+            approved = true;
+            return resolve({ go: true, prompt: o.approve, kind: 'image' });
+          }
+          ST.imgAsk = { id: turn.id, ask, prompt: ask.prompt, dontAsk: false, kind: ask.kind, resolve };
           renderBody();
           const t = $('#agImgPrompt') as HTMLTextAreaElement | null;
           if (t) t.focus();
@@ -850,6 +991,95 @@ async function runTurn(
   setBusy(false);
   persistChat();
   render();
+}
+
+/* ---------- "Make it as an image instead" ---------- */
+
+const trackNames = (l: any) =>
+  Object.keys(l.t || {})
+    .filter(k => Array.isArray(l.t[k]) && l.t[k].length)
+    .map(k => propLabel(l, k).toLowerCase());
+
+/** The redo card: the vector's prompt, what animation won't carry over, the image model and price. */
+async function askAsImage(id: number) {
+  const t = CHAT.turns.find(x => x.id === id),
+    c = imageChoice();
+  if (!t || !c || !canAsImage(t)) return;
+  const st = t.steps.find(vectorStep)!,
+    tops = vectorLayers(t),
+    a = st.args || {},
+    lost: string[] = [],
+    kept: string[] = [];
+  const inside = (l: any) => {
+    for (let p = l.parent; p; p = (layerById(p) as any)?.parent) if (tops.includes(p)) return true;
+    return false;
+  };
+  for (const l of doc.layers) {
+    const ps = trackNames(l);
+    if (!ps.length) continue;
+    if (tops.includes(l.id)) kept.push(`${l.name} (${ps.join(', ')})`);
+    else if (inside(l)) lost.push(`${l.name} (${ps.join(', ')})`);
+  }
+  const price = await Promise.race([imagePrice(c, 'square'), new Promise<null>(r => setTimeout(() => r(null), 4000))]);
+  ST.redo = {
+    id,
+    name: a.name || 'artwork',
+    // the prompt it was made with (as the user edited it), else what the agent asked for
+    prompt: (st.result && st.result.prompt) || a.prompt || t.user,
+    lost,
+    kept,
+    model: modelName(c),
+    service: c.provider === 'custom' ? 'Custom' : imageProviderById(c.provider)!.label,
+    price,
+    transparent: getSettings().transparent,
+  };
+  renderBody();
+  const ta = $('#agRedoPrompt') as HTMLTextAreaElement | null;
+  if (ta) ta.focus();
+}
+
+/** Undo the vector request, then run it again as an image, as one undo step that brings the vector back. */
+async function redoAsImage() {
+  const rd = ST.redo,
+    choice = currentChoice(),
+    old = rd && CHAT.turns.find(x => x.id === rd.id),
+    req = old && REQUESTS.get(old.id);
+  ST.redo = null;
+  if (!rd || !old || !choice || !req || ST.running) return render();
+  if (!isLatest(req)) {
+    toast('The project changed since, so the vector stays.');
+    return render();
+  }
+  const ta = $('#agRedoPrompt') as HTMLTextAreaElement | null,
+    prompt = (ta && ta.value.trim()) || rd.prompt;
+  const withVector = JSON.stringify(doc);
+  undo();
+  old.replaced = true;
+  const s = getSettings(),
+    turn: Turn = {
+      id: CHAT.next++,
+      user: old.user,
+      redo: true,
+      reply: '',
+      model: choice.model,
+      steps: [],
+      msgs: [],
+      budget: s.maxSteps,
+    };
+  CHAT.turns.push(turn);
+  ST.unfolded.clear();
+  await runTurn(turn, choice, {
+    text: `${old.user}\n\n(The user undid your vector version of this and wants it as a raster image instead. Call generate_image without either, name "${rd.name}", with this prompt: ${prompt}. Place it about where the vector was, then animate it again with what works on one piece: a picture moves as one piece.)`,
+    history: chatHistory(),
+    maxSteps: s.maxSteps,
+    // Undo of this request brings the vector back
+    begin: () => {
+      const r = beginRequest();
+      r.snap = withVector;
+      return r;
+    },
+    approve: prompt,
+  });
 }
 
 /* ---------- settings actions ---------- */
@@ -1196,11 +1426,28 @@ function onClick(e: MouseEvent) {
         ST.imgAsk = null;
         q.resolve(
           b.dataset.act === 'imggo'
-            ? { go: true, prompt: ta ? ta.value : q.prompt, dontAsk: q.dontAsk }
+            ? { go: true, prompt: ta ? ta.value : q.prompt, dontAsk: q.ask.choice ? false : q.dontAsk, kind: q.kind }
             : { go: false },
         );
         renderBody();
       }
+      return;
+    case 'imgkind':
+      if (ST.imgAsk && ST.imgAsk.ask.choice) {
+        const ta = $('#agImgPrompt') as HTMLTextAreaElement | null;
+        if (ta) ST.imgAsk.prompt = ta.value;
+        ST.imgAsk.kind = b.dataset.v === 'image' ? 'image' : 'vector';
+        renderBody();
+      }
+      return;
+    case 'asimage':
+      askAsImage(id);
+      return;
+    case 'redokeep':
+      ST.redo = null;
+      return renderBody();
+    case 'redogo':
+      redoAsImage();
       return;
     case 'askimages':
       setConfirmImages(true);
