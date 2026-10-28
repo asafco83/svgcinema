@@ -18,8 +18,8 @@ async def main():
         lay=await ev("""(()=>{const a=document.querySelector('.lp-acts').getBoundingClientRect(),l=document.getElementById('lp').getBoundingClientRect(),f=document.querySelector('.lp-foot').getBoundingClientRect(),an=lAnim.getBoundingClientRect();
           const order=[...document.querySelectorAll('.lp-acts button')].map(b=>b.id);
           const gap=document.getElementById('lDup').getBoundingClientRect().left-document.getElementById('lDown').getBoundingClientRect().right;
-          return {topBar:a.bottom<=l.top+1, order:order.join(','), split:gap>10, gap:Math.round(gap), animRight:Math.abs(an.right-(f.right-parseFloat(getComputedStyle(document.querySelector('.lp-foot')).paddingRight)))<2, iconOnly:[...document.querySelectorAll('.lp-acts button')].every(b=>!b.textContent.trim()&&b.querySelector('svg'))}})()""")
-        check('actions at the top, in order, split left/right; Animate bottom-right', lay['topBar'] and lay['order']=='lUp,lDown,lDup,lUngroup,lGroup,lUnmask,lMask,lDel' and lay['split'] and lay['animRight'] and lay['iconOnly'], lay)
+          return {topBar:a.bottom<=l.top+1, order:order.join(','), split:gap>10, gap:Math.round(gap), animRight:!!lAnim.closest('.tl-ctrl'), iconOnly:[...document.querySelectorAll('.lp-acts button')].every(b=>!b.textContent.trim()&&b.querySelector('svg'))}})()""")
+        check('actions at the top, in order, split left/right; Animate in the timeline header', lay['topBar'] and lay['order']=='lUp,lDown,lDup,lUngroup,lGroup,lUnmask,lMask,lDel' and lay['split'] and lay['animRight'] and lay['iconOnly'], lay)
         await ev("hi.select(null)"); s=await st()
         check('nothing selected: only Group available', s=={'lUp':False,'lDown':False,'lDup':False,'lUngroup':False,'lGroup':True,'lDel':False,'lAnim':False}, s)
         tid=await ev("st.doc.layers.find(l=>l.name==='Title').id"); await ev(f"hi.select('{tid}')"); s=await st()

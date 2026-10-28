@@ -7968,3 +7968,7 @@ button.ag-chip:hover {
 .ezpn-r .btn.danger {
   color: var(--danger);
 }
+.tl-len > span {
+  cursor: ew-resize;
+  padding: 4px 2px;
+}

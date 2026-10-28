@@ -27,7 +27,7 @@ const STEP: Record<string, number> = {
 
 /** the label a scrub starts from, and its field */
 export function scrubTarget(t: EventTarget | null): { lab: HTMLElement; inp: HTMLInputElement } | null {
-  const lab = t && (t as any).closest ? ((t as Element).closest('.nf > span') as HTMLElement) : null;
+  const lab = t && (t as any).closest ? ((t as Element).closest('.nf > span, .tl-len > span') as HTMLElement) : null;
   if (!lab) return null;
   const inp = lab.parentElement.querySelector('input') as HTMLInputElement | null;
   if (!inp || inp.disabled || inp.readOnly || inp.type === 'range' || inp.type === 'checkbox') return null;

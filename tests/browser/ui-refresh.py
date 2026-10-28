@@ -51,7 +51,7 @@ async def main():
         await pg.fill('#pname','Morning'); lab2=await ev("abName.textContent")
         check('label follows the project name while typing', lab2=='Morning', lab2)
         await pg.press('#pname','Escape')
-        check('timecode shows the total length', await ev("tcTot.textContent")=='/ 0:03.00', await ev("tcTot.textContent"))
+        check('timecode shows the total length (the length field)', await ev("tcTot.textContent.trim()+' '+tDur.value")=='/ 0:03.00', await ev("tcTot.textContent.trim()+' '+tDur.value"))
 
         # playhead flag
         await ev("hi.setTime(1.5)")

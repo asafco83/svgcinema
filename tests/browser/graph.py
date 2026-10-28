@@ -40,7 +40,7 @@ async def main():
         e=await ev(f"st.layerById('{title}').t.op[0][2]")
         check('dragging a handle makes a custom cubic-bezier', isinstance(e,list) and len(e)==4, e)
         kb=await pg.locator('.tl-graph .gr-key[data-gi="0"]').bounding_box(); await pg.mouse.click(kb['x']+kb['width']/2, kb['y']+kb['height']/2); await pg.wait_for_timeout(150)
-        check('the easing presets stay in the Keyframe panel: clicking a key shows them there', await ev("!document.querySelector('.tl-graph .gr-ezb')") and await ev("!!document.getElementById('ezGrid')"))
+        check('the easing presets stay in the Easing panel: clicking a key enables its button', await ev("!document.querySelector('.tl-graph .gr-ezb')") and await ev("!document.getElementById('tEase').disabled"))
         v1=await ev("document.querySelector('.tl-graph [data-gv]').textContent"); await ev("hi.setTime(1.5)"); await pg.wait_for_timeout(100)
         v2=await ev("document.querySelector('.tl-graph [data-gv]').textContent")
         check('the value beside the graph follows the playhead', v1!=v2, (v1,v2))

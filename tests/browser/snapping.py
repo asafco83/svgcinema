@@ -41,7 +41,7 @@ async def main():
         # menus
         await pg.click('#vSnap'); await pg.wait_for_timeout(80)
         items=await ev("[...document.querySelectorAll('#viewMenu button')].map(b=>b.textContent.trim())")
-        check('snap menu items', items==['✓Snap to objects','✓Snap to points','✓Snap to guides','Snap to grid','Snap to pixel','✓Enable snappingAlt S'], items)
+        check('snap menu items', items==['✓Snap to objects','✓Snap to points','✓Snap to guides','Snap to grid','Snap to pixel','✓Enable snappingAlt S','✓Snap keyframesTo the playhead, keys and 0.05 s'], items)
         await pg.click('#viewMenu [data-v=sGrid]'); await pg.click('#viewMenu [data-v=sObjects]'); await pg.click('#viewMenu [data-v=sPoints]')
         await pg.keyboard.press('Escape')
         await drag((615,365),(615+13*sc,365+7*sc))
