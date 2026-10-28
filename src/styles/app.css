@@ -7976,3 +7976,9 @@ button.ag-chip:hover {
 .ezed .none {
   display: none;
 }
+
+.ezpn-l .btn {
+  height: 26px;
+  justify-content: center;
+  font-size: 11.5px;
+}

@@ -20,7 +20,7 @@ import { boneCreate, fkDrag, ikDrag } from './bones';
 import { bindDown, bindHover, boneEditDown, boneScaleDown } from './bone-edit';
 import { isPinTool, pinHandleDown, pinHover, pinsDown, shownPinDown } from './pins';
 import { createText, handleDrag, nodeDrag, toggleSmooth } from './edit-tools';
-import { groupHandleDrag } from './group-xform';
+import { groupHandleDrag, groupMode, groupMoveDrag, insideGroupBox } from './group-xform';
 import { addNodeDown, convertDown, delNodeDown, finishPen, penDown, penHover, pencilDown } from './pen';
 import { SHAPE_TOOLS, backToSelect, createDrag } from './shapes';
 
@@ -282,13 +282,31 @@ export function init(): void {
       }
     }
     const chain = hitChain(e.target);
+    // several layers selected: a drag inside the box around them moves them all, even over another
+    // layer; a click there without moving picks that other layer
+    if (t === 'select' && groupMode() && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && insideGroupBox(p)) {
+      const other = chain.find(c => !S.selSet.has(c)) && !chain.some(c => S.selSet.has(c)) ? chain : null;
+      if (!other) return groupMoveDrag(p, e);
+      const nb = other.filter(c => {
+          const x = layerById(c);
+          return x && x.type !== 'bone';
+        }),
+        pick = nb[nb.length - 1] || other[0];
+      return groupMoveDrag(p, e, () => {
+        const x = layerById(pick);
+        if (x && !isLocked(x)) select(pick);
+      });
+    }
     if (chain.length) {
       const nb = chain.filter(c => {
         const x = layerById(c);
         return x && x.type !== 'bone';
       });
+      // several layers selected and the press is on one of them: that one (the selection stays)
+      const inSel = S.selSet.size > 1 && !e.ctrlKey && !e.metaKey ? chain.find(c => S.selSet.has(c)) : undefined;
       let id =
-        e.ctrlKey || e.metaKey ? chain[0] : S.sel && chain.includes(S.sel) ? S.sel : nb[nb.length - 1] || chain[0];
+        inSel ||
+        (e.ctrlKey || e.metaKey ? chain[0] : S.sel && chain.includes(S.sel) ? S.sel : nb[nb.length - 1] || chain[0]);
       if (t === 'node') {
         const pth = chain.find(c => {
           const x = layerById(c);
@@ -302,6 +320,8 @@ export function init(): void {
           select(id, 'toggle');
           return;
         }
+        // a layer of the multi-selection: they all move together, like the box's other handles
+        if (inSel && id === inSel && t === 'select' && groupMode()) return groupMoveDrag(p, e);
         if (S.sel !== id || S.selSet.size > 1) select(id);
         // double-click on a text starts typing (detected by timing: the canvas is redrawn after a press)
         const now = Date.now();
@@ -323,6 +343,8 @@ export function init(): void {
         return;
       }
     }
+    // inside the box around several selected layers: move them all
+    if (t === 'select' && groupMode() && insideGroupBox(p)) return groupMoveDrag(p, e);
     // inside the selected layer's box (also for layers that aren't drawn, like masks): move it
     const cur = S.sel && layerById(S.sel);
     if (cur && t === 'select' && !isLocked(cur) && insideBox(cur, p)) return dragLayer(cur, p, e);

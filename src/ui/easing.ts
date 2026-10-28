@@ -132,14 +132,19 @@ export function keyPanel() {
             `<button data-v="${d[0]}" class="${dir === d[0] ? 'on' : ''}" role="radio" aria-checked="${dir === d[0]}">${d[1]}</button>`,
         )
         .join('')}</div>
-      <div class="ezfam" id="ezGrid">${grid}</div></div>
+      <div class="ezfam" id="ezGrid">${grid}</div>${
+        // a custom curve can become a preset; a preset of this project can be removed (under the presets)
+        Array.isArray(cur) && !isPreset
+          ? '<button class="btn" data-act="ezsave">Save as preset</button>'
+          : isPreset
+            ? '<button class="btn" data-act="ezdelp">Remove preset</button>'
+            : ''
+      }</div>
     <div class="ezpn-r"><svg class="ezed" id="ezEd" width="${EZW}" height="${EZH}" viewBox="0 0 ${EZW} ${EZH}" role="img" aria-label="Easing curve editor. Drag the two handles to make a custom curve.">${lines}
       <text x="${EZW - 12}" y="${EZH - 3}" text-anchor="end">time</text>
       <line class="arm" id="ezA0"/><line class="arm" id="ezA1"/><path class="cv" id="ezCurve"/>
       <circle class="end" id="ezE0" cx="${EZX(0)}" cy="${EZY(0)}" r="2.5"/><circle class="end" id="ezE1" cx="${EZX(1)}" cy="${EZY(1)}" r="2.5"/>
       <circle class="hd" id="ezH0" data-hd="0" r="5"/><circle class="hd" id="ezH1" data-hd="1" r="5"/></svg>
-      ${Array.isArray(cur) && !isPreset ? '<button class="btn" data-act="ezsave">Save as preset</button>' : ''}
-      ${isPreset ? '<button class="btn" data-act="ezdelp">Remove preset</button>' : ''}
       <button class="btn" data-act="ezall">Use on whole animator</button><button class="btn danger" data-act="kdel">Delete key${ks.length > 1 ? 's' : ''}</button></div></div></section>`;
 }
 export function drawEz() {
