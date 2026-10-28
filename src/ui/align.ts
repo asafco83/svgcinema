@@ -6,7 +6,7 @@ import { ellNodes, rectNodes } from '../geometry/nodes';
 import { H, byId, clone, esc, ic, r2, r3, valueAt, xfp } from '../core/constants';
 import { beginEdit, setProp } from '../core/history';
 import { S, doc, layerById } from '../core/state';
-import { parentMatrix, selectedRoots } from '../model/tree';
+import { isLocked, parentMatrix, selectedRoots } from '../model/tree';
 import { boxOf, localMatrix } from '../render/overlay';
 import { BOOL_OPS, boolTargets } from '../core/booleans';
 
@@ -48,9 +48,33 @@ export const ALIGN: Array<[string, string, string]> = [
 function targets() {
   return selectedRoots().filter(l => !l.lock && byId('e-' + l.id + '-s'));
 }
+/** Flip and quarter turns (as in the right-click menu), after the booleans. */
+export const XF: Array<[string, string, string]> = [
+  [
+    'fliph',
+    'Flip horizontal',
+    '<path d="M12 3v18" stroke-dasharray="2 2.2"/><path d="M9 7L3 17h6z"/><path d="M15 7l6 10h-6z" fill="currentColor" fill-opacity=".35"/>',
+  ],
+  [
+    'flipv',
+    'Flip vertical',
+    '<path d="M3 12h18" stroke-dasharray="2 2.2"/><path d="M7 9L17 3v6z"/><path d="M7 15l10 6v-6z" fill="currentColor" fill-opacity=".35"/>',
+  ],
+  [
+    'rotr',
+    'Rotate 90° right',
+    '<rect x="3.5" y="10.5" width="10" height="10" rx="1.5"/><path d="M9 5.5h4.5a6 6 0 0 1 6 6V14"/><path d="M17 11.8l2.5 2.6 2.5-2.6"/>',
+  ],
+  [
+    'rotl',
+    'Rotate 90° left',
+    '<rect x="10.5" y="10.5" width="10" height="10" rx="1.5"/><path d="M15 5.5h-4.5a6 6 0 0 0-6 6V14"/><path d="M2 11.8l2.5 2.6 2.5-2.6"/>',
+  ],
+];
 export function alignBar() {
   const n = targets().length,
-    bools = !!boolTargets();
+    bools = !!boolTargets(),
+    free = selectedRoots().some(l => !isLocked(l));
   return `<div class="align-bar" role="toolbar" aria-label="Align and distribute">${ALIGN.map(([k, label, p]) => {
     const dist = k.startsWith('dist'),
       off = n === 0 || (dist && n < 3),
@@ -59,9 +83,13 @@ export function alignBar() {
         : label + (n > 1 ? ' (to selection)' : ' (to canvas)');
     return `<button class="btn ib" data-align="${k}" title="${t}" aria-label="${t}"${off ? ' disabled' : ''}>${ic(p)}</button>`;
   }).join('')}<span class="ab-sep"></span>${BOOL_OPS.map(([k, label, p]) => {
-    const t = bools ? label : label + ' (select two or more shapes or paths)';
-    return `<button class="btn ib" data-bool="${k}" title="${t}" aria-label="${t}"${bools ? '' : ' disabled'}>${ic(p)}</button>`;
-  }).join('')}${bools ? '' : '<span class="ab-note">Booleans: select 2+ shapes</span>'}</div>`;
+    // greyed out but still hoverable (not disabled), so its tooltip says what it needs
+    const t = bools ? label : label + ' (select 2+ shapes)';
+    return `<button class="btn ib" data-bool="${k}" title="${t}" aria-label="${t}"${bools ? '' : ' aria-disabled="true"'}>${ic(p)}</button>`;
+  }).join('')}${XF.map(([k, label, p]) => {
+    const t = free ? label : label + ' (select an unlocked layer)';
+    return `<button class="btn ib" data-xf="${k}" title="${t}" aria-label="${t}"${free ? '' : ' disabled'}>${ic(p)}</button>`;
+  }).join('')}</div>`;
 }
 /** Move a layer by a delta given in document units. */
 function nudge(l: Layer, dx: number, dy: number) {

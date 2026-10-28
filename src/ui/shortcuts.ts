@@ -56,7 +56,7 @@ function tabs(): Tab[] {
           r('Save as', 'Ctrl Shift S'),
           r('Open', 'Ctrl O'),
           r('Import files', 'Ctrl I'),
-          r('Export SVG', 'Ctrl E'),
+          r('Export', 'Ctrl E'),
           r('Export the selected layers', 'Ctrl Shift E'),
         ),
         sec(

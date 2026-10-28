@@ -18,7 +18,7 @@ async def main():
         top=lambda: ev("[...document.querySelectorAll('#fileMenu > .lm-it > button, #fileMenu > hr')].map(b=>b.tagName==='HR'?'-':b.querySelector('span').textContent)")
         sub=lambda k: ev(f"[...document.querySelectorAll('#fileMenu [data-sub={k}] > .lm-sub > .lm-it > button, #fileMenu [data-sub={k}] > .lm-sub > hr')].map(b=>b.tagName==='HR'?'-':(b.disabled?'(':'')+b.querySelector('span:not(.lm-chk)').textContent+(b.disabled?')':''))")
         await pg.click('#bMenu'); await pg.wait_for_timeout(100)
-        check('the main menu, laid out as SVGator\'s', await top()==['New project…','Open…','Open recent','-','Edit','Element','Animate','-','Save','Save as…','Import files…','Export SVG…','-','View','Help'], await top())
+        check('the main menu, laid out as SVGator\'s', await top()==['New project…','Open…','Open recent','-','Edit','Element','Animate','-','Save','Save as…','Import files…','Export…','-','View','Help'], await top())
         check('with nothing selected Element and Animate grey out', await ev("[...document.querySelectorAll('#fileMenu [data-sub=element] > button, #fileMenu [data-sub=animate] > button')].every(b=>b.disabled)"))
         await pg.hover('#fileMenu [data-sub=element] > button'); await pg.wait_for_timeout(100)
         check('a greyed-out submenu opens no empty box', await ev("getComputedStyle(document.querySelector('#fileMenu [data-sub=element] > .lm-sub')).display")=='none')
