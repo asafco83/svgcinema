@@ -237,6 +237,52 @@ export interface ExportSettings {
   img?: StillSettings;
   /** Export › Video */
   vid?: VideoSettings;
+  /** Export › GIF & Animated WebP */
+  anim?: AnimSettings;
+}
+
+/** Export › GIF & Animated WebP settings. */
+export interface AnimSettings {
+  fmt: 'gif' | 'webp';
+  /** part of the timeline (from – to, seconds) instead of all of it */
+  part: boolean;
+  from: number;
+  to: number;
+  fps: number;
+  /** 0 = loop forever, else how many times it plays */
+  loops: number;
+  /** frames identical to the one before are merged into it */
+  merge: boolean;
+  /** of the document's size */
+  scale: '50' | '75' | '100' | '200';
+  /** GIF: 2–256 */
+  colours: number;
+  /** GIF: one palette for every frame, or one per frame */
+  palette: 'one' | 'per';
+  /** GIF: Best refines the palette */
+  pick: 'fast' | 'best';
+  /** GIF: colours (#RRGGBB) that always get a palette slot */
+  keep: string[];
+  dither: 'none' | 'diff' | 'pat' | 'noise';
+  /** dithering strength, 0–100 */
+  strength: number;
+  /** noise reduction, 0–100 */
+  denoise: number;
+  /** GIF: lossy compression, 0–200 */
+  lossy: number;
+  /** store only the pixels that change */
+  changed: boolean;
+  /** GIF: changes below this (%) count as unchanged */
+  tolerance: number;
+  transparent: boolean;
+  /** GIF: soft edges are blended with this colour when transparent */
+  matte: string;
+  /** Animated WebP: quality 1–100, or lossless */
+  q: number;
+  lossless: boolean;
+  /** Embed: a GIF also makes an Animated WebP; an Animated WebP also makes a GIF */
+  alsoWebp?: boolean;
+  gifFallback?: boolean;
 }
 
 /** Export › Video settings. */

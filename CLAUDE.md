@@ -93,7 +93,12 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   and JPEG from the canvas; WebP, AVIF and JPEG XL from jSquash's WebAssembly encoders in
   `export/encoder.worker.ts`, kept out of Vite's prebundling in `vite.config.ts`). `export/video.ts` is Export › Video
   (WebCodecs `VideoEncoder`, frames from `frameSource(into)` mounted in the preview; `export/mux.ts` writes MP4 and
-  WebM by hand). Third-party code shipped in
+  WebM by hand). `export/anim.ts` is Export › GIF & Animated WebP: frames drawn once (export/frames)
+  and kept in `export/anim.worker.ts`, re-encoded on every change so the size and comparison are the real file's;
+  `export/gif.ts` is our own GIF encoder (median cut + k-means palette, kept colours, diffusion / pattern / noise
+  dithering whose dots stay put within the tolerance, lossy LZW searching the dictionary tree, changed-pixel
+  crops), `export/webp-anim.ts` muxes libwebp still frames into ANMF chunks. `tests/export-anim.test.ts` decodes
+  the GIFs again to check them. Third-party code shipped in
   the app is listed in `public/third-party-notices.txt`; keep it up to date when adding any.
 - `src/io/` — open/save `.SVGcinema` projects (zip), SVG import, assets.
 - `src/agent/` — the design agent (in-app AI chat, being built in steps; spec: the "SVGcinema design agent — tool

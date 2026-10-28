@@ -106,6 +106,10 @@ src/
     still.ts             Export › Image: one frame as PNG, JPEG, WebP, AVIF, JPEG XL or SVG
     video.ts             Export › Video: MP4, WebM or PNG frames (WebCodecs), progress and Cancel
     mux.ts               The MP4 and WebM files (and av1C from an AV1 stream), written by hand
+    anim.ts              Export › GIF & Animated WebP: settings, the comparison, the set
+    anim.worker.ts       Makes the GIFs and Animated WebPs off the main thread
+    gif.ts               The GIF encoder: palette, dithering, lossy LZW, changed pixels only
+    webp-anim.ts         The Animated WebP file from still WebP frames
     encoder.worker.ts    WebP, AVIF and JPEG XL encoders (WebAssembly, in a worker)
 
   app/boot.ts            Startup: restore the last project, assets and file handle
@@ -359,7 +363,7 @@ Use the AI assistant you already pay for, such as Claude in Chrome or any assist
 
 **The Export window:** the options sit in sections that collapse like the inspector's: **Format** (JavaScript or CSS only, the player, and a folded-away note on what each supports), **Playback** (trigger, what happens when it ends, repeat, direction, after the end, speed and frame rate, less motion), **Size** (responsive or fixed, dimensions, scale, largest width), **Images** and **Text** (only when the canvas has images or web / local fonts) and **Advanced** (element IDs, ID prefix, the editable project), which starts closed. A closed section shows a one-line summary of its settings, and the sections you close stay closed (remembered in this browser). Only the options column scrolls: the preview, the file size and the Copy / Download buttons stay in view.
 
-**Export › Image:** the picker at the top of the Export window (**Animated SVG · Image · Video**) switches what it makes. **Image** saves one frame of the animation as a picture: the frame under the playhead. The playhead under the preview is the editor's own: drag it, type a time, or step one frame (1/30 s) with the arrows, and the editor's playhead moves with it.
+**Export › Image:** the picker at the top of the Export window (**Animated SVG · Image · Video · GIF & Animated WebP**) switches what it makes. **Image** saves one frame of the animation as a picture: the frame under the playhead. The playhead under the preview is the editor's own: drag it, type a time, or step one frame (1/30 s) with the arrows, and the editor's playhead moves with it.
 
 - **Formats:** PNG (lossless), JPEG, WebP, AVIF, JPEG XL and SVG (the frame as still vector markup, no script). PNG and JPEG come from the browser; WebP, AVIF and JPEG XL from the official libraries (libwebp, libavif, libjxl) compiled to WebAssembly, loaded the first time they're used and run in a worker, so every format works in every browser. JPEG XL carries a note: not every browser shows it yet (Safari does, Chrome from version 155, Firefox not), so the preview shows it as PNG where it can't.
 - **Quality** (JPEG, WebP, AVIF, JPEG XL), **Lossless** (WebP, AVIF, JPEG XL) and **Encoding** (AVIF and JPEG XL: Faster, Balanced or Smallest) show only for the formats that have them.
@@ -378,6 +382,16 @@ Use the AI assistant you already pay for, such as Claude in Chrome or any assist
 - **The preview** is the animation in the video's frame, with the shared playhead (drag it, or **Play** the part) and the output, frame rate, frame count and length. The footer shows an estimate until the file is made, then its real size.
 - **While it encodes** the options are locked, the preview shows each frame as it's encoded, and the footer shows the progress, the size so far, the time left and **Cancel**.
 - **Embed in your site:** a muted, looping `<video>` (`autoplay muted loop playsinline`) with WebM and MP4 sources and a poster image; **Export the set (.zip)** makes them all.
+
+**Export › GIF & Animated WebP** makes an animated image for places that don't play SVG or video: email, chat apps, docs. Both encoders run in a worker on frames drawn exactly; the GIF encoder is SVGcinema's own (no library), the WebP frames come from libwebp.
+
+- **File:** **GIF** (plays everywhere, at most 256 colours per frame) or **Animated WebP** (full colour and transparency, much smaller; every current browser, but most email apps don't show it).
+- **Frames:** the whole animation or a part of it (from – to), at 10–50 fps; repeat forever, once, or 2–3 times; frames that don't change are merged (the one before shows longer).
+- **Size:** 50%, 75%, 100% or 2× of the document.
+- **GIF compression:** **Colours** (any number from 2 to 256); one **palette** for all frames or one per frame; **Pick colours** Faster or Best (refined); **Keep exact**: the document's colours you tick always get a palette slot, so brand colours and text stay exact; **Dithering** None, Diffusion, Pattern or Noise, with a **Strength** (the dots stay still where the picture doesn't change, so they don't shimmer); **Noise reduction** (smooths grain before the colours are picked); **Lossy** (allows small errors for a smaller file); **Store only the pixels that change** with a **Tolerance**; **Transparent background** with an **Edge colour** that soft edges are blended with.
+- **Animated WebP compression:** **Quality** or **Lossless**, store only the pixels that change, transparent background.
+- **The preview** is made from the real file each time a setting changes: its size and how much smaller it is than a plain GIF of the same frames (256 colours, full dithering, every frame stored whole), and the frame at the playhead next to the original with a divider to drag (Fit, 100% or 200%). The playhead's track has a tick per frame; **Play** plays the file itself.
+- **Embed in your site:** a GIF as a plain `<img>`; an Animated WebP in a `<picture>` with a GIF behind it for email and older apps. **Download the set (.zip)** makes both.
 
 **Less motion:** the Export dialog's _Less motion_ setting decides what visitors who ask their system for reduced motion see: _Play normally_ (the default, adds nothing), _Show the first frame_ or _Show the last frame_. The JS player then holds that frame and doesn't start (whatever the trigger); a CSS export pauses every animation on it (a few bytes of CSS). Shape morphs in a CSS export are held with the CSS `d` property, which Safari ignores, so there they keep playing.
 
@@ -481,7 +495,7 @@ The code is ready for a Tauri shell without changes. When it gets wrapped:
 
 - **Files:** replace the browser file APIs in `io/save.ts` and `io/open.ts` with Tauri's dialog and fs plugins. This gives true overwrite-on-save, recent files and `.SVGcinema` file associations.
 - **Image encoding:** add native encoders (mozjpeg, oxipng, ravif) behind the same `optimizeAsset` interface in `export/images.ts`.
-- **Video and GIF export:** these become practical with native libraries.
+- **Video and GIF export:** already work in the browser (WebCodecs, our own GIF encoder); native encoders (ffmpeg, gifski) could make them faster.
 
 ## Browser support
 

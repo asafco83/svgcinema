@@ -14,6 +14,7 @@ import { init as initExportSections } from './export/sections';
 import { init as initExportKind } from './export/kind';
 import { init as initExportStill } from './export/still';
 import { init as initExportVideo } from './export/video';
+import { init as initExportAnim } from './export/anim';
 import { init as init10 } from './ui/topbar';
 import { init as init11 } from './ui/file-menu';
 import { init as init12 } from './io/save';
@@ -81,6 +82,7 @@ initExportSections(); // export/sections (the Export dialog's collapsing section
 initExportKind(); // export/kind (the Export dialog's picker: Animated SVG, Image…)
 initExportStill(); // export/still (Export › Image)
 initExportVideo(); // export/video (Export › Video)
+initExportAnim(); // export/anim (Export › GIF & Animated WebP)
 init10(); // ui/topbar
 init11(); // ui/file-menu
 init12(); // io/save
