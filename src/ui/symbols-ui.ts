@@ -6,6 +6,7 @@
 // - Assets ▸ Symbols: a card per symbol with a live thumbnail and its instance count; click to add an
 //   instance, double-click the name to rename it, Delete (asks first when it has instances).
 // - the inspector's Instance section: time offset, Edit symbol, Detach instance.
+import { infoTip } from './info-tip';
 import type { Layer } from '../model/types';
 import { $, esc, fmt } from '../core/constants';
 import { S, doc, layerById } from '../core/state';
@@ -111,11 +112,9 @@ export function instanceChip(l: Layer) {
 }
 export function instanceSection(l: Layer) {
   if (!isInstance(l)) return '';
-  return `<section class="sec" id="symSec"><h3>Instance</h3>
-    ${nrow('Time offset', `<label class="nf"><span>t</span><input id="sym-off" data-symoff inputmode="decimal" value="${fmt(l.symOff || 0)}" aria-label="Time offset"><em>s</em></label>`)}
-    <p class="sym-note">Starts the symbol’s animation later for this instance. In the JS export an offset instance is written out in full rather than shared.</p>
-    <div class="btns"><button class="btn pri" data-symact="edit">Edit symbol</button><button class="btn" data-symact="detach">Detach instance</button></div>
-    <p class="sym-note">Shape, fill, stroke and the contents’ animation are shared by all ${instanceCount(l.sym)} instances: edit them inside the symbol. Transform, opacity and keyframes here are this instance’s own.</p></section>`;
+  return `<section class="sec" id="symSec"><h3>Instance${infoTip(`Shape, fill, stroke and the contents’ animation are shared by all ${instanceCount(l.sym)} instances: edit them inside the symbol. Transform, opacity and keyframes here are this instance’s own.`, 'instances')}</h3>
+    ${nrow('Time offset' + infoTip('Starts the symbol’s animation later for this instance. In the JS export an offset instance is written out in full rather than shared.', 'Time offset'), `<label class="nf"><span>t</span><input id="sym-off" data-symoff inputmode="decimal" value="${fmt(l.symOff || 0)}" aria-label="Time offset"><em>s</em></label>`)}
+    <div class="btns"><button class="btn pri" data-symact="edit">Edit symbol</button><button class="btn" data-symact="detach">Detach instance</button></div></section>`;
 }
 
 /* ---------- Assets ▸ Symbols ---------- */

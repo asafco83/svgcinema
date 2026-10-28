@@ -6,6 +6,7 @@
 //   data-x="attr"                       static SVG attribute stored in Layer.extra
 //   data-ly="field"                     layer setting (blend, iso)
 //   data-tx="…" / data-act="…"          buttons
+import { infoTip } from './info-tip';
 import { layerBox } from '../render/mesh';
 import { canAlign, meshOf } from '../render/markup';
 import { MESH_DEFAULT } from '../model/mesh';
@@ -222,11 +223,11 @@ export function shapeSection(l: Layer) {
       <div class="btns"><button class="btn" data-act="topath">Convert to path</button></div></section>`;
   }
   if (isLine(l))
-    return `<section class="sec"><h3>Line</h3>
+    return `<section class="sec"><h3>Line${infoTip('Key each end with ◆ so the line can grow, swing or swap ends over time.', 'lines')}</h3>
       ${sizeRow(l)}
       ${krow('p0', 'From', `<label class="nf"><span>X</span><input id="ln-0-0" data-ln="0:0" inputmode="decimal" aria-label="From X"></label><label class="nf"><span>Y</span><input id="ln-0-1" data-ln="0:1" inputmode="decimal" aria-label="From Y"></label>`)}
       ${krow('p1', 'To', `<label class="nf"><span>X</span><input id="ln-1-0" data-ln="1:0" inputmode="decimal" aria-label="To X"></label><label class="nf"><span>Y</span><input id="ln-1-1" data-ln="1:1" inputmode="decimal" aria-label="To Y"></label>`)}
-      <p>Key each end with ◆ so the line can grow, swing or swap ends over time.</p></section>`;
+</section>`;
   return '';
 }
 /** Apply one shape setting (from a slider while dragging, or a number). */
@@ -424,11 +425,13 @@ export function appearanceSection(l: Layer) {
     );
     if (l.type !== 'text')
       h +=
-        `<div class="sub">Trim path</div>` +
+        `<div class="sub">Trim path${infoTip(
+          'Trim shows only part of the stroke, from Start to End, shifted along the path by Offset. Animate End from 0% to 100% to draw a line on. While the stroke is trimmed, trim replaces the dash pattern.',
+          'Trim path',
+        )}</div>` +
         krow('ts', 'Start', num('ts', 'S', '%')) +
         krow('te', 'End', num('te', 'E', '%')) +
-        krow('to', 'Offset', num('to', 'O', '%')) +
-        `<p>Trim shows only part of the stroke, from Start to End, shifted along the path by Offset. Animate End from 0% to 100% to draw a line on. While the stroke is trimmed, trim replaces the dash pattern.</p>`;
+        krow('to', 'Offset', num('to', 'O', '%'));
   }
   return h + `</section>`;
 }
@@ -934,7 +937,8 @@ export function pinsSection(l: Layer) {
     mesh = meshOf(l),
     cur = ps.find(p => p.n === n),
     bone = cur && cur.bone ? layerById(cur.bone) : null;
-  return `<section class="sec"><h3>Pins <small>${ps.length} ${ps.length > 1 ? 'pins' : 'pin'}</small></h3>
+  const tip = `${mesh ? 'Pins bend the artwork through a mesh of triangles; a denser mesh bends more smoothly and makes CSS exports larger.' : 'Pins bend the path through its own nodes.'} Click with the Pin tool (W) to add pins; drag one to bend the ${mesh ? 'artwork' : 'path'} (keyed at the playhead). Bind to bones (in the Pin tool) adds pins that follow bones. Reach sets how far each pin pulls.`;
+  return `<section class="sec"><h3>Pins <small>${ps.length} ${ps.length > 1 ? 'pins' : 'pin'}</small>${infoTip(tip, 'pins')}</h3>
     ${nrow('Pin', `<div class="pin-chips" role="group" aria-label="Pins">${ps.map(p => `<button type="button" class="pin-chip${p.n === n ? ' on' : ''}${p.bone ? ' bound' : ''}" data-act="pinsel" data-n="${p.n}" aria-pressed="${p.n === n}" aria-label="Pin ${p.n}${p.bone ? ' (on a bone)' : ''}">${p.n}</button>`).join('')}</div>`)}
     ${
       bone
@@ -944,8 +948,7 @@ export function pinsSection(l: Layer) {
     }
     ${nrow('Reach', `<input type="range" class="rng" id="pinReach" data-preach data-range min="20" max="400" step="5" value="${reach}" aria-label="Reach"><span class="pin-val" id="pinReachV">${fmt(reach)} %</span>`)}
     ${mesh ? nrow('Mesh', `<input type="range" class="rng" id="pinMesh" data-pmesh data-range min="12" max="240" step="4" value="${Math.min(240, (l.mesh && l.mesh.n) || MESH_DEFAULT)}" aria-label="Mesh density"><span class="pin-val" id="pinMeshV">${mesh.t.length} triangles</span>`) : ''}
-    <div class="btns pin-ind"><button class="btn" data-act="pinrm">Remove pin</button><button class="btn" data-act="pinrmall">Remove all pins</button></div>
-    <p class="pin-ind">${mesh ? 'Pins bend the artwork through a mesh of triangles; a denser mesh bends more smoothly and makes CSS exports larger.' : 'Pins bend the path through its own nodes.'} Click with the Pin tool (W) to add pins; drag one to bend the ${mesh ? 'artwork' : 'path'} (keyed at the playhead). Bind to bones (in the Pin tool) adds pins that follow bones. Reach sets how far each pin pulls.</p></section>`;
+    <div class="btns pin-ind"><button class="btn" data-act="pinrm">Remove pin</button><button class="btn" data-act="pinrmall">Remove all pins</button></div></section>`;
 }
 
 /** the chain-link icon of the Keep proportions toggles */
