@@ -160,6 +160,12 @@ function easeOf(e: unknown): Ease {
   if (e === undefined) return DEFAULT_EASE;
   if (typeof e === 'string' && easeName(e)) return easeName(e)!;
   if (Array.isArray(e) && e.length === 4 && e.every(n => typeof n === 'number' && isFinite(n))) return e as number[];
+  // CSS: cubic-bezier(x1, y1, x2, y2)
+  const m = typeof e === 'string' && /^\s*cubic-bezier\(([^)]*)\)\s*$/i.exec(e);
+  if (m) {
+    const n = m[1].split(',').map(Number);
+    if (n.length === 4 && n.every(isFinite) && n[0] >= 0 && n[0] <= 1 && n[2] >= 0 && n[2] <= 1) return n.map(r3);
+  }
   return fail(`Unknown easing ${JSON.stringify(e)}. Use one of ${EASES.join(', ')} or a Bézier [x1, y1, x2, y2].`);
 }
 const isNum = (v: unknown): v is number => typeof v === 'number' && isFinite(v);
@@ -222,7 +228,7 @@ const obj = (properties: Record<string, Schema>, required: string[] = []): Schem
 });
 const VALUE: Schema = { description: 'A number, [x, y], a colour string, or a list of numbers' };
 const EASE: Schema = {
-  description: `How the move to the next key goes: ${EASES.join(', ')} (CSS / GSAP names like ease-in-out or power2.out work too), or a Bézier [x1, y1, x2, y2].`,
+  description: `How the move to the next key goes: ${EASES.join(', ')} (CSS / GSAP names like ease-in-out or power2.out work too), or a Bézier [x1, y1, x2, y2] (or "cubic-bezier(x1, y1, x2, y2)"; x1 and x2 between 0 and 1). get_layer lists each key's easing (a name, or [x1, y1, x2, y2] for a custom curve).`,
 };
 
 /* ---------- images ---------- */
