@@ -41,7 +41,9 @@ import {
   persistChat,
   restoreChat,
 } from '../agent/chat';
-import { AgentError, type AgentErrorKind, type Msg } from '../agent/clients/types';
+import { AgentError, type AgentErrorKind, type Msg, type Part } from '../agent/clients/types';
+import { ATTACH, attachNote, attachPictures } from '../agent/attach';
+import { CLIP, initAttach, renderChips, renderHL, resetAttachments, takeAttachments, userHTML } from './agent-attach';
 import { describe, type StepIcon } from '../agent/describe';
 import { runAgent } from '../agent/loop';
 import {
@@ -466,7 +468,7 @@ function turnHTML(t: Turn, last: boolean) {
   const running = ST.running && ST.running.id === t.id,
     req = REQUESTS.get(t.id),
     n = t.steps.length;
-  let h = `<div class="ag-user" dir="auto">${esc(t.user)}</div>`;
+  let h = userHTML(t);
   // older turns fold to one line (open them by hand); the last one stays open
   const folded = !last && !ST.unfolded.has(t.id) && !running;
   if (folded) {
@@ -1137,7 +1139,8 @@ function renderComposer() {
   t.placeholder = running ? 'Add to your next request…' : 'Describe what to make or change…';
   ($('#agSend') as HTMLElement).hidden = running;
   ($('#agStop') as HTMLElement).hidden = !running;
-  ($('#agSend') as HTMLButtonElement).disabled = !t.value.trim();
+  ($('#agSend') as HTMLButtonElement).disabled = !canSend();
+  renderChips();
   const ch = currentChoice();
   // the model chip: a menu of the provider's models (with prices), and Settings…
   const chip = $('#agModelChip') as HTMLElement;
@@ -1174,21 +1177,30 @@ export function render() {
 
 /* ---------- running a request ---------- */
 
+/** Something to send: text, or files attached. */
+const canSend = () => !!($('#agText') as HTMLTextAreaElement).value.trim() || ATTACH.list.length > 0;
+
 async function send(text: string) {
   const choice = currentChoice();
   if (!choice) {
     ST.view = 'settings';
     return render();
   }
-  if (ST.running || !text.trim()) return;
+  if (ST.running || (!text.trim() && !ATTACH.list.length)) return;
   const s = getSettings(),
     history = chatHistory(),
+    atts = takeAttachments(),
     turn: Turn = { id: CHAT.next++, user: text.trim(), reply: '', model: choice.model, steps: [], msgs: [] };
+  if (atts.length) turn.att = atts.map(a => ({ id: a.id, name: a.name, kind: a.kind }));
   CHAT.turns.push(turn);
   // the last request stays open; earlier ones fold to a line
   ST.unfolded.clear();
   turn.budget = s.maxSteps;
-  await runTurn(turn, choice, { text: turn.user, history, maxSteps: s.maxSteps });
+  // attached files: their names and asset ids ride with the text; a model that can see gets the pictures
+  const see = canSee(choice),
+    images: Part[] = see && atts.length ? await attachPictures(atts) : [],
+    said = (turn.user || 'Here are the files I attached.') + attachNote(atts, images.length > 0);
+  await runTurn(turn, choice, { text: said, images, history, maxSteps: s.maxSteps });
 }
 
 /** Steps Continue allows past the limit: the agent's estimate and 2 spare (the limit, with no estimate). */
@@ -1231,6 +1243,8 @@ async function runTurn(
     merge?: boolean;
     /** the first image ask is already confirmed, with this prompt */
     approve?: string;
+    /** pictures sent with the message (attached files) */
+    images?: Part[];
   },
 ) {
   const s = getSettings();
@@ -1242,6 +1256,7 @@ async function runTurn(
   const r = await runAgent({
     client: makeClient(choice),
     text: o.text,
+    ...(o.images && o.images.length ? { images: o.images } : {}),
     history: o.history,
     maxSteps: o.maxSteps,
     ...(o.begin ? { begin: o.begin } : {}),
@@ -1972,9 +1987,12 @@ export function init(): void {
     <div class="ag-as-foot" id="agAsFoot" hidden></div>
     <div class="ag-comp" id="agComp">
       <div class="ag-box">
+        <div class="ag-att" id="agAtt" hidden></div>
         <label class="vh" for="agText">Message the agent</label>
-        <textarea class="ag-ta" id="agText" rows="2" dir="auto"></textarea>
+        <div class="ag-ed"><div class="ag-hl" id="agHL" aria-hidden="true"></div><textarea class="ag-ta" id="agText" rows="2" dir="auto"></textarea></div>
         <div class="ag-row">
+          <button class="ag-clip" id="agClip" aria-label="Attach files" title="Attach images or SVG (or drop them here)">${CLIP}</button>
+          <input type="file" id="agAttFile" multiple hidden>
           <span class="ag-chip" id="agScope" title="What the agent sees selected">${svg(
             '<rect x="2.5" y="2.5" width="11" height="11" rx="1.5" stroke-dasharray="2.2 1.8"/>',
             12,
@@ -1996,28 +2014,28 @@ export function init(): void {
     if (t.id === 'agImgPrompt' && ST.imgAsk) ST.imgAsk.prompt = t.value;
   });
   const ta = $('#agText') as HTMLTextAreaElement;
+  // attachments and "@" references (its keys come first: the "@" list takes Enter while open)
+  initAttach(() => (($('#agSend') as HTMLButtonElement).disabled = !canSend()));
   ta.addEventListener('input', () => {
-    ($('#agSend') as HTMLButtonElement).disabled = !ta.value.trim();
+    ($('#agSend') as HTMLButtonElement).disabled = !canSend();
     ta.style.height = 'auto';
     ta.style.height = Math.min(160, ta.scrollHeight) + 'px';
   });
-  ta.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-      e.preventDefault();
-      if (!ST.running && ta.value.trim()) {
-        const v = ta.value;
-        ta.value = '';
-        ta.style.height = '';
-        send(v);
-      }
-    }
-  });
-  $('#agSend').addEventListener('click', () => {
-    if (!ta.value.trim()) return;
+  const go = () => {
     const v = ta.value;
     ta.value = '';
     ta.style.height = '';
     send(v);
+    renderHL();
+  };
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      if (!ST.running && canSend()) go();
+    }
+  });
+  $('#agSend').addEventListener('click', () => {
+    if (canSend()) go();
   });
   $('#agStop').addEventListener('click', () => {
     if (!ST.running) return;
@@ -2056,6 +2074,7 @@ export function init(): void {
   );
   EXTRAS.reset.push(() => {
     if (ST.running) ST.running.ctl.abort();
+    resetAttachments();
     clearChat();
     render();
   });

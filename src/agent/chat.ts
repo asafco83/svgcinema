@@ -14,6 +14,8 @@ export interface Turn {
   id: number;
   /** what the user typed */
   user: string;
+  /** the files attached to it (in Assets), for its thumbnails and coloured references */
+  att?: { id: string; name: string; kind: 'image' | 'svg' }[];
   /** what the agent said before its steps (its earlier answers), and its last answer */
   pre?: string;
   reply: string;

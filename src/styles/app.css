@@ -7982,3 +7982,269 @@ button.ag-chip:hover {
   justify-content: center;
   font-size: 11.5px;
 }
+
+/* Agent prompt: attachments and "@" references (matched to the "Agent prompt — attach files" mockup) */
+.ag-att {
+  padding: 8px 8px 0;
+}
+.ag-att[hidden],
+.ag-at[hidden],
+.ag-tip[hidden],
+.ag-dropov[hidden] {
+  display: none !important;
+}
+.ag-att-l {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ag-att-i {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0 26px 0 2px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.ag-att-i .th,
+.ag-user-att .th,
+.ag-at-o .th {
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  background: var(--panel-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--muted);
+  font-style: normal;
+}
+.ag-att-i .th {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+}
+.ag-att-i .th img,
+.ag-user-att .th img,
+.ag-at-o .th img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ag-att-t {
+  min-width: 0;
+}
+.ag-att-t b {
+  display: block;
+  max-width: 120px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ag-att-t small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 14px;
+}
+.ag-att-i .x {
+  all: unset;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.ag-att-i .x:hover {
+  background: var(--line);
+  color: var(--fg);
+}
+.ag-att-i .x:focus-visible,
+.ag-clip:focus-visible {
+  outline: 2px solid var(--accent);
+}
+.ag-att-note {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 15px;
+}
+.ag-clip {
+  all: unset;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.ag-clip:hover {
+  background: var(--panel-2);
+  color: var(--fg);
+}
+/* the text: a coloured copy under a transparent textarea */
+.ag-ed {
+  position: relative;
+}
+.ag-hl {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 9px 11px 2px;
+  line-height: 17px;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  color: var(--fg);
+  pointer-events: none;
+  scrollbar-gutter: stable;
+}
+.ag-ed .ag-ta {
+  position: relative;
+  color: transparent;
+  caret-color: var(--fg);
+  scrollbar-gutter: stable;
+}
+.ag-ed .ag-ta::selection {
+  color: transparent;
+  background: var(--accent-line);
+}
+.ag-ref {
+  border-radius: 3px;
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  color: var(--accent);
+}
+.ag-user .ag-ref {
+  padding: 0 3px;
+  box-shadow: none;
+  font-weight: 500;
+}
+.ag-ref-x {
+  color: var(--danger);
+  text-decoration: underline wavy var(--danger-line);
+  text-underline-offset: 3px;
+}
+.ag-mark {
+  display: inline;
+}
+.ag-user-att {
+  align-self: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 86%;
+  margin-bottom: -8px;
+}
+.ag-user-att .th {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+}
+/* the "@" list */
+.ag-at {
+  position: fixed;
+  z-index: 1000;
+  width: 228px;
+  box-sizing: border-box;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--raised);
+  box-shadow: var(--shade);
+  color: var(--fg);
+  font-size: 13px;
+}
+.ag-at h6 {
+  margin: 4px 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+.ag-at-o {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 6px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.ag-at-o.on,
+.ag-at-o:hover {
+  background: var(--accent-soft);
+}
+.ag-at-o .th {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+}
+.ag-at-o b {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ag-at-o small {
+  flex: none;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+.ag-at-f {
+  margin: 2px 8px 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.ag-tip {
+  position: fixed;
+  z-index: 1000;
+  max-width: 230px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--fg);
+  box-shadow: var(--shade-sm);
+  color: var(--panel);
+  font-size: 11px;
+  line-height: 15px;
+  pointer-events: none;
+}
+/* dropping files on the panel */
+.ag-dropov {
+  position: fixed;
+  z-index: 999;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1.5px dashed var(--accent);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 999px var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.ag-dropov small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+}
