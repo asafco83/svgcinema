@@ -11,6 +11,8 @@ import { init as init7 } from './export/snippets';
 import { init as init8 } from './export/size';
 import { init as init9 } from './export/images';
 import { init as initExportSections } from './export/sections';
+import { init as initExportKind } from './export/kind';
+import { init as initExportStill } from './export/still';
 import { init as init10 } from './ui/topbar';
 import { init as init11 } from './ui/file-menu';
 import { init as init12 } from './io/save';
@@ -75,6 +77,8 @@ init7(); // export/snippets
 init8(); // export/size
 init9(); // export/images
 initExportSections(); // export/sections (the Export dialog's collapsing sections)
+initExportKind(); // export/kind (the Export dialog's picker: Animated SVG, Image…)
+initExportStill(); // export/still (Export › Image)
 init10(); // ui/topbar
 init11(); // ui/file-menu
 init12(); // io/save

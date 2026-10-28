@@ -29,6 +29,9 @@ export default defineConfig({
     // source maps stay on for debugging the GitHub Pages build; site/bundle.mjs leaves them out of the zip
     sourcemap: true,
   },
+  // the image encoders (WebAssembly, in a worker) load their .wasm files by URL: Vite must not prebundle them
+  optimizeDeps: { exclude: ['@jsquash/avif', '@jsquash/jxl', '@jsquash/webp'] },
+  worker: { format: 'es' },
   test: {
     environment: 'happy-dom',
     include: ['tests/**/*.test.ts'],

@@ -9,6 +9,8 @@ import { buildExport } from './build';
 import { syncExportUI } from './dialog';
 import { exportPxScale, outDims, usedImageIds } from './size';
 import { lastExport, renderSnippet, setLastExport } from './snippets';
+import { exportKind, registerKind } from './kind';
+import { syncSizeUI } from './size';
 import { blobToData } from '../io/assets';
 import { toast } from '../io/open';
 import { ancestors, isHidden } from '../model/tree';
@@ -383,9 +385,22 @@ export async function saveFile(name: string, data: BlobPart, type: string) {
 }
 
 export function init(): void {
+  // Export › Animated SVG: the preview is built when the kind opens
+  registerKind('svg', {
+    open() {
+      $('#xCopy').textContent = 'Copy SVG code';
+      $('#xDlT').textContent = 'Download .svg';
+      sizePreview();
+      detectEnc().then(() => {
+        syncSizeUI();
+        updateExport();
+      });
+    },
+    close() {},
+  });
   $('#xPrevZoom').addEventListener('click', (e: MouseEvent) => {
     const b = (e.target as any).closest('button');
-    if (!b) return;
+    if (!b || exportKind() !== 'svg') return;
     prevMode = b.dataset.v;
     sizePreview();
   });
@@ -448,6 +463,7 @@ export function init(): void {
     updateExport();
   });
   $('#xCopy').addEventListener('click', async () => {
+    if (exportKind() !== 'svg') return;
     await expReady();
     // without clipboard access, copy through a hidden text box
     const fallback = () => {
@@ -471,6 +487,7 @@ export function init(): void {
     }
   });
   $('#xDl').addEventListener('click', async () => {
+    if (exportKind() !== 'svg') return;
     await expReady();
     saveFile(fileName(doc.name) + '.svg', lastExport, 'image/svg+xml');
   });

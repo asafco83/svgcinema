@@ -5801,6 +5801,251 @@ a.btn {
   font-size: 12px;
 }
 
+/* ---------- Export: the format picker and Image (matched to the mockup) ---------- */
+.xhead {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+.xhead h2 {
+  white-space: nowrap;
+}
+.xkind {
+  flex: none;
+}
+.xkind button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.xkind button[hidden] {
+  display: none;
+}
+.xpart {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.xpart[hidden] {
+  display: none;
+}
+.xfmts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.xfmts button {
+  display: grid;
+  gap: 1px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.xfmts button:hover:not(.on) {
+  background: color-mix(in srgb, var(--panel-2) 70%, var(--line));
+}
+.xfmts button b {
+  font-size: 12px;
+  font-weight: 600;
+}
+.xfmts button span {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.xfmts button.on {
+  background: var(--raised);
+  box-shadow:
+    0 0 0 1.5px var(--accent),
+    0 1px 2px var(--shade-sm);
+}
+#mExport .check.xind {
+  margin-left: 96px;
+}
+#xiQ {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+.xtime {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px 28px;
+  gap: 6px;
+  min-width: 0;
+}
+.xtime .btn.ib,
+#xiLink {
+  width: 28px;
+  height: 28px;
+}
+.xcol {
+  gap: 8px;
+}
+.xcol input[type='color'] {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  cursor: pointer;
+}
+.xcol input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.xcol input[type='color']::-webkit-color-swatch {
+  border: 0;
+  border-radius: 4px;
+}
+.xcol input[type='color']::-moz-color-swatch {
+  border: 0;
+  border-radius: 4px;
+}
+.xcol input:not([type='color']) {
+  flex: 1;
+  min-width: 0;
+}
+.xi-box {
+  height: 300px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background-color: var(--panel-2);
+  background-image: conic-gradient(var(--check) 25%, transparent 0 50%, var(--check) 0 75%, transparent 0);
+  background-size: 16px 16px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.xi-box img,
+.xi-box canvas {
+  display: block;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 24px);
+  box-shadow: 0 1px 3px var(--shade-sm);
+}
+.xi-box.actual {
+  overflow: auto;
+  place-items: start;
+}
+.xi-box.actual img,
+.xi-box.actual canvas {
+  max-width: none;
+  max-height: none;
+  margin: 12px;
+}
+.xi-box.busy img,
+.xi-box.busy canvas {
+  opacity: 0.6;
+}
+.xph {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px 8px;
+  border-radius: 9px;
+  background: var(--panel-2);
+}
+.xph-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.xph-head b {
+  font-weight: 600;
+}
+.xph-t {
+  font-weight: 600;
+  color: var(--accent-fg);
+}
+.xph-of {
+  color: var(--muted);
+}
+.xph-track {
+  position: relative;
+  height: 50px;
+}
+.xph-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 26px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line-2);
+}
+.xph-line {
+  position: absolute;
+  top: 0;
+  height: 36px;
+  width: 1.5px;
+  margin-left: -0.75px;
+  background: var(--head);
+}
+.xph-flag {
+  position: absolute;
+  top: 0;
+  min-width: 34px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  background: var(--head);
+  color: #fff;
+  font: 500 10px/18px var(--f-num);
+  text-align: center;
+  white-space: nowrap;
+}
+.xph-ruler {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 36px;
+  height: 14px;
+}
+.xph-ruler span {
+  position: absolute;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.xph-track input[type='range'] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+}
+#xiSnip {
+  height: 240px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+#xiEmbed .btns {
+  justify-content: flex-end;
+  gap: 8px;
+}
+#xiEmbed .btns .btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12.5px;
+}
+
 /* ---------- Filters: cards like the draw order list (matched to the mockup) ---------- */
 .fx-add {
   width: 100%;
