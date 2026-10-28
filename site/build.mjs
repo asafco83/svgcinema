@@ -5,6 +5,7 @@
 //   node site/build.mjs --editor=https://…   # editor links point somewhere else
 //   node site/build.mjs --out=/abs/path.html # write somewhere else (relative paths are inside site/)
 import { readFileSync, writeFileSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { dirname, isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -38,6 +39,11 @@ const logo = [...brand.matchAll(/<path d="([^"]+)" class="(cls-\d)"\/>/g)]
 const hero = read('src/hero.svg')
   .trim()
   .replace(/\.player=s\.svgatorPlayer=/g, '.player=');
+// the sizes the page quotes: the hero file as it is, and gzipped (always measured, never typed in)
+const heroBytes = Buffer.from(read('src/hero.svg')),
+  kb = n => (n / 1024).toFixed(1) + ' KB',
+  heroKB = kb(heroBytes.length),
+  heroGZ = kb(gzipSync(heroBytes, { level: 9 }).length);
 const snips = JSON.parse(read('src/snippets.json'));
 for (const k in snips) snips[k] = snips[k].replace(/[ \t]*\/\/ also \.svgatorPlayer/g, '');
 const snippets = JSON.stringify(snips).replace(/<\//g, '<\\/');
@@ -46,6 +52,8 @@ let body = read('src/page.html')
   .replaceAll('{{LOGO}}', logo)
   .replaceAll('{{LOGO_VB}}', logoVB)
   .replaceAll('{{HERO_SVG}}', hero)
+  .replaceAll('{{HERO_KB}}', heroKB)
+  .replaceAll('{{HERO_GZ}}', heroGZ)
   .replaceAll('{{SNIPS}}', snippets)
   .replaceAll('{{EDITOR_URL}}', editor);
 
