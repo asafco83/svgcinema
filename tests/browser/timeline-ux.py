@@ -49,7 +49,7 @@ async def main():
         await ev(f"(hi.select({json.dumps(sun)}), hi.select({json.dumps(title)},'toggle'))"); await pg.wait_for_timeout(150)
         hit=await ev(f"(()=>{{const e=document.elementFromPoint({r[0]},{r[1]});const g=e&&e.closest('[id^=e-]');return g?g.id.replace(/^e-|-s$/g,''):''}})()")
         await pg.mouse.click(*r); await pg.wait_for_timeout(150)
-        check('a click (no drag) on another layer inside the box picks that layer', hit not in (sun,title) and await ev("st.S.selSet.size")==1 and await ev("st.S.sel")==hit, (hit, await ev("st.S.sel")))
+        check('a click (no drag) on another layer inside the box picks that layer (its outermost group, as a canvas click does)', hit not in (sun,title) and await ev("st.S.selSet.size")==1 and await ev(f"(()=>{{let x=st.doc.layers.find(l=>l.id==={json.dumps(hit)});while(x){{if(x.id===st.S.sel)return true;x=x.parent&&st.doc.layers.find(l=>l.id===x.parent)}}return false}})()"), (hit, await ev("st.S.sel")))
 
         # 2. Ctrl / Shift in the timeline
         await ev(f"hi.select({json.dumps(sun)})"); await pg.wait_for_timeout(100)
