@@ -86,6 +86,10 @@ async def main():
         await pg.click('#ezGrid .ezb[title="Bounce in-out"], #ezGrid .ezb:has(span:text-is("Bounce"))'); await pg.wait_for_timeout(150)
         check('a preset sets the easing of the selected key', 'Bounce' in str(await ev(f"st.doc.layers.find(l=>l.id==={json.dumps(blob)}).t.rot[0][2]")), await ev(f"st.doc.layers.find(l=>l.id==={json.dumps(blob)}).t.rot[0][2]"))
         await pg.screenshot(path=OUT+'timeline-ux-easing.png')
+        inside=await ev("""(async()=>{const E=await import('/src/ui/easing.ts');const out={};for(const e of ['outBack','outElastic',[0.3,-0.6,0.6,1.8]]){E.applyEase(e);await new Promise(r=>setTimeout(r,60));
+          const sv=document.getElementById('ezEd'),r=sv.getBoundingClientRect(),c=document.getElementById('ezCurve').getBoundingClientRect(),hs=[...sv.querySelectorAll('.hd')].filter(h=>getComputedStyle(h).display!=='none').map(h=>h.getBoundingClientRect());
+          out[JSON.stringify(e)]=c.top>=r.top-1&&c.bottom<=r.bottom+1&&hs.every(h=>h.top>=r.top-1&&h.bottom<=r.bottom+1)}return out})()""")
+        check('overshooting curves and handles stay inside the curve editor', all(inside.values()), inside)
         await pg.keyboard.press('Escape'); await pg.wait_for_timeout(100)
         check('Esc closes it', await ev("ezPop.hidden"))
         await pg.click('#vSnap'); await pg.wait_for_timeout(150)

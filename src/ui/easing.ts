@@ -50,21 +50,45 @@ export function thumb(e: Ease) {
   }
   return `<svg viewBox="0 -2 40 30" aria-hidden="true"><path d="${d}"/></svg>`;
 }
-/* the curve editor: 160 × 176, time across, the value up (a little room for overshoot, -0.12…1.12) */
+/* the curve editor: 160 × 224, time across, the value up. The value range fits the curve and its
+   handles (overshoot such as Back, Elastic or a handle dragged past 0 or 1 stays inside), and holds
+   still while a handle is dragged. */
 export const EZW = 160,
-  EZH = 176;
+  EZH = 224;
+export const EZR = { lo: -0.12, hi: 1.12, lock: false };
+/** Fit the value range to an easing (unless a drag holds it still). */
+export function fitEz(e: Ease) {
+  if (EZR.lock) return;
+  let lo = 0,
+    hi = 1;
+  for (let i = 0; i <= 100; i++) {
+    const v = H.ease(e, i / 100);
+    if (isFinite(v)) {
+      lo = Math.min(lo, v);
+      hi = Math.max(hi, v);
+    }
+  }
+  const b = bezOf(e);
+  if (b) {
+    lo = Math.min(lo, b[1], b[3]);
+    hi = Math.max(hi, b[1], b[3]);
+  }
+  const pad = Math.max(0.12, (hi - lo) * 0.08);
+  EZR.lo = lo - pad;
+  EZR.hi = hi + pad;
+}
 export function EZX(x: number) {
   return 12 + x * (EZW - 24);
 }
 export function EZY(v: number) {
-  return EZH - 14 - ((v + 0.12) * (EZH - 28)) / 1.24;
+  return EZH - 14 - ((v - EZR.lo) * (EZH - 28)) / (EZR.hi - EZR.lo);
 }
 /** a point of the editor back to time and value */
 export function EZXi(px: number) {
   return (px - 12) / (EZW - 24);
 }
 export function EZYi(py: number) {
-  return ((EZH - 14 - py) * 1.24) / (EZH - 28) - 0.12;
+  return ((EZH - 14 - py) * (EZR.hi - EZR.lo)) / (EZH - 28) + EZR.lo;
 }
 /** The Easing panel (timeline header): the selected keyframes' easing to the next key. */
 export function keyPanel() {
@@ -87,8 +111,9 @@ export function keyPanel() {
   const isPreset = pre.some(p => sameEase(p.v, cur));
   if (Array.isArray(cur) && !isPreset)
     grid += `<button class="ezb on" data-ez="${esc(JSON.stringify(cur))}" title="${esc(easeLabel(cur))}" aria-pressed="true">${thumb(cur)}<span>Custom</span></button>`;
+  fitEz(cur);
   const lines = [0, 1]
-    .map(v => `<line class="gb" x1="${EZX(0)}" x2="${EZX(1)}" y1="${EZY(v)}" y2="${EZY(v)}"/>`)
+    .map(v => `<line class="gb" id="ezG${v}" x1="${EZX(0)}" x2="${EZX(1)}" y1="${EZY(v)}" y2="${EZY(v)}"/>`)
     .join('');
   return `<section id="kfsec" class="ezpn">
     <div class="ezpn-h"><b>${ks.length > 1 ? `${ks.length} keyframes` : 'Keyframe'}</b><small>easing to the next key</small>${
@@ -111,7 +136,7 @@ export function keyPanel() {
     <div class="ezpn-r"><svg class="ezed" id="ezEd" width="${EZW}" height="${EZH}" viewBox="0 0 ${EZW} ${EZH}" role="img" aria-label="Easing curve editor. Drag the two handles to make a custom curve.">${lines}
       <text x="${EZW - 12}" y="${EZH - 3}" text-anchor="end">time</text>
       <line class="arm" id="ezA0"/><line class="arm" id="ezA1"/><path class="cv" id="ezCurve"/>
-      <circle class="end" cx="${EZX(0)}" cy="${EZY(0)}" r="2.5"/><circle class="end" cx="${EZX(1)}" cy="${EZY(1)}" r="2.5"/>
+      <circle class="end" id="ezE0" cx="${EZX(0)}" cy="${EZY(0)}" r="2.5"/><circle class="end" id="ezE1" cx="${EZX(1)}" cy="${EZY(1)}" r="2.5"/>
       <circle class="hd" id="ezH0" data-hd="0" r="5"/><circle class="hd" id="ezH1" data-hd="1" r="5"/></svg>
       ${Array.isArray(cur) && !isPreset ? '<button class="btn" data-act="ezsave">Save as preset</button>' : ''}
       ${isPreset ? '<button class="btn" data-act="ezdelp">Remove preset</button>' : ''}
@@ -122,10 +147,20 @@ export function drawEz() {
   if (!k0 || !$('#ezEd')) return;
   const e = k0[2] || 'ease',
     bz = bezOf(e);
+  fitEz(e);
+  [0, 1].forEach(v => {
+    const g = $('#ezG' + v),
+      c = $('#ezE' + v);
+    if (g) {
+      g.setAttribute('y1', String(EZY(v)));
+      g.setAttribute('y2', String(EZY(v)));
+    }
+    if (c) c.setAttribute('cy', String(EZY(v)));
+  });
   let d = '';
   for (let i = 0; i <= 100; i++) {
     const p = i / 100;
-    d += (i ? 'L' : 'M') + r2(EZX(p)) + ' ' + r2(EZY(clamp(H.ease(e, p), -0.16, 1.16)));
+    d += (i ? 'L' : 'M') + r2(EZX(p)) + ' ' + r2(EZY(clamp(H.ease(e, p), EZR.lo, EZR.hi)));
   }
   $('#ezCurve').setAttribute('d', d);
   const b = bz || [0.25, 0.1, 0.25, 1],
@@ -151,7 +186,8 @@ export function drawEz() {
   H0.setAttribute('cy', P1[1]);
   H1.setAttribute('cx', P2[0]);
   H1.setAttribute('cy', P2[1]);
-  [A0, A1, H0, H1].forEach(x => x.classList.toggle('dim', !bz));
+  // an easing that isn't a curve with handles (Elastic, Bounce, Hold…): no handles to show
+  [A0, A1, H0, H1].forEach(x => x.classList.toggle('none', !bz));
 }
 export function applyEase(v: Ease) {
   const ed = beginEdit();
