@@ -18,7 +18,9 @@ async def main():
     check('site/index.html is built from the current sources', built==open(os.path.join(ROOT,'site/index.html')).read())
     check('the page names no other product', 'svgator' not in built.lower())
     hero=open(os.path.join(ROOT,'site/src/hero.svg'),'rb').read()
-    kb=f'{len(hero)/1024:.1f} KB'; gz=f'{len(gzip.compress(hero,9))/1024:.1f} KB'
+    kb=f'{len(hero)/1024:.1f} KB'
+    # gzipped the way the build measures it (Node's zlib, level 9): other gzip implementations differ by a few bytes
+    gz=subprocess.run(['node','-e',"const z=require('zlib'),f=require('fs');process.stdout.write((z.gzipSync(f.readFileSync(process.argv[1]),{level:9}).length/1024).toFixed(1)+' KB')",os.path.join(ROOT,'site/src/hero.svg')],capture_output=True,text=True,check=True).stdout
     base=(sys.argv[1] if len(sys.argv)>1 else 'http://localhost:5199/')
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1440,'height':900}); pg.set_default_timeout(5000)
