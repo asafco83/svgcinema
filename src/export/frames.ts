@@ -88,14 +88,19 @@ export function frameMarkup() {
   }
 }
 
-/** Mount the animation out of sight with its player, ready to draw any frame. */
-export function frameSource(): FrameSource {
+/**
+ * Mount the animation with its player, ready to draw any frame: out of sight, or inside `into` (the
+ * Video preview shows it there, and every frame drawn moves it).
+ */
+export function frameSource(into?: HTMLElement): FrameSource {
   const r = frameMarkup(),
     host = document.createElement('div');
   host.setAttribute('aria-hidden', 'true');
-  host.style.cssText = `position:fixed;left:-20000px;top:0;width:${doc.w}px;height:${doc.h}px;overflow:hidden;visibility:hidden;pointer-events:none`;
+  host.style.cssText = into
+    ? 'width:100%;height:100%;pointer-events:none'
+    : `position:fixed;left:-20000px;top:0;width:${doc.w}px;height:${doc.h}px;overflow:hidden;visibility:hidden;pointer-events:none`;
   host.innerHTML = r.code;
-  document.body.appendChild(host);
+  (into || document.body).appendChild(host);
   const svg = host.querySelector('svg') as SVGSVGElement & { player?: any };
   svg.querySelectorAll('script').forEach(sc => {
     const n = document.createElement('script');

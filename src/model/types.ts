@@ -235,6 +235,44 @@ export interface ExportSettings {
   player?: 'embed' | 'external';
   /** Export › Image: one frame as a picture */
   img?: StillSettings;
+  /** Export › Video */
+  vid?: VideoSettings;
+}
+
+/** Export › Video settings. */
+export interface VideoSettings {
+  fmt: 'mp4' | 'webm' | 'seq';
+  /** WebM's codec */
+  codec: 'vp9' | 'av1';
+  /** part of the timeline (from – to, seconds) instead of all of it */
+  part: boolean;
+  from: number;
+  to: number;
+  fps: number;
+  /** a frame size, or a size typed in (w × h) */
+  preset: 'doc' | '720' | '1080' | 'sq' | 'p45' | 'story' | 'c';
+  w?: number;
+  h?: number;
+  /** when the frame's shape differs: fitted with bars, or filled and cropped */
+  fit: 'fit' | 'fill';
+  /** WebM (VP9) and PNG frames */
+  alpha: boolean;
+  /** the bars and background (default: the document's) */
+  bgc?: string;
+  /** compress for a quality (0–100), a file size (MB) or a bitrate (Mbit/s) */
+  aim: 'q' | 'size' | 'rate';
+  q: number;
+  mb: number;
+  mbps: number;
+  /** seconds between keyframes; 0 = only the first */
+  key: number;
+  /** MP4: the index first, so it starts playing while it downloads */
+  fast: boolean;
+  /** PNG frames: smaller files (takes longer) */
+  small: boolean;
+  /** Embed: also the other format, and a poster image */
+  other?: boolean;
+  poster?: boolean;
 }
 
 /** Export › Image settings (kept with the project, like the other export settings). */

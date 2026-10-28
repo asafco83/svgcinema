@@ -91,7 +91,9 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   column, preview part and embed part; the footer is shared). `export/frames.ts` draws still frames from the JS
   export mounted out of sight (so frames match the exported animation); `export/still.ts` is Export › Image (PNG
   and JPEG from the canvas; WebP, AVIF and JPEG XL from jSquash's WebAssembly encoders in
-  `export/encoder.worker.ts`, kept out of Vite's prebundling in `vite.config.ts`). Third-party code shipped in
+  `export/encoder.worker.ts`, kept out of Vite's prebundling in `vite.config.ts`). `export/video.ts` is Export › Video
+  (WebCodecs `VideoEncoder`, frames from `frameSource(into)` mounted in the preview; `export/mux.ts` writes MP4 and
+  WebM by hand). Third-party code shipped in
   the app is listed in `public/third-party-notices.txt`; keep it up to date when adding any.
 - `src/io/` — open/save `.SVGcinema` projects (zip), SVG import, assets.
 - `src/agent/` — the design agent (in-app AI chat, being built in steps; spec: the "SVGcinema design agent — tool
