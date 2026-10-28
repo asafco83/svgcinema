@@ -82,7 +82,7 @@ async def main():
         # line ends, line join and Align (closed shapes): drawn as the stroke with the path knocked out (Align's
         # inside / outside icons are just the band, smaller or larger: the owner's icons)
         check('line ends and joins: stroke shapes with the path knocked out', await ev("document.querySelectorAll('#insp .btns.lj').length")>=2 and await ev("[...document.querySelectorAll('#insp .btns.lj .btn:not([data-tx=al])')].every(b=>b.querySelector('.knock'))") and await ev("(()=>{const c=document.querySelector('#insp [data-tx=al][data-v=center]'); return !c || !!c.querySelector('.knock')})()"))
-        check('a note says what the booleans need', await ev("(document.querySelector('.align-bar .ab-note')||{}).textContent")=='Booleans: select 2+ shapes')
+        check('the booleans say what they need in their tooltip (no note line)', not await ev("!!document.querySelector('.align-bar .ab-note')") and await ev("[...document.querySelectorAll('.align-bar [data-bool]')].every(b=>b.getAttribute('aria-disabled')==='true' && /select 2\\+ shapes/.test(b.title))"))
         cf=await ev("(()=>{const c=document.getElementById('c-fill').closest('.cf');return [c.firstElementChild.className, [...c.firstElementChild.children].map(e=>e.id), [...c.children].slice(1).map(e=>e.dataset.act||'')]})()")
         check('colour field: swatch and value in one box, eyedropper beside it', cf[0]=='cbox' and cf[1]==['c-fill','t-fill'] and cf[2] in (['pick'],[]), cf)
         units=await ev("['i-scl_0_100','i-skw_0'].map(id=>{const e=document.getElementById(id).parentElement.querySelector('em');return e&&getComputedStyle(e).display!=='none'?e.textContent:''})")
