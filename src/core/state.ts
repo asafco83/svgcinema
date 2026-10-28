@@ -39,7 +39,6 @@ export const S: EditorState = {
   lockAR: true,
   ezDir: 'inOut',
   tab: 'layers',
-  snap: true,
   clip: null,
   showBones: true,
   showPins: true,

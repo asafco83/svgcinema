@@ -24,7 +24,7 @@ How the project works
 - Units: document pixels (origin top left, y down), seconds, degrees. scl 1 = 100 %, op 0–1.
 - Layers have base values and keyframe tracks. Properties: ${props}. Filter parameters are fx.<filter id>.<param>.
 - update_layer on a property that already has keyframes writes a keyframe at the playhead, so seek first. Use get_layer before changing existing keyframes.
-- The ease on a keyframe shapes the move to the next one.
+- The ease on a keyframe shapes the move to the next one: a name (linear is the default) or a custom curve as [x1, y1, x2, y2] or "cubic-bezier(x1, y1, x2, y2)".
 - Everything you do in one request is one undo step: the user can take it all back at once.
 
 How to work

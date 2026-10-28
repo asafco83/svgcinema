@@ -6,8 +6,11 @@
 // document, timeline length, colour stops, export…) by typing into the field and sending the same
 // input/change events typing would, so each field keeps its own rules. A whole drag is one undo step.
 import { S, doc } from '../core/state';
-import { fmt } from '../core/constants';
+import { clock, fmt, parseClock } from '../core/constants';
 
+/** the length field shows a clock time ("0:03.00"): read and write it as one */
+const readV = (inp: HTMLInputElement) => (inp.id === 'tDur' ? parseClock(inp.value) : parseFloat(inp.value));
+const writeV = (inp: HTMLInputElement, v: number) => (inp.id === 'tDur' ? clock(Math.max(0.1, v)) : fmt(v));
 /** pixels-to-value steps for fields whose unit is small */
 const STEP: Record<string, number> = {
   'g-lh': 0.01,
@@ -24,7 +27,7 @@ const STEP: Record<string, number> = {
 
 /** the label a scrub starts from, and its field */
 export function scrubTarget(t: EventTarget | null): { lab: HTMLElement; inp: HTMLInputElement } | null {
-  const lab = t && (t as any).closest ? ((t as Element).closest('.nf > span') as HTMLElement) : null;
+  const lab = t && (t as any).closest ? ((t as Element).closest('.nf > span, .tl-len > span') as HTMLElement) : null;
   if (!lab) return null;
   const inp = lab.parentElement.querySelector('input') as HTMLInputElement | null;
   if (!inp || inp.disabled || inp.readOnly || inp.type === 'range' || inp.type === 'checkbox') return null;
@@ -93,7 +96,7 @@ function initArrows() {
     const numeric = inp.getAttribute('inputmode') === 'numeric',
       k = e.shiftKey ? 10 : e.altKey ? 0.1 : 1,
       step = (numeric ? 1 : KEY_STEP[inp.id] || 1) * k,
-      cur = parseFloat(inp.value),
+      cur = readV(inp),
       start = isFinite(cur) ? cur : parseFloat(inp.placeholder) || 0;
     let v = start + (e.key === 'ArrowUp' ? step : -step);
     // keep the value's own decimals (2.37 + 1 = 3.37) without float noise (0.1 + 0.2)
@@ -104,7 +107,7 @@ function initArrows() {
     }
     const find = locator(inp),
       caret = inp.selectionStart === 0 && inp.selectionEnd === inp.value.length;
-    inp.value = fmt(v);
+    inp.value = writeV(inp, v);
     inp.dispatchEvent(new Event('input', { bubbles: true }));
     inp.dispatchEvent(new Event('change', { bubbles: true }));
     // the panel may draw the field again (now or on the next frame): keep typing in it
@@ -176,7 +179,7 @@ export function initScrub(): void {
       find = locator(inp),
       numeric = inp.getAttribute('inputmode') === 'numeric',
       step = scrubStep(lab, inp),
-      start = parseFloat(inp.value) || parseFloat(inp.placeholder) || 0,
+      start = readV(inp) || parseFloat(inp.placeholder) || 0,
       x0 = e.clientX,
       // the field's own handlers may each make an undo step: the drag keeps just one
       undo0 = S.undo.slice(),
@@ -192,7 +195,7 @@ export function initScrub(): void {
       const k = ev.shiftKey ? 10 : ev.altKey ? 0.1 : 1;
       let v = start + (ev.clientX - x0) * step * k;
       v = numeric ? Math.round(v) : Math.round(v / (step * k)) * (step * k);
-      const s = fmt(v);
+      const s = writeV(el, v);
       if (el.value === s) return;
       moved = true;
       el.value = s;

@@ -111,7 +111,7 @@ async def main():
         check('several layers: W scales the selection, keeping proportions', abs(w1-w0/2)<1 and abs(h1-h0/2)<1, (w0,h0,w1,h1))
         await ev("(()=>{const l=st.doc.layers.find(x=>x.name==='Sky');const tr=Object.values(l.t).find(t=>t&&t.length);if(tr)st.S.keys.add(tr[0]);IN.renderInspector()})()")
         t=await titles()
-        check('several layers: Keyframe above the selection section', t[:2]==['Keyframe','2 layers selected'], t)
+        check('several layers: the selection section first (the Keyframe section moved to the Easing panel)', t[0]=='2 layers selected' and 'Keyframe' not in t, t)
         await pg.screenshot(path=OUT+'inspector-order.png')
 
         check('no page errors', not errs, errs[:3])

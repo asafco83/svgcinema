@@ -11,7 +11,7 @@ import { S, doc } from '../core/state';
 
 const MAG = ic('<path d="M6 4v8a6 6 0 0012 0V4"/><path d="M6 4h4v8a2 2 0 004 0V4h4"/><path d="M6 8h4M14 8h4"/>'),
   GRID = ic('<path d="M4 4h16v16H4zM4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16"/>');
-type Row = [key: keyof ViewPrefs | string, label: string, on: boolean, kbd?: string] | '-';
+type Row = [key: keyof ViewPrefs | string, label: string, on: boolean, kbd?: string, sub?: string] | '-';
 const M = () => $('#viewMenu') as HTMLElement;
 let which: 'snap' | 'grid' | null = null;
 
@@ -25,6 +25,9 @@ function rows(kind: 'snap' | 'grid'): Row[] {
       ['sPixel', 'Snap to pixel', VIEW.sPixel],
       '-',
       ['snap', 'Enable snapping', VIEW.snap, 'Alt S'],
+      '-',
+      // keyframes in the timeline: their own switch, not turned off by Enable snapping
+      ['sKeys', 'Snap keyframes', VIEW.sKeys, '', 'To the playhead, keys and 0.05 s'],
     ];
   return [
     ['gridFront', 'Front grid', VIEW.gridFront, 'Alt G'],
@@ -48,7 +51,7 @@ function render(kind: 'snap' | 'grid') {
           ? '<hr>'
           : r[0] === 'clearGuides'
             ? `<button role="menuitem" data-v="clearGuides"${doc.guides && (doc.guides.x.length || doc.guides.y.length) ? '' : ' disabled'}><span class="vm-chk"></span><span>Clear guides</span><kbd></kbd></button>`
-            : `<button role="menuitemcheckbox" aria-checked="${r[2]}" data-v="${r[0]}"${off && r[0] !== 'snap' ? ' class="dim"' : ''}><span class="vm-chk">${r[2] ? '✓' : ''}</span><span>${r[1]}</span><kbd>${r[3] || ''}</kbd></button>`,
+            : `<button role="menuitemcheckbox" aria-checked="${r[2]}" data-v="${r[0]}"${off && r[0] !== 'snap' && r[0] !== 'sKeys' ? ' class="dim"' : ''}><span class="vm-chk">${r[2] ? '✓' : ''}</span><span>${r[1]}${r[4] ? `<small class="vm-sub">${r[4]}</small>` : ''}</span><kbd>${r[3] || ''}</kbd></button>`,
       )
       .join('') +
     (kind === 'grid'

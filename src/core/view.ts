@@ -8,6 +8,8 @@ export interface ViewPrefs {
   sGuides: boolean;
   sGrid: boolean;
   sPixel: boolean;
+  /** snap dragged keyframes to the playhead, other keyframes and 0.05 s steps (Shift inverts) */
+  sKeys: boolean;
   gridFront: boolean;
   gridBack: boolean;
   /** grid cell, document units */
@@ -23,6 +25,7 @@ export const VIEW: ViewPrefs = {
   sGuides: true,
   sGrid: false,
   sPixel: false,
+  sKeys: true,
   gridFront: false,
   gridBack: false,
   grid: 10,

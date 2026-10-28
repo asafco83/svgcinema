@@ -40,6 +40,7 @@ import { initTlResize } from './ui/tl-resize';
 import { initShortcuts } from './ui/shortcuts';
 import { initScrub } from './ui/scrub';
 import { init as initAgent } from './ui/agent-panel';
+import { init as initEasePop } from './ui/ease-pop';
 
 // Same order as the original single-file build
 initTheme(); // ui/theme (before the rail renders its button)
@@ -80,5 +81,6 @@ init12(); // io/save
 init13(); // io/guard
 init14(); // io/open
 initAgent(); // ui/agent-panel (the design agent, docked on the right)
+initEasePop(); // ui/ease-pop (the Easing panel of the timeline header)
 init15(); // ui/keyboard
 init16(); // app/boot

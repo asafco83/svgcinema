@@ -137,7 +137,7 @@ async def main():
         # ---- 5. drag a field's label to change the value
         async def scrub(inp, dx=30, mods=None):
             await pg.locator('#'+inp).scroll_into_view_if_needed()
-            bb=await pg.locator(f'.nf:has(#{inp}) > span').first.bounding_box()
+            bb=await pg.locator(f'.nf:has(#{inp}) > span, .tl-len:has(#{inp}) > span').first.bounding_box()
             x,y=bb['x']+bb['width']/2, bb['y']+bb['height']/2
             if mods: await pg.keyboard.down(mods)
             await pg.mouse.move(x,y); await pg.mouse.down()

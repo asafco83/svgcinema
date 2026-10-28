@@ -270,6 +270,16 @@ export const FONTS = [
 ];
 export const SWATCH = ['#5B7CFA', '#F2B63D', '#2EC4A6', '#F25F5C', '#A07BFF', '#FF8A3D'];
 export const KAPPA = 0.5523;
+/** A time as the timeline shows it: "0:03.00" (minutes, seconds). */
+export function clock(t: number) {
+  return `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, '0')}`;
+}
+/** A time typed as "0:03.00", "1:05" or plain seconds ("3", "2.5"); NaN when it can't be read. */
+export function parseClock(s: string): number {
+  const m = /^\s*(\d+):(\d+(?:[.,]\d*)?)\s*$/.exec(s || '');
+  if (m) return +m[1] * 60 + parseFloat(m[2].replace(',', '.'));
+  return parseFloat(String(s || '').replace(',', '.'));
+}
 /** The easing a new keyframe gets (presets keep their own). */
 export const DEFAULT_EASE = 'linear';
 export const NOFILL: Record<'fill' | 'stk' | 'sw', null> = { fill: null, stk: null, sw: null };

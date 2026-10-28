@@ -50,6 +50,9 @@ async def main():
         check('set_keyframes writes a track', r['ok'] and r['result']['keys']==2 and await ev(f"st.layerById('{box}').t.pos[0][2]")=='linear', r)
         r=await run('set_keyframes',{'id':box,'prop':'rot','keys':[{'t':0,'v':0,'ease':'easeIn'},{'t':0.5,'v':10,'ease':'power2.out'},{'t':1,'v':0}]})
         check('…easing names from CSS / Penner / GSAP are understood (easeIn, power2.out)', r['ok'] and await ev(f"st.layerById('{box}').t.rot.map(k=>k[2]).join()")=='in,outCubic,linear', r)
+        r=await run('set_keyframes',{'id':box,'prop':'op','keys':[{'t':0,'v':0,'ease':'cubic-bezier(0.2, 0, 0.4, 1)'},{'t':0.5,'v':1,'ease':[0.1,0.7,0.3,1]},{'t':1,'v':0.5}]})
+        g=(await run('get_layer',{'id':box}))['result']
+        check('…custom curves go in as cubic-bezier() or [x1, y1, x2, y2], and get_layer reads them back', r['ok'] and [k[2] for k in g['tracks']['op']][:2]==[[0.2,0,0.4,1],[0.1,0.7,0.3,1]], (r, g['tracks'].get('op')))
         await ev("hi.setTime(0.5)")
         r=await run('update_layer',{'id':box,'values':{'pos':[100,50]}})
         check('…then a value on an animated property becomes a key at the playhead', r['result']['keyed']==['pos'] and await ev(f"st.layerById('{box}').t.pos.length")==3, r)

@@ -23,7 +23,7 @@ async def main():
         await pg.mouse.move(e[0]+60*2.5, e[1], steps=8)
         tip=await ev("(()=>{const t=document.getElementById('tlEndTip');return t&&!t.hidden?t.textContent:null})()")
         dur=await ev("st.doc.dur"); box=await ev("document.getElementById('tDur').value")
-        check('dragging updates length live, box and tip', abs(dur-5.5)<0.06 and box==str(dur).rstrip('0').rstrip('.') and tip and '0:05.50' in tip, (dur,box,tip))
+        check('dragging updates length live, box and tip', abs(dur-5.5)<0.06 and box=='0:05.50' and tip and '0:05.50' in tip, (dur,box,tip))
         await pg.mouse.up(); await pg.wait_for_timeout(100)
         check('tip hides after drag', await ev("document.getElementById('tlEndTip').hidden"))
         await pg.keyboard.press('Control+z')

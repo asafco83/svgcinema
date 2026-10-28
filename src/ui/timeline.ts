@@ -1,7 +1,8 @@
 // SVGcinema — ui/timeline
+import { VIEW } from '../core/view';
 import { graphNames, graphSVG, graphTrack, graphable, updateGraphValues } from './graph';
 import type { Keyframe, Layer, PropKey } from '../model/types';
-import { $, ICON, clamp, clone, esc, fmt, isFrozen, layerTracks, propLabel, r3 } from '../core/constants';
+import { $, ICON, clamp, clock, clone, esc, fmt, isFrozen, layerTracks, propLabel, r3 } from '../core/constants';
 import { TLB, TLS } from '../core/dom';
 import { beginEdit, setTime } from '../core/history';
 import { closeMenu } from '../core/keyframes';
@@ -35,6 +36,9 @@ export function ticks(W: number, span = doc.dur) {
   return h + `<div class="tl-out" style="left:${W}px"></div>`;
 }
 export function renderTimeline() {
+  // the header's Easing button follows the selected keyframes
+  const ez = document.getElementById('tEase') as HTMLButtonElement | null;
+  if (ez) ez.disabled = !S.keys.size;
   const W = doc.dur * S.pps,
     span = shownSpan(),
     LW = span * S.pps + 24,
@@ -215,7 +219,7 @@ function endDrag(e0: PointerEvent) {
       tip.textContent = '⏱ ' + tc(doc.dur);
     }
     const n = $('#tDur');
-    if (n) n.value = fmt(doc.dur);
+    if (n) n.value = clock(doc.dur);
   };
   show();
   dragWin(
@@ -357,7 +361,7 @@ export function keyDrag(e: PointerEvent, grab: Keyframe) {
         gT0 = g[0];
         anchor = Math.abs(gT0 - tMin) < 1e-6 && tMax > tMin ? tMax : tMin;
       }
-      const snap = S.snap !== ev.shiftKey;
+      const snap = VIEW.sKeys !== ev.shiftKey;
       let tg = gT0 + dx / S.pps;
       tg = snap ? snapT(tg, S.keys) : Math.round(tg * 100) / 100;
       if (ev.altKey && tMax > tMin && Math.abs(gT0 - anchor) > 1e-6) {
