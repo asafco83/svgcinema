@@ -18,7 +18,7 @@ async def main():
             if not c: F.append(n)
         await ev("localStorage.removeItem('svgcinema:exportClosed'); st.doc.ex.mode='js'; st.doc.ex.player='embed'; st.doc.ex.size='resp'")
         await pg.click('#bExport'); await pg.wait_for_timeout(1500)
-        secs=lambda: ev("[...document.querySelectorAll('#mExport .xopts .sec')].filter(s=>!s.hidden).map(s=>[s.querySelector('h3').childNodes[0].textContent.trim(), s.classList.contains('closed')])")
+        secs=lambda: ev("[...document.querySelectorAll('#xOptsSvg .sec')].filter(s=>!s.hidden).map(s=>[s.querySelector('h3').childNodes[0].textContent.trim(), s.classList.contains('closed')])")
         s0=await secs()
         check('sections in order, Advanced closed by default', s0==[['Format',False],['Playback',False],['Size',False],['Advanced',True]], s0)
         check('every section heading has a collapse toggle', await ev("[...document.querySelectorAll('#mExport .sec > h3')].every(h=>h.querySelector('.sec-tg'))"))

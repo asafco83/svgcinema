@@ -233,6 +233,33 @@ export interface ExportSettings {
   proj?: boolean;
   /** JS export: the player inside the SVG (default) or linked from outside */
   player?: 'embed' | 'external';
+  /** Export › Image: one frame as a picture */
+  img?: StillSettings;
+}
+
+/** Export › Image settings (kept with the project, like the other export settings). */
+export interface StillSettings {
+  fmt: 'png' | 'jpeg' | 'webp' | 'avif' | 'jxl' | 'svg';
+  /** 1–100, for JPEG, WebP, AVIF and JPEG XL */
+  q: number;
+  /** WebP, AVIF and JPEG XL */
+  lossless?: boolean;
+  /** AVIF and JPEG XL: how long the encoder looks for a smaller file */
+  effort?: 'fast' | 'bal' | 'small';
+  /** pixels: 1×, 2× or 3× the canvas, or a size typed in (w × h) */
+  scale: '1' | '2' | '3' | 'c';
+  w?: number;
+  h?: number;
+  /** keep the canvas proportions while typing a size */
+  lock?: boolean;
+  /** still SVG: fills its container, or a fixed size */
+  svgFit?: 'resp' | 'fixed';
+  bg: 'transparent' | 'doc' | 'colour';
+  /** the colour for bg: 'colour' */
+  bgc?: string;
+  /** Embed: also make the fallback formats, and 2× versions */
+  fallbacks?: boolean;
+  hi?: boolean;
 }
 
 export interface Doc {

@@ -5,6 +5,7 @@ import { TLS, WRAP } from '../core/dom';
 import { save } from '../core/history';
 import { ASSETS, S, blankDoc, doc, setIdc, syncIdc } from '../core/state';
 import { openExport } from '../export/build';
+import { closeKind } from '../export/kind';
 import { importFiles, placeAsset } from '../io/assets';
 import { confirmDiscard } from '../io/guard';
 import { applyProject, toast } from '../io/open';
@@ -17,6 +18,7 @@ import { tln } from './timeline';
 export function closeModal(m: HTMLElement) {
   m.hidden = true;
   if (m.id === 'mExport') {
+    closeKind();
     S.exportOnly = null;
     const s = $('#xprev svg');
     if (s && s.player) s.player.destruct();

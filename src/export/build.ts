@@ -8,8 +8,8 @@ import { $, H, clone, esc, r3 } from '../core/constants';
 import { togglePlay } from '../core/playback';
 import { ASSETS, S, doc, layerById } from '../core/state';
 import { syncExportUI } from './dialog';
-import { detectEnc, updateExport } from './images';
-import { outDims, syncSizeUI } from './size';
+import { outDims } from './size';
+import { rememberedKind, showKind } from './kind';
 import { markup } from '../render/markup';
 import { fontFaceCSS } from '../render/fonts';
 import { CinEngine } from '../runtime/engine';
@@ -786,8 +786,5 @@ export function openExport() {
   if (S.playing) togglePlay();
   syncExportUI();
   $('#mExport').hidden = false;
-  detectEnc().then(() => {
-    syncSizeUI();
-    updateExport();
-  });
+  showKind(rememberedKind());
 }

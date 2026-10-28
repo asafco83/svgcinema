@@ -87,6 +87,12 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
 - `src/ui/` — panels and menus: `inspector.ts` + `props-panel.ts` (right panel), `timeline.ts`,
   `layers-panel.ts`, `layer-menu.ts` (right-click), `color-picker.ts` (the colour window), …
 - `src/export/build.ts` — export (JS or CSS mode), `dialog.ts` the Export dialog.
+- The Export dialog makes several kinds, picked in its header (`export/kind.ts`: each kind has its own options
+  column, preview part and embed part; the footer is shared). `export/frames.ts` draws still frames from the JS
+  export mounted out of sight (so frames match the exported animation); `export/still.ts` is Export › Image (PNG
+  and JPEG from the canvas; WebP, AVIF and JPEG XL from jSquash's WebAssembly encoders in
+  `export/encoder.worker.ts`, kept out of Vite's prebundling in `vite.config.ts`). Third-party code shipped in
+  the app is listed in `public/third-party-notices.txt`; keep it up to date when adding any.
 - `src/io/` — open/save `.SVGcinema` projects (zip), SVG import, assets.
 - `src/agent/` — the design agent (in-app AI chat, being built in steps; spec: the "SVGcinema design agent — tool
   spec" doc). `tools.ts` = the tools a model calls, each a thin wrapper over an editor function (never edit `doc`

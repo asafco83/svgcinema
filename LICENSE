@@ -36,8 +36,8 @@ at any time, at their own discretion and without prior notice:
 Continuing to use the Software after a change means accepting the changed terms. No permission in
 these terms is irrevocable, and none limits these rights.
 
-Third-party components included with the Software (such as paper.js and opentype.js) remain under
-their own licenses.
+Third-party components included with the Software (such as paper.js, opentype.js and the image
+encoders listed in third-party-notices.txt) remain under their own licenses.
 
 Versions of the Software that were published earlier under the PolyForm Noncommercial License
 1.0.0 stay under that license for those copies. This notice applies from the version that

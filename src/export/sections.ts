@@ -36,8 +36,14 @@ function show(h3: Element, shut: boolean) {
     b.setAttribute('title', `${shut ? 'Show' : 'Hide'} this section`);
   }
 }
+/** The remembered key: the title, prefixed by the column for kinds other than Animated SVG. */
+function key(h3: Element) {
+  const col = h3.closest('.xopts') as HTMLElement | null,
+    pre = col && col.id !== 'xOptsSvg' ? col.id.replace(/^xOpts/, '') + ':' : '';
+  return pre + title(h3);
+}
 function toggle(h3: Element) {
-  const t = title(h3),
+  const t = key(h3),
     c = closedSet(),
     shut = !c.has(t);
   if (shut) c.add(t);
@@ -49,18 +55,21 @@ function toggle(h3: Element) {
 }
 
 export function init(): void {
-  const opts = $('#mExport .xopts') as HTMLElement,
-    c = closedSet();
-  opts.querySelectorAll('.sec > h3').forEach((h3: Element) => {
-    h3.insertAdjacentHTML('beforeend', `<button type="button" class="sec-tg">${CHEV}</button>`);
-    show(h3, c.has(title(h3)));
-  });
-  opts.addEventListener('click', (e: MouseEvent) => {
-    const h3 = (e.target as Element).closest('.sec > h3');
-    if (h3) toggle(h3);
+  const c = closedSet();
+  // every kind's options column (Animated SVG, Image…); a title is remembered per column
+  document.querySelectorAll('#mExport .xopts').forEach(opts => {
+    opts.querySelectorAll('.sec > h3').forEach((h3: Element) => {
+      h3.insertAdjacentHTML('beforeend', `<button type="button" class="sec-tg">${CHEV}</button>`);
+      show(h3, c.has(key(h3)));
+    });
+    opts.addEventListener('click', (e: Event) => {
+      const h3 = (e.target as Element).closest('.sec > h3');
+      if (h3) toggle(h3);
+    });
   });
   // a closed section's summary follows every change made in the dialog
   const later = () => requestAnimationFrame(syncSummaries);
-  opts.addEventListener('change', later);
-  opts.addEventListener('click', later);
+  const svg = $('#xOptsSvg') as HTMLElement;
+  svg.addEventListener('change', later);
+  svg.addEventListener('click', later);
 }
