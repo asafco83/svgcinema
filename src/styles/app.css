@@ -8248,3 +8248,38 @@ button.ag-chip:hover {
   font-size: 11px;
   font-weight: 400;
 }
+
+/* Help as a tooltip: an ⓘ at the end of a section title or a row label (matched to the mockup) */
+.itip {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  vertical-align: -3px;
+  border-radius: 50%;
+  color: var(--muted);
+  cursor: help;
+}
+.itip:hover {
+  color: var(--fg);
+}
+.itip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.rl:has(> .itip),
+.check > span:has(> .itip) {
+  display: flex;
+  align-items: center;
+  overflow: visible;
+  text-overflow: clip;
+}
+.rl > .itip {
+  margin-left: 2px;
+}
+/* "Time offset" fills its label: that row's label column is wider, so the ⓘ doesn't sit on the field */
+#symSec .row:has(#sym-off) {
+  grid-template-columns: 82px minmax(0, 1fr);
+}

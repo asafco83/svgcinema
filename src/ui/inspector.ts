@@ -1,4 +1,5 @@
 // SVGcinema — ui/inspector
+import { infoTip } from './info-tip';
 import { propOK } from '../core/keyframes';
 import { allPainted, commonType, isMulti, multiEdit, multiFields, multiKey, multiSel } from './multi';
 import { instanceChip, instanceSection } from './symbols-ui';
@@ -97,6 +98,17 @@ export function colf(f: string, types = 'solid') {
 export function krow(k: string, label: string, body: string) {
   return `<div class="row"><button class="kb" data-kb="${k}" aria-label="Keyframe ${label}" title="Add / remove keyframe at playhead"></button><span class="rl">${label}</span><div class="rf">${body}</div></div>`;
 }
+const MOTION_TIP =
+  'Drag the path on the canvas to curve it; drag its handles to fine-tune (Alt moves one handle alone); double-click a segment to straighten it.';
+const BONE_TIP =
+  'Drag a bone to rotate it (forward kinematics). Drag its tip, or Alt+drag the bone, to pull the chain into place (inverse kinematics). The Edit bone tool (E) changes the rest pose; the Scale bone tool (S) scales along or across the bone. Attach artwork by dragging layers onto the bone in the Layers panel, with the Bind tool, or with “Attach to bone” on the layer.';
+/** What an imported element is (the importer kept it as it was) and what can still change. */
+function rawWarning(l: Layer) {
+  const m = /^\s*<\s*([\w:-]+)/.exec(l.geo.markup || ''),
+    tag = m ? m[1] : '',
+    what = tag === 'image' ? 'a linked image' : tag === 'text' ? 'text on a path' : tag ? `a ${tag}` : 'this element';
+  return `<div class="xwarn raw-warn" role="note"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3l8 14H2z"/><path d="M10 8.5v3.5M10 14.6v.1"/></svg><span><b>Kept as imported: not editable.</b> SVGcinema can’t convert this element (here ${esc(what)}), so its shape, fill and stroke stay as they are. It can still move, turn, scale and fade; Size stretches it to the box, like Scale.</span></div>`;
+}
 export function nrow(label: string, body: string) {
   return `<div class="row nk"><span class="rl">${label}</span><div class="rf">${body}</div></div>`;
 }
@@ -119,12 +131,12 @@ function renderInspector0() {
     const sbn = (f: string, lab: string) =>
         `<label class="nf"><span>${lab}</span><input id="sb-${f}" data-sb="${f}" inputmode="decimal" spellcheck="false" aria-label="Selection ${lab}"></label>`,
       keep = S.sbLock !== false;
-    m += `<section class="sec"><h3>${ms.length} layers selected</h3>${nrow('Position', sbn('x', 'X') + sbn('y', 'Y'))}${nrow(
+    m += `<section class="sec"><h3>${ms.length} layers selected${infoTip('The box around the whole selection. Moving it moves every layer; resizing it scales them all from its corner. Each change keys the layers that are animated.', 'the selection box')}</h3><p>Fields show the value the layers share, or “Mixed”. A change applies to all of them.</p>${nrow('Position', sbn('x', 'X') + sbn('y', 'Y'))}${nrow(
       'Size',
       sbn('w', 'W') +
         sbn('h', 'H') +
         `<button class="btn ib tg${keep ? ' on' : ''}" data-act="sblock" aria-pressed="${keep}" title="Keep proportions" aria-label="Keep proportions">${LINK_IC}</button>`,
-    )}<p>The box around the whole selection. Moving it moves every layer; resizing it scales them all from its corner. Each change keys the layers that are animated.</p><div class="btns"><button class="btn" data-act="grp">Group them</button><button class="btn danger" data-act="delsel">Delete all</button></div><p>Fields show the value the layers share, or “Mixed”. A change applies to all of them.</p></section>`;
+    )}<div class="btns"><button class="btn" data-act="grp">Group them</button><button class="btn danger" data-act="delsel">Delete all</button></div></section>`;
     m += transformSection(l);
     if (allPainted(ms)) m += paintSection(l);
     m += appearanceSection(allPainted(ms) ? l : ({ ...l, type: 'group' } as Layer));
@@ -145,8 +157,8 @@ function renderInspector0() {
   const curve = l.t.pos && l.t.pos.length > 1,
     pick = l.type === 'bone' ? '' : motionPick(l);
   if (curve || pick)
-    h += `<section class="sec"><h3>Motion path</h3>${pick ? nrow('Follow', pick) : ''}
-    ${curve ? `<label class="check"><input type="checkbox" data-flag="sm" id="fl-sm" ${l.sm ? 'checked' : ''}> Smooth path through keyframes</label><label class="check"><input type="checkbox" data-flag="ev" id="fl-ev" ${l.ev ? 'checked' : ''}> Even speed along curves</label><p>Drag the path on the canvas to curve it; drag its handles to fine-tune (Alt moves one handle alone); double-click a segment to straighten it.</p>${nodeSection(l)}` : ''}</section>`;
+    h += `<section class="sec"><h3>Motion path${infoTip(MOTION_TIP, 'motion paths')}</h3>${pick ? nrow('Follow', pick) : ''}
+    ${curve ? `<label class="check"><input type="checkbox" data-flag="sm" id="fl-sm" ${l.sm ? 'checked' : ''}> Smooth path through keyframes</label><label class="check"><input type="checkbox" data-flag="ev" id="fl-ev" ${l.ev ? 'checked' : ''}> Even speed along curves</label>${nodeSection(l)}` : ''}</section>`;
   if (l.type === 'text') h += textAppearanceSection(l);
   if (painted) h += paintSection(l);
   if (l.type !== 'bone') h += appearanceSection(l) + filtersSection(l);
@@ -175,18 +187,21 @@ function typeSection(l: Layer) {
     return `<section class="sec"><h3>Ellipse</h3>${nrow('Center', gnum('cx', 'X') + gnum('cy', 'Y'))}${sizeRow(l)}<div class="btns"><button class="btn" data-act="topath">Convert to path</button></div></section>`;
   if (l.type === 'group') {
     const n = kids(l.id).length;
-    return `<section class="sec"><h3>Group <small>${n} layer${n === 1 ? '' : 's'} inside</small></h3>${
+    return `<section class="sec"><h3>Group <small>${n} layer${n === 1 ? '' : 's'} inside</small>${infoTip('Keyframes on a group move, turn, scale or fade everything inside it together. Layers inside keep their own keyframes.', 'groups')}</h3>${
       l.mask === 'mask'
         ? nrow(
-            'Mask by',
+            'Mask by' +
+              infoTip(
+                'Opacity: the mask shows the layers where it is opaque. Brightness: where it is light (white shows, black hides).',
+                'Mask by',
+              ),
             `<select class="sel" data-ly="mm" id="ly-mm" aria-label="Mask mode"><option value="">Opacity</option><option value="lum"${l.mm === 'lum' ? ' selected' : ''}>Brightness</option></select>`,
-          ) +
-          `<p>Opacity: the mask shows the layers where it is opaque. Brightness: where it is light (white shows, black hides).</p>`
+          )
         : ''
-    }<p>Keyframes on a group move, turn, scale or fade everything inside it together. Layers inside keep their own keyframes.</p><div class="btns"><button class="btn" data-act="ungroup">Ungroup</button></div></section>`;
+    }<div class="btns"><button class="btn" data-act="ungroup">Ungroup</button></div></section>`;
   }
   if (l.type === 'raw')
-    return `<section class="sec"><h3>Imported element</h3>${sizeBox(l) ? sizeRow(l) : ''}<p>This element animates with position, size, rotation, scale and opacity. Its own styling is kept as imported; Size stretches it to the box, like Scale.</p></section>`;
+    return `<section class="sec"><h3>Imported element</h3>${sizeBox(l) ? sizeRow(l) : ''}${rawWarning(l)}</section>`;
   if (l.type === 'image') {
     const a = ASSETS[G.asset];
     return `<section class="sec"><h3>Image <span class="chip">${a ? esc((a.mime || '').replace('image/', '').replace('x-icon', 'ico')) : 'missing'}</span></h3>
@@ -197,15 +212,14 @@ function typeSection(l: Layer) {
   if (l.type === 'bone') {
     const n = kids(l.id).length,
       pb0 = l.parent && layerById(l.parent);
-    return `<section class="sec"><h3>Bone <small>${n} attached</small></h3>${nrow('Length', gnum('len', 'L'))}${nrow('Rest angle', gnum('ang', '∠', '°'))}
+    return `<section class="sec"><h3>Bone <small>${n} attached</small>${infoTip(BONE_TIP, 'bones')}</h3>${nrow('Length', gnum('len', 'L'))}${nrow('Rest angle', gnum('ang', '∠', '°'))}
       <label class="check"><input type="checkbox" data-flag="pin" id="fl-pin" ${l.pin ? 'checked' : ''}> Pin: IK stops at this bone</label>
       <label class="check"><input type="checkbox" data-flag="lim" id="fl-lim" ${l.lim ? 'checked' : ''}> Limit rotation</label>
-      ${poseRowFor(l) ? `<label class="check sub-check"><input type="checkbox" data-flag="kr" id="fl-kr" ${l.kr !== false ? 'checked' : ''}><span>Key whole rig<span class="bsub">Moving any bone of this rig keys every bone, so each pose is stored whole. Turn off for overlapping action.</span></span></label>` : ''}
+      ${poseRowFor(l) ? `<label class="check sub-check"><input type="checkbox" data-flag="kr" id="fl-kr" ${l.kr !== false ? 'checked' : ''}><span>Key whole rig${infoTip('Moving any bone of this rig keys every bone, so each pose is stored whole. Turn off for overlapping action.', 'Key whole rig')}</span></label>` : ''}
       ${poseRowFor(l) ? drawOrderBlock(l) : ''}
       ${pb0 && pb0.type === 'bone' ? `<label class="check sub-check"><input type="checkbox" data-flag="inh" id="fl-inh" ${l.inh ? 'checked' : ''}><span>Inherit scale<span class="bsub">Off: this bone follows the parent’s tip without being stretched by its scale.</span></span></label>` : ''}
       ${l.lim ? nrow('Range', `<label class="nf"><span>min</span><input id="bl-min" data-bl="lmin" inputmode="decimal" value="${fmt(l.lmin != null ? l.lmin : -90)}"><em>°</em></label><label class="nf"><span>max</span><input id="bl-max" data-bl="lmax" inputmode="decimal" value="${fmt(l.lmax != null ? l.lmax : 90)}"><em>°</em></label>`) : ''}
-      <div class="btns"><button class="btn" data-act="childbone">Add child bone</button></div>
-      <p>Drag a bone to rotate it (forward kinematics). Drag its tip, or Alt+drag the bone, to pull the chain into place (inverse kinematics). The Edit bone tool (E) changes the rest pose; the Scale bone tool (S) scales along or across the bone. Attach artwork by dragging layers onto the bone in the Layers panel, with the Bind tool, or with “Attach to bone” on the layer.</p></section>`;
+      <div class="btns"><button class="btn" data-act="childbone">Add child bone</button></div></section>`;
   }
   return '';
 }
@@ -216,10 +230,13 @@ function morphSection(l: Layer) {
     nodes = l.type === 'path' ? (H.get(l, 'd', S.time) as PathData) : shapeNodes(l),
     cnt = (nodes || []).reduce((s, p) => s + p.n.length, 0),
     box = l.type !== 'path';
-  return `<section class="sec"><h3>Morph <small>${cnt} nodes</small></h3>
+  const tip =
+    'Add a Morph keyframe, move the playhead, then edit nodes. The shape blends between keyframes.' +
+    (box
+      ? ` Editing the nodes, or adding Morph keyframes, turns this ${l.type === 'rect' ? 'rectangle into a plain path. Radius keyframes are kept as Morph keyframes.' : 'ellipse into a plain path.'}`
+      : '');
+  return `<section class="sec"><h3>Morph <small>${cnt} nodes</small>${infoTip(tip, 'morphing')}</h3>
       ${krow('d', 'Morph', `<button class="btn" data-act="nodes" style="flex:1">${S.tool === 'node' ? 'Done editing' : 'Edit nodes'}</button>`)}
-      <p>Add a Morph keyframe, move the playhead, then edit nodes. The shape blends between keyframes.</p>
-      ${box ? `<p>Editing the nodes, or adding Morph keyframes, turns this ${l.type === 'rect' ? 'rectangle into a plain path. Radius keyframes are kept as Morph keyframes.' : 'ellipse into a plain path.'}</p>` : ''}
       ${nrow('Morph into', `<select class="sel" id="morphTo" aria-label="Morph into another shape"><option value="">Choose a shape…</option>${others.map(o => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select>`)}
       <div class="btns"><button class="btn" data-act="subdiv">Add nodes (subdivide)</button></div></section>`;
 }
@@ -866,7 +883,7 @@ export function init(): void {
     // a click on a section heading (not on a control inside it) opens or closes the section
     const h3 = (e.target as any).closest('.sec > h3');
     if (h3) {
-      const ctl = (e.target as any).closest('button, input, select, label, a');
+      const ctl = (e.target as any).closest('button, input, select, label, a, .itip');
       if (!ctl || ctl.matches('[data-sectg]')) {
         toggleSection(h3);
         return;
@@ -1023,7 +1040,7 @@ export const GRIP =
   '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><circle cx="4.5" cy="3" r="1"/><circle cx="7.5" cy="3" r="1"/><circle cx="4.5" cy="6" r="1"/><circle cx="7.5" cy="6" r="1"/><circle cx="4.5" cy="9" r="1"/><circle cx="7.5" cy="9" r="1"/></svg>';
 function drawOrderBlock(l: Layer) {
   const order = drawOrder(l, doc.layers);
-  let h = `<label class="check sub-check"><input type="checkbox" data-dord id="fl-dord" ${order ? 'checked' : ''}><span>Own draw order<span class="bsub">Draws this rig’s artwork in the order below, whatever bone it hangs on, so a part can sit behind its parent’s artwork.</span></span></label>`;
+  let h = `<label class="check sub-check"><input type="checkbox" data-dord id="fl-dord" ${order ? 'checked' : ''}><span>Own draw order${infoTip('Draws this rig’s artwork in the order below, whatever bone it hangs on, so a part can sit behind its parent’s artwork.', 'Own draw order')}</span></label>`;
   if (!order) return h;
   const rows = order
     .slice()
