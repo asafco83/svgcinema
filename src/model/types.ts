@@ -379,7 +379,6 @@ export interface EditorState {
   } | null;
   ezDir: string;
   tab: string;
-  snap: boolean;
   clip: ClipKey[] | null;
   showBones: boolean;
   /** Show pins (Alt+P): every pinned layer's pins outside the Pin tools */

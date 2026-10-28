@@ -1,7 +1,7 @@
 // SVGcinema — io/open
 import { fitView, zoomAt } from '../tools/hand';
 import type { Asset, BaseValues, Doc, Layer, OpenFile } from '../model/types';
-import { $, clamp } from '../core/constants';
+import { $, clamp, clock } from '../core/constants';
 import { syncFa } from '../model/filters';
 import { redo, save, setTime, undo } from '../core/history';
 import { togglePlay } from '../core/playback';
@@ -193,7 +193,19 @@ export function init(): void {
     S.loop = !S.loop;
     (e.currentTarget as HTMLElement).classList.toggle('on', S.loop);
   });
-  $('#tDur').addEventListener('change', (e: Event) => docField(e.target as HTMLInputElement));
+  // the length field (the total after the time): seconds or a time; Enter applies, Esc puts it back
+  const td = $('#tDur') as HTMLInputElement;
+  td.addEventListener('change', () => {
+    docField(td);
+    td.value = clock(doc.dur);
+  });
+  td.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') td.blur();
+    else if (e.key === 'Escape') {
+      td.value = clock(doc.dur);
+      td.blur();
+    }
+  });
   $('#tZoom').addEventListener('input', (e: Event) => {
     S.pps = +(e.target as any).value;
     renderTimeline();

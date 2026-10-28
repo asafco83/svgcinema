@@ -7793,3 +7793,178 @@ button.ag-chip:hover {
     background: var(--accent-soft);
   }
 }
+
+/* Timeline header (mockup "Timeline header — Animate, Easing, keyframe snapping"): the total after the
+   time is the length field, then the Easing button and Animate */
+.tc-tot.tl-len {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 2px;
+  padding-right: 6px;
+}
+.tl-len input {
+  all: unset;
+  box-sizing: border-box;
+  width: 60px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: var(--panel-2);
+  color: var(--fg);
+  font: 11.5px var(--f-num);
+  font-variant-numeric: tabular-nums;
+  cursor: text;
+}
+.tl-len input:hover {
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.tl-len input:focus {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+#tEase {
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+}
+#tEase[aria-expanded='true'] {
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+}
+#tEase:disabled {
+  opacity: 0.4;
+}
+.tl-ctrl .tl-anim {
+  height: 28px;
+  padding: 0 12px 0 10px;
+  gap: 6px;
+  font-size: 12.5px;
+}
+.tl-ctrl .tl-anim:disabled {
+  box-shadow: none;
+}
+
+/* the Easing panel: left side of the window, just above the timeline */
+.ezpop {
+  position: fixed;
+  z-index: 56;
+  bottom: auto;
+  max-height: none;
+  width: 358px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 12px 32px var(--shade);
+}
+.ezpop[hidden] {
+  display: none;
+}
+.ezpn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+}
+.ezpn-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+}
+.ezpn-h b {
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.ezpn-h small {
+  flex: 1;
+  color: var(--muted);
+  font-size: 11px;
+}
+.ezpn-h .ezpn-t {
+  flex: none;
+  width: 60px;
+  height: 24px;
+}
+.ezpn-b {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.ezpn-l {
+  width: 164px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ezpn-l .segc {
+  padding: 2px;
+  border-radius: 7px;
+}
+.ezpn-l .segc button {
+  height: 22px;
+  border-radius: 5px;
+  font-size: 11.5px;
+}
+.ezpop .ezfam {
+  grid-template-columns: repeat(3, 52px);
+}
+.ezpop .ezb {
+  height: 38px;
+  padding: 3px 2px;
+  align-content: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 6px;
+}
+.ezpop .ezb.on {
+  box-shadow: inset 0 0 0 1px var(--key);
+}
+.ezpop .ezb:hover:not(.on) {
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.ezpop .ezb svg {
+  width: 22px;
+  height: 14px;
+}
+.ezpop .ezb path {
+  stroke-width: 1.3;
+}
+.ezpn-r {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ezpn-r .ezed {
+  width: 160px;
+  height: 176px;
+  border: 0;
+  border-radius: 7px;
+}
+.ezpn-r .ezed .cv {
+  stroke-width: 2;
+}
+.ezpn-r .ezed .hd {
+  stroke-width: 1.5;
+}
+.ezpn-r .btn {
+  height: 26px;
+  justify-content: center;
+  font-size: 11.5px;
+}
+
+/* the snapping menu: Snap keyframes with its line under it */
+.view-menu .vm-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+.ezpop .ezb path {
+  vector-effect: non-scaling-stroke;
+}
+.ezpn-r .btn.danger {
+  color: var(--danger);
+}

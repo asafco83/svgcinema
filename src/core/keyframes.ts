@@ -311,10 +311,6 @@ export function init(): void {
   document.addEventListener('pointerdown', (e: PointerEvent) => {
     if (!MENU.hidden && !MENU.contains(e.target as Node)) closeMenu();
   });
-  $('#tSnap').addEventListener('click', (e: MouseEvent) => {
-    S.snap = !S.snap;
-    (e.currentTarget as HTMLElement).classList.toggle('on', S.snap);
-  });
   TLB.addEventListener('click', (e: MouseEvent) => {
     const b = (e.target as any).closest('[data-act]');
     if (!b) return;

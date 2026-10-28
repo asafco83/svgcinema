@@ -17,7 +17,9 @@ import {
   isFrozen,
   byId,
   clamp,
+  clock,
   clone,
+  parseClock,
   esc,
   fmt,
   r2,
@@ -114,7 +116,6 @@ function renderInspector0() {
     // several layers: only what they all have, edited on all of them (ui/multi)
     let m = `<div class="insp-head"><span class="ih-name ih-multi">${ms.length} layers</span><span class="chip">${commonType(ms)}</span></div>`;
     m += alignBar();
-    if (S.keys.size) m += keyPanel();
     const sbn = (f: string, lab: string) =>
         `<label class="nf"><span>${lab}</span><input id="sb-${f}" data-sb="${f}" inputmode="decimal" spellcheck="false" aria-label="Selection ${lab}"></label>`,
       keep = S.sbLock !== false;
@@ -130,7 +131,6 @@ function renderInspector0() {
     INSP.innerHTML = m;
     applyCollapse();
     refreshInspector(true);
-    drawEz();
     return;
   }
   let h = `<div class="insp-head"><input class="txt ih-name" id="ln" data-name value="${esc(l.name)}" spellcheck="false" aria-label="Layer name"><span class="chip${l.sym ? ' sym' : ''}">${l.sym ? instanceChip(l) || l.type : l.type}</span></div>`;
@@ -138,7 +138,6 @@ function renderInspector0() {
   // the order: instance, keyframe easing, the layer's own section (its shape, text, image…), then the
   // properties every layer shares, and Morph and Rig last
   h += instanceSection(l);
-  if (S.keys.size) h += keyPanel();
   const painted = ['rect', 'ellipse', 'path', 'text'].includes(l.type);
   h += typeSection(l);
   h += transformSection(l);
@@ -414,12 +413,12 @@ export function refreshDocFields() {
   set('d-dur', fmt(doc.dur));
   set('d-it', String(doc.it || 0));
   set('d-dir', doc.dir);
-  set('tDur', fmt(doc.dur));
+  set('tDur', clock(doc.dur));
 }
 const GDEF: Record<string, number> = { ls: 0, lh: 1.2 };
 export function refreshInspector(full?: boolean) {
   const td = $('#tDur');
-  if (td !== document.activeElement) td.value = fmt(doc.dur);
+  if (td !== document.activeElement) td.value = clock(doc.dur);
   const l = selLayer();
   if (!l) return;
   const sbIn = INSP.querySelectorAll('[data-sb]');
@@ -603,7 +602,7 @@ export function docField(t: HTMLInputElement) {
     const v = parseInt(t.value);
     if (v > 0) doc[k as 'w' | 'h'] = Math.min(8000, v);
   } else if (k === 'dur') {
-    const v = parseFloat(t.value);
+    const v = parseClock(t.value);
     if (v > 0) {
       doc.dur = r3(clamp(v, 0.1, 600));
       S.time = Math.min(S.time, doc.dur);
@@ -858,41 +857,6 @@ export function init(): void {
       else moveLayers([l.id], null, 'root');
       return;
     }
-    if (t.dataset.ezv !== undefined) {
-      const k0 = [...S.keys][0];
-      if (!k0) return;
-      const b = (bezOf(k0[2]) || [0.25, 0.1, 0.25, 1]).slice();
-      const v = parseFloat(t.value);
-      if (!isFinite(v)) {
-        drawEz();
-        return;
-      }
-      const i = +t.dataset.ezv;
-      b[i] = i % 2 === 0 ? clamp(v, 0, 1) : clamp(v, -2, 3);
-      applyEase(b.map(r3));
-      return;
-    }
-    if (t.id === 'ezCss') {
-      const b = parseBez(t.value);
-      if (!b) {
-        toast('Use the form cubic-bezier(x1, y1, x2, y2).');
-        drawEz();
-        return;
-      }
-      applyEase(b);
-      return;
-    }
-    if (t.id === 'kf-time') {
-      const v = parseFloat(t.value);
-      if (!isFinite(v)) return;
-      const ed = beginEdit();
-      const k = [...S.keys][0];
-      k[0] = r3(clamp(v, 0, doc.dur));
-      doc.layers.forEach(L => Object.values<any>(L.t).forEach(sortTrack));
-      S.time = k[0];
-      ed.end({ insp: true });
-      return;
-    }
     if (t.id === 'morphTo' && t.value) {
       const tg = layerById(t.value);
       if (tg) morphTo(l, tg);
@@ -911,26 +875,6 @@ export function init(): void {
     const kbt = (e.target as any).closest('[data-kb]'),
       l = selLayer();
     if (kbt && l) return isMulti() ? multiKey(kbt.dataset.kb, toggleKey) : toggleKey(l, kbt.dataset.kb);
-    const ez = (e.target as any).closest('[data-ez]');
-    if (ez) {
-      applyEase(JSON.parse(ez.dataset.ez));
-      return;
-    }
-    const dirB = (e.target as any).closest('#ezDir button');
-    if (dirB) {
-      S.ezDir = dirB.dataset.v;
-      const k0 = [...S.keys][0],
-        fam = easeFam(k0 && k0[2]);
-      if (EZFAM.includes(fam)) applyEase(famName(fam, S.ezDir));
-      else {
-        const sec = $('#kfsec');
-        if (sec) {
-          sec.outerHTML = keyPanel();
-          drawEz();
-        }
-      }
-      return;
-    }
     if ((e.target as any).closest('[data-docpick]')) {
       new (window as any).EyeDropper()
         .open()
@@ -1020,55 +964,9 @@ export function init(): void {
       setProp(l, 'sz', [as.w, as.h]);
       ed.end();
       refreshInspector(true);
-    } else if (a === 'kdel') deleteKeys();
-    else if (a === 'ezsave') {
-      const k0 = [...S.keys][0];
-      if (!k0 || !Array.isArray(k0[2])) return;
-      const ed = beginEdit();
-      doc.ezPresets = doc.ezPresets || [];
-      doc.ezPresets.push({ name: 'Custom ' + (doc.ezPresets.length + 1), v: clone(k0[2]) });
-      ed.end({ insp: true });
-      toast('Saved as an easing preset for this project.');
-    } else if (a === 'ezdelp') {
-      const k0 = [...S.keys][0];
-      const ed = beginEdit();
-      doc.ezPresets = (doc.ezPresets || []).filter(p => !sameEase(p.v, k0[2]));
-      ed.end({ insp: true });
-    } else if (a === 'ezall') {
-      const k0 = [...S.keys][0];
-      if (!k0) return;
-      const ed = beginEdit();
-      doc.layers.forEach(L =>
-        Object.values(L.t).forEach(tr => {
-          if (tr.some(q => S.keys.has(q))) tr.forEach(q => (q[2] = clone(k0[2])));
-        }),
-      );
-      ed.end({ insp: true });
-      toast('Easing applied to every keyframe in this animator.');
     }
   });
   INSP.addEventListener('pointerdown', (e: PointerEvent) => {
-    const hd = (e.target as any).closest('[data-hd]');
-    if (hd && S.keys.size) {
-      e.preventDefault();
-      const idx = +hd.dataset.hd,
-        svg = $('#ezEd'),
-        k0 = [...S.keys][0],
-        base = (bezOf(k0[2]) || [0.25, 0.1, 0.25, 1]).slice(),
-        ed = beginEdit();
-      dragWin(
-        ev => {
-          const p = xfp(svg.getScreenCTM().inverse(), ev.clientX, ev.clientY);
-          base[idx * 2] = r2(clamp((p.x - 20) / 200, 0, 1));
-          base[idx * 2 + 1] = r2(clamp((190 - p.y) / 90 - 0.5, -0.5, 1.5));
-          S.keys.forEach(k => (k[2] = base.slice() as Ease));
-          drawEz();
-          frame();
-        },
-        () => ed.end({ insp: true }),
-      );
-      return;
-    }
     const sc = (e.target as any).closest('[data-scrub]');
     const l = selLayer();
     if (!sc || !l) return;

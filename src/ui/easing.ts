@@ -3,7 +3,6 @@ import type { Ease } from '../model/types';
 import { $, EZFAM, H, clamp, clone, esc, fmt, r2, r3 } from '../core/constants';
 import { beginEdit } from '../core/history';
 import { S, doc } from '../core/state';
-import { nrow } from './inspector';
 
 export function easeLabel(e: Ease): string {
   if (Array.isArray(e)) return 'cubic-bezier(' + e.map(v => r3(v)).join(', ') + ')';
@@ -51,12 +50,23 @@ export function thumb(e: Ease) {
   }
   return `<svg viewBox="0 -2 40 30" aria-hidden="true"><path d="${d}"/></svg>`;
 }
+/* the curve editor: 160 × 176, time across, the value up (a little room for overshoot, -0.12…1.12) */
+export const EZW = 160,
+  EZH = 176;
 export function EZX(x: number) {
-  return 20 + x * 200;
+  return 12 + x * (EZW - 24);
 }
 export function EZY(v: number) {
-  return 190 - (v + 0.5) * 90;
+  return EZH - 14 - ((v + 0.12) * (EZH - 28)) / 1.24;
 }
+/** a point of the editor back to time and value */
+export function EZXi(px: number) {
+  return (px - 12) / (EZW - 24);
+}
+export function EZYi(py: number) {
+  return ((EZH - 14 - py) * 1.24) / (EZH - 28) - 0.12;
+}
+/** The Easing panel (timeline header): the selected keyframes' easing to the next key. */
 export function keyPanel() {
   const ks = [...S.keys],
     k0 = ks[0],
@@ -65,7 +75,7 @@ export function keyPanel() {
   const allSame = ks.every(k => sameEase(k[2], cur)),
     dir = S.ezDir;
   const tile = (e: Ease, label: string, extra?: string) =>
-    `<button class="ezb${allSame && sameEase(e, cur) ? ' on' : ''}" data-ez="${esc(JSON.stringify(e))}" title="${esc(easeLabel(e))}"${extra || ''}>${thumb(e)}<span>${esc(label)}</span></button>`;
+    `<button class="ezb${allSame && sameEase(e, cur) ? ' on' : ''}" data-ez="${esc(JSON.stringify(e))}" title="${esc(easeLabel(e))}" aria-pressed="${allSame && sameEase(e, cur)}"${extra || ''}>${thumb(e)}<span>${esc(label)}</span></button>`;
   let grid = tile('linear', 'Linear') + tile('ease', 'Ease') + tile('hold', 'Hold');
   EZFAM.forEach(f => {
     grid += tile(famName(f, dir), f === 'Standard' ? 'Basic' : f);
@@ -76,34 +86,36 @@ export function keyPanel() {
   });
   const isPreset = pre.some(p => sameEase(p.v, cur));
   if (Array.isArray(cur) && !isPreset)
-    grid += `<button class="ezb on" data-ez="${esc(JSON.stringify(cur))}" title="${esc(easeLabel(cur))}">${thumb(cur)}<span>Custom</span></button>`;
-  const lines =
-    [0, 1].map(v => `<line class="gb" x1="20" x2="220" y1="${EZY(v)}" y2="${EZY(v)}"/>`).join('') +
-    [0, 0.25, 0.5, 0.75, 1].map(x => `<line class="gl" x1="${EZX(x)}" x2="${EZX(x)}" y1="10" y2="190"/>`).join('');
-  return `<section class="sec" id="kfsec"><h3>${ks.length > 1 ? `${ks.length} keyframes` : 'Keyframe'} <small>easing to the next key</small></h3>
-    ${ks.length === 1 ? nrow('Time', `<label class="nf"><span>t</span><input id="kf-time" inputmode="decimal" value="${fmt(k0[0])}"><em>s</em></label>`) : ''}
-    ${nrow(
-      'Direction',
-      `<div class="segc" id="ezDir" style="flex:1">${[
+    grid += `<button class="ezb on" data-ez="${esc(JSON.stringify(cur))}" title="${esc(easeLabel(cur))}" aria-pressed="true">${thumb(cur)}<span>Custom</span></button>`;
+  const lines = [0, 1]
+    .map(v => `<line class="gb" x1="${EZX(0)}" x2="${EZX(1)}" y1="${EZY(v)}" y2="${EZY(v)}"/>`)
+    .join('');
+  return `<section id="kfsec" class="ezpn">
+    <div class="ezpn-h"><b>${ks.length > 1 ? `${ks.length} keyframes` : 'Keyframe'}</b><small>easing to the next key</small>${
+      ks.length === 1
+        ? `<label class="nf ezpn-t" title="The keyframe's time"><span>t</span><input id="kf-time" inputmode="decimal" value="${fmt(k0[0])}" aria-label="Keyframe time"><em>s</em></label>`
+        : ''
+    }</div>
+    <div class="ezpn-b"><div class="ezpn-l">
+      <div class="segc" id="ezDir" role="radiogroup" aria-label="Direction">${[
         ['in', 'In'],
         ['out', 'Out'],
         ['inOut', 'In-Out'],
       ]
-        .map(d => `<button data-v="${d[0]}" class="${dir === d[0] ? 'on' : ''}">${d[1]}</button>`)
-        .join('')}</div>`,
-    )}
-    <div class="ezfam" id="ezGrid">${grid}</div>
-    <svg class="ezed" id="ezEd" viewBox="0 0 240 200" role="img" aria-label="Easing curve editor. Drag the two handles to make a custom curve.">${lines}
-      <text x="24" y="${EZY(1) - 4}">1</text><text x="24" y="${EZY(0) + 12}">0</text><text x="${EZX(1) - 18}" y="${EZY(0) + 12}">time</text>
+        .map(
+          d =>
+            `<button data-v="${d[0]}" class="${dir === d[0] ? 'on' : ''}" role="radio" aria-checked="${dir === d[0]}">${d[1]}</button>`,
+        )
+        .join('')}</div>
+      <div class="ezfam" id="ezGrid">${grid}</div></div>
+    <div class="ezpn-r"><svg class="ezed" id="ezEd" width="${EZW}" height="${EZH}" viewBox="0 0 ${EZW} ${EZH}" role="img" aria-label="Easing curve editor. Drag the two handles to make a custom curve.">${lines}
+      <text x="${EZW - 12}" y="${EZH - 3}" text-anchor="end">time</text>
       <line class="arm" id="ezA0"/><line class="arm" id="ezA1"/><path class="cv" id="ezCurve"/>
-      <circle class="end" cx="${EZX(0)}" cy="${EZY(0)}" r="3"/><circle class="end" cx="${EZX(1)}" cy="${EZY(1)}" r="3"/>
-      <circle class="hd" id="ezH0" data-hd="0" r="7"/><circle class="hd" id="ezH1" data-hd="1" r="7"/></svg>
-    <div class="ezrow">${['x1', 'y1', 'x2', 'y2'].map((n, i) => `<label class="nf"><span>${n}</span><input id="ez-${i}" data-ezv="${i}" inputmode="decimal"></label>`).join('')}</div>
-    <input class="txt mono" id="ezCss" spellcheck="false" placeholder="Paste cubic-bezier(.17,.67,.83,.67)" aria-label="CSS cubic-bezier value">
-    <p>Drag to move · Alt+drag to stretch · Ctrl+drag to copy · right-click for more.</p>
-    <div class="btns">${Array.isArray(cur) && !isPreset ? '<button class="btn" data-act="ezsave">Save as preset</button>' : ''}
+      <circle class="end" cx="${EZX(0)}" cy="${EZY(0)}" r="2.5"/><circle class="end" cx="${EZX(1)}" cy="${EZY(1)}" r="2.5"/>
+      <circle class="hd" id="ezH0" data-hd="0" r="5"/><circle class="hd" id="ezH1" data-hd="1" r="5"/></svg>
+      ${Array.isArray(cur) && !isPreset ? '<button class="btn" data-act="ezsave">Save as preset</button>' : ''}
       ${isPreset ? '<button class="btn" data-act="ezdelp">Remove preset</button>' : ''}
-      <button class="btn" data-act="ezall">Use on whole animator</button><button class="btn danger" data-act="kdel">Delete key${ks.length > 1 ? 's' : ''}</button></div></section>`;
+      <button class="btn" data-act="ezall">Use on whole animator</button><button class="btn danger" data-act="kdel">Delete key${ks.length > 1 ? 's' : ''}</button></div></div></section>`;
 }
 export function drawEz() {
   const k0 = [...S.keys][0];
@@ -113,7 +125,7 @@ export function drawEz() {
   let d = '';
   for (let i = 0; i <= 100; i++) {
     const p = i / 100;
-    d += (i ? 'L' : 'M') + r2(EZX(p)) + ' ' + r2(EZY(clamp(H.ease(e, p), -0.5, 1.5)));
+    d += (i ? 'L' : 'M') + r2(EZX(p)) + ' ' + r2(EZY(clamp(H.ease(e, p), -0.16, 1.16)));
   }
   $('#ezCurve').setAttribute('d', d);
   const b = bz || [0.25, 0.1, 0.25, 1],
@@ -140,12 +152,6 @@ export function drawEz() {
   H1.setAttribute('cx', P2[0]);
   H1.setAttribute('cy', P2[1]);
   [A0, A1, H0, H1].forEach(x => x.classList.toggle('dim', !bz));
-  for (let i = 0; i < 4; i++) {
-    const inp = $('#ez-' + i);
-    if (inp !== document.activeElement) inp.value = bz ? fmt(b[i], 3) : '';
-  }
-  const css = $('#ezCss');
-  if (css !== document.activeElement) css.value = bz ? `cubic-bezier(${b.map(v => r3(v)).join(', ')})` : '';
 }
 export function applyEase(v: Ease) {
   const ed = beginEdit();

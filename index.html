@@ -201,17 +201,7 @@
           <div class="lp" id="lp" role="tree" aria-label="Layers"></div>
           <div class="lp-foot">
             <span class="rl" id="lCount"></span>
-            <button
-              class="btn pri lp-anim-btn"
-              id="lAnim"
-              aria-haspopup="menu"
-              aria-expanded="false"
-              title="Animate a property of the selected layers"
-            >
-              <span id="lAnimIc" aria-hidden="true"></span>Animate
-            </button>
           </div>
-          <div class="ctx" id="animMenu" role="menu" aria-label="Animate property" hidden></div>
           <div class="ctx zoom-menu" id="zoomMenu" role="menu" aria-label="Zoom" hidden></div>
         </div>
         <div class="pane" id="paneAssets" hidden>
@@ -284,30 +274,29 @@
           <button class="btn ghost ib" id="tStart" aria-label="Go to start" title="Go to start (Home)"></button>
           <button class="btn ib" id="tPlay" aria-label="Play" title="Play / pause (Space)"></button>
           <button class="btn ghost ib on" id="tLoop" aria-label="Loop preview" title="Loop preview"></button>
-          <span class="tc" id="tc">0:00.00</span><span class="tc-tot" id="tcTot"></span>
+          <span class="tc" id="tc">0:00.00</span
+          ><label class="tc-tot tl-len" id="tcTot" title="Animation length: click to edit"
+            ><span aria-hidden="true">/</span
+            ><input id="tDur" data-doc="dur" inputmode="decimal" spellcheck="false" aria-label="Animation length"
+          /></label>
           <span class="sep"></span>
-          <label class="nf" title="Animation length"
-            ><span>Length</span><input id="tDur" data-doc="dur" inputmode="decimal" /><em>s</em></label
-          >
           <button
-            class="btn ghost on"
-            id="tSnap"
-            title="Snap dragged keyframes to the playhead, other keyframes and 0.05s steps. Hold Shift while dragging to invert."
+            class="btn ghost ib"
+            id="tEase"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-label="Easing"
+            title="Easing of the selected keyframes"
+            disabled
+          ></button>
+          <button
+            class="btn pri lp-anim-btn tl-anim"
+            id="lAnim"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            title="Animate a property of the selected layers"
           >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              aria-hidden="true"
-            >
-              <path d="M4 2.5v6a4 4 0 008 0v-6" />
-              <path d="M4 5h2.5M9.5 5H12" />
-            </svg>
-            Snap
+            <span id="lAnimIc" aria-hidden="true"></span>Animate
           </button>
           <span class="sp"></span>
           <button
@@ -974,6 +963,8 @@
       </div>
     </div>
     <div class="toast" id="toast" hidden></div>
+    <div class="ctx" id="animMenu" role="menu" aria-label="Animate property" hidden></div>
+    <div class="ezpop" id="ezPop" role="dialog" aria-label="Easing" hidden></div>
     <div class="tl-marq" id="tlmarq" hidden></div>
     <div class="tl-tip" id="tltip" hidden></div>
     <div class="ctx" id="ctxmenu" role="menu" hidden></div>

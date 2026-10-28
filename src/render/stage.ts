@@ -144,7 +144,8 @@ export function frame() {
   updatePlayhead();
   refreshInspector();
   $('#tc').textContent = tc(S.time);
-  $('#tcTot').textContent = '/ ' + tc(doc.dur);
+  const td = $('#tDur') as HTMLInputElement;
+  if (td && td !== document.activeElement) td.value = tc(doc.dur);
 }
 export function tc(t: number) {
   return `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, '0')}`;
