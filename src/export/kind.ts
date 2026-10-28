@@ -62,6 +62,8 @@ export function showKind(k: ExportKind) {
       if (e) e.hidden = x !== k;
     }),
   );
+  // Video and GIF have no second button: Download (or Export) is all there is
+  $('#xCopy').hidden = k === 'video' || k === 'anim';
   hooks[k]?.open();
 }
 /** The dialog closed: the open kind lets go of what it holds. */

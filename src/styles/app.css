@@ -8551,3 +8551,213 @@ button.ag-chip:hover {
   width: 1px;
   background: var(--line-2);
 }
+
+/* ---------- Export › Video (matched to the mockup) ---------- */
+.xstatic {
+  height: 28px;
+  line-height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  font-size: 12px;
+}
+.xmuted {
+  flex: none;
+  color: var(--muted);
+  font-size: 11px;
+}
+.nf em {
+  flex: none;
+  font-style: normal;
+  color: var(--muted);
+  font-size: 11px;
+}
+#xvQ {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+#xvQv {
+  min-width: 30px;
+  text-align: center;
+}
+.xopts.locked {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.xkind.locked {
+  pointer-events: none;
+}
+.xv-stage {
+  position: relative;
+  height: 300px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.xv-stage.actual {
+  overflow: auto;
+  place-items: start;
+}
+.xv-stage.actual .xv-frame {
+  margin: 12px;
+}
+.xv-frame {
+  flex: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px var(--shade-sm);
+}
+.xv-frame.alpha {
+  background-color: var(--panel-2);
+  background-image: conic-gradient(var(--check) 25%, transparent 0 50%, var(--check) 0 75%, transparent 0);
+  background-size: 16px 16px;
+}
+.xv-art {
+  position: absolute;
+}
+.xv-art > div,
+.xv-art svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.xv-chip {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  height: 24px;
+  line-height: 24px;
+  padding: 0 9px;
+  border-radius: 6px;
+  background: var(--raised);
+  box-shadow: 0 1px 3px var(--shade-sm);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.xph-head .sp {
+  flex: 1;
+}
+.xv-play {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--panel);
+  cursor: pointer;
+}
+.xv-play .pa,
+.xv-play.on .pl {
+  display: none;
+}
+.xv-play.on .pa {
+  display: inline;
+}
+.xph-span {
+  position: absolute;
+  top: 26px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.xph-h {
+  position: absolute;
+  top: 20px;
+  width: 8px;
+  height: 18px;
+  margin-left: -4px;
+  border-radius: 3px;
+  background: var(--raised);
+  box-shadow:
+    0 0 0 1px var(--line-2),
+    0 1px 2px var(--shade-sm);
+}
+#xvSnip {
+  height: 240px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+#xvEmbed .btns {
+  justify-content: flex-end;
+  gap: 8px;
+}
+#xvEmbed .btns .btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12.5px;
+}
+/* the footer while a video is made: what it's doing, a bar, Cancel */
+.xprog {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.xprog[hidden] {
+  display: none;
+}
+.xspin {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--accent);
+  animation: xspin 0.8s linear infinite;
+}
+@keyframes xspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xspin {
+    animation: none;
+  }
+}
+.xprog-t {
+  display: grid;
+  gap: 5px;
+  width: 320px;
+}
+.xprog-t > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.xprog-t b {
+  font-weight: 600;
+}
+.xprog-t span {
+  color: var(--muted);
+}
+.xbar {
+  position: relative;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line-2);
+  overflow: hidden;
+}
+.xbar > span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.xprog-so {
+  font-size: 12px;
+  color: var(--muted);
+}

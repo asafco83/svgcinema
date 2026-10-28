@@ -436,7 +436,7 @@
                 >
                   <path d="M3.5 5h17v14h-17zM3.5 16l5-5 4 4 2.5-2.5 5.5 5.5M15 9.2h.01"></path></svg
                 >Image</button
-              ><button role="tab" data-v="video" hidden>
+              ><button role="tab" data-v="video">
                 <svg
                   width="15"
                   height="15"
@@ -879,6 +879,147 @@
               <p class="note xind" id="xiBgNote"></p>
             </section>
           </div>
+          <div class="xopts" id="xOptsVid" hidden>
+            <section class="sec" id="xvSecFmt">
+              <h3>Format<small id="xvSumFmt"></small></h3>
+              <div class="row">
+                <span class="rl">File</span>
+                <div class="segc" id="xvFmt" role="radiogroup" aria-label="Video format">
+                  <button role="radio" data-v="mp4">MP4</button><button role="radio" data-v="webm">WebM</button
+                  ><button role="radio" data-v="seq">PNG frames</button>
+                </div>
+              </div>
+              <div class="row" id="xvCodecMp4"><span class="rl">Codec</span><span class="xstatic">H.264</span></div>
+              <div class="row" id="xvCodecWebm" hidden>
+                <span class="rl">Codec</span>
+                <div class="segc" id="xvCodec" role="radiogroup" aria-label="Codec">
+                  <button role="radio" data-v="vp9">VP9</button
+                  ><button role="radio" data-v="av1">AV1 (smallest)</button>
+                </div>
+              </div>
+              <p class="note xind" id="xvFmtNote"></p>
+            </section>
+            <section class="sec" id="xvSecTime">
+              <h3>Timing<small id="xvSumTime"></small></h3>
+              <div class="row">
+                <span class="rl">Part</span>
+                <div class="segc" id="xvPart" role="radiogroup" aria-label="Which part">
+                  <button role="radio" data-v="whole">Whole animation</button
+                  ><button role="radio" data-v="part">Part of it</button>
+                </div>
+              </div>
+              <div class="row" id="xvFromRow" hidden>
+                <span class="rl">From – to</span>
+                <div class="xpair">
+                  <label class="nf"><input id="xvFrom" spellcheck="false" aria-label="From" /></label
+                  ><label class="nf"><input id="xvTo" spellcheck="false" aria-label="To" /></label>
+                </div>
+              </div>
+              <div class="row">
+                <span class="rl">Frame rate</span
+                ><select class="sel" id="xvFps" aria-label="Frame rate">
+                  <option value="24">24 fps (film)</option>
+                  <option value="25">25 fps</option>
+                  <option value="30">30 fps</option>
+                  <option value="50">50 fps</option>
+                  <option value="60">60 fps (smoothest)</option>
+                </select>
+              </div>
+            </section>
+            <section class="sec" id="xvSecSize">
+              <h3>Size<small id="xvSumSize"></small></h3>
+              <div class="row">
+                <span class="rl">Frame</span
+                ><select class="sel" id="xvPreset" aria-label="Frame size">
+                  <option value="" hidden>Custom</option>
+                  <option value="doc">Document</option>
+                  <option value="720">720p HD (1280 × 720)</option>
+                  <option value="1080">1080p Full HD (1920 × 1080)</option>
+                  <option value="sq">Square (1080 × 1080)</option>
+                  <option value="p45">Portrait 4:5 (1080 × 1350)</option>
+                  <option value="story">Story 9:16 (1080 × 1920)</option>
+                </select>
+              </div>
+              <div class="row">
+                <span class="rl">Pixels</span>
+                <div class="xpair">
+                  <label class="nf"><span>W</span><input id="xvW" inputmode="numeric" aria-label="Width" /></label
+                  ><label class="nf"><span>H</span><input id="xvH" inputmode="numeric" aria-label="Height" /></label>
+                </div>
+              </div>
+              <div class="row" id="xvFitRow" title="The animation’s shape differs from the frame’s">
+                <span class="rl">Fit</span>
+                <div class="segc" id="xvFit" role="radiogroup" aria-label="Fit">
+                  <button role="radio" data-v="fit">Fit (bars)</button
+                  ><button role="radio" data-v="fill">Fill (crop)</button>
+                </div>
+              </div>
+              <label class="check" id="xvAlphaRow"><input type="checkbox" id="xvAlpha" /> Transparent background</label>
+              <div class="row" id="xvBgRow">
+                <span class="rl">Background</span>
+                <label class="nf xcol"
+                  ><input type="color" id="xvBgPick" aria-label="Pick the background colour" /><input
+                    id="xvBgc"
+                    spellcheck="false"
+                    aria-label="Background colour"
+                  /><span class="xmuted" id="xvBgDoc">document</span></label
+                >
+              </div>
+              <p class="note" id="xvAlphaNote"></p>
+            </section>
+            <section class="sec" id="xvSecComp">
+              <h3>Compression<small id="xvSumComp"></small></h3>
+              <div class="row">
+                <span class="rl">Aim for</span>
+                <div class="segc" id="xvAim" role="radiogroup" aria-label="Aim for">
+                  <button role="radio" data-v="q">Quality</button><button role="radio" data-v="size">File size</button
+                  ><button role="radio" data-v="rate">Bitrate</button>
+                </div>
+              </div>
+              <div class="row" id="xvQRow">
+                <span class="rl">Quality</span>
+                <div class="rf">
+                  <input type="range" id="xvQ" min="0" max="100" step="1" aria-label="Video quality" /><span
+                    class="chip"
+                    id="xvQv"
+                  ></span>
+                </div>
+              </div>
+              <div class="row" id="xvSizeRow" hidden>
+                <span class="rl">File size</span>
+                <label class="nf"
+                  ><input id="xvMb" inputmode="decimal" aria-label="Target file size" /><em>MB at most</em></label
+                >
+              </div>
+              <div class="row" id="xvRateRow" hidden>
+                <span class="rl">Bitrate</span>
+                <label class="nf"><input id="xvMbps" inputmode="decimal" aria-label="Bitrate" /><em>Mbit/s</em></label>
+              </div>
+              <div class="row" title="A keyframe is a full picture; seeking jumps to the nearest one">
+                <span class="rl">Keyframes</span
+                ><select class="sel" id="xvKey" aria-label="Keyframe spacing">
+                  <option value="2">Every 2 seconds</option>
+                  <option value="1">Every second</option>
+                  <option value="5">Every 5 seconds</option>
+                  <option value="0">Only the first</option>
+                </select>
+              </div>
+              <label class="check" id="xvFastRow" title="Puts the index at the start of the file (fast start)"
+                ><input type="checkbox" id="xvFast" /> Starts playing while it downloads</label
+              >
+            </section>
+            <section class="sec" id="xvSecFiles" hidden>
+              <h3>Files</h3>
+              <div class="row">
+                <span class="rl">Names</span
+                ><input class="txt mono" id="xvNames" readonly spellcheck="false" aria-label="File names" />
+              </div>
+              <label class="check"><input type="checkbox" id="xvSmall" /> Smaller PNGs (takes longer)</label>
+              <p class="note">
+                One PNG per frame, in a .zip. For video editors: Premiere, DaVinci Resolve, After Effects.
+              </p>
+            </section>
+          </div>
           <div class="xside">
             <div class="xtop">
               <div class="segc" id="xTab" role="tablist" aria-label="Preview or embed code">
@@ -910,6 +1051,31 @@
                   </div>
                 </div>
                 <div class="stats" id="xiStats"></div>
+              </div>
+              <div class="xpart" id="xvPrev" hidden>
+                <div class="xv-stage" id="xvStage">
+                  <div class="xv-frame" id="xvFrame"><div class="xv-art" id="xvArt"></div></div>
+                  <span class="xv-chip" id="xvChip" hidden></span>
+                </div>
+                <div class="xph">
+                  <div class="xph-head">
+                    <button class="xv-play" id="xvPlay" aria-label="Play">
+                      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                        <path class="pl" d="M2.5 1.5l6 3.5-6 3.5z" fill="currentColor"></path>
+                        <path class="pa" d="M2 1.5h2.2v7H2zM5.8 1.5H8v7H5.8z" fill="currentColor"></path>
+                      </svg></button
+                    ><b>Playhead</b><span class="xph-t" id="xvT"></span><span class="xph-of" id="xvOf"></span
+                    ><span class="sp"></span><span class="xph-of" id="xvRange"></span>
+                  </div>
+                  <div class="xph-track">
+                    <span class="xph-bar"></span><span class="xph-span" id="xvSpan"></span
+                    ><span class="xph-h" id="xvFromH"></span><span class="xph-h" id="xvToH"></span
+                    ><span class="xph-ruler" id="xvRuler"></span><span class="xph-line" id="xvLine"></span
+                    ><span class="xph-flag" id="xvFlag"></span
+                    ><input type="range" id="xvScrub" min="0" max="1" step="0.01" aria-label="Playhead" />
+                  </div>
+                </div>
+                <div class="stats" id="xvStats"></div>
               </div>
               <div class="xpart" id="xSvgPrev">
                 <div id="xprev"></div>
@@ -965,6 +1131,36 @@
                   </button>
                 </div>
               </div>
+              <div class="xpart" id="xvEmbed" hidden>
+                <p class="note" id="xvEmbNote"></p>
+                <textarea class="code" id="xvSnip" readonly spellcheck="false" aria-label="Embed code"></textarea>
+                <label class="check" id="xvOtherRow"
+                  ><input type="checkbox" id="xvOther" /><span class="xgrow" id="xvOtherT"></span
+                  ><span class="xkb" id="xvOtherKb"></span
+                ></label>
+                <label class="check" id="xvPosterRow"
+                  ><input type="checkbox" id="xvPoster" /><span class="xgrow">Poster image (WebP, the first frame)</span
+                  ><span class="xkb">≈ 38 KB</span></label
+                >
+                <div class="btns" id="xvSetRow">
+                  <button class="btn" id="xvSnipCopy">Copy snippet</button
+                  ><button class="btn pri" id="xvSet">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg
+                    ><span>Export the set (.zip)</span>
+                  </button>
+                </div>
+              </div>
               <div class="xpart" id="xSvgEmbed">
                 <div class="segc" id="xFw">
                   <button data-v="html" class="on">HTML</button><button data-v="react">React</button
@@ -996,8 +1192,26 @@
           </div>
         </div>
         <footer>
-          <div class="xsize"><b id="xFileSize"></b><span id="xFileSub"></span></div>
-          <span class="sp"></span>
+          <div class="xsize" id="xFootSize"><b id="xFileSize"></b><span id="xFileSub"></span></div>
+          <div class="xprog" id="xProg" hidden>
+            <span class="xspin" aria-hidden="true"></span>
+            <div class="xprog-t">
+              <div><b id="xProgT">Encoding the video</b><span id="xProgS"></span></div>
+              <span
+                class="xbar"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-label="Progress"
+                ><span id="xProgBar"></span
+              ></span>
+            </div>
+            <span class="sp"></span>
+            <span class="xprog-so" id="xProgSo"></span>
+            <button class="btn" id="xCancel">Cancel</button>
+          </div>
+          <span class="sp" id="xFootSp"></span>
           <button class="btn" id="xCopy">Copy SVG code</button
           ><button class="btn pri" id="xDl">
             <svg

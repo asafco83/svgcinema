@@ -23,7 +23,7 @@ async def main():
         await ev("localStorage.removeItem('svgcinema:exportKind'); delete st.doc.ex.img; hi.setTime(1.8)")
         await pg.click('#bExport'); await pg.wait_for_timeout(800)
         kinds=await ev("[...document.querySelectorAll('#xKind button')].filter(b=>!b.hidden).map(b=>b.textContent.trim())")
-        check('the picker offers Animated SVG and Image', kinds==['Animated SVG','Image'], kinds)
+        check('the picker offers Animated SVG and Image first', kinds[:2]==['Animated SVG','Image'], kinds)
         check('it opens on Animated SVG the first time', await ev("document.querySelector('#xKind .on').dataset.v==='svg' && !document.getElementById('xOptsSvg').hidden && document.getElementById('xOptsImg').hidden"))
         check('the title is just Export', await ev("document.getElementById('xTitle').textContent")=='Export')
         await pg.click('#xKind [data-v="image"]'); await settled()

@@ -104,6 +104,8 @@ src/
     kind.ts              The Export window's picker: Animated SVG, Image…
     frames.ts            Still frames of the animation (from the JS export, out of sight)
     still.ts             Export › Image: one frame as PNG, JPEG, WebP, AVIF, JPEG XL or SVG
+    video.ts             Export › Video: MP4, WebM or PNG frames (WebCodecs), progress and Cancel
+    mux.ts               The MP4 and WebM files (and av1C from an AV1 stream), written by hand
     encoder.worker.ts    WebP, AVIF and JPEG XL encoders (WebAssembly, in a worker)
 
   app/boot.ts            Startup: restore the last project, assets and file handle
@@ -357,7 +359,7 @@ Use the AI assistant you already pay for, such as Claude in Chrome or any assist
 
 **The Export window:** the options sit in sections that collapse like the inspector's: **Format** (JavaScript or CSS only, the player, and a folded-away note on what each supports), **Playback** (trigger, what happens when it ends, repeat, direction, after the end, speed and frame rate, less motion), **Size** (responsive or fixed, dimensions, scale, largest width), **Images** and **Text** (only when the canvas has images or web / local fonts) and **Advanced** (element IDs, ID prefix, the editable project), which starts closed. A closed section shows a one-line summary of its settings, and the sections you close stay closed (remembered in this browser). Only the options column scrolls: the preview, the file size and the Copy / Download buttons stay in view.
 
-**Export › Image:** the picker at the top of the Export window (**Animated SVG · Image**) switches what it makes. **Image** saves one frame of the animation as a picture: the frame under the playhead. The playhead under the preview is the editor's own: drag it, type a time, or step one frame (1/30 s) with the arrows, and the editor's playhead moves with it.
+**Export › Image:** the picker at the top of the Export window (**Animated SVG · Image · Video**) switches what it makes. **Image** saves one frame of the animation as a picture: the frame under the playhead. The playhead under the preview is the editor's own: drag it, type a time, or step one frame (1/30 s) with the arrows, and the editor's playhead moves with it.
 
 - **Formats:** PNG (lossless), JPEG, WebP, AVIF, JPEG XL and SVG (the frame as still vector markup, no script). PNG and JPEG come from the browser; WebP, AVIF and JPEG XL from the official libraries (libwebp, libavif, libjxl) compiled to WebAssembly, loaded the first time they're used and run in a worker, so every format works in every browser. JPEG XL carries a note: not every browser shows it yet (Safari does, Chrome from version 155, Firefox not), so the preview shows it as PNG where it can't.
 - **Quality** (JPEG, WebP, AVIF, JPEG XL), **Lossless** (WebP, AVIF, JPEG XL) and **Encoding** (AVIF and JPEG XL: Faster, Balanced or Smallest) show only for the formats that have them.
@@ -366,6 +368,16 @@ Use the AI assistant you already pay for, such as Claude in Chrome or any assist
 - **The preview** is the encoded file itself (Fit or Actual size), with its time, size and format; the footer shows the file's real size, **Copy image** (as PNG, the format pictures are pasted in; Copy SVG code for SVG) and **Download**.
 - **Embed in your site:** a plain `<img>` for PNG, JPEG and SVG; for WebP, AVIF and JPEG XL a `<picture>` that lists the newer formats first with PNG as the fallback. 2× versions for high-density screens and the fallbacks are ticked by default; **Download the set (.zip)** makes every file the code names.
 - The frames are drawn from the same SVG the JavaScript export writes (text as outlines, images embedded), so they show what the exported animation shows. The settings are kept with the project, and the window opens on the kind used last.
+
+**Export › Video** makes the animation into a video file, every frame drawn exactly and encoded by the browser's own encoder (WebCodecs), faster than real time; the files are written by SVGcinema itself (no video library).
+
+- **File:** **MP4** (H.264: plays everywhere), **WebM** (VP9, or AV1 for the smallest files) or **PNG frames** (one PNG per frame in a .zip, for video editors). Codecs this browser can't encode aren't offered.
+- **Timing:** the whole animation or a part of it (from – to), at 24, 25, 30, 50 or 60 fps.
+- **Size:** the document's size, 720p, 1080p, square, portrait 4:5 or story 9:16 (or a typed size); when the shape differs from the animation's, **Fit** (bars in the background colour) or **Fill** (cropped). **Transparent background** for WebM VP9 (where the browser's encoder keeps alpha) and PNG frames; otherwise a background colour (the document's by default).
+- **Compression:** aim for a **Quality** (a number, 0–100: the encoder's quantizer where the browser supports it, else a bitrate worked out from it), a **File size** (MB at most) or a **Bitrate** (Mbit/s); keyframe spacing; MP4 puts its index first so it starts playing while it downloads. WebM files carry their duration and cues, so they seek properly.
+- **The preview** is the animation in the video's frame, with the shared playhead (drag it, or **Play** the part) and the output, frame rate, frame count and length. The footer shows an estimate until the file is made, then its real size.
+- **While it encodes** the options are locked, the preview shows each frame as it's encoded, and the footer shows the progress, the size so far, the time left and **Cancel**.
+- **Embed in your site:** a muted, looping `<video>` (`autoplay muted loop playsinline`) with WebM and MP4 sources and a poster image; **Export the set (.zip)** makes them all.
 
 **Less motion:** the Export dialog's _Less motion_ setting decides what visitors who ask their system for reduced motion see: _Play normally_ (the default, adds nothing), _Show the first frame_ or _Show the last frame_. The JS player then holds that frame and doesn't start (whatever the trigger); a CSS export pauses every animation on it (a few bytes of CSS). Shape morphs in a CSS export are held with the CSS `d` property, which Safari ignores, so there they keep playing.
 
