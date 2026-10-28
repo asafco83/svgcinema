@@ -132,8 +132,8 @@ export function toggleLock() {
   ls.forEach(l => (l.lock = on));
   ed.end({ insp: true });
 }
-const rotate = (d: number) => eachSel(l => setProp(l, 'rot', r2((valueAt(l, 'rot', S.time) || 0) + d)));
-const flip = (ax: 0 | 1) =>
+export const rotate = (d: number) => eachSel(l => setProp(l, 'rot', r2((valueAt(l, 'rot', S.time) || 0) + d)));
+export const flip = (ax: 0 | 1) =>
   eachSel(l => {
     const s = clone(valueAt(l, 'scl', S.time) || [1, 1]);
     s[ax] *= -1;

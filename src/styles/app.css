@@ -8283,3 +8283,26 @@ button.ag-chip:hover {
 #symSec .row:has(#sym-off) {
   grid-template-columns: 82px minmax(0, 1fr);
 }
+/* the booleans are greyed out but hoverable (their tooltip says what they need) */
+.align-bar .btn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: default;
+}
+.align-bar .btn[aria-disabled='true']:hover {
+  background: transparent;
+  color: var(--muted);
+}
+/* a hairline between the booleans and flip / rotate */
+.align-bar [data-xf='fliph'] {
+  position: relative;
+  overflow: visible;
+}
+.align-bar [data-xf='fliph']::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--line-2);
+}

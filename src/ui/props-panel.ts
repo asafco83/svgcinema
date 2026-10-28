@@ -146,8 +146,18 @@ export function transformSection(l: Layer) {
     onPath = !!(l.t.pos && l.t.pos.length > 1);
   return `<section class="sec"><h3>Transforms <span class="kleg" title="◆ beside a property adds or removes a keyframe at the playhead"><span><i></i>off</span><span><i class="a"></i>animated</span><span><i class="k"></i>key here</span></span></h3>
     ${krow('pos', 'Position', num('pos:0', 'X') + num('pos:1', 'Y'))}
-    ${krow('scl', 'Scale', num('scl:0:100', 'W', '%') + num('scl:1:100', 'H', '%') + `<button class="btn ib tg${S.sclLock ? ' on' : ''}" data-act="scllock" aria-pressed="${!!S.sclLock}" title="Keep proportions" aria-label="Keep proportions">${I.link}</button>`)}
-    ${bone ? '<p class="bnote">W along the bone · H across it</p>' : ''}
+    ${krow(
+      'scl',
+      'Scale',
+      num('scl:0:100', 'W', '%') +
+        num('scl:1:100', 'H', '%') +
+        `<button class="btn ib tg${S.sclLock ? ' on' : ''}" data-act="scllock" aria-pressed="${!!S.sclLock}" title="Keep proportions" aria-label="Keep proportions">${I.link}</button>`,
+    ).replace(
+      '<span class="rl">Scale</span>',
+      bone
+        ? `<span class="rl">Scale${infoTip('W along the bone · H across it', 'bone scale')}</span>`
+        : '<span class="rl">Scale</span>',
+    )}
     ${bone ? '' : krow('skw', 'Skew', num('skw:0', 'X', '°') + num('skw:1', 'Y', '°'))}
     ${krow('rot', 'Rotate', rotField('turn') + rotField('deg') + (onPath ? `<button class="btn ib tg${l.or ? ' on' : ''}" data-act="orient" aria-pressed="${!!l.or}" title="Rotate along the motion path" aria-label="Rotate along the motion path">${I.orient}</button>` : ''))}
     ${bone ? '' : krow('org', 'Origin', num('org:0', 'X') + num('org:1', 'Y') + `<button class="btn ib" data-act="center" title="Center origin on the shape" aria-label="Center origin">${ic('<circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>', 14)}</button>`)}
@@ -214,12 +224,11 @@ export function shapeSection(l: Layer) {
   if (sh) {
     const star = sh.kind === 'star',
       mx = r2(maxCornerRadius(sh));
-    return `<section class="sec"><h3>${star ? 'Star' : 'Polygon'}</h3>
+    return `<section class="sec"><h3>${star ? 'Star' : 'Polygon'}${infoTip('Editing the nodes by hand, or adding Morph keyframes, turns this into a plain path.', star ? 'stars' : 'polygons')}</h3>
       ${sizeRow(l)}
       ${slide('n', star ? 'Points' : 'Sides', 3, 24, 1, sh.n)}
       ${star ? slide('ratio', 'Ratio', 5, 95, 1, Math.round((sh.ratio == null ? 0.45 : sh.ratio) * 100), '%', 100) : ''}
       ${slide('rad', 'Radius', 0, mx, 0.5, Math.min(valueAt(l, 'rad', S.time) || 0, mx), 'px', 1, 'rad')}
-      <p>Editing the nodes by hand, or adding Morph keyframes, turns this into a plain path.</p>
       <div class="btns"><button class="btn" data-act="topath">Convert to path</button></div></section>`;
   }
   if (isLine(l))

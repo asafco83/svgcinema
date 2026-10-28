@@ -1,4 +1,6 @@
 // SVGcinema — ui/inspector
+import { safeLink } from './layer-menu';
+import { flip, rotate } from './layer-menu';
 import { infoTip } from './info-tip';
 import { propOK } from '../core/keyframes';
 import { allPainted, commonType, isMulti, multiEdit, multiFields, multiKey, multiSel } from './multi';
@@ -102,6 +104,29 @@ const MOTION_TIP =
   'Drag the path on the canvas to curve it; drag its handles to fine-tune (Alt moves one handle alone); double-click a segment to straighten it.';
 const BONE_TIP =
   'Drag a bone to rotate it (forward kinematics). Drag its tip, or Alt+drag the bone, to pull the chain into place (inverse kinematics). The Edit bone tool (E) changes the rest pose; the Scale bone tool (S) scales along or across the bone. Attach artwork by dragging layers onto the bone in the Layers panel, with the Bind tool, or with “Attach to bone” on the layer.';
+/** Hyperlink (also Element › Hyperlink…): clicking the layer in the exported SVG opens it. Empty: no link. */
+function linkSection(l: Layer) {
+  const k = l.link;
+  return `<section class="sec" id="linkSec"><h3>Hyperlink${infoTip('Clicking the layer in the exported SVG opens the link. Use a web address (https://…), mailto:, tel: or #anchor; leave it empty for no link.', 'hyperlinks')}</h3>
+    ${nrow('Link', `<input class="txt" id="lk-url" placeholder="https://…" spellcheck="false" inputmode="url" value="${esc((k && k.url) || '')}" aria-label="Link address">`)}
+    ${k ? nrow('Opens', `<select class="sel" id="lk-target" aria-label="Opens in"><option value="_blank">New tab</option><option value="_self"${k.target === '_self' ? ' selected' : ''}>Same tab</option></select>`) : ''}</section>`;
+}
+function setLink(l: Layer) {
+  const u = $('#lk-url') as HTMLInputElement,
+    tg = $('#lk-target') as HTMLSelectElement | null,
+    url = safeLink(u.value);
+  if (url === null) {
+    toast('Use a web address (https://…), mailto:, tel: or #anchor.');
+    u.value = (l.link && l.link.url) || '';
+    return;
+  }
+  const target: '_blank' | '_self' = tg && tg.value === '_self' ? '_self' : '_blank';
+  if ((l.link ? l.link.url : '') === url && (!l.link || l.link.target === target)) return;
+  const ed = beginEdit();
+  if (url) l.link = { url, target };
+  else delete l.link;
+  ed.end({ insp: true });
+}
 /** What an imported element is (the importer kept it as it was) and what can still change. */
 function rawWarning(l: Layer) {
   const m = /^\s*<\s*([\w:-]+)/.exec(l.geo.markup || ''),
@@ -170,6 +195,7 @@ function renderInspector0() {
         cur = pb && pb.type === 'bone' ? pb.id : '';
       h += `<section class="sec"><h3>Rig</h3>${nrow('Attach to bone', `<select class="sel" id="attachBone"><option value="">Not attached</option>${bones.map(b => `<option value="${b.id}"${b.id === cur ? ' selected' : ''}>${esc(b.name)}</option>`).join('')}</select>`)}</section>`;
     }
+    h += linkSection(l);
   }
   INSP.innerHTML = h;
   applyCollapse();
@@ -217,7 +243,7 @@ function typeSection(l: Layer) {
       <label class="check"><input type="checkbox" data-flag="lim" id="fl-lim" ${l.lim ? 'checked' : ''}> Limit rotation</label>
       ${poseRowFor(l) ? `<label class="check sub-check"><input type="checkbox" data-flag="kr" id="fl-kr" ${l.kr !== false ? 'checked' : ''}><span>Key whole rig${infoTip('Moving any bone of this rig keys every bone, so each pose is stored whole. Turn off for overlapping action.', 'Key whole rig')}</span></label>` : ''}
       ${poseRowFor(l) ? drawOrderBlock(l) : ''}
-      ${pb0 && pb0.type === 'bone' ? `<label class="check sub-check"><input type="checkbox" data-flag="inh" id="fl-inh" ${l.inh ? 'checked' : ''}><span>Inherit scale<span class="bsub">Off: this bone follows the parent’s tip without being stretched by its scale.</span></span></label>` : ''}
+      ${pb0 && pb0.type === 'bone' ? `<label class="check sub-check"><input type="checkbox" data-flag="inh" id="fl-inh" ${l.inh ? 'checked' : ''}><span>Inherit scale${infoTip('Off: this bone follows the parent’s tip without being stretched by its scale.', 'Inherit scale')}</span></label>` : ''}
       ${l.lim ? nrow('Range', `<label class="nf"><span>min</span><input id="bl-min" data-bl="lmin" inputmode="decimal" value="${fmt(l.lmin != null ? l.lmin : -90)}"><em>°</em></label><label class="nf"><span>max</span><input id="bl-max" data-bl="lmax" inputmode="decimal" value="${fmt(l.lmax != null ? l.lmax : 90)}"><em>°</em></label>`) : ''}
       <div class="btns"><button class="btn" data-act="childbone">Add child bone</button></div></section>`;
   }
@@ -869,6 +895,7 @@ export function init(): void {
       ed.end({ insp: true });
       return;
     }
+    if (t.id === 'lk-url' || t.id === 'lk-target') return setLink(l);
     if (t.id === 'attachBone') {
       if (t.value) moveLayers([l.id], layerById(t.value), 'into');
       else moveLayers([l.id], null, 'root');
@@ -908,7 +935,12 @@ export function init(): void {
     const al = (e.target as any).closest('[data-align]');
     if (al) return align(al.dataset.align);
     const bo = (e.target as any).closest('[data-bool]');
-    if (bo) return void booleanOp(bo.dataset.bool);
+    if (bo) return void (bo.getAttribute('aria-disabled') === 'true' ? 0 : booleanOp(bo.dataset.bool));
+    const xf = (e.target as any).closest('[data-xf]');
+    if (xf) {
+      const k = xf.dataset.xf;
+      return void (k === 'fliph' || k === 'flipv' ? flip(k === 'fliph' ? 0 : 1) : rotate(k === 'rotr' ? 90 : -90));
+    }
     const tx = (e.target as any).closest('[data-tx]');
     if (tx && l) return isMulti() ? multiEdit(t2 => propsToggle(tx, t2)) : propsToggle(tx, l);
     const an = (e.target as any).closest('[data-anchor]');
