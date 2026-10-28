@@ -450,7 +450,7 @@
                 >
                   <path d="M2.5 6.5h13v11h-13zM15.5 10.5l6-3.5v10l-6-3.5"></path></svg
                 >Video</button
-              ><button role="tab" data-v="anim" hidden>
+              ><button role="tab" data-v="anim">
                 <svg
                   width="15"
                   height="15"
@@ -1020,13 +1020,216 @@
               </p>
             </section>
           </div>
+          <div class="xopts" id="xOptsAnim" hidden>
+            <section class="sec" id="xaSecFmt">
+              <h3>Format<small id="xaSumFmt"></small></h3>
+              <div class="row" id="xaFmtRow">
+                <span class="rl">File</span>
+                <div class="segc" id="xaFmt" role="radiogroup" aria-label="Animated image format">
+                  <button role="radio" data-v="gif">GIF</button
+                  ><button role="radio" data-v="webp">Animated WebP</button>
+                </div>
+              </div>
+              <p class="note xind" id="xaFmtNote"></p>
+            </section>
+            <section class="sec" id="xaSecFrames">
+              <h3>Frames<small id="xaFramesSum"></small></h3>
+              <div class="row" id="xaPartRow">
+                <span class="rl">Part</span>
+                <div class="segc" id="xaPart" role="radiogroup" aria-label="Which part">
+                  <button role="radio" data-v="whole">Whole animation</button
+                  ><button role="radio" data-v="part">Part of it</button>
+                </div>
+              </div>
+              <div class="row" id="xaFromRow" hidden>
+                <span class="rl">From – to</span>
+                <div class="xpair">
+                  <label class="nf"><input id="xaFrom" spellcheck="false" aria-label="From" /></label
+                  ><label class="nf"><input id="xaTo" spellcheck="false" aria-label="To" /></label>
+                </div>
+              </div>
+              <div class="row">
+                <span class="rl">Frame rate</span
+                ><select class="sel" id="xaFps" aria-label="Frame rate">
+                  <option value="10">10 fps (smallest)</option>
+                  <option value="12">12 fps</option>
+                  <option value="15">15 fps</option>
+                  <option value="20">20 fps</option>
+                  <option value="25">25 fps</option>
+                  <option value="30">30 fps</option>
+                  <option value="50">50 fps (smoothest)</option>
+                </select>
+              </div>
+              <div class="row">
+                <span class="rl">Repeat</span
+                ><select class="sel" id="xaLoops" aria-label="Repeat">
+                  <option value="0">Loop forever</option>
+                  <option value="1">Play once</option>
+                  <option value="2">2 times</option>
+                  <option value="3">3 times</option>
+                </select>
+              </div>
+              <label
+                class="check"
+                title="Frames identical to the one before are merged: the earlier one is shown longer"
+                ><input type="checkbox" id="xaMerge" /> Merge frames that don’t change</label
+              >
+            </section>
+            <section class="sec" id="xaSecSize">
+              <h3>Size<small id="xaSumSize"></small></h3>
+              <div class="row" id="xaScaleRow">
+                <span class="rl">Scale</span>
+                <div class="segc" id="xaScale" role="radiogroup" aria-label="Scale">
+                  <button role="radio" data-v="50">50%</button><button role="radio" data-v="75">75%</button
+                  ><button role="radio" data-v="100">100%</button><button role="radio" data-v="200">2×</button>
+                </div>
+              </div>
+              <div class="row">
+                <span class="rl">Pixels</span>
+                <div class="xpair">
+                  <label class="nf"><span>W</span><input id="xaW" readonly aria-label="Width" /></label
+                  ><label class="nf"><span>H</span><input id="xaH" readonly aria-label="Height" /></label>
+                </div>
+              </div>
+            </section>
+            <section class="sec" id="xaSecGif">
+              <h3>Compression<small id="xaSumGif"></small></h3>
+              <div class="row" id="xaColRow">
+                <span class="rl">Colours</span>
+                <div class="rf">
+                  <input type="range" id="xaCol" min="2" max="256" step="1" aria-label="Number of colours" /><span
+                    class="chip"
+                    id="xaColv"
+                  ></span>
+                </div>
+              </div>
+              <div
+                class="row"
+                id="xaPalRow"
+                title="One palette for every frame is smaller; one per frame keeps colours truer when scenes change"
+              >
+                <span class="rl">Palette</span>
+                <div class="segc" id="xaPal" role="radiogroup" aria-label="Palette">
+                  <button role="radio" data-v="one">One for all</button
+                  ><button role="radio" data-v="per">Per frame</button>
+                </div>
+              </div>
+              <div class="row" id="xaPickRow" title="Best takes longer to find the palette that fits the artwork">
+                <span class="rl">Pick colours</span>
+                <div class="segc" id="xaPick" role="radiogroup" aria-label="Palette quality">
+                  <button role="radio" data-v="fast">Faster</button><button role="radio" data-v="best">Best</button>
+                </div>
+              </div>
+              <div
+                class="row"
+                id="xaKeepRow"
+                title="These colours always get a palette slot, so they stay exact: brand colours, text, logos"
+              >
+                <span class="rl">Keep exact</span>
+                <div class="xkeeps" id="xaKeep"></div>
+              </div>
+              <div
+                class="row"
+                id="xaDitherRow"
+                title="Mixes the available colours in fine dots so gradients don’t band"
+              >
+                <span class="rl">Dithering</span>
+                <div class="segc" id="xaDither" role="radiogroup" aria-label="Dithering">
+                  <button role="radio" data-v="none">None</button><button role="radio" data-v="diff">Diffusion</button
+                  ><button role="radio" data-v="pat">Pattern</button><button role="radio" data-v="noise">Noise</button>
+                </div>
+              </div>
+              <div class="row" id="xaStrRow">
+                <span class="rl">Strength</span>
+                <div class="rf">
+                  <input type="range" id="xaStr" min="0" max="100" step="1" aria-label="Dithering strength" /><span
+                    class="chip"
+                    id="xaStrv"
+                  ></span>
+                </div>
+              </div>
+              <div
+                class="row"
+                id="xaNrRow"
+                title="Smooths grain and speckles (photos, blurs, glows) before the colours are picked: cleaner and smaller. Crisp vector art has little to smooth."
+              >
+                <span class="rl">Noise reduction</span>
+                <div class="rf">
+                  <input type="range" id="xaNr" min="0" max="100" step="5" aria-label="Noise reduction" /><span
+                    class="chip"
+                    id="xaNrv"
+                  ></span>
+                </div>
+              </div>
+              <div class="row" id="xaLossyRow" title="Allows small errors in exchange for a smaller file">
+                <span class="rl">Lossy</span>
+                <div class="rf">
+                  <input type="range" id="xaLossy" min="0" max="200" step="5" aria-label="Lossy compression" /><span
+                    class="chip"
+                    id="xaLossyv"
+                  ></span>
+                </div>
+              </div>
+              <label
+                class="check"
+                id="xaChangedRow"
+                title="Each frame stores only what changed since the last one; the rest is transparent"
+                ><input type="checkbox" id="xaChanged" /> Store only the pixels that change</label
+              >
+              <div
+                class="row"
+                id="xaTolRow"
+                title="Changes smaller than this count as unchanged, so they aren’t stored again"
+              >
+                <span class="rl">Tolerance</span>
+                <div class="rf">
+                  <input type="range" id="xaTol" min="0" max="20" step="1" aria-label="Change tolerance" /><span
+                    class="chip"
+                    id="xaTolv"
+                  ></span>
+                </div>
+              </div>
+              <label class="check"><input type="checkbox" id="xaAlpha" /> Transparent background</label>
+              <div class="row" id="xaMatteRow" hidden>
+                <span class="rl">Edge colour</span>
+                <label class="nf xcol"
+                  ><input type="color" id="xaMattePick" aria-label="Pick the edge colour" /><input
+                    id="xaMatte"
+                    spellcheck="false"
+                    aria-label="Edge colour"
+                /></label>
+              </div>
+              <p class="note xind" id="xaMatteNote" hidden>
+                GIF pixels are either fully transparent or solid, so soft edges are blended with this colour. Pick the
+                page’s background.
+              </p>
+            </section>
+            <section class="sec" id="xaSecWebp" hidden>
+              <h3>Compression<small id="xaSumWebp"></small></h3>
+              <div class="row" id="xaWqRow">
+                <span class="rl">Quality</span>
+                <div class="rf">
+                  <input type="range" id="xaWq" min="1" max="100" step="1" aria-label="Quality" /><span
+                    class="chip"
+                    id="xaWqv"
+                  ></span>
+                </div>
+              </div>
+              <label class="check"><input type="checkbox" id="xaWll" /> Lossless</label>
+              <label class="check" title="Each frame stores only what changed since the last one"
+                ><input type="checkbox" id="xaWchanged" /> Store only the pixels that change</label
+              >
+              <label class="check"><input type="checkbox" id="xaWalpha" /> Transparent background</label>
+            </section>
+          </div>
           <div class="xside">
             <div class="xtop">
               <div class="segc" id="xTab" role="tablist" aria-label="Preview or embed code">
                 <button data-v="preview" class="on">Preview</button><button data-v="embed">Embed in your site</button>
               </div>
               <div class="segc" id="xPrevZoom">
-                <button data-v="fit">Fit</button><button data-v="actual">Actual size</button>
+                <button data-v="fit">Fit</button><button data-v="actual">Actual size</button
+                ><button data-v="200" hidden>200%</button>
               </div>
             </div>
             <div id="xPanePrev" class="xpane">
@@ -1076,6 +1279,64 @@
                   </div>
                 </div>
                 <div class="stats" id="xvStats"></div>
+              </div>
+              <div class="xpart" id="xaPrev" hidden>
+                <div class="xa-banner">
+                  <b id="xaSize">…</b
+                  ><span
+                    id="xaSaving"
+                    title="Compared with the same frames as a plain GIF: 256 colours, full dithering, every frame stored whole"
+                  ></span
+                  ><span class="sp"></span><span id="xaUpd"></span>
+                </div>
+                <div class="xa-box" id="xaBox">
+                  <canvas class="xa-orig" id="xaOrig" aria-label="The original frame"></canvas>
+                  <div class="xa-clip">
+                    <canvas class="xa-comp" id="xaComp" aria-label="The same frame, compressed"></canvas>
+                  </div>
+                  <img class="xa-play" id="xaPlayImg" alt="The exported file, playing" hidden />
+                  <span class="xa-div" aria-hidden="true"></span
+                  ><span class="xa-knob" aria-hidden="true"
+                    ><svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      stroke="#161a25"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 4L2 7l3 3M9 4l3 3-3 3"></path></svg
+                  ></span>
+                  <span class="xa-tag l">Original</span><span class="xa-tag r" id="xaCompLbl"></span>
+                  <input
+                    type="range"
+                    id="xaSplit"
+                    min="2"
+                    max="98"
+                    value="50"
+                    aria-label="Compare: drag to move the divider"
+                  />
+                </div>
+                <div class="xph">
+                  <div class="xph-head">
+                    <button class="xv-play" id="xaPlay" aria-label="Play the file">
+                      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                        <path class="pl" d="M2.5 1.5l6 3.5-6 3.5z" fill="currentColor"></path>
+                        <path class="pa" d="M2 1.5h2.2v7H2zM5.8 1.5H8v7H5.8z" fill="currentColor"></path>
+                      </svg></button
+                    ><b>Playhead</b><span class="xph-t" id="xaT"></span><span class="xph-of" id="xaOf"></span
+                    ><span class="sp"></span><span class="xph-of">each tick is a frame</span>
+                  </div>
+                  <div class="xph-track">
+                    <span class="xph-band" id="xaSpan"></span><span class="xa-ticks" id="xaTicks"></span
+                    ><span class="xph-ruler" id="xaRuler"></span><span class="xph-line" id="xaLine"></span
+                    ><span class="xph-flag" id="xaFlag"></span
+                    ><input type="range" id="xaScrub" min="0" max="1" step="0.01" aria-label="Playhead" />
+                  </div>
+                </div>
               </div>
               <div class="xpart" id="xSvgPrev">
                 <div id="xprev"></div>
@@ -1158,6 +1419,32 @@
                     >
                       <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg
                     ><span>Export the set (.zip)</span>
+                  </button>
+                </div>
+              </div>
+              <div class="xpart" id="xaEmbed" hidden>
+                <p class="note" id="xaEmbNote"></p>
+                <textarea class="code" id="xaSnip" readonly spellcheck="false" aria-label="Embed code"></textarea>
+                <label class="check"
+                  ><input type="checkbox" id="xaFb" /><span class="xgrow" id="xaFbT"></span
+                  ><span class="xkb" id="xaFbKb"></span
+                ></label>
+                <div class="btns">
+                  <button class="btn" id="xaSnipCopy">Copy snippet</button
+                  ><button class="btn pri" id="xaSet">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg
+                    ><span id="xaSetT">Download the set (.zip)</span>
                   </button>
                 </div>
               </div>

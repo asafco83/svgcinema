@@ -8761,3 +8761,194 @@ button.ag-chip:hover {
   font-size: 12px;
   color: var(--muted);
 }
+
+/* ---------- Export › GIF & Animated WebP (matched to the mockup) ---------- */
+#xOptsAnim .rf input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+#xOptsAnim .rf .chip {
+  min-width: 30px;
+  text-align: center;
+}
+#xaDither button {
+  padding: 0 4px;
+}
+.xkeeps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+.xkeep {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 6px 0 5px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--fg);
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.xkeep span {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.xkeep.on {
+  background: var(--raised);
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+.xa-banner {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: var(--panel-2);
+}
+.xa-banner b {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.xa-banner span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.xa-banner .sp {
+  flex: 1;
+}
+.xa-banner #xaUpd {
+  font-size: 11.5px;
+}
+.xa-box {
+  --split: 50%;
+  position: relative;
+  height: 300px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--panel-2);
+}
+.xa-box canvas,
+.xa-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+}
+.xa-box[data-zoom='200'] canvas,
+.xa-box[data-zoom='200'] .xa-play {
+  image-rendering: pixelated;
+}
+.xa-box.alpha canvas,
+.xa-box.alpha .xa-play {
+  background-color: var(--panel-2);
+  background-image: conic-gradient(var(--check) 25%, transparent 0 50%, var(--check) 0 75%, transparent 0);
+  background-size: 16px 16px;
+}
+.xa-clip {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 0 var(--split));
+}
+.xa-box.busy .xa-comp {
+  opacity: 0.6;
+}
+.xa-div {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--split);
+  width: 2px;
+  margin-left: -1px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+.xa-knob {
+  position: absolute;
+  top: 50%;
+  left: var(--split);
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+}
+.xa-tag {
+  position: absolute;
+  top: 10px;
+  height: 22px;
+  line-height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: rgba(12, 16, 28, 0.72);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.xa-tag.l {
+  left: 10px;
+}
+.xa-tag.r {
+  right: 10px;
+}
+#xaSplit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+}
+/* playing the file: the comparison steps aside */
+.xa-box.playing :is(canvas, .xa-clip, .xa-div, .xa-knob, .xa-tag, #xaSplit) {
+  display: none;
+}
+.xph-band {
+  position: absolute;
+  top: 22px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+}
+.xa-ticks span {
+  position: absolute;
+  top: 24px;
+  width: 1px;
+  height: 10px;
+  background: var(--line-2);
+}
+.xa-ticks span.in {
+  background: var(--fg);
+}
+#xaSnip {
+  height: 240px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+#xaEmbed .btns {
+  justify-content: flex-end;
+  gap: 8px;
+}
+#xaEmbed .btns .btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12.5px;
+}
