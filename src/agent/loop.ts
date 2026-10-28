@@ -2,7 +2,7 @@
 // Runs one request: send the conversation and tools to the model, run the tool calls it makes one by
 // one, send the results back, and repeat until it answers without tools, the step cap is reached,
 // the user presses Stop, or the provider fails. However it ends, the request is one undo step.
-import type { AgentError, Client, ModelReply, Msg } from './clients/types';
+import type { AgentError, Client, ModelReply, Msg, Part } from './clients/types';
 import { AgentError as Err } from './clients/types';
 import { systemPrompt, userTurn } from './prompt';
 import { type AgentRequest, beginRequest, endRequest } from './request';
@@ -46,6 +46,8 @@ export interface RunOptions {
   end?: (r: AgentRequest) => boolean;
   /** how the user's message is built (default: with the scene attached) */
   turn?: (text: string) => string;
+  /** pictures sent with the user's message (attached files, for a model that can see) */
+  images?: Part[];
 }
 
 export interface RunResult {
@@ -94,7 +96,8 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
     error: AgentError | undefined,
     reply = '',
     left: string[] | undefined;
-  push({ role: 'user', content: (o.turn || userTurn)(o.text) });
+  const said = (o.turn || userTurn)(o.text);
+  push({ role: 'user', content: o.images && o.images.length ? [{ type: 'text', text: said }, ...o.images] : said });
   try {
     for (;;) {
       if (o.signal && o.signal.aborted) {
@@ -175,14 +178,24 @@ export async function runAgent(o: RunOptions): Promise<RunResult> {
  * attachments dropped (a fresh one rides with every request) and long tool results shortened.
  */
 export function compactHistory(msgs: Msg[], turns = 10): Msg[] {
-  const starts = msgs.map((m, i) => (m.role === 'user' && typeof m.content === 'string' ? i : -1)).filter(i => i >= 0);
+  const starts = msgs.map((m, i) => (m.role === 'user' ? i : -1)).filter(i => i >= 0);
   // a turn starts at a user message that isn't a tool result; keep whole turns only
   const from = starts.length > turns ? starts[starts.length - turns] : 0;
   return msgs.slice(from).map((m): Msg => {
     if (m.role === 'user') {
-      const c = m.content;
-      if (typeof c === 'string') return { ...m, content: c.replace(/\n*<project note=[\s\S]*?<\/project>\s*$/, '') };
-      return { ...m, content: c.filter(p => p.type === 'text') };
+      // the scene rode with that request only; so did attached pictures (their names and ids stay)
+      const lean = (t: string) => t.replace(/\n*<project note=[\s\S]*?<\/project>\s*$/, ''),
+        c = m.content;
+      if (typeof c === 'string') return { ...m, content: lean(c) };
+      return {
+        ...m,
+        content: lean(
+          c
+            .filter(p => p.type === 'text')
+            .map(p => (p as { text: string }).text)
+            .join('\n\n'),
+        ),
+      };
     }
     // big arguments (an SVG the model wrote) don't need sending again
     if (m.role === 'assistant' && m.calls.some(c => JSON.stringify(c.args || {}).length > 2000))
