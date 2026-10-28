@@ -107,7 +107,7 @@ async def main():
         check('no Inherit scale on a root bone', await ev("!document.getElementById('fl-inh')"))
         await ev(f"hi.select('{ID['Stem 3']}')"); await pg.wait_for_timeout(100)
         check('Inherit scale on a child bone, off by default', await ev("!!document.getElementById('fl-inh') && !document.getElementById('fl-inh').checked"))
-        check('W/H note in Transforms for bones', await ev("/W along the bone/.test(document.querySelector('.bnote')?.textContent||'')"))
+        check('W/H note in Transforms for bones (the Scale label’s tooltip)', await ev("[...document.querySelectorAll('#insp .rl')].some(r=>r.textContent.trim()==='Scale' && /W along the bone/.test((r.querySelector('.itip')||{}).title||''))"))
         await pg.screenshot(path=OUT+'bone-inspector.png', clip={'x':1144,'y':52,'width':296,'height':760})
         await pg.click('#fl-inh'); await pg.wait_for_timeout(150)
         check('Inherit scale turns on', await ev(f"{L('Stem 3')}.inh===true"))

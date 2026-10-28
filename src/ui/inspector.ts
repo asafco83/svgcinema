@@ -217,7 +217,7 @@ function typeSection(l: Layer) {
       <label class="check"><input type="checkbox" data-flag="lim" id="fl-lim" ${l.lim ? 'checked' : ''}> Limit rotation</label>
       ${poseRowFor(l) ? `<label class="check sub-check"><input type="checkbox" data-flag="kr" id="fl-kr" ${l.kr !== false ? 'checked' : ''}><span>Key whole rig${infoTip('Moving any bone of this rig keys every bone, so each pose is stored whole. Turn off for overlapping action.', 'Key whole rig')}</span></label>` : ''}
       ${poseRowFor(l) ? drawOrderBlock(l) : ''}
-      ${pb0 && pb0.type === 'bone' ? `<label class="check sub-check"><input type="checkbox" data-flag="inh" id="fl-inh" ${l.inh ? 'checked' : ''}><span>Inherit scale<span class="bsub">Off: this bone follows the parent’s tip without being stretched by its scale.</span></span></label>` : ''}
+      ${pb0 && pb0.type === 'bone' ? `<label class="check sub-check"><input type="checkbox" data-flag="inh" id="fl-inh" ${l.inh ? 'checked' : ''}><span>Inherit scale${infoTip('Off: this bone follows the parent’s tip without being stretched by its scale.', 'Inherit scale')}</span></label>` : ''}
       ${l.lim ? nrow('Range', `<label class="nf"><span>min</span><input id="bl-min" data-bl="lmin" inputmode="decimal" value="${fmt(l.lmin != null ? l.lmin : -90)}"><em>°</em></label><label class="nf"><span>max</span><input id="bl-max" data-bl="lmax" inputmode="decimal" value="${fmt(l.lmax != null ? l.lmax : 90)}"><em>°</em></label>`) : ''}
       <div class="btns"><button class="btn" data-act="childbone">Add child bone</button></div></section>`;
   }
