@@ -36,6 +36,20 @@ async def main():
         r=await vals('rot')
         check('the rotate handle turns them all by the same angle', abs(r[0])>10 and abs(r[0]-r[1])<1e-6, r)
         await ev("hi.undo()")
+        # dragging one of the selected layers moves them all (the selection stays)
+        await ev(f"(hi.select({json.dumps(sun)}), hi.select({json.dumps(title)},'toggle'))"); await pg.wait_for_timeout(150)
+        p0=await vals('pos'); u1=await ev("st.S.undo.length")
+        r=await ev(f"(()=>{{const b=document.getElementById('e-'+{json.dumps(sun)}+'-s').getBoundingClientRect();return [b.left+b.width*0.3,b.top+b.height*0.3]}})()")
+        await pg.mouse.move(*r); await pg.mouse.down(); await pg.mouse.move(r[0]+60,r[1]+40,steps=6); await pg.mouse.up(); await pg.wait_for_timeout(100)
+        p1=await vals('pos')
+        d=[(p1[i][0]-p0[i][0],p1[i][1]-p0[i][1]) for i in range(2)]
+        check('dragging a selected layer moves every selected layer the same', abs(d[0][0]-d[1][0])<0.6 and abs(d[0][1]-d[1][1])<0.6 and abs(d[0][0])>10, (p0,p1))
+        check('…keeps them all selected, as one undo step', await ev("st.S.selSet.size")==2 and await ev("st.S.undo.length")==u1+1)
+        await ev("hi.undo()")
+        await ev(f"(hi.select({json.dumps(sun)}), hi.select({json.dumps(title)},'toggle'))"); await pg.wait_for_timeout(150)
+        hit=await ev(f"(()=>{{const e=document.elementFromPoint({r[0]},{r[1]});const g=e&&e.closest('[id^=e-]');return g?g.id.replace(/^e-|-s$/g,''):''}})()")
+        await pg.mouse.click(*r); await pg.wait_for_timeout(150)
+        check('a click (no drag) on another layer inside the box picks that layer (its outermost group, as a canvas click does)', hit not in (sun,title) and await ev("st.S.selSet.size")==1 and await ev(f"(()=>{{let x=st.doc.layers.find(l=>l.id==={json.dumps(hit)});while(x){{if(x.id===st.S.sel)return true;x=x.parent&&st.doc.layers.find(l=>l.id===x.parent)}}return false}})()"), (hit, await ev("st.S.sel")))
 
         # 2. Ctrl / Shift in the timeline
         await ev(f"hi.select({json.dumps(sun)})"); await pg.wait_for_timeout(100)

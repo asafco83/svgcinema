@@ -6,7 +6,9 @@
 // playhead, as with one layer. The whole drag is one undo step.
 import type { Layer, XY } from '../model/types';
 import { H, byId, clone, r2, r3, valueAt, xfp } from '../core/constants';
-import { beginEdit, setProp } from '../core/history';
+import { beginEdit, commit, setProp } from '../core/history';
+import { copyLayer } from '../ui/layers-panel';
+import { clearSnap, selfAndKids, snapMove, snapTargets } from './snap';
 import { S } from '../core/state';
 import { isLocked, parentMatrix, selectedRoots } from '../model/tree';
 import { boxOf } from '../render/overlay';
@@ -146,4 +148,60 @@ export function groupHandleDrag(kind: string, p0: XY) {
       ed.end({ insp: true });
     },
   };
+}
+
+/** Drag one of the selected layers (or inside the selection's box): every selected layer moves with it,
+ *  snapping the box around them all against the rest (Ctrl/Cmd: no snapping; Shift: one direction).
+ *  Alt drags copies of them all, leaving the originals. One undo step. */
+export function groupMoveDrag(p0: XY, e0: PointerEvent, onClick?: () => void) {
+  const ed = beginEdit();
+  let ls = groupTargets();
+  if (e0.altKey) {
+    const copies = ls.map(l => copyLayer(l, false));
+    S.selSet = new Set(copies.map(c => c.id));
+    S.sel = copies[copies.length - 1].id;
+    commit({ insp: true });
+    ls = groupTargets();
+  }
+  if (!ls.length) return ed.end();
+  const ex = new Set<string>();
+  ls.forEach(l => selfAndKids(l).forEach(id => ex.add(id)));
+  const T = snapTargets(ex),
+    B = groupBox(ls),
+    st = ls.map(l => ({ l, pos: clone(valueAt(l, 'pos', S.time) || [0, 0]), PMi: parentMatrix(l).inverse() }));
+  let moved = false;
+  S.drag = {
+    move(p: XY, e: PointerEvent) {
+      let dx = p.x - p0.x,
+        dy = p.y - p0.y;
+      if (!moved && Math.hypot(dx, dy) * S.scale < 3) return;
+      moved = true;
+      if (e.shiftKey) {
+        if (Math.abs(dx) > Math.abs(dy)) dy = 0;
+        else dx = 0;
+      }
+      if (B && !e.ctrlKey && !e.metaKey) {
+        const [sx, sy] = snapMove(B, dx, dy, T);
+        dx = e.shiftKey && dx === 0 ? 0 : sx;
+        dy = e.shiftKey && dy === 0 ? 0 : sy;
+      } else clearSnap();
+      st.forEach(s => {
+        const a = xfp(s.PMi, 0, 0),
+          b = xfp(s.PMi, dx, dy);
+        setProp(s.l, 'pos', [r2(s.pos[0] + b.x - a.x), r2(s.pos[1] + b.y - a.y)]);
+      });
+      frame();
+    },
+    up() {
+      clearSnap();
+      ed.end({ insp: true });
+      // a press on another layer inside the box that didn't move: it picks that layer instead
+      if (!moved && onClick) onClick();
+    },
+  };
+}
+/** Is the point inside the box around the selected layers? */
+export function insideGroupBox(p: XY) {
+  const B = groupBox();
+  return !!B && p.x >= B.x && p.x <= B.x + B.w && p.y >= B.y && p.y <= B.y + B.h;
 }
