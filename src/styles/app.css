@@ -7939,7 +7939,7 @@ button.ag-chip:hover {
 }
 .ezpn-r .ezed {
   width: 160px;
-  height: 176px;
+  height: 224px;
   border: 0;
   border-radius: 7px;
 }
@@ -7971,4 +7971,8 @@ button.ag-chip:hover {
 .tl-len > span {
   cursor: ew-resize;
   padding: 4px 2px;
+}
+
+.ezed .none {
+  display: none;
 }

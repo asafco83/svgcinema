@@ -10,7 +10,7 @@ import { beginEdit, deleteKeys } from '../core/history';
 import { S, doc, sortTrack } from '../core/state';
 import { frame } from '../render/stage';
 import { toast } from '../io/open';
-import { EZXi, EZYi, applyEase, bezOf, drawEz, easeFam, famName, keyPanel, sameEase } from './easing';
+import { EZR, EZXi, EZYi, applyEase, bezOf, drawEz, easeFam, famName, keyPanel, sameEase } from './easing';
 import { INSPECTOR_EVENT } from './inspector';
 
 const ICON =
@@ -123,10 +123,12 @@ function onPointerDown(e: PointerEvent) {
     k0 = [...S.keys][0],
     base = (bezOf(k0[2]) || [0.25, 0.1, 0.25, 1]).slice(),
     ed = beginEdit();
+  EZR.lock = true;
   const move = (ev: PointerEvent) => {
     const p = xfp(svg.getScreenCTM().inverse(), ev.clientX, ev.clientY);
     base[idx * 2] = r2(clamp(EZXi(p.x), 0, 1));
-    base[idx * 2 + 1] = r2(clamp(EZYi(p.y), -0.5, 1.5));
+    // the view holds still while dragging: the handle stays inside it (it refits on release)
+    base[idx * 2 + 1] = r2(clamp(EZYi(p.y), EZR.lo, EZR.hi));
     S.keys.forEach(k => (k[2] = base.slice() as Ease));
     drawEz();
     frame();
@@ -134,6 +136,7 @@ function onPointerDown(e: PointerEvent) {
   const up = () => {
     removeEventListener('pointermove', move);
     removeEventListener('pointerup', up);
+    EZR.lock = false;
     ed.end({ insp: true });
   };
   addEventListener('pointermove', move);
