@@ -30,7 +30,7 @@ async def main():
         SHARED=['Transforms','Pins','Motion path','Text appearance','Fill & stroke','Appearance','Filters','Morph','Rig']
 
         await pick('Sky'); t=await titles()
-        check('rectangle: Rectangle first, Morph after Filters, Rig last', order_ok(t,'Rectangle',SHARED) and 'Morph' in t and t[-1]=='Rig', t)
+        check('rectangle: Rectangle first, Morph after Filters, Rig then Hyperlink last', order_ok(t,'Rectangle',SHARED) and 'Morph' in t and t[-2:]==['Rig','Hyperlink'], t)
         check('rectangle: Size in its own section, not in Morph', await inSec('Rectangle','[data-f="sz:0"]') and not await inSec('Morph','[data-f^="sz"]'))
         check('rectangle: Morph says it becomes a path (in its title tooltip)', await ev("[...document.querySelectorAll('#insp .sec > h3 .itip')].some(t=>t.title.includes('turns this rectangle into a plain path'))"))
         check('no "Path & morph" title any more', 'Path & morph' not in t)
