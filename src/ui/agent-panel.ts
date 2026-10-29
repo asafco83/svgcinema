@@ -29,6 +29,7 @@ import {
   stopSession,
 } from '../agent/assist';
 import { makeZip } from '../io/zip';
+import { SKILL_MD } from '../agent/skill';
 import {
   CHAT,
   CHAT_FILE,
@@ -1610,22 +1611,6 @@ async function copyStarter() {
     toast('Couldn’t copy here: select the message and copy it.');
   }
 }
-/** The Claude skill: a folder with SKILL.md that points Claude at window.svgcinema. */
-export const SKILL_MD = `---
-name: svgcinema
-description: Make, edit and animate artwork in SVGcinema (an animated SVG editor open in a browser tab) through its window.svgcinema tools. Use when the user asks for drawing or animation in SVGcinema, or in an svgcinema tab.
----
-
-# SVGcinema
-
-SVGcinema runs in the user's browser tab and has a JavaScript API for assistants: \`window.svgcinema\`.
-
-1. In the SVGcinema tab, run \`window.svgcinema.help()\` with your page-script tool and read all of it: it explains how to work, the rules and every tool, and it follows the user's current settings (for example how to handle images).
-2. Follow it: \`svgcinema.start({ task, assistant })\`, then \`await svgcinema.call(name, args)\` (or \`svgcinema.batch([...])\`), then \`svgcinema.done(summary)\`. Everything between start and done is one undo step for the user.
-3. Look at your work with a screenshot of the tab, and fix what looks wrong.
-
-If \`window.svgcinema\` is missing, the tab isn't SVGcinema (or it is still loading): ask the user to open their project at https://asafco83.github.io/svgcinema/.
-`;
 async function downloadSkill() {
   const blob = await makeZip([{ name: 'svgcinema/SKILL.md', data: new TextEncoder().encode(SKILL_MD) }]);
   const a = document.createElement('a');
@@ -2172,3 +2157,5 @@ export function init(): void {
   }
   if (BUSY.on) setBusy(false);
 }
+
+export { SKILL_MD };

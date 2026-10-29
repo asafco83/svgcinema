@@ -117,7 +117,7 @@ src/
   app/boot.ts            Startup: restore the last project, assets and file handle
 
 tests/                   Vitest: runtime player and easing, zip container, path geometry, export output
-site/                    The landing page (one self-contained index.html), see site/README.md
+site/                    The website (home, features, design agent, import, export, downloads, licence), see site/README.md
 ```
 
 ## How the pieces fit
@@ -341,7 +341,7 @@ Click **Agent** in the top bar (Alt A) to open a chat docked on the right. Descr
 
 Use the AI assistant you already pay for, such as Claude in Chrome or any assistant that can run scripts on web pages, to edit the open project with its own subscription. You chat with it in its own window; the Agent panel shows what it does.
 
-- **How to connect:** the panel lists the steps: open your assistant in the SVGcinema tab, and start with the message it gives (**Copy**): “Edit my animation in this tab with SVGcinema’s tools: run window.svgcinema.help() and follow it. Then: …”. With Claude, **Download the skill** once (a `svgcinema` skill folder to add in Claude's settings) and just ask.
+- **How to connect:** the panel lists the steps: open your assistant in the SVGcinema tab, and start with the message it gives (**Copy**): “Edit my animation in this tab with SVGcinema’s tools: run window.svgcinema.help() and follow it. Then: …”. With Claude, **Download the skill** once (a `svgcinema` skill folder to add in Claude's settings) and just ask. The same `svgcinema-skill.zip` is in the site's `downloads/` folder (written by `npm run build` from `src/agent/skill.ts`), for the website's Downloads page.
 - **`window.svgcinema`** is the editing API for assistants: `help()` (a plain-text guide: how to work, the rules and every tool with its arguments, following your current settings), `tools(name?)`, `start({ task, assistant })`, `await call(tool, args)`, `await batch([{ name, args }, …])` and `done(summary)`. The tools are the design agent's own (shapes, SVG artwork, layers, presets, keyframes, shape morphing, project settings); a refusal comes back as `{ error }` with the reason. **Guide for AI assistants** (in Settings, and on the connect screen) opens the same guide, for assistants that read it from a page.
 - **In the panel:** the assistant's name and its steps as it works (“Working · 4 steps so far · one undo step”), **Stop** (what it did is kept; its next call is refused until it starts again) and **Undo**. Editing is paused while it works, so everything from `start()` to `done()` (or Stop, or 90 seconds without a call) is **one undo step**. Earlier sessions fold to one line. Deleting layers asks you in the panel (Settings › Ask first).
 - **Images** (Settings, or the menu on the connect screen): **Your assistant’s own** (the default): it makes the picture with its own tools and hands it over as data or a web address (`add_image`); if it can't hand it over, the panel shows a **drop card**: save the image from the assistant's chat and drop it in, paste it (Ctrl V) or choose the file, or **Draw vector instead**; if it can't make pictures it draws vector shapes. **Your image key**: the image model of the API key settings, with your credit, asking first with the price; it can only be picked once an image model is set up there (until then it is greyed out, with **Set one up in API key ›**; once set up it shows the service, model and price, with **Change ›**). **Vector shapes only**: no pictures.
@@ -497,7 +497,7 @@ One-time setup: **Settings → Pages → Build and deployment → Source: GitHub
 
 The site is served at `https://<user>.github.io/<repo>/`. The Vite `base: './'` setting makes asset paths relative, so no extra configuration is needed.
 
-**Landing page:** `site/` holds the SVGcinema website that introduces the editor and links into it. `node site/build.mjs` builds `site/index.html`, which expects the editor in an `editor/` folder beside it; `npm run build:deploy` puts the two together in `deploy/` for any static host, and `npm run build:zip` makes the whole site (thumbnail installers included) as `svgcinema-site.zip`. The Pages workflow does not publish it yet. See [`site/README.md`](site/README.md).
+**Website:** `site/` holds the SVGcinema website that introduces the editor and links into it: a short home page (the live hero, the workflow, the design agent, highlights, export) and a page each for Features, Design agent, Import, Export, Downloads and the Licence, with captures of the real editor in light and dark. `node site/build.mjs` builds the pages (`site/index.html`, `site/features/index.html`, …), which expect the editor in an `editor/` folder beside the home page; `npm run build:deploy` puts them together in `deploy/` for any static host, and `npm run build:zip` makes the whole site (thumbnail installers, player and Claude skill included) as `svgcinema-site.zip`. The Pages workflow does not publish it yet. See [`site/README.md`](site/README.md).
 
 ## Toward a desktop app (Tauri)
 

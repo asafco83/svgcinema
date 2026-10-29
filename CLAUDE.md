@@ -10,7 +10,7 @@ pure CSS). Live site: https://asafco83.github.io/svgcinema/ (GitHub Pages, deplo
 hosting zip (`npm run build:deploy`, `site/bundle.mjs`) must never include any `*.map`: they would expose the full source.
 **Site zip:** whenever the owner asks for the zip / site zip, give the **full** one, built from an up-to-date `master`
 with `npm run build:zip` (→ `svgcinema-site.zip`), and send that file. It must include everything the live site has,
-so no link on the landing page or in the editor breaks: the thumbnail installers too (`site/fetch-downloads.sh`
+so no link on the website or in the editor breaks: the thumbnail installers too (`site/fetch-downloads.sh`
 puts the "thumbnails" release's files in `public/downloads/`, as the Pages build does), the player downloads, and
 every asset. `site/bundle.mjs` refuses to build when a local link in the pages doesn't reach a file; never leave
 anything out to make it pass.
@@ -25,7 +25,8 @@ how it should work must be reflected in all three, in the same PR:
 - the API, `window.svgcinema` (`src/agent/assist.ts`, built on the agent's tools in `src/agent/tools.ts`),
   including the guide that `help()` returns (`guide()` in `assist.ts`);
 - `public/llms.txt`;
-- the Claude skill (`SKILL_MD` in `src/ui/agent-panel.ts`, downloaded as `svgcinema-skill.zip`).
+- the Claude skill (`SKILL_MD` in `src/agent/skill.ts`, downloaded from the agent panel as `svgcinema-skill.zip`, and
+  written to `dist/downloads/svgcinema-skill.zip` by `scripts/build-player.mjs` for the website).
 
 Update `tests/assist.test.ts` and `tests/browser/assist.py` to match.
 
@@ -109,6 +110,10 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   the GIFs again to check them. Third-party code shipped in
   the app is listed in `public/third-party-notices.txt`; keep it up to date when adding any.
 - `src/io/` — open/save `.SVGcinema` projects (zip), SVG import, assets.
+- `site/` — the website (`site/README.md`): one source per page in `site/src/pages/`, shared partials, demo cards
+  (`src/specs/`), CSS and script; `node site/build.mjs` writes the pages (commit them; `tests/browser/site.py` checks
+  they are current). Pictures of the editor are real captures in `site/img/` (light and dark), taken by
+  `python3 site/captures.py` from the dev server: never redraw the editor's UI.
 - `src/agent/` — the design agent (in-app AI chat, being built in steps; spec: the "SVGcinema design agent — tool
   spec" doc). `tools.ts` = the tools a model calls, each a thin wrapper over an editor function (never edit `doc`
   by hand where one exists); `scene.ts` = the scene summary; `request.ts` = one request = one undo step (tools'

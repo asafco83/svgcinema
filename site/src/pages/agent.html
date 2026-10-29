@@ -1,0 +1,306 @@
+<!-- {"path":"agent/","nav":"agent","title":"Design agent · SVGcinema","description":"SVGcinema’s design agent draws, keys and checks its own work with the editor’s own tools. Use your own API key, or your AI assistant in the browser. No SVGcinema server in between."} -->
+<section class="phead mat ag-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="{{HOME}}">Home</a><span>/</span>Design agent</p>
+    <div class="ag-grid">
+      <div>
+        <div class="tc">DESIGN AGENT</div>
+        <h1>Describe it.<br />Watch it animate.</h1>
+        <p class="lede">
+          The agent works in your project with the editor’s own tools: it draws shapes and SVG artwork, edits layers,
+          applies presets, sets keyframes and morphs. Every step lands on the canvas and the timeline, where you can
+          change it by hand.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-pri" href="{{EDITOR_URL}}" target="_blank" rel="noopener" data-editor
+            >Open the editor, press <kbd class="kbd-on">Alt A</kbd></a
+          >
+          <a class="btn btn-ghost" href="#ways">Two ways to connect</a>
+        </div>
+      </div>
+      <div class="ag-cap">
+        {{CAP:agent-chat|The agent panel after a request: the message, the agent’s reply, 2 steps as one undo step
+        (Breathe on Sun, Pop in on Title), the answer, Play and Undo this request, and the prompt with the selection and
+        model}}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec band">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">WHAT IT CAN DO</div>
+        <h2>The editor’s own tools, 23 of them.</h2>
+      </div>
+      <p>
+        The same functions you use, so whatever it makes is ordinary layers and keyframes. Easing names from CSS, Penner
+        and GSAP all work.
+      </p>
+    </div>
+    <div class="rails">
+      <div class="card rail-c">
+        <h3>Look</h3>
+        <p>Read the scene, a layer, the presets and assets; take a snapshot of a frame.</p>
+        <div class="tchips">
+          <code>get_scene</code><code>get_layer</code><code>list_presets</code><code>list_assets</code
+          ><code>snapshot</code><code>seek</code>
+        </div>
+      </div>
+      <div class="card rail-c">
+        <h3>Draw</h3>
+        <p>Shapes, SVG artwork that arrives as editable layers, vector from a model, pictures.</p>
+        <div class="tchips">
+          <code>add_shape</code><code>import_svg</code><code>generate_vector</code><code>generate_image</code
+          ><code>place_image</code>
+        </div>
+      </div>
+      <div class="card rail-c">
+        <h3>Arrange</h3>
+        <p>Select, change, group and order layers; delete only after asking.</p>
+        <div class="tchips">
+          <code>select</code><code>update_layer</code><code>group</code><code>ungroup</code><code>duplicate</code
+          ><code>reorder</code><code>delete</code>
+        </div>
+      </div>
+      <div class="card rail-c">
+        <h3>Animate</h3>
+        <p>Keyframes on any property, Morph keys as path data, presets, timing shifts.</p>
+        <div class="tchips">
+          <code>set_keyframes</code><code>apply_preset</code><code>offset_animation</code><code>clear_animation</code>
+        </div>
+      </div>
+      <div class="card rail-c">
+        <h3>Project</h3>
+        <p>Canvas size, background, length, repeat and direction.</p>
+        <div class="tchips"><code>set_document</code></div>
+      </div>
+      <div class="card rail-c rail-dark">
+        <h3>Attach your own</h3>
+        <p>
+          Paperclip, paste or drop up to 4 PNG, JPG, WebP, GIF or SVG files, and type <b>@</b> to point at one in your
+          prompt.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="ways">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">TWO WAYS TO CONNECT</div>
+        <h2>Bring a key, or bring your assistant.</h2>
+      </div>
+      <p>The first time you open the panel it asks which. Switch any time in Settings › How you connect.</p>
+    </div>
+    <div class="ways">
+      <div class="ways-cap">
+        {{CAP:agent-connect|The agent’s first screen: Make and animate by asking, and How do you want to connect? Your
+        own API key, or Your AI assistant}}
+      </div>
+      <div class="card ways-t">
+        <table>
+          <thead>
+            <tr>
+              <td></td>
+              <th scope="col"><b>Your own API key</b><span>The chat in the panel</span></th>
+              <th scope="col">
+                <b>Your AI assistant</b><span>It edits through <code>window.svgcinema</code></span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">You need</th>
+              <td>
+                A key from OpenRouter (recommended), OpenAI, Anthropic, Gemini or Groq; or any OpenAI-compatible
+                address, a local server too
+              </td>
+              <td>An assistant that can run scripts in the page, such as Claude in Chrome</td>
+            </tr>
+            <tr>
+              <th scope="row">You chat in</th>
+              <td>The panel docked beside the inspector</td>
+              <td>Your assistant’s own chat; its steps show in the panel</td>
+            </tr>
+            <tr>
+              <th scope="row">Choosing a model</th>
+              <td>
+                Click the model under the prompt: each one with its live price. <b>Test</b> checks tools and vision.
+              </td>
+              <td>Whatever your assistant runs</td>
+            </tr>
+            <tr>
+              <th scope="row">Pictures</th>
+              <td>An image model you pick, after a confirm card with the price</td>
+              <td>Its own image tools, your image key, or vector shapes only</td>
+            </tr>
+            <tr>
+              <th scope="row">Undo</th>
+              <td>One step per request</td>
+              <td>One step per session, from start to done (or Stop, or 90 s idle)</td>
+            </tr>
+            <tr>
+              <th scope="row">Off switch</th>
+              <td>Settings › Privacy › Remove keys</td>
+              <td>Let assistants edit this project: off</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="ways-2">
+      <pre class="code-card"><code><i>// in the editor’s tab, from your assistant</i>
+svgcinema.<em>help</em>()  <i>// the guide: rules and every tool</i>
+svgcinema.<em>start</em>({ task: <b>'Rocket launch'</b>, assistant: <b>'Claude'</b> })
+await svgcinema.<em>batch</em>([{ name: <b>'add_shape'</b>, args: { … } }, …])
+svgcinema.<em>done</em>(<b>'Launches in 1.4 s'</b>)</code></pre>
+      <div class="card dl-card">
+        <b>For assistants that read docs first</b>
+        <a href="{{DL}}svgcinema-skill.zip" download>Download the Claude skill (svgcinema-skill.zip) <span>↓</span></a>
+        <a href="{{EDITOR_URL}}llms.txt">Guide for AI assistants (llms.txt) <span>→</span></a>
+        <a href="{{ROOT}}downloads/#ai">All downloads <span>→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec band">
+  <div class="wrap">
+    <div class="vec">
+      <div>
+        <div class="tc">IMAGES AND VECTOR</div>
+        <h2>Vector when it moves. Pictures when you ask.</h2>
+        <ul class="dlist">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>Drawn by the agent, free.</b> Or a vector model (Recraft via OpenRouter, or your own service), whose
+              SVG comes in as editable layers.</span
+            >
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>Prefer vector when parts move.</b> When a request doesn’t say, this switch decides; off, the agent
+              asks on a card.</span
+            >
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>Confirm before generating.</b> Edit the prompt, see the model, size and price. Turn it off and each
+              image shows its cost instead.</span
+            >
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>Transparent backgrounds,</b> even from models that can’t make one: the background is removed in your
+              browser.</span
+            >
+          </li>
+        </ul>
+      </div>
+      <div class="vec-caps">
+        <figure>
+          {{CAP:agent-kind|The Vector or image? card: Vector (moves in parts, free) or Image, the prompt, Made by,
+          Result and Cost, with Cancel and Draw vector}}
+          <figcaption>When a request doesn’t say</figcaption>
+        </figure>
+        <figure>
+          {{CAP:agent-image|The Generate 1 image? card: the editable prompt, model, size, background and cost, Don’t ask
+          again, Cancel and Generate}}
+          <figcaption>Before it pays for a picture</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">YOU STAY IN CHARGE</div>
+        <h2>It works in the open.</h2>
+      </div>
+      <p>While it works, editing pauses, but play, scrub and zoom still do. Its cursor shows where it is.</p>
+    </div>
+    <div class="rails">
+      <div class="card rail-c">
+        <h3>One request, one undo</h3>
+        <p>Undo, or “Undo this request” under its answer, rolls the whole request back.</p>
+      </div>
+      <div class="card rail-c">
+        <h3>Stop keeps what’s done</h3>
+        <p>Stop at any moment; the steps already taken stay, as one undo step.</p>
+      </div>
+      <div class="card rail-c">
+        <h3>A step cap you set</h3>
+        <p>
+          20 steps by default, 1 to 100. At the cap it pauses with what’s done and what’s left; Continue gives it that
+          plus two.
+        </p>
+      </div>
+      <div class="card rail-c">
+        <h3>Asks before deleting</h3>
+        <p>Layers are never removed without a yes, unless you turn the question off.</p>
+      </div>
+      <div class="card rail-c">
+        <h3>Checks its work</h3>
+        <p>Models that can see look at a frame and fix what’s wrong, up to three times a request.</p>
+      </div>
+      <div class="card rail-c">
+        <h3>Plain errors</h3>
+        <p>What happened, whether anything changed, and Try again.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec band">
+  <div class="wrap">
+    <div class="faq">
+      <div>
+        <div class="tc">PRIVACY</div>
+        <h2>No SVGcinema server in between.</h2>
+        <p class="faq-p">
+          The agent runs in your browser. Your key is kept there and goes straight to your provider. Chats are saved in
+          the project file only if you tick <b>Include AI agent chats</b> when saving, and Settings › Privacy clears the
+          chat or removes the keys.
+        </p>
+      </div>
+      <div>
+        <div class="tc">QUESTIONS</div>
+        <div class="q">
+          <h3>Which model should I use?</h3>
+          <p>
+            One that can use tools. Test tells you, and whether it can see images, which lets it check its own frames.
+          </p>
+        </div>
+        <div class="q">
+          <h3>What does it cost?</h3>
+          <p>
+            The agent is free. You pay your provider for what you use, and the model menu shows each price before you
+            pick.
+          </p>
+        </div>
+        <div class="q">
+          <h3>Can I use a model on my own computer?</h3>
+          <p>
+            Yes: choose Custom and give any OpenAI-compatible address. A local server may need no key; it must allow
+            requests from the page.
+          </p>
+        </div>
+        <div class="q">
+          <h3>Does OpenAI image generation need anything extra?</h3>
+          <p>OpenAI may ask you to verify your organization before its image models work with your key.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

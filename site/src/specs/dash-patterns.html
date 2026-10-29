@@ -1,0 +1,35 @@
+<article class="spec">
+  <div class="spec-art mat">
+    <svg viewBox="0 0 240 150" aria-hidden="true">
+      <path
+        d="M30 75 C60 30 90 30 120 75 S180 120 210 75"
+        fill="none"
+        stroke="#7189ff"
+        stroke-width="5"
+        stroke-linecap="round"
+        stroke-dasharray="1 10 1 10"
+      >
+        <animate
+          attributeName="stroke-dasharray"
+          dur="4s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0;.5;1"
+          keySplines=".6 0 .3 1;.6 0 .3 1"
+          values="1 10 1 10;26 8 4 8;1 10 1 10"
+        />
+        <animate attributeName="stroke-dashoffset" dur="4s" repeatCount="indefinite" values="0;-88" />
+      </path>
+    </svg>
+  </div>
+  <div class="spec-tx">
+    <div class="mini" style="--d: 4s">
+      <i style="left: 0"></i><i style="left: 50%"></i><i style="left: 100%"></i><u></u>
+    </div>
+    <h3>Dash patterns</h3>
+    <p>
+      Dash patterns blend from one keyframe to the next, even patterns of different lengths, and the offset sends them
+      travelling.
+    </p>
+  </div>
+</article>

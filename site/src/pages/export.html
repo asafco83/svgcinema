@@ -1,0 +1,371 @@
+<!-- {"path":"export/","nav":"export","title":"Export · SVGcinema","description":"Export from SVGcinema as one self-contained animated SVG with a JS player or pure CSS, linked to scroll, or as a video, a GIF or animated WebP, or an image. Embed code for HTML, React, Next.js, Vue, Svelte and Angular."} -->
+<section class="phead mat">
+  <div class="wrap">
+    <p class="crumb"><a href="{{HOME}}">Home</a><span>/</span>Export</p>
+    <div class="phead-row">
+      <div>
+        <div class="tc">EXPORT</div>
+        <h1>One animation.<br />Every format it needs.</h1>
+      </div>
+      <p>
+        The Export window makes four kinds of file from the same frames, so a video or a GIF shows exactly what the SVG
+        plays.
+      </p>
+    </div>
+    <nav class="pchips" aria-label="Kinds of export">
+      <a href="#svg">Animated SVG</a><a href="#img">Image</a><a href="#vid">Video</a
+      ><a href="#gif">GIF &amp; Animated WebP</a>
+    </nav>
+    <div class="card choose">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Where it’s going</th>
+            <th scope="col">Export</th>
+            <th scope="col">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">A website or app</th>
+            <td><a href="#svg">Animated SVG</a></td>
+            <td>Sharp at any size, tiny, and you can control it from code</td>
+          </tr>
+          <tr>
+            <th scope="row">A scrolling story</th>
+            <td><a href="#scroll">Linked to scroll</a></td>
+            <td>The page’s scroll drives the timeline, both ways</td>
+          </tr>
+          <tr>
+            <th scope="row">Social, slides, video editors</th>
+            <td><a href="#vid">Video</a></td>
+            <td>MP4 plays everywhere; PNG frames for editing</td>
+          </tr>
+          <tr>
+            <th scope="row">Email, chat apps, docs</th>
+            <td><a href="#gif">GIF or animated WebP</a></td>
+            <td>Plays where SVG and video don’t</td>
+          </tr>
+          <tr>
+            <th scope="row">A poster, thumbnail or fallback</th>
+            <td><a href="#img">Image</a></td>
+            <td>Any frame, in modern formats with a fallback</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="svg">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">ANIMATED SVG</div>
+        <h2>One file. Two ways to play it.</h2>
+      </div>
+      <p>
+        What you see on the canvas is what ships: the editor draws your artwork with the same markup and the same player
+        that go into the file.
+      </p>
+    </div>
+    <div class="engines">
+      <div class="eng">
+        <h3>JavaScript player</h3>
+        <p>A small dependency-free player. Everything animates.</p>
+        <ul>
+          <li><span>Morphs, motion paths, bones, pins, gradients, masks and every filter parameter</span></li>
+          <li><span>Play, pause, seek, reverse and change speed from your code, with events</span></li>
+          <li><span>Inside each file, or one shared player for pages with many animations</span></li>
+          <li>
+            <span
+              >Plays inline, in <code>&lt;object&gt;</code> or <code>&lt;embed&gt;</code>; browsers run no scripts in
+              <code>&lt;img&gt;</code></span
+            >
+          </li>
+        </ul>
+      </div>
+      <div class="eng css">
+        <h3>Pure CSS</h3>
+        <p>No script at all, so it works anywhere an image does.</p>
+        <ul>
+          <li>
+            <span>A plain <code>&lt;img&gt;</code> tag or a CSS background</span>
+          </li>
+          <li><span>Plays on load or on hover; ideal for docs and CMS fields</span></li>
+          <li><span>Gradients animate their stop colours; filters stay still</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="starts">
+      <b>Starts</b>
+      <div class="chipset">
+        <span>On load</span><span>On hover</span><span>On click</span><span>When scrolled into view</span
+        ><span>From your code</span><span><a href="#scroll">Linked to scroll</a></span>
+      </div>
+      <span class="starts-n">Less motion: play, or hold the first or last frame</span>
+    </div>
+    <div class="x-cap">
+      {{CAP:export-svg|Export › Animated SVG: Format (JavaScript or CSS only, Embedded or External player), Playback,
+      Size and Advanced, with the preview, file size and Download .svg|shot}}
+    </div>
+    <div class="code">
+      <div class="tabs" role="tablist" aria-label="Embed code">
+        <button role="tab" id="tab-html" aria-selected="true" data-fw="html">HTML</button>
+        <button role="tab" id="tab-react" aria-selected="false" data-fw="react">React</button>
+        <button role="tab" id="tab-next" aria-selected="false" data-fw="next">Next.js</button>
+        <button role="tab" id="tab-vue" aria-selected="false" data-fw="vue">Vue</button>
+        <button role="tab" id="tab-svelte" aria-selected="false" data-fw="svelte">Svelte</button>
+        <button role="tab" id="tab-angular" aria-selected="false" data-fw="angular">Angular</button>
+        <button role="tab" id="tab-css" aria-selected="false" data-fw="css">CSS-only</button>
+        <button role="tab" id="tab-api" aria-selected="false" data-fw="api">Player API</button>
+        <button class="btn btn-ghost btn-sm copy" id="copyBtn" type="button">Copy</button>
+      </div>
+      <div class="code-body">
+        <pre id="codePre" role="tabpanel" aria-labelledby="tab-html" tabindex="0"><code id="codeEl"></code></pre>
+      </div>
+      <p class="code-note" id="codeNote"></p>
+    </div>
+
+    <div class="sizes">
+      <div><b>{{HERO_KB}}</b><span>the sample scene, player included</span></div>
+      <div><b>{{HERO_GZ}}</b><span>the same file, gzipped</span></div>
+      <div><b>0</b><span>runtime dependencies</span></div>
+    </div>
+
+    <div class="card photos" id="images">
+      <div class="img-copy">
+        <h3>Photos inside the SVG, shipped light.</h3>
+        <p>
+          Turn on <b>Resize and compress for this size</b> in the export’s Images section, or leave it off to embed the
+          originals.
+        </p>
+        <ul class="dlist">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>Sized to fit.</b> Each image is scaled down to the largest size it reaches anywhere in the animation,
+              scale keyframes included.</span
+            >
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span><b>Sharp on 2× screens.</b> Optionally keeps twice that resolution.</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>Smallest format wins.</b> Automatic mode tries AVIF and WebP where your browser can encode them, plus
+              JPEG or PNG, and keeps the smallest.</span
+            >
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>Safe by default.</b> Transparent images never become JPEG, animated GIFs stay as they are, and an
+              image that wouldn’t get smaller keeps its original file.</span
+            >
+          </li>
+        </ul>
+      </div>
+      <figure>
+        <div class="xpanel" id="xpanel">
+          <div class="xp-head"><span>Export SVG</span><span class="xp-tag">Try it</span></div>
+          <div class="xp-prev" id="xpPrev">
+            <img id="xpImg" alt="Test photo after export compression" width="640" height="400" />
+            <div class="xp-loupe" id="xpLoupe" aria-hidden="true"><span>300%</span></div>
+          </div>
+          <div class="xp-body">
+            <h4>Images</h4>
+            <label class="xp-check" for="imgOpt"
+              ><input type="checkbox" id="imgOpt" checked /> Resize and compress for this size</label
+            >
+            <div class="xp-row" id="imgFmtRow">
+              <label for="imgFmt">Format</label>
+              <select id="imgFmt">
+                <option value="auto">Smallest file (automatic)</option>
+                <option value="webp">WebP</option>
+                <option value="avif">AVIF</option>
+                <option value="jpeg">JPEG (no transparency)</option>
+                <option value="png">PNG (lossless)</option>
+              </select>
+            </div>
+            <div class="xp-row" id="imgQRow">
+              <label for="imgQ">Quality</label>
+              <div class="xp-range">
+                <input type="range" id="imgQ" min="30" max="100" step="1" value="82" /><output id="imgQv" for="imgQ"
+                  >82%</output
+                >
+              </div>
+            </div>
+            <label class="xp-check" for="imgHi" id="imgHiRow"
+              ><input type="checkbox" id="imgHi" checked /> Sharp on high-density screens (2×)</label
+            >
+            <div class="xp-sum" aria-live="polite">
+              <div class="xp-file"><b>sunrise-photo.png</b><span id="xpOrig">2400×1500 PNG</span></div>
+              <div class="xp-arrow" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 8h10m-3.5-3.5L13 8l-3.5 3.5" />
+                </svg>
+              </div>
+              <div class="xp-file out"><b id="xpOutSize">Encoding…</b><span id="xpOut">&nbsp;</span></div>
+            </div>
+            <div class="xp-bar"><i id="xpBar"></i></div>
+            <p class="xp-note" id="xpNote">Sized for 640px wide at 2×.</p>
+          </div>
+        </div>
+        <figcaption>
+          Try it: the panel runs your browser’s own image encoders on a generated test photo, the same encoders the
+          editor uses, so the sizes are real.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="sec band" id="player">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <div class="tc">THE EXTERNAL PLAYER</div>
+        <h2>Many animations, one player.</h2>
+        <p class="lead">
+          Export with <b>Player: External</b> and each SVG carries only its artwork and animation, plus a loader under 1
+          KB. Every animation on the page shares one player, from the page, jsDelivr or your own server.
+        </p>
+        <ul class="dlist">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>The version is fixed in each file, so later releases never change what you shipped</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>Or host it yourself: one file, added with one script line before your SVGs</span>
+          </li>
+        </ul>
+        <div class="cta-row">
+          <a class="btn btn-pri" href="{{DL}}cin-player.min.js" download
+            ><svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              aria-hidden="true"
+            >
+              <path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13.5h10" /></svg
+            >Download the player · {{PLAYER_VERSION}}</a
+          >
+          <a class="btn btn-ghost" href="{{ROOT}}downloads/#player">All downloads</a>
+        </div>
+      </div>
+      <pre class="code-card"><code><em>$</em> npm i <b>svgcinema-player</b>
+
+<i>&lt;!-- or straight from the CDN --&gt;</i>
+&lt;script src=<b>"…/npm/svgcinema-player@{{PLAYER_VERSION}}/cin-player.min.js"</b>&gt;&lt;/script&gt;
+
+<i>// about 24 KB minified, then shared by every SVG</i></code></pre>
+    </div>
+
+    <div class="split" id="scroll">
+      <div>
+        <div class="tc">LINKED TO SCROLL</div>
+        <h2>Scroll is the playhead.</h2>
+        <p class="lead">
+          Scrolling down plays it, scrolling back plays it backwards. Choose when it plays: while it crosses the window,
+          while it scrolls in, while it scrolls out, or your own start and end lines.
+        </p>
+        <ul class="dlist">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span><b>Smoothing</b> lets it glide after each wheel step instead of jumping</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>The Export preview is a small test page you scroll to try it</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>Pasted inline or in an <code>&lt;object&gt;</code>; follows a box that scrolls on its own</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        {{CAP:export-scroll|Export with Starts set to Linked to scroll: the preview is a test page with start and end
+        lines and how much has played|shot}}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">BEYOND SVG</div>
+        <h2>For places SVG can’t go.</h2>
+      </div>
+      <p>
+        Every frame is drawn exactly and encoded in your browser. Each kind ends with embed code and a set to download.
+      </p>
+    </div>
+    <div class="kinds3">
+      <article class="card kind" id="vid">
+        {{CAP:export-video|Export › Video|kind-cap}}
+        <h3>Video</h3>
+        <div class="chipset"><span>MP4 · H.264</span><span>WebM · VP9 / AV1</span><span>PNG frames</span></div>
+        <ul class="dlist">
+          <li><span class="dia" aria-hidden="true">◆</span><span>24 to 60 fps, the whole animation or a part</span></li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span><span>720p, 1080p, square, 4:5 and 9:16, fit or fill</span>
+          </li>
+          <li><span class="dia" aria-hidden="true">◆</span><span>Aim for a quality, a file size or a bitrate</span></li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span><span>Transparent WebM where the browser keeps alpha</span>
+          </li>
+        </ul>
+      </article>
+      <article class="card kind" id="gif">
+        {{CAP:export-anim|Export › GIF & Animated WebP|kind-cap}}
+        <h3>GIF &amp; Animated WebP</h3>
+        <div class="chipset"><span>Our own GIF encoder</span><span>libwebp</span></div>
+        <ul class="dlist">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>2 to 256 colours, and keep your brand colours exact</span>
+          </li>
+          <li><span class="dia" aria-hidden="true">◆</span><span>Dithering whose dots don’t shimmer</span></li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span><span>Lossy, and store only the pixels that change</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>The real file’s size, against a plain GIF, as you tune</span>
+          </li>
+        </ul>
+      </article>
+      <article class="card kind" id="img">
+        {{CAP:export-image|Export › Image|kind-cap}}
+        <h3>Image</h3>
+        <div class="chipset">
+          <span>PNG</span><span>JPEG</span><span>WebP</span><span>AVIF</span><span>JPEG XL</span><span>SVG still</span>
+        </div>
+        <ul class="dlist">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span><span>Any frame: drag the playhead, or step one frame</span>
+          </li>
+          <li><span class="dia" aria-hidden="true">◆</span><span>1×, 2× or 3×, transparent or on a colour</span></li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>Every format in every browser (WebAssembly encoders)</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>A <code>&lt;picture&gt;</code> with modern formats first and a PNG fallback</span>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>

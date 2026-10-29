@@ -1,0 +1,58 @@
+<article class="spec">
+  <div class="spec-art mat">
+    <svg viewBox="0 0 240 150" aria-hidden="true">
+      <circle cx="120" cy="75" r="19" fill="none" stroke="#7189ff" stroke-width="2" opacity="0">
+        <animate attributeName="r" dur="3s" repeatCount="indefinite" keyTimes="0;.45;.8;1" values="19;19;52;52" />
+        <animate
+          attributeName="opacity"
+          dur="3s"
+          repeatCount="indefinite"
+          keyTimes="0;.449;.45;.8;1"
+          values="0;0;.6;0;0"
+        />
+      </circle>
+      <g transform="translate(120 75)">
+        <g>
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            dur="3s"
+            repeatCount="indefinite"
+            keyTimes="0;.42;.46;.54;1"
+            values="1;1;.9;1;1"
+          />
+          <rect x="-42" y="-19" width="84" height="38" rx="19" fill="#7189ff" />
+          <path d="M-5 -8 L9 0 L-5 8Z" fill="#fff" />
+        </g>
+      </g>
+      <g>
+        <animateTransform
+          attributeName="transform"
+          type="translate"
+          dur="3s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0;.38;.75;1"
+          keySplines=".5 0 .3 1;0 0 1 1;.5 0 .3 1"
+          values="196 132;134 82;134 82;196 132"
+        />
+        <path
+          d="M0 0 L0 17 L4.5 13 L7.5 20 L10 19 L7 12.5 L12.5 12.5Z"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          style="fill: var(--fg); stroke: var(--panel)"
+        />
+      </g>
+    </svg>
+  </div>
+  <div class="spec-tx">
+    <div class="mini" style="--d: 3s">
+      <i style="left: 0"></i><i style="left: 45%"></i><i style="left: 100%"></i><u></u>
+    </div>
+    <h3>Triggers and links</h3>
+    <p>
+      Play on load, on hover, on click, when scrolled into view or from your code, and pick what mouse-out does. Any
+      layer can link to a page.
+    </p>
+  </div>
+</article>

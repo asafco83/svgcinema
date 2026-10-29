@@ -1,0 +1,47 @@
+<article class="spec">
+  <div class="spec-art mat">
+    <svg viewBox="0 0 240 150" aria-hidden="true">
+      <defs>
+        <linearGradient id="gwipe" x1="0" x2="1">
+          <stop offset="0" stop-color="#fff" />
+          <stop offset=".75" stop-color="#fff" />
+          <stop offset="1" stop-color="#fff" stop-opacity="0" />
+        </linearGradient>
+        <mask id="mwipe" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="150">
+          <rect class="wipe" x="0" y="0" width="240" height="150" fill="url(#gwipe)" />
+        </mask>
+      </defs>
+      <text
+        x="120"
+        y="92"
+        text-anchor="middle"
+        font-family="Instrument Serif, Georgia, serif"
+        font-size="56"
+        fill="#959cae"
+        fill-opacity=".14"
+      >
+        cinema
+      </text>
+      <g mask="url(#mwipe)">
+        <text
+          x="120"
+          y="92"
+          text-anchor="middle"
+          font-family="Instrument Serif, Georgia, serif"
+          font-size="56"
+          fill="#7189ff"
+        >
+          cinema
+        </text>
+      </g>
+    </svg>
+  </div>
+  <div class="spec-tx">
+    <div class="mini" style="--d: 4s"><i style="left: 0"></i><i style="left: 60%"></i><u></u></div>
+    <h3>Masks and clipping</h3>
+    <p>
+      Soft masks work by opacity or brightness, so a gradient wipe reveals as you’d expect. Clipping paths use only the
+      shape.
+    </p>
+  </div>
+</article>

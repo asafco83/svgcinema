@@ -1,0 +1,618 @@
+<!-- {"path":"","nav":"","title":"SVGcinema: a free SVG animation editor in your browser","description":"Draw or import artwork, animate it on a keyframe timeline or ask the built-in design agent, and export one self-contained animated SVG, or a video, GIF or image of it. Free, no account."} -->
+<section class="hero mat">
+  <div class="wrap">
+    <a class="hero-pill" href="{{ROOT}}agent/">
+      <span class="hp-ic"
+        ><svg
+          width="13"
+          height="13"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          aria-hidden="true"
+        >
+          <path d="M8 1.8l1.5 4.2 4.3 1.5-4.3 1.5L8 13.2 6.5 9 2.2 7.5 6.5 6z" /></svg
+      ></span>
+      Meet the design agent: describe it, watch it animate
+      <span class="hp-ar" aria-hidden="true">→</span>
+    </a>
+    <div class="hero-grid">
+      <h1>
+        <span class="ln"><span>Draw it.</span></span
+        ><span class="ln"><span>Key it.</span></span
+        ><span class="ln"
+          ><span>Ship one SVG<span class="dot">.</span></span></span
+        >
+      </h1>
+      <div class="hero-copy">
+        <p class="lede">
+          <b>SVGcinema</b> is a free animation editor in your browser. Draw or import, animate on a keyframe timeline,
+          or just ask the built-in agent. Then export one self-contained <b>.svg</b> that plays anywhere, or a video,
+          GIF or image of it.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-pri" href="{{EDITOR_URL}}" target="_blank" rel="noopener" data-editor>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M4 2.8v10.4a.6.6 0 00.9.5l8.2-5.2a.6.6 0 000-1L4.9 2.3a.6.6 0 00-.9.5z" />
+            </svg>
+            Open the editor
+          </a>
+          <a class="btn btn-ghost" href="{{ROOT}}features/">See every feature</a>
+        </div>
+        <p class="note"><i></i>No account, no install, no watermark.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="app playing" id="app">
+        <div class="app-top">
+          <svg class="logo" viewBox="{{LOGO_VB}}" aria-hidden="true">{{LOGO}}</svg>
+          <span class="app-name">Sunrise badge</span>
+          <span class="pill">Saved</span>
+          <a class="app-agent" href="{{ROOT}}agent/"
+            ><svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+              aria-hidden="true"
+            >
+              <path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z" />
+              <path d="M8 5.5v3M6.5 7h3" /></svg
+            >Agent</a
+          >
+          <a class="btn btn-pri app-export" href="{{EDITOR_URL}}" target="_blank" rel="noopener" data-editor>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              aria-hidden="true"
+            >
+              <path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13.5h10" />
+            </svg>
+            Export SVG
+          </a>
+        </div>
+        <div class="app-body">
+          <div class="rail" aria-hidden="true">
+            <span class="on"
+              ><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M3.5 2l9 5-4 1-2 4z" /></svg
+            ></span>
+            <span
+              ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                <path d="M3 13c2-7 6-9 10-10" />
+                <rect x="1.8" y="11.8" width="2.4" height="2.4" fill="currentColor" />
+                <rect x="11.8" y="1.8" width="2.4" height="2.4" fill="currentColor" /></svg
+            ></span>
+            <span
+              ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                <path d="M8 1.5l4 6.5-4 6.5-4-6.5z" />
+                <circle cx="8" cy="8.5" r="1.3" /></svg
+            ></span>
+            <span
+              ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                <rect x="2.5" y="3.5" width="11" height="9" rx="1" /></svg
+            ></span>
+            <span
+              ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 3h10M8 3v10" /></svg
+            ></span>
+            <span
+              ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                <circle cx="4" cy="12" r="1.6" />
+                <path d="M5.2 10.8L12 4" />
+                <circle cx="12.5" cy="3.5" r="1.4" /></svg
+            ></span>
+            <span
+              ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+                <path
+                  d="M5.5 8V3.5a1 1 0 012 0V7m0-1.5a1 1 0 012 0V7m0-.8a1 1 0 012 0V9.5c0 2.5-1.6 4-4 4-2 0-3-1-4-2.6L2.6 8.8a1 1 0 011.6-1.1l1.3 1.4"
+                /></svg
+            ></span>
+          </div>
+          <div class="canvas mat">
+            <p class="board-label"><b>Sunrise badge</b>640 × 400</p>
+            <div class="board" id="board">{{HERO_SVG}}</div>
+          </div>
+          <aside class="insp" aria-label="Document properties">
+            <h4>
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M2 3.5l3 3 3-3" /></svg
+              >Document
+            </h4>
+            <dl>
+              <dt>Canvas</dt>
+              <dd><small>W</small>640 <small style="margin-left: 6px">H</small>400</dd>
+              <dt>Background</dt>
+              <dd><span class="sw"></span>#14213d</dd>
+              <dt>Length</dt>
+              <dd>3 <small style="margin-left: auto">s</small></dd>
+              <dt>Repeat</dt>
+              <dd>Loop forever</dd>
+              <dt>Direction</dt>
+              <dd>Normal</dd>
+            </dl>
+            <h4>
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M2 3.5l3 3 3-3" /></svg
+              >How to animate
+            </h4>
+            <p class="insp-tip">
+              <b>Start animating a property</b> with <span class="kd"></span> beside it. Then move the playhead and
+              change it: every change adds a keyframe there.
+            </p>
+          </aside>
+        </div>
+
+        <div class="tl">
+          <div class="tl-bar">
+            <button class="play" id="playBtn" type="button" aria-label="Pause">
+              <svg class="i-play" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                <path d="M3 1.5v9l7.5-4.5z" />
+              </svg>
+              <svg class="i-pause" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                <path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" />
+              </svg>
+            </button>
+            <span class="time" id="timeRead">0:00.00 <small>/ 0:03.00</small></span>
+            <span class="tl-hint"
+              ><svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                aria-hidden="true"
+              >
+                <path d="M5 8h6M3.5 8l2-2m-2 2l2 2m7-2l-2-2m2 2l-2 2" /></svg
+              >Drag across the timeline to scrub</span
+            >
+          </div>
+          <div class="tl-grid">
+            <div class="tl-names" id="tlNames">
+              <div class="tl-head"><span class="w">ANIMATED</span>LAYERS</div>
+            </div>
+            <div
+              class="tl-area"
+              id="tlArea"
+              role="slider"
+              tabindex="0"
+              aria-label="Playhead"
+              aria-valuemin="0"
+              aria-valuemax="3"
+              aria-valuenow="0"
+            >
+              <div class="tl-ruler" id="tlRuler"></div>
+              <div id="tlRows"></div>
+              <div class="head" id="tlHead"><b id="tlFlag">0.00s</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="caption">
+        This is the editor’s sample scene, exported from SVGcinema as one {{HERO_KB}} file and playing live on this
+        page. Drag across the timeline to scrub it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="proof">
+  <div class="wrap">
+    <div>
+      <b>{{HERO_KB}}</b>
+      <p>the whole sample scene, as one SVG with its player inside</p>
+    </div>
+    <div>
+      <b>4 kinds</b>
+      <p>of export: animated SVG, image, video, and GIF or animated WebP</p>
+    </div>
+    <div>
+      <b>0</b>
+      <p>runtime dependencies in what you ship, and no accounts or watermarks</p>
+    </div>
+    <div>
+      <b>100%</b>
+      <p>in your browser: projects and API keys stay on your machine</p>
+    </div>
+  </div>
+</section>
+
+<section class="flow" id="workflow">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">0:03.00</div>
+        <h2>From blank canvas to a file in three moves.</h2>
+      </div>
+      <p>Keep scrolling. The playhead below follows you, the same way it follows your edits in the editor.</p>
+    </div>
+    <div class="flow-grid" id="flow">
+      <div class="flow-vis">
+        <div class="flow-card">
+          <div class="flow-art" id="flowArt">
+            <svg viewBox="0 0 320 200" aria-hidden="true">
+              <defs>
+                <linearGradient id="fsky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#14213d" />
+                  <stop offset="1" id="fskyB" stop-color="#14213d" />
+                </linearGradient>
+              </defs>
+              <rect width="320" height="200" fill="url(#fsky)" />
+              <circle id="fsun" cx="200" cy="96" r="26" fill="#ffc547" />
+              <path
+                id="fground"
+                d="M0 150 C50 116 100 112 150 138 C200 164 260 152 320 120 L320 200 L0 200Z"
+                fill="#1f3358"
+              />
+              <path
+                id="fhill"
+                d="M0 150 C50 116 100 112 150 138 C200 164 260 152 320 120"
+                fill="none"
+                stroke="#7fd8c0"
+                stroke-width="3"
+                stroke-linecap="round"
+                pathLength="1"
+                stroke-dasharray="1"
+                stroke-dashoffset="0"
+              />
+              <g id="fnodes" fill="#14171e" stroke="#7189ff" stroke-width="1.5">
+                <rect x="-3.5" y="146.5" width="7" height="7" />
+                <rect x="146.5" y="134.5" width="7" height="7" />
+                <rect x="316.5" y="116.5" width="7" height="7" />
+              </g>
+              <g id="fpen" opacity="0">
+                <path
+                  d="M0 0 l8 -14 l8 14 l-8 12z"
+                  fill="#fff"
+                  stroke="#14171e"
+                  stroke-width="1.2"
+                  transform="translate(-8 -16)"
+                />
+                <circle r="2" fill="#7189ff" />
+              </g>
+              <rect
+                id="fsel"
+                x="172"
+                y="68"
+                width="56"
+                height="56"
+                fill="none"
+                stroke="#7189ff"
+                stroke-width="1"
+                stroke-dasharray="3 2"
+                opacity="0"
+              />
+            </svg>
+            <div class="file" id="ffile">
+              <svg class="file-ic" viewBox="0 0 38 46" aria-hidden="true">
+                <path d="M3 1h22l10 10v32a2 2 0 01-2 2H3a2 2 0 01-2-2V3a2 2 0 012-2z" fill="#7189ff" />
+                <path d="M25 1v10h10" fill="#a3b2ff" />
+                <text
+                  x="18"
+                  y="34"
+                  text-anchor="middle"
+                  font-family="JetBrains Mono, monospace"
+                  font-size="8.5"
+                  font-weight="500"
+                  fill="#0b0e13"
+                >
+                  SVG
+                </text>
+              </svg>
+              <div><b>sunrise-badge.svg</b><small>One file, player included. Plays anywhere.</small></div>
+            </div>
+          </div>
+          <div class="flow-tl tl">
+            <div class="tl-grid">
+              <div class="tl-names">
+                <div class="tl-head">LAYERS<span class="ftime" id="ftime">0:00.00</span></div>
+                <div><span class="nm">Hill</span><span class="pr">Trim end</span></div>
+                <div><span class="nm">Sun</span><span class="pr">Position</span></div>
+                <div><span class="nm">Sun</span><span class="pr">Fill</span></div>
+              </div>
+              <div class="tl-area">
+                <div class="tl-ruler" id="fRuler"></div>
+                <div class="tl-row">
+                  <div class="seg" style="left: 2%; width: 30%"></div>
+                  <i class="dm fk" data-k=".02" style="left: 2%"></i
+                  ><i class="dm fk" data-k=".32" style="left: 32%"></i>
+                </div>
+                <div class="tl-row">
+                  <div class="seg fseg" style="left: 36%; width: 28%"></div>
+                  <i class="dm fk" data-k=".36" style="left: 36%"></i
+                  ><i class="dm fk" data-k=".64" style="left: 64%"></i>
+                </div>
+                <div class="tl-row">
+                  <div class="seg fseg" style="left: 40%; width: 24%"></div>
+                  <i class="dm fk" data-k=".40" style="left: 40%"></i
+                  ><i class="dm fk" data-k=".64" style="left: 64%"></i>
+                </div>
+                <div class="head" id="fHead"><b id="fFlag">0.00s</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+        <div class="step on" data-step="0">
+          <div class="step-n">1</div>
+          <h3>Draw or bring in artwork</h3>
+          <p>
+            Use the pen, pencil and shape tools, or bring in what you already have. Imported SVG keeps its groups as
+            layers.
+          </p>
+          <ul>
+            <li><kbd>P</kbd>Pen: click for a corner, drag for a curve</li>
+            <li><kbd>Ctrl V</kbd>Paste Figma’s “Copy as SVG” straight onto the canvas</li>
+            <li><kbd>Drop</kbd><span>SVG and images: PNG, JPG, GIF, WebP, AVIF, BMP, ICO, TIFF and HEIC</span></li>
+          </ul>
+        </div>
+        <div class="step" data-step="1">
+          <div class="step-n">2</div>
+          <h3>Animate on the timeline</h3>
+          <p>
+            Click the diamond beside a property to start animating it. Move the playhead, change the value, and a
+            keyframe appears. Or describe the motion and let the agent key it.
+          </p>
+          <ul>
+            <li><kbd>Shift P</kbd>Add a position keyframe at the playhead</li>
+            <li>
+              <kbd>Shift O</kbd><span>Opacity. Also <kbd>Shift R</kbd> rotate and <kbd>Shift S</kbd> scale</span>
+            </li>
+            <li><kbd>Alt A</kbd>Open the design agent</li>
+          </ul>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-n">3</div>
+          <h3>Export one file</h3>
+          <p>
+            Out comes a single SVG with your images embedded and a tiny player built in, plus the embed code for HTML,
+            React, Next.js, Vue, Angular or Svelte. Or the same animation as a video, a GIF or a still.
+          </p>
+          <ul>
+            <li><kbd>Ctrl E</kbd>Open the Export window</li>
+            <li>
+              <kbd>Ctrl S</kbd
+              ><span
+                >Save the project as a
+                <code style="font-family: var(--f-code); font-size: 13px">.SVGcinema</code> file</span
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="agent-band-sec">
+  <div class="wrap">
+    <div class="agent-band">
+      <div>
+        <div class="tc tc-on-dark">DESIGN AGENT</div>
+        <h2>Describe it. It draws, keys and checks its own work.</h2>
+        <p class="ab-lede">
+          Ask for “a cartoon rocket that launches” and the agent works in your project with the editor’s own tools:
+          shapes, layers, presets, keyframes and shape morphs. You watch every step on the canvas.
+        </p>
+        <ul class="ab-list">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>One request, one undo step.</b> Roll back the whole request, or stop it half-way and keep what’s
+              done.</span
+            >
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span
+              ><b>It looks at its work.</b> Models that can see take a snapshot of the canvas and fix what’s off.</span
+            >
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span><b>It asks first.</b> Before deleting layers, and before paying for an image, with the price.</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span><b>No middleman.</b> Keys stay in your browser and go straight to your provider.</span>
+          </li>
+        </ul>
+        <a class="btn btn-pri ab-btn" href="{{ROOT}}agent/">Meet the design agent →</a>
+      </div>
+      <div class="ab-side">
+        {{SHOT:agent-chat-dark|The agent panel: a request, its two steps folded into one undo step, the answer, Play and
+        Undo this request|ab-cap}}
+        <div class="ab-ways">
+          <div><b>Your own API key</b>OpenRouter, OpenAI, Anthropic, Gemini, Groq or any compatible service</div>
+          <div><b>Your AI assistant</b>No key: Claude in Chrome or another assistant in your browser</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec band" id="animate">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">0:06.00</div>
+        <h2>Every property gets its own track.</h2>
+      </div>
+      <p>
+        Colour and opacity, a gradient’s angle, a blur’s radius, a star’s corner radius. If you can set it in the
+        inspector, you can put a keyframe on it.
+      </p>
+    </div>
+    <div class="specs">
+      {{SPEC:shape-morphing}} {{SPEC:motion-paths}} {{SPEC:trim-path}} {{SPEC:bones-and-ik}} {{SPEC:pins-and-mesh-warp}}
+      {{SPEC:filters}} {{SPEC:animation-presets}} {{SPEC:graph-editor}}
+    </div>
+    <div class="sec-more">
+      <a class="btn btn-ghost" href="{{ROOT}}features/">See all features →</a>
+      <p>Plus masks, gradients, dash patterns, symbols, onion skin, easing, triggers, hyperlinks and more.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="export">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">0:09.00</div>
+        <h2>Ship it anywhere.</h2>
+      </div>
+      <p>
+        One self-contained animated SVG is the headline. Where SVG can’t play, export the same animation as a video, a
+        GIF or a still.
+      </p>
+    </div>
+    <div class="ship">
+      <div class="kinds">
+        <div>
+          <h3>Animated SVG</h3>
+          <p>
+            With a tiny JS player or pure CSS. Plays on load, hover, click, when scrolled into view, or from your code;
+            with the JS player it can even follow the page’s scroll, forwards and back.
+          </p>
+        </div>
+        <div>
+          <h3>Video</h3>
+          <p>MP4, WebM or PNG frames, encoded in your browser.</p>
+        </div>
+        <div>
+          <h3>GIF &amp; Animated WebP</h3>
+          <p>For email and chat, with the real file size as you tune it.</p>
+        </div>
+        <div>
+          <h3>Image</h3>
+          <p>Any frame as PNG, JPEG, WebP, AVIF or JPEG XL.</p>
+        </div>
+      </div>
+      <div class="ship-cap">
+        {{CAP:export-anim|Export › GIF & Animated WebP: the settings, the file size, and the original and the GIF side
+        by side with a divider|shot}}
+      </div>
+    </div>
+    <div class="embed-bar">
+      <span class="eb-t">Embed code for</span>
+      <div class="chips">
+        <span>HTML</span><span>React</span><span>Next.js</span><span>Vue</span><span>Svelte</span><span>Angular</span
+        ><span>Player API</span>
+      </div>
+      <span class="eb-sp"></span>
+      <span class="eb-npm">Many on one page? <b>npm i svgcinema-player</b></span>
+      <a class="more" href="{{ROOT}}downloads/#player">Download the player →</a>
+    </div>
+    <div class="sec-more">
+      <a class="btn btn-ghost" href="{{ROOT}}export/">Everything about export →</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec band" id="fits">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="tc">0:12.00</div>
+        <h2>Fits the way you already work.</h2>
+      </div>
+      <p>Bring in work from other tools and keep editing it. Keys where your hands expect them.</p>
+    </div>
+    <div class="fits">
+      <div>
+        <h3>Opens any SVG, even animated ones</h3>
+        <p>
+          Figma, Illustrator and Inkscape files keep their layers. JS-player and CSS animations come in as keyframes you
+          can edit.
+        </p>
+        <a class="more" href="{{ROOT}}import/">Import →</a>
+      </div>
+      <div>
+        <h3>Every tool is one key away</h3>
+        <p>
+          <kbd>V</kbd> <kbd>P</kbd> <kbd>R</kbd> <kbd>T</kbd> <kbd>B</kbd> <kbd>W</kbd>, on any keyboard layout.
+          Snapping, guides, align, booleans, and numbers you can drag or nudge with the arrows.
+        </p>
+        <a class="more" href="{{ROOT}}features/#tools">Tools and keys →</a>
+      </div>
+      <div>
+        <h3>Projects at a glance</h3>
+        <p>
+          A project is one <code>.SVGcinema</code> file with its first frame inside, shown as a thumbnail in Windows
+          Explorer and Linux file managers.
+        </p>
+        <div class="more-row">
+          <a class="more" href="{{ROOT}}downloads/#thumbs">Windows →</a
+          ><a class="more" href="{{ROOT}}downloads/#thumbs">Linux →</a>
+        </div>
+      </div>
+    </div>
+    <div class="free-row">
+      <div class="tc">FREE, AND IT STAYS ON YOUR MACHINE</div>
+      <div class="free4">
+        <div>
+          <h3>No account</h3>
+          <p>Open the editor and start. Your work saves itself in the browser.</p>
+        </div>
+        <div>
+          <h3>Projects are files</h3>
+          <p>Save, share and back them up like any document.</p>
+        </div>
+        <div>
+          <h3>Your exports are yours</h3>
+          <p>Use and sell what you make, commercially too, player included.</p>
+        </div>
+        <div>
+          <h3>Light or dark</h3>
+          <p>The editor and this site share your choice.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="final">
+  <div class="strip t" aria-hidden="true"></div>
+  <div class="strip b" aria-hidden="true"></div>
+  <div class="wrap">
+    <h2>Roll the first frame.</h2>
+    <p>
+      The sample scene opens with the editor, so you can take it apart layer by layer and see how each effect is made.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-pri" href="{{EDITOR_URL}}" target="_blank" rel="noopener" data-editor>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M4 2.8v10.4a.6.6 0 00.9.5l8.2-5.2a.6.6 0 000-1L4.9 2.3a.6.6 0 00-.9.5z" />
+        </svg>
+        Open the editor
+      </a>
+    </div>
+  </div>
+</section>

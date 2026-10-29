@@ -1,0 +1,55 @@
+<article class="spec">
+  <div class="spec-art">
+    <svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="gsky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0">
+            <animate
+              attributeName="stop-color"
+              values="#0b1230;#2c3e7a;#5b6fd6;#2c3e7a;#0b1230"
+              dur="6s"
+              repeatCount="indefinite"
+            />
+          </stop>
+          <stop offset=".6">
+            <animate
+              attributeName="stop-color"
+              values="#1a1f4a;#8a4f9e;#ff8a6b;#8a4f9e;#1a1f4a"
+              dur="6s"
+              repeatCount="indefinite"
+            />
+          </stop>
+          <stop offset="1">
+            <animate
+              attributeName="stop-color"
+              values="#2a2f5a;#ff9a6b;#ffd27a;#ff9a6b;#2a2f5a"
+              dur="6s"
+              repeatCount="indefinite"
+            />
+          </stop>
+        </linearGradient>
+        <radialGradient id="gsun">
+          <stop offset="0" stop-color="#fff3c4" />
+          <stop offset=".5" stop-color="#ffc547" />
+          <stop offset="1" stop-color="#ffc547" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="240" height="150" fill="url(#gsky)" />
+      <circle cx="120" cy="120" r="44" fill="url(#gsun)">
+        <animate attributeName="cy" values="150;100;76;100;150" dur="6s" repeatCount="indefinite" />
+      </circle>
+      <path d="M0 122 C50 106 90 108 130 120 C170 132 210 118 240 110 L240 150 L0 150Z" fill="#14213d" />
+    </svg>
+  </div>
+  <div class="spec-tx">
+    <div class="mini" style="--d: 6s">
+      <i style="left: 0"></i><i style="left: 25%"></i><i style="left: 50%"></i><i style="left: 75%"></i
+      ><i style="left: 100%"></i><u></u>
+    </div>
+    <h3>Animated gradients</h3>
+    <p>
+      Linear and radial gradients blend their stops, angle, centre and radius. They can even fade in from a solid
+      colour.
+    </p>
+  </div>
+</article>
