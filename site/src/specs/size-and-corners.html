@@ -1,0 +1,65 @@
+<article class="spec">
+  <div class="spec-art mat">
+    <svg viewBox="0 0 240 150" aria-hidden="true">
+      <rect x="90" y="45" width="60" height="60" rx="4" fill="#ffb84d" stroke-width="3" style="stroke: var(--fg)">
+        <animate
+          attributeName="width"
+          dur="4s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0;.33;.66;1"
+          keySplines=".6 0 .3 1;.6 0 .3 1;.6 0 .3 1"
+          values="60;150;44;60"
+        />
+        <animate
+          attributeName="x"
+          dur="4s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0;.33;.66;1"
+          keySplines=".6 0 .3 1;.6 0 .3 1;.6 0 .3 1"
+          values="90;45;98;90"
+        />
+        <animate
+          attributeName="height"
+          dur="4s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0;.33;.66;1"
+          keySplines=".6 0 .3 1;.6 0 .3 1;.6 0 .3 1"
+          values="60;36;84;60"
+        />
+        <animate
+          attributeName="y"
+          dur="4s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0;.33;.66;1"
+          keySplines=".6 0 .3 1;.6 0 .3 1;.6 0 .3 1"
+          values="45;57;33;45"
+        />
+        <animate
+          attributeName="rx"
+          dur="4s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0;.33;.66;1"
+          keySplines=".6 0 .3 1;.6 0 .3 1;.6 0 .3 1"
+          values="4;18;22;4"
+        />
+      </rect>
+      <circle cx="120" cy="75" r="3.5" fill="none" stroke="#7189ff" stroke-width="1.5" />
+      <path d="M114 75h12M120 69v12" stroke="#7189ff" stroke-width="1.2" />
+    </svg>
+  </div>
+  <div class="spec-tx">
+    <div class="mini" style="--d: 4s">
+      <i style="left: 0"></i><i style="left: 33%"></i><i style="left: 66%"></i><i style="left: 100%"></i><u></u>
+    </div>
+    <h3>Size and corners</h3>
+    <p>
+      Shapes grow and shrink around their origin while the stroke keeps its width. Corner radius on rectangles, polygons
+      and stars animates too.
+    </p>
+  </div>
+</article>

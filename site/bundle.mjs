@@ -1,6 +1,7 @@
 // SVGcinema — deploy bundle
-// Puts the landing page and the editor build together, ready to upload to any static host:
-//   deploy/index.html   the landing page (site/index.html)
+// Puts the website and the editor build together, ready to upload to any static host:
+//   deploy/index.html, deploy/<page>/index.html   the website (site/build.mjs writes them into site/)
+//   deploy/img/         the editor captures the pages show (site/img/)
 //   deploy/editor/      the editor (dist/ from `vite build`)
 // Run `npm run build:deploy`, which builds both first. Usage on its own:
 //   node site/bundle.mjs              # → deploy/
@@ -12,14 +13,19 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = process.argv.find(a => a.startsWith('--out='));
 const out = resolve(root, arg ? arg.slice('--out='.length) : 'deploy');
-const page = join(root, 'site/index.html'),
+const site = join(root, 'site'),
+  page = join(site, 'index.html'),
   dist = join(root, 'dist');
 if (!existsSync(page)) throw new Error('site/index.html is missing: run node site/build.mjs');
+// the inner pages: every folder of site/ with an index.html (features/, agent/, …)
+const pages = readdirSync(site).filter(f => f !== 'src' && existsSync(join(site, f, 'index.html')));
 if (!existsSync(join(dist, 'index.html'))) throw new Error('dist/ is missing: run npm run build');
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync(page, join(out, 'index.html'));
+for (const p of pages) cpSync(join(site, p, 'index.html'), join(out, p, 'index.html'));
+cpSync(join(site, 'img'), join(out, 'img'), { recursive: true });
 // source maps would publish the full source: never ship them, even from an older dist/
 cpSync(dist, join(out, 'editor'), { recursive: true, filter: src => !src.endsWith('.map') });
 // …and the scripts' pointers to them go too (the GitHub Pages build keeps both, for debugging)
@@ -68,4 +74,6 @@ let n = 0,
     }
   }
 })(out);
-console.log(`${out}: ${n} files, ${(bytes / 1048576).toFixed(1)} MB (index.html + editor/)`);
+console.log(
+  `${out}: ${n} files, ${(bytes / 1048576).toFixed(1)} MB (the website: index.html, ${pages.join(', ')}, img/; editor/)`,
+);

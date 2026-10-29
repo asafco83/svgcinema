@@ -1,68 +1,92 @@
-# SVGcinema landing page
+# SVGcinema website
 
-The public website for SVGcinema: what the editor does, and the way into it. It is one self-contained page,
-`site/index.html`, with no build tools or runtime dependencies beyond Google Fonts. The editor is expected in an
-`editor/` folder next to it.
+The public website for SVGcinema: a short, pitch-first home page, and a page for each part of the product. Every
+page is one self-contained HTML file (styles and script inlined), with no build tools or runtime dependencies beyond
+Google Fonts; the only other files they load are the editor captures in `img/`. The editor is expected in an
+`editor/` folder next to the home page.
+
+| Page         | Path         | What's on it                                                                                                                      |
+| ------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| Home         | `index.html` | The live hero, the proof strip, the workflow, the design agent, highlights, export, fit                                           |
+| Features     | `features/`  | Everything the editor does, in six groups (Draw, Style, Animate, Timing, Interaction, Workflow)                                   |
+| Design agent | `agent/`     | What the agent can do, the two ways to connect, images and vector, guard rails, privacy                                           |
+| Import       | `import/`    | Opening SVGs from other tools and animated SVGs, adding images                                                                    |
+| Export       | `export/`    | Which export for what, animated SVG (embed code, image optimization), the external player, linked to scroll, video, GIF and image |
+| Downloads    | `downloads/` | The thumbnail installers, the player, the Claude skill and the guide for AI assistants                                            |
+| Licence      | `licence/`   | The `LICENSE` file                                                                                                                |
 
 ## Files
 
-| File                | What it is                                                                 |
-| ------------------- | -------------------------------------------------------------------------- |
-| `src/page.html`     | The page source: styles, markup and script, with `{{…}}` placeholders      |
-| `src/hero.svg`      | The editor's sample scene, exported from SVGcinema, that plays in the hero |
-| `src/snippets.json` | The embed code shown in the Export section, as the export dialog writes it |
-| `build.mjs`         | Fills in the placeholders and writes `index.html`                          |
-| `index.html`        | The built page (generated, do not edit)                                    |
+| File                         | What it is                                                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `src/pages/*.html`           | One file per page: its settings in a first-line comment (path, nav, title, description), then its sections |
+| `src/partials/`              | `layout.html` (the document around every page), `header.html`, `footer.html`                               |
+| `src/specs/*.html`           | The animated demo cards (morph, motion paths, trim path, …), shared by the pages                           |
+| `src/site.css`               | The styles of every page                                                                                   |
+| `src/site.js`                | The script of every page: each part runs only on a page that has it                                        |
+| `src/hero.svg`               | The editor's sample scene, exported from SVGcinema, that plays in the hero                                 |
+| `src/snippets.json`          | The embed code shown on the Export page, as the export dialog writes it                                    |
+| `img/`                       | Captures of the real editor, light and dark (`name.webp`, `name-dark.webp`), and `sunrise.webp`            |
+| `captures.py`                | Takes the captures from the editor (dev server), with scripted agent replies                               |
+| `build.mjs`                  | Builds every page into `index.html` / `<path>/index.html`                                                  |
+| `bundle.mjs`                 | Puts the website and the editor build together in `deploy/`, and checks every local link                   |
+| `index.html`, `*/index.html` | The built pages (generated, do not edit)                                                                   |
+
+Placeholders the build fills in: `{{SPEC:slug}}` (a demo card), `{{ART:slug}}` (only its animated picture),
+`{{CAP:name|alt|class}}` (a capture in the reader's theme: both files, the other theme's hidden with CSS, sized from
+the WebP header), `{{SHOT:name|alt|class}}` (one capture for both themes), `{{ROOT}}`, `{{HOME}}`, `{{IMG}}`,
+`{{EDITOR_URL}}`, `{{DL}}` (the editor's `downloads/` folder), `{{HERO_SVG}}`, `{{HERO_KB}}`, `{{HERO_GZ}}`,
+`{{PLAYER_VERSION}}`, `{{LICENCE}}`, `{{LOGO}}`. The build stops on any placeholder it doesn't know.
 
 The logo is read from `public/brand/svgcinema-logo-white.svg` at build time, so a new logo shows up on the next build.
+
+**Every picture of the editor is a real capture**, never redrawn. When the editor's look changes, take them again:
+start the dev server (`npx vite --port 5199`) and run `python3 site/captures.py`.
 
 ## Build
 
 ```bash
 node site/build.mjs                                            # editor links → editor/
 node site/build.mjs --editor=https://example.com/app/          # editor links → anywhere else
-npm run build:deploy                                           # editor + page together in deploy/
+npm run build:deploy                                           # editor + website together in deploy/
 npm run build:zip                                              # the full site as svgcinema-site.zip
 ```
 
-`npx prettier --write site` formats the sources; `index.html` and `hero.svg` are generated, so `.prettierignore`
+`npx prettier --write site` formats the sources; the built pages and `hero.svg` are generated, so `.prettierignore`
 skips them.
 
 ## Deploying
 
-`npm run build:deploy` builds the editor and the page and puts them together in `deploy/` (git-ignored): upload its
-contents to any static host. The thumbnail installers the page links to aren't in the repository: they're in the
+`npm run build:deploy` builds the editor and the website and puts them together in `deploy/` (git-ignored): upload
+its contents to any static host. The thumbnail installers the pages link to aren't in the repository: they're in the
 "thumbnails" release, and `sh site/fetch-downloads.sh` puts them in `public/downloads/` (the GitHub Pages build does
-the same), so run it first. The bundle checks that every local link in the pages reaches a file and stops if one
-doesn't. `npm run build:zip` does all of it and zips the result as `svgcinema-site.zip`, the whole site, ready to
-upload. By hand: put `site/index.html` at the root of the site and the editor build (`dist/`
-from `npm run build`) in an `editor/` folder beside it. The editor builds with relative paths (`base: './'`), so it works from a subfolder unchanged.
-Both live on the same origin, so the page and the editor share the light/dark choice
-(`localStorage['svgcinema:theme']`).
+the same), so run it first. The player and the Claude skill (`svgcinema-skill.zip`) are written to the editor's
+`downloads/` folder by `npm run build` (`scripts/build-player.mjs`). The bundle checks that every local link in the
+pages reaches a file and stops if one doesn't. `npm run build:zip` does all of it and zips the result as
+`svgcinema-site.zip`, the whole site, ready to upload. By hand: put the built pages and `img/` at the root of the
+site and the editor build (`dist/` from `npm run build`) in an `editor/` folder beside them. The editor builds with
+relative paths (`base: './'`), so it works from a subfolder unchanged. Both live on the same origin, so the website
+and the editor share the light/dark choice (`localStorage['svgcinema:theme']`).
 
-Every "Open the editor" link opens the editor in a new tab, so the landing page stays open behind it.
+Every "Open the editor" link opens the editor in a new tab, so the website stays open behind it.
 
-## What's on the page
+## What's interactive
 
-- **Hero:** a copy of the editor window. `hero.svg` is inlined and its own player runs it; the timeline under it
-  lists the scene's real layers and keyframe times (`TRACKS` in the page script) and scrubs the player with
-  `seekTo()`.
-- **What it animates:** twelve small looping demos (morph, motion path, trim path, bones, gradients, masks, easing,
-  filters, pins, size and corners, dash patterns, triggers and links), drawn with SMIL or CSS. They pause while off
+- **Home hero:** a copy of the editor window. `hero.svg` is inlined and its own player runs it; the timeline under it
+  lists the scene's real layers and keyframe times (`TRACKS` in `src/site.js`) and scrubs the player with `seekTo()`.
+- **Home workflow:** draw, animate, export, scrubbed by scrolling.
+- **Demo cards** (home, and the Features tiles): small looping demos drawn with SMIL or CSS. They pause while off
   screen.
-- **How it works:** draw, animate, export, scrubbed by scrolling.
-- **Images:** importing and the export dialog's image optimization, with a working copy of its image panel. It
-  draws a test photo and compresses it with the visitor's own browser encoders, the same ones the editor uses.
-- **Export:** JS player vs. pure CSS, the embed code for each framework (Next.js included), and the hero file's size.
-- **Import:** opening SVGs from other tools, animated SVGs (supported JS-player exports and CSS animations) as editable
-  keyframes, and SVGcinema exports that carry the editable project.
-- **Tools, Free, final call to action.** Pressing a tool key while the Tools section is in view lights up that key
-  (`+` / `=` and `-` too); under the keys, snapping and guides, align and booleans, and number dragging.
-- **Footer:** the logo (back to top) and the tagline, no links.
+- **Features › Try the keys:** pressing a tool key while it is in view lights up that key (`+` / `=` and `-` too).
+  The side index follows the group in view.
+- **Export:** the embed code for each framework (Next.js included), the hero file's size, and a working copy of the
+  export's image panel: it draws a test photo and compresses it with the visitor's own browser encoders, the same
+  ones the editor uses.
+- **Home finale:** film strips that run while it is in view.
 
-`tests/browser/site.py` checks the page: that `index.html` is built from the current sources, that it runs without
-errors, the feature cards and sections, the quoted sizes against `src/hero.svg`, the footer, the tool keys and the
-phone layout.
+`tests/browser/site.py` checks the pages: that they are built from the current sources, that every picture exists,
+that they run without errors and fit a phone, the navigation and footer, the hero, the workflow, the cards, the
+quoted sizes against `src/hero.svg`, the tool keys, the embed tabs, the image demo and the download links.
 
 Motion is turned off for visitors who ask for reduced motion.
 
@@ -86,6 +110,6 @@ copy(JSON.stringify(out, null, 1)); // → src/snippets.json
 ```
 
 Keep the `hero` prefix: the page script finds the player at `#hero-svg`. If the scene's keyframes change, update
-`TRACKS` in `src/page.html` to match, and the file sizes quoted in the Export section and under the hero
-(`tests/browser/site.py` checks the Export section's sizes against `src/hero.svg`). Start from a fresh editor (clear
-the site's storage) so the sample scene is the one exported.
+`TRACKS` in `src/site.js` to match. The sizes the pages quote are measured from `src/hero.svg` at build time. Start
+from a fresh editor (clear the site's storage) so the sample scene is the one exported, and take the captures again
+(`captures.py`) and `img/sunrise.webp` (a frame of the hero at 2.4 s) if the scene's look changed.

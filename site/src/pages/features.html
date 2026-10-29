@@ -1,0 +1,680 @@
+<!-- {"path":"features/","nav":"features","title":"Features · SVGcinema","description":"Everything SVGcinema does: drawing tools, styles and filters, keyframes on every property, shape morphing, motion paths, bones, pins, easing, the graph editor, triggers, scroll-linked playback and more."} -->
+<section class="phead mat">
+  <div class="wrap">
+    <p class="crumb"><a href="{{HOME}}">Home</a><span>/</span>Features</p>
+    <div class="phead-row">
+      <div>
+        <div class="tc">FEATURES</div>
+        <h1>Every property gets<br />its own track.</h1>
+      </div>
+      <p>
+        Everything the editor does, in the order you use it: draw the artwork, style it, animate it, get the timing
+        right, make it respond, and work faster while you do.
+      </p>
+    </div>
+    <nav class="pchips" aria-label="Groups">
+      <a href="#draw">01 Draw</a><a href="#style">02 Style</a><a href="#animate">03 Animate</a
+      ><a href="#timing">04 Timing</a><a href="#interact">05 Interaction</a><a href="#workflow">06 Workflow</a>
+    </nav>
+  </div>
+</section>
+
+<div class="wrap feat">
+  <aside class="idx" aria-label="On this page">
+    <div class="idx-in">
+      <p class="idx-t">ON THIS PAGE</p>
+      <a href="#draw">01 Draw</a>
+      <a class="sub" href="#draw">Pen · Shapes · Text · Images · Booleans · Symbols · Keys</a>
+      <a href="#style">02 Style</a>
+      <a class="sub" href="#style">Filters · Fill · Stroke · Masks</a>
+      <a href="#animate">03 Animate</a>
+      <a class="sub" href="#animate">Tracks · Morph · Paths · Trim · Bones · Pins · Presets</a>
+      <a href="#timing">04 Timing</a>
+      <a class="sub" href="#timing">Easing · Timeline · Graph · Onion skin</a>
+      <a href="#interact">05 Interaction</a>
+      <a class="sub" href="#interact">Scroll · Triggers · Links · Player API</a>
+      <a href="#workflow">06 Workflow</a>
+      <a class="sub" href="#workflow">Many layers · Select same · Numbers · Keys · Help · Files</a>
+      <div class="idx-more">
+        <a href="{{ROOT}}agent/">Design agent →</a>
+        <a href="{{ROOT}}import/">Import →</a>
+        <a href="{{ROOT}}export/">Export →</a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="feat-main">
+    <section id="draw" class="grp">
+      <div class="ghead">
+        <span class="gnum">01</span>
+        <div>
+          <h2>Draw</h2>
+          <p>Make the artwork, or bring it in. Tools stay active after each shape, the way they do in design apps.</p>
+        </div>
+      </div>
+      <div class="spot">
+        <div class="spot-cap">
+          {{CAP:editor-draw|The editor: the tool rail, the Layers panel with groups, masks and clip paths, and the
+          canvas with the sample scene|shot}}
+        </div>
+        <div>
+          <h3>Every tool is one key away</h3>
+          <p>
+            Select <kbd>V</kbd>, pen <kbd>P</kbd>, rectangle <kbd>R</kbd>, text <kbd>T</kbd>, bones <kbd>B</kbd>, pins
+            <kbd>W</kbd>. Letters go by key position, so they work on any keyboard layout. Snapping and guides keep
+            things lined up, and the Layers panel shows groups, masks and clip paths as a tree.
+          </p>
+        </div>
+      </div>
+      <div class="tiles">
+        <div class="tile">
+          <div class="vis mat">
+            <svg width="200" height="100" viewBox="0 0 230 120" fill="none" aria-hidden="true">
+              <path d="M20 100 C60 10, 120 10, 140 60 S 200 110, 212 20" stroke="currentColor" stroke-width="2.4" />
+              <path d="M60 20 L20 100 M140 60 L110 20 M140 60 L172 102" stroke="var(--accent)" stroke-width="1" />
+              <circle cx="60" cy="20" r="4" fill="var(--raised)" stroke="var(--accent)" stroke-width="1.4" />
+              <circle cx="110" cy="20" r="4" fill="var(--raised)" stroke="var(--accent)" stroke-width="1.4" />
+              <circle cx="172" cy="102" r="4" fill="var(--raised)" stroke="var(--accent)" stroke-width="1.4" />
+              <rect x="16" y="96" width="8" height="8" fill="var(--accent)" />
+              <rect
+                x="136"
+                y="56"
+                width="8"
+                height="8"
+                fill="var(--raised)"
+                stroke="var(--accent)"
+                stroke-width="1.6"
+              />
+              <rect x="208" y="16" width="8" height="8" fill="var(--accent)" />
+            </svg>
+          </div>
+          <div class="tb">
+            <h3>Pen and pencil <kbd>P</kbd></h3>
+            <p>Click for a corner, drag for a curve, or draw freehand. Edit any node afterwards.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <svg
+              width="210"
+              height="70"
+              viewBox="0 0 210 70"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <rect x="6" y="12" width="46" height="46" rx="8" />
+              <ellipse cx="86" cy="35" rx="24" ry="23" />
+              <path d="M140 10l7 15 16 2-12 11 3 16-14-8-14 8 3-16-12-11 16-2z" />
+              <path d="M186 12l18 10v24l-18 10-18-10V22z" />
+            </svg>
+          </div>
+          <div class="tb">
+            <h3>Shapes</h3>
+            <p>
+              Rectangles, ellipses, polygons, stars and lines. Sides, points and corner radius stay editable, and
+              animate.
+            </p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <div class="v-text" aria-hidden="true">
+              <span class="vt-a">Aa</span><span class="vt-b" lang="he">אב</span><span class="vt-c" lang="ru">Жж</span>
+            </div>
+          </div>
+          <div class="tb">
+            <h3>Text and fonts</h3>
+            <p>36 Google Fonts grouped by script, your computer’s fonts, right-to-left text, and text to outlines.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <img
+              class="sun-img"
+              src="{{IMG}}sunrise.webp"
+              width="150"
+              height="94"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="tb">
+            <h3>Images</h3>
+            <p>PNG, JPG, GIF, WebP, AVIF, HEIC and more, resized and compressed on export.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <svg width="150" height="80" viewBox="0 0 150 80" aria-hidden="true">
+              <circle cx="58" cy="40" r="30" fill="#8b7bf7" />
+              <circle cx="92" cy="40" r="30" fill="#8b7bf7" />
+              <circle cx="58" cy="40" r="30" fill="none" stroke="var(--accent)" stroke-dasharray="3 3" />
+              <circle cx="92" cy="40" r="30" fill="none" stroke="var(--accent)" stroke-dasharray="3 3" />
+            </svg>
+          </div>
+          <div class="tb">
+            <h3>Booleans and align</h3>
+            <p>Union, subtract, intersect and exclude; align, distribute, flip and turn in one bar.</p>
+          </div>
+        </div>
+        <article class="tile spec">
+          <div class="vis">{{ART:symbols}}</div>
+          <div class="tb">
+            <h3>Symbols</h3>
+            <p>Reusable artwork: edit it once and every instance follows, each with its own timing.</p>
+          </div>
+        </article>
+      </div>
+      <div class="keys-try" id="tools">
+        <h3>Try the keys</h3>
+        <p>Press a key on your keyboard, or click one, to see what the tool does.</p>
+        <div class="keys" id="keys">
+          <button
+            class="key"
+            type="button"
+            data-k="v"
+            data-tip="<b>Select.</b> Move, scale and rotate. Ctrl-click picks a layer inside a group."
+          >
+            <b>V</b><span>Select</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="a"
+            data-tip="<b>Edit nodes.</b> Drag nodes and handles. Double-click a node to switch between smooth and corner."
+          >
+            <b>A</b><span>Edit nodes</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="+"
+            data-k2="="
+            data-tip="<b>Add node.</b> Click a segment of the selected path to add a node there."
+          >
+            <b>+</b><span>Add node</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="-"
+            data-tip="<b>Remove node.</b> Click a node of the selected path to remove it."
+          >
+            <b>−</b><span>Remove node</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="p"
+            data-tip="<b>Pen.</b> Click for a corner, drag for a curve. Alt breaks the handle, Shift snaps to 45°, Space moves the point."
+          >
+            <b>P</b><span>Pen</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="n"
+            data-tip="<b>Pencil.</b> Draw freehand; the line is simplified and smoothed. End near the start to close it."
+          >
+            <b>N</b><span>Pencil</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="o"
+            data-tip="<b>Ellipse.</b> Shift draws a circle, Alt draws from the centre."
+          >
+            <b>O</b><span>Ellipse</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="m"
+            data-tip="<b>Rectangle.</b> Shift draws a square, Alt draws from the centre. Corner radius is animatable. Polygon and Star sit beside it: ↑ and ↓ change the sides while you drag."
+          >
+            <b>M</b><span>Rectangle</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="l"
+            data-tip="<b>Line.</b> Shift keeps 45° steps. Each end has its own track, so a line can grow or swing."
+          >
+            <b>L</b><span>Line</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="t"
+            data-tip="<b>Text.</b> Type in place on the canvas, with 36 Google Fonts in Hebrew, Latin, Cyrillic, Greek and Arabic (each previewed in itself), or fonts from your computer."
+          >
+            <b>T</b><span>Text</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="b"
+            data-tip="<b>Bone.</b> Build a rig, then pose it with forward or inverse kinematics. Bind hangs layers and bones on a bone."
+          >
+            <b>B</b><span>Bone</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="e"
+            data-tip="<b>Edit bone.</b> Change a rig’s rest pose, its joints, lengths and angles, without touching the keyframes."
+          >
+            <b>E</b><span>Edit bone</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="s"
+            data-tip="<b>Scale bone.</b> Drag along a bone to stretch it or squash it, keyed at the playhead."
+          >
+            <b>S</b><span>Scale bone</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="w"
+            data-tip="<b>Pin.</b> Click a path, image, text or group to pin it, then drag a pin to bend it. Pins can follow bones."
+          >
+            <b>W</b><span>Pin</span>
+          </button>
+          <button
+            class="key"
+            type="button"
+            data-k="h"
+            data-tip="<b>Hand.</b> Drag to pan. Ctrl and the mouse wheel zoom at the pointer."
+          >
+            <b>H</b><span>Hand</span>
+          </button>
+          <button
+            class="key wide"
+            type="button"
+            data-k=" "
+            data-tip="<b>Space.</b> Tap it to play and pause. Hold it for the hand in any tool."
+          >
+            <b>Space</b><span>Play / pan</span>
+          </button>
+        </div>
+        <p class="key-out" id="keyOut" aria-live="polite">Pick a key to see what the tool does.</p>
+      </div>
+    </section>
+
+    <section id="style" class="grp">
+      <div class="ghead">
+        <span class="gnum">02</span>
+        <div>
+          <h2>Style</h2>
+          <p>
+            Colour, strokes, effects and masks. Every setting here is a property, so every one of them can be keyed.
+          </p>
+        </div>
+      </div>
+      <div class="spot">
+        <div class="spot-cap">
+          {{CAP:filters|The Filters section of the inspector: Add filter, a note that filters don’t animate in CSS
+          exports, and a Drop shadow card with X, Y, Blur, Spread, Color and Opacity, each with its own keyframe
+          diamond|shot}}
+        </div>
+        <div>
+          <h3>Filters you stack and animate</h3>
+          <p>
+            Blur, drop shadow with spread, glow, inner shadow and glow, colour adjustments, colour overlay and outlines.
+            Each filter is a card: collapse it, drag it to reorder, and key any of its values.
+          </p>
+        </div>
+      </div>
+      <div class="tiles">
+        <article class="tile spec">
+          <div class="vis">{{ART:animated-gradients}}</div>
+          <div class="tb">
+            <h3>Fill and gradients</h3>
+            <p>Solid, linear or radial. Stops, angle, centre and radius all blend between keyframes.</p>
+          </div>
+        </article>
+        <article class="tile spec">
+          <div class="vis">{{ART:dash-patterns}}</div>
+          <div class="tb">
+            <h3>Strokes</h3>
+            <p>Width, line ends and joins, dash patterns that blend, and alignment: centre, inside or outside.</p>
+          </div>
+        </article>
+        <article class="tile spec">
+          <div class="vis">{{ART:masks-and-clipping}}</div>
+          <div class="tb">
+            <h3>Masks and clipping</h3>
+            <p>Soft masks by opacity or brightness, so a gradient wipe reveals as you’d expect.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="animate" class="grp">
+      <div class="ghead">
+        <span class="gnum">03</span>
+        <div>
+          <h2>Animate</h2>
+          <p>Key anything in the inspector, then reach for the tools made for motion.</p>
+        </div>
+      </div>
+      <div class="spot">
+        <div class="spot-cap">
+          {{CAP:inspector-tracks|The inspector’s Transforms section: Position, Scale, Skew, Rotate and Origin, each with
+          a keyframe diamond; Scale is animated|shot}}
+        </div>
+        <div>
+          <h3>A diamond beside every property</h3>
+          <p>
+            Click it to start a track. From then on, change the value anywhere on the timeline and a keyframe appears
+            there. Grey is off, an outline is animated, filled means a key sits under the playhead.
+          </p>
+        </div>
+      </div>
+      <div class="tiles">
+        <article class="tile spec">
+          <div class="vis">{{ART:shape-morphing}}</div>
+          <div class="tb">
+            <h3>Shape morphing</h3>
+            <p>Any path into another; nodes are matched so the in-betweens stay clean.</p>
+          </div>
+        </article>
+        <article class="tile spec">
+          <div class="vis">{{ART:motion-paths}}</div>
+          <div class="tb">
+            <h3>Motion paths</h3>
+            <p>Any path becomes a route, followed at an even speed, turning with the curve.</p>
+          </div>
+        </article>
+        <article class="tile spec">
+          <div class="vis">{{ART:trim-path}}</div>
+          <div class="tb">
+            <h3>Trim path <kbd>Shift D</kbd></h3>
+            <p>Lines that draw themselves on, and dashes that travel.</p>
+          </div>
+        </article>
+        <article class="tile spec">
+          <div class="vis">{{ART:bones-and-ik}}</div>
+          <div class="tb">
+            <h3>Bones and IK <kbd>B</kbd></h3>
+            <p>Rig a stalk, an arm or a tail; pose it forward or by inverse kinematics, squash and stretch it.</p>
+          </div>
+        </article>
+        <article class="tile spec">
+          <div class="vis">{{ART:pins-and-mesh-warp}}</div>
+          <div class="tb">
+            <h3>Pins and mesh warp <kbd>W</kbd></h3>
+            <p>Bend a path, an image, text or a whole group by its pins; pins can follow bones.</p>
+          </div>
+        </article>
+        <div class="tile">
+          <div class="vis shotv">{{CAP:presets|The Presets window|crop crop-presets}}</div>
+          <div class="tb">
+            <h3>Animation presets</h3>
+            <p>Entrances, exits, emphasis, strokes, colour and filters, slotted in at the playhead.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="timing" class="grp">
+      <div class="ghead">
+        <span class="gnum">04</span>
+        <div>
+          <h2>Timing</h2>
+          <p>Where an animation starts to feel right: when things happen, and how they get there.</p>
+        </div>
+      </div>
+      <div class="spot">
+        <div class="spot-cap">
+          {{CAP:easing|The Easing panel: In, Out and In-Out, the easing presets three across with Back picked, the curve
+          editor, Use on whole animator and Delete key|narrow}}
+        </div>
+        <div>
+          <h3>The Easing panel</h3>
+          <p>
+            Select keyframes and press Easing: In, Out or In-Out, presets from Linear to Bounce, and a curve editor
+            whose range fits overshooting curves like Back and Elastic. Save your own curve as a preset.
+          </p>
+        </div>
+      </div>
+      <div class="tiles">
+        <div class="tile">
+          <div class="vis shotv">{{CAP:timeline|The timeline|crop crop-tl}}</div>
+          <div class="tb">
+            <h3>The timeline</h3>
+            <p>
+              One row per property. Select layers and keys with Ctrl and Shift; keys snap to the playhead and to each
+              other.
+            </p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis shotv">{{CAP:graph|The graph editor|crop crop-graph}}</div>
+          <div class="tb">
+            <h3>Graph editor</h3>
+            <p>Open a track into a value graph: drag keys for value and time, shape the easing with handles.</p>
+          </div>
+        </div>
+        <article class="tile spec">
+          <div class="vis">{{ART:onion-skin}}</div>
+          <div class="tb">
+            <h3>Onion skin <kbd>Alt O</kbd></h3>
+            <p>Outlines of where the selected layers were and will be, before and after the playhead.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="interact" class="grp">
+      <div class="ghead">
+        <span class="gnum">05</span>
+        <div>
+          <h2>Interaction</h2>
+          <p>How the animation plays once it’s on a page. You choose this when you export.</p>
+        </div>
+      </div>
+      <div class="spot">
+        <div class="spot-cap">
+          {{CAP:export-scroll|Export with Starts set to Linked to scroll: a test page with start and end lines and how
+          much has played|shot}}
+        </div>
+        <div>
+          <h3>Linked to scroll</h3>
+          <p>
+            The page’s scroll becomes the playhead: scrolling down plays it, scrolling back plays it backwards. Pick
+            when it plays, smooth the wheel steps, and try it on a test page right in the Export window.
+          </p>
+          <p class="tl-more"><a class="more" href="{{ROOT}}export/#scroll">More in Export →</a></p>
+        </div>
+      </div>
+      <div class="tiles">
+        <div class="tile">
+          <div class="vis mat"><span class="v-pill" aria-hidden="true">▶ Play on hover</span></div>
+          <div class="tb">
+            <h3>Triggers</h3>
+            <p>Play on load, on hover, on click, when scrolled into view, or from your code.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat"><span class="v-link" aria-hidden="true">Good morning ↗</span></div>
+          <div class="tb">
+            <h3>Hyperlinks</h3>
+            <p>Any layer can link to a page, an email or a phone number, in a new tab or the same one.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis code-vis">
+            <span class="v-code" aria-hidden="true"
+              >player.<i>seek</i>(<b>1200</b>) player.<i>reverse</i>() player.<i>on</i>(<b>'end'</b>, …)</span
+            >
+          </div>
+          <div class="tb">
+            <h3>Player API</h3>
+            <p>Play, pause, seek, reverse and change speed from your code, with events.</p>
+            <p class="tl-more"><a class="more" href="{{ROOT}}downloads/#player">Download the player →</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow" class="grp">
+      <div class="ghead">
+        <span class="gnum">06</span>
+        <div>
+          <h2>Workflow</h2>
+          <p>The things that add up over a day of animating.</p>
+        </div>
+      </div>
+      <div class="spot">
+        <div class="spot-cap">
+          {{CAP:editor-multi|Two layers selected on the canvas in one transform box; the inspector says 2 layers
+          selected, with Mixed where their values differ|shot}}
+        </div>
+        <div>
+          <h3>Edit many layers at once</h3>
+          <p>
+            One transform box around the whole selection: scale, rotate and drag them together. The inspector shows the
+            properties they share, “Mixed” where they differ, and a change lands on all of them.
+          </p>
+        </div>
+      </div>
+      <div class="tiles">
+        <div class="tile">
+          <div class="vis mat">
+            <svg width="190" height="70" viewBox="0 0 190 70" aria-hidden="true">
+              <rect x="8" y="14" width="40" height="40" rx="6" fill="#ffb648" />
+              <circle cx="88" cy="34" r="20" fill="#8b7bf7" />
+              <rect x="120" y="14" width="40" height="40" rx="6" fill="#ffb648" />
+              <rect x="4" y="10" width="48" height="48" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5" />
+              <rect
+                x="116"
+                y="10"
+                width="48"
+                height="48"
+                rx="8"
+                fill="none"
+                stroke="var(--accent)"
+                stroke-width="1.5"
+              />
+            </svg>
+          </div>
+          <div class="tb">
+            <h3>Select same</h3>
+            <p>Every layer with the same fill, stroke, font or kind, inside groups too.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <div class="v-num" aria-hidden="true">
+              <span class="vn-f"><span>W</span> 100 <span>%</span></span
+              ><kbd>↑</kbd><kbd>↓</kbd><kbd>Shift</kbd>
+            </div>
+          </div>
+          <div class="tb">
+            <h3>Numbers you can nudge</h3>
+            <p>Drag any number, or press ↑ / ↓ to change it live: Shift ×10, Alt ×0.1.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <div class="v-keys" aria-hidden="true">
+              <kbd>V</kbd><kbd>P</kbd><kbd>R</kbd><kbd>T</kbd><kbd>B</kbd><kbd>W</kbd><kbd>F1</kbd>
+            </div>
+          </div>
+          <div class="tb">
+            <h3>Shortcuts on any layout</h3>
+            <p>F1 lists every shortcut with search; Hebrew or Russian layouts work too.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <div class="v-help" aria-hidden="true">
+              <span class="vh-tip">What the mask uses: its shapes’ opacity, or their brightness</span
+              ><span class="vh-l">Mask by <span>ⓘ</span></span>
+            </div>
+          </div>
+          <div class="tb">
+            <h3>Help where you need it</h3>
+            <p>An ⓘ beside inspector titles and labels explains them, on hover or with Tab.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat"><span class="v-spell" aria-hidden="true">Good morninng</span></div>
+          <div class="tb">
+            <h3>Spell check</h3>
+            <p>Text you edit on the canvas uses your browser’s own spell check.</p>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="vis mat">
+            <div class="v-file" aria-hidden="true">
+              <img src="{{IMG}}sunrise.webp" width="52" height="33" alt="" loading="lazy" decoding="async" /><span
+                >Sunrise.SVGcinema</span
+              >
+            </div>
+          </div>
+          <div class="tb">
+            <h3>Projects are files</h3>
+            <p>Saved as you work, reopened from Open recent, with a thumbnail in your file manager.</p>
+            <p class="tl-more">
+              <a class="more" href="{{ROOT}}downloads/#thumbs">Thumbnails for Windows and Linux →</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="more" class="grp">
+      <div class="ghead">
+        <span class="gnum">+</span>
+        <div>
+          <h2>Beyond the editor</h2>
+          <p>Three things big enough for a page of their own.</p>
+        </div>
+      </div>
+      <div class="tiles">
+        <a class="tile" href="{{ROOT}}agent/">
+          <div class="vis shotv">{{SHOT:agent-chat|The agent panel|crop crop-agent}}</div>
+          <div class="tb">
+            <h3>Design agent →</h3>
+            <p>Describe it, and it draws, keys and checks its own work.</p>
+          </div>
+        </a>
+        <a class="tile" href="{{ROOT}}import/">
+          <div class="vis mat">
+            <div class="v-exts" aria-hidden="true"><span>.svg</span><span>.png</span><span>.SVGcinema</span></div>
+          </div>
+          <div class="tb">
+            <h3>Import →</h3>
+            <p>Figma, Illustrator and Inkscape files, and animated SVGs as editable keyframes.</p>
+          </div>
+        </a>
+        <a class="tile" href="{{ROOT}}export/">
+          <div class="vis shotv">{{CAP:export-anim||crop crop-exp}}</div>
+          <div class="tb">
+            <h3>Export →</h3>
+            <p>One animated SVG, or a video, a GIF or a still of it.</p>
+          </div>
+        </a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<section class="cta-band band">
+  <div class="wrap">
+    <h2>Try any of it in a minute.</h2>
+    <a class="btn btn-pri" href="{{EDITOR_URL}}" target="_blank" rel="noopener" data-editor>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M4 2.8v10.4a.6.6 0 00.9.5l8.2-5.2a.6.6 0 000-1L4.9 2.3a.6.6 0 00-.9.5z" />
+      </svg>
+      Open the editor
+    </a>
+  </div>
+</section>

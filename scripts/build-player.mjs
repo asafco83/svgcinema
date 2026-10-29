@@ -2,12 +2,14 @@
 // - player/cin-player.min.js: the npm package's file (svgcinema-player, published by
 //   .github/workflows/player.yml), with the package's version inside;
 // - dist/downloads/ (when the editor has been built): cin-player.min.js (the latest) and
-//   cin-player-<version>.min.js for self-hosting, next to the thumbnail installers, with an index page.
+//   cin-player-<version>.min.js for self-hosting, and svgcinema-skill.zip (the Claude skill, the same zip the
+//   agent panel makes), next to the thumbnail installers, with an index page.
 import { build } from 'esbuild';
 import {
   copyFileSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   readdirSync,
   rmSync,
@@ -15,6 +17,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 
 const root = resolve(import.meta.dirname, '..'),
@@ -43,6 +46,22 @@ if (existsSync(join(dist, 'index.html'))) {
   mkdirSync(dl, { recursive: true });
   copyFileSync(out, join(dl, 'cin-player.min.js'));
   copyFileSync(out, join(dl, `cin-player-${pkg.version}.min.js`));
+  // the Claude skill as a static file, for the website's links: svgcinema/SKILL.md from src/agent/skill.ts
+  const skillJs = await build({
+    entryPoints: [join(root, 'src/agent/skill.ts')],
+    bundle: true,
+    format: 'esm',
+    write: false,
+  });
+  const { SKILL_MD } = await import(
+    'data:text/javascript;base64,' + Buffer.from(skillJs.outputFiles[0].text).toString('base64')
+  );
+  const tmp = mkdtempSync(join(tmpdir(), 'svgcinema-skill-'));
+  mkdirSync(join(tmp, 'svgcinema'));
+  writeFileSync(join(tmp, 'svgcinema/SKILL.md'), SKILL_MD);
+  rmSync(join(dl, 'svgcinema-skill.zip'), { force: true });
+  execFileSync('zip', ['-9', '-q', '-X', '-r', join(dl, 'svgcinema-skill.zip'), 'svgcinema'], { cwd: tmp });
+  rmSync(tmp, { recursive: true, force: true });
   // the Windows installer is offered zipped (many web hosts refuse to serve .exe files); the
   // thumbnails release has the .zip, and an older .exe found here is zipped now
   const exe = 'SVGcinema-Thumbnails-Setup.exe';
@@ -58,6 +77,7 @@ if (existsSync(join(dist, 'index.html'))) {
     'svgcinema-thumbnails.deb': 'Thumbnails in Linux file managers (.deb package)',
     'svgcinema-thumbnails-linux.tar.gz': 'Thumbnails in Linux file managers (with install.sh)',
     'cin-player.min.js': `The external player, latest (${pkg.version})`,
+    'svgcinema-skill.zip': 'The Claude skill: add it to Claude and it knows how to work in SVGcinema',
   };
   const files = readdirSync(dl)
     .filter(f => f !== 'index.html')

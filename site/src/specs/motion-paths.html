@@ -1,0 +1,36 @@
+<article class="spec">
+  <div class="spec-art mat">
+    <svg viewBox="0 0 240 150" aria-hidden="true">
+      <path
+        id="mp1"
+        d="M28 118 C60 18 176 14 212 96"
+        fill="none"
+        stroke="#959cae"
+        stroke-opacity=".55"
+        stroke-width="1.6"
+        stroke-dasharray="1 6"
+        stroke-linecap="round"
+      />
+      <circle cx="28" cy="118" r="3.5" fill="none" stroke="#7189ff" stroke-width="1.5" />
+      <circle cx="212" cy="96" r="3.5" fill="none" stroke="#7189ff" stroke-width="1.5" />
+      <g>
+        <path d="M-14 -5 L12 0 L-14 5 L-9 0Z" style="fill: var(--fg)" />
+        <animateMotion
+          dur="3.5s"
+          repeatCount="indefinite"
+          rotate="auto"
+          calcMode="spline"
+          keyTimes="0;1"
+          keySplines=".45 0 .55 1"
+        >
+          <mpath href="#mp1" />
+        </animateMotion>
+      </g>
+    </svg>
+  </div>
+  <div class="spec-tx">
+    <div class="mini" style="--d: 3.5s"><i style="left: 0"></i><i style="left: 100%"></i><u></u></div>
+    <h3>Motion paths</h3>
+    <p>Set any path as a motion path. The layer follows it at an even speed and can turn along the curve.</p>
+  </div>
+</article>
