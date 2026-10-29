@@ -60,8 +60,8 @@ export function syncExportUI() {
     .querySelectorAll('button')
     .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === (ext ? 'external' : 'embed')));
   $('#xPlayerNote').textContent = ext
-    ? `Uses the page’s player, else loads svgcinema-player ${PLAYER_VERSION} from jsDelivr. Saves about 24 KB per SVG.`
-    : 'Plays anywhere, even offline. Adds about 24 KB.';
+    ? `Uses the page’s player, else loads svgcinema-player ${PLAYER_VERSION} from jsDelivr. Saves about 26 KB per SVG.`
+    : 'Plays anywhere, even offline. Adds about 26 KB.';
   const wf = doc.layers.filter(
       l => l.type === 'text' && !l.hid && (webFont(l.geo.family) || isLocalFamily(l.geo.family)),
     ),
