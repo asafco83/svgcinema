@@ -32,6 +32,29 @@ cpSync(dist, join(out, 'editor'), { recursive: true, filter: src => !src.endsWit
   }
 })(join(out, 'editor'));
 
+// every local link in the pages must reach a file in the bundle (the thumbnail installers in
+// editor/downloads/ come from site/fetch-downloads.sh): a broken one stops the build
+const broken = [];
+(function links(d) {
+  for (const f of readdirSync(d)) {
+    const p = join(d, f);
+    if (statSync(p).isDirectory()) links(p);
+    else if (f.endsWith('.html'))
+      for (const m of readFileSync(p, 'utf8').matchAll(/\b(?:href|src)="([^"]+)"/g)) {
+        const u = m[1].split('#')[0].split('?')[0];
+        if (!u || /^([a-z]+:|\/\/)/i.test(m[1])) continue;
+        const t = u.startsWith('/') ? join(out, u) : join(dirname(p), decodeURIComponent(u));
+        if (!existsSync(t) || (statSync(t).isDirectory() && !existsSync(join(t, 'index.html'))))
+          broken.push(`${p.slice(out.length + 1)} → ${m[1]}`);
+      }
+  }
+})(out);
+if (broken.length)
+  throw new Error(
+    'Broken links in the bundle (for the thumbnail installers, run sh site/fetch-downloads.sh first):\n  ' +
+      broken.join('\n  '),
+  );
+
 let n = 0,
   bytes = 0;
 (function walk(d) {

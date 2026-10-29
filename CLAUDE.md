@@ -8,6 +8,12 @@ pure CSS). Live site: https://asafco83.github.io/svgcinema/ (GitHub Pages, deplo
 `featureSuggestions.md` lists features that are planned but not built yet.
 **Source maps:** the GitHub Pages build keeps them (`sourcemap: true` in `vite.config.ts`, for debugging there), but the
 hosting zip (`npm run build:deploy`, `site/bundle.mjs`) must never include any `*.map`: they would expose the full source.
+**Site zip:** whenever the owner asks for the zip / site zip, give the **full** one, built from an up-to-date `master`
+with `npm run build:zip` (→ `svgcinema-site.zip`), and send that file. It must include everything the live site has,
+so no link on the landing page or in the editor breaks: the thumbnail installers too (`site/fetch-downloads.sh`
+puts the "thumbnails" release's files in `public/downloads/`, as the Pages build does), the player downloads, and
+every asset. `site/bundle.mjs` refuses to build when a local link in the pages doesn't reach a file; never leave
+anything out to make it pass.
 `LICENSE`: proprietary, all rights reserved (package.json `"license": "UNLICENSED"`). It lets people use
 the published app, and use their exported files (with the embedded player) for any purpose,
 including commercially, and load or host the external player file unmodified to play them. The owner keeps the
