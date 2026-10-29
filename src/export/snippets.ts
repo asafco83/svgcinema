@@ -84,6 +84,10 @@ export function renderSnippet() {
       : selfHost
         ? 'Paste the SVG code into your page: every animation on the page then shares one player. Download the player to host it yourself, or leave out the first line and the SVG loads it from jsDelivr. SVGs added later by script (<code>innerHTML</code> doesn’t run scripts) start with <code>CinPlayer.boot(svg)</code>.'
         : FW_NOTES[fwSel];
+  // Linked to scroll: the player has to see the page around the SVG
+  if (doc.ex.mode !== 'css' && doc.ex.trigger === 'scrub' && fwSel !== 'api')
+    $('#xFwNote').innerHTML +=
+      ' <b>Linked to scroll</b> follows the page’s scroll: paste the SVG inline, or use an <code>&lt;object&gt;</code> with a file from the same site. In a box that scrolls on its own, it follows that box.';
 }
 export let lastExport = '';
 export function setLastExport(c: string) {

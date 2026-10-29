@@ -76,7 +76,9 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
 
 - `src/runtime/engine.ts` — **CinEngine**, the animation runtime. It is self-contained (no imports)
   because it is serialised into the exported SVG; the editor also uses it (`H` in `core/constants`).
-  Write it in plain ES5-style code (`var`, `function`), like the rest of the file.
+  Write it in plain ES5-style code (`var`, `function`), like the rest of the file. `src/runtime/scrub.ts`
+  (`cinScrub`, Playback › Starts › Linked to scroll) is serialised the same way, so the same rules apply; the
+  external player (`runtime/boot.ts`) calls it directly. Scroll-linked exports are external-player data format 2.
 - `src/model/` — data types (`types.ts`), layer tree, filters, fonts, sample document.
 - `src/core/` — state (`S` UI state, `doc` document), history (`beginEdit()` → `ed.end({insp:true})`
   is one undo step), keyframes, masks, booleans, view prefs.

@@ -201,9 +201,24 @@ export interface EasingPreset {
   v: Ease;
 }
 
+/** Linked to scroll: the part of the scroll that plays the animation. */
+export interface ScrubSettings {
+  /** while it crosses the window, scrolls in (to the centre), scrolls out (from the centre), or custom */
+  range: 'cross' | 'in' | 'out' | 'custom';
+  /** custom: the SVG's edge that starts it and where in the window (% from the top), and the end */
+  fe: 'top' | 'center' | 'bottom';
+  fp: number;
+  te: 'top' | 'center' | 'bottom';
+  tp: number;
+  /** seconds the animation takes to catch up with the scroll (0 = at once) */
+  sm: number;
+}
+
 export interface ExportSettings {
   mode: 'js' | 'css';
-  trigger: 'load' | 'click' | 'hover' | 'scroll' | 'api';
+  trigger: 'load' | 'click' | 'hover' | 'scroll' | 'scrub' | 'api';
+  /** Starts › Linked to scroll: where it plays, and smoothing */
+  scrub?: ScrubSettings;
   /** what happens on mouse out (hover trigger) */
   out: 'pause' | 'reverse' | 'restart' | 'start' | 'none' | string;
   size: 'resp' | 'fixed';

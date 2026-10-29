@@ -6,7 +6,14 @@ import { $, byId, esc, fmt } from '../core/constants';
 import { save } from '../core/history';
 import { ASSETS, URLS, doc, randPre } from '../core/state';
 import { buildExport } from './build';
-import { syncExportUI } from './dialog';
+import { scrubSettings, smoothLabel, syncExportUI } from './dialog';
+import {
+  centreScrubPreview,
+  isScrubPreview,
+  layoutScrubPreview,
+  scrubPreviewHTML,
+  watchScrubPreview,
+} from './scrub-preview';
 import { exportPxScale, outDims, usedImageIds } from './size';
 import { lastExport, renderSnippet, setLastExport } from './snippets';
 import { exportKind, registerKind } from './kind';
@@ -238,6 +245,18 @@ export function sizePreview() {
     rh = fixed ? h : Math.round((rw * doc.h) / doc.w),
     actual = prevMode === 'actual';
   box.classList.add('actual');
+  box.classList.toggle('scrub', isScrubPreview());
+  if (isScrubPreview()) {
+    // Linked to scroll: the art on a test page that scrolls
+    const k = layoutScrubPreview(rw, rh, actual);
+    $('#xPrevLbl').textContent =
+      `A test page: the animation follows its scroll · start and end lines show where it plays` +
+      (actual ? '' : ` · shown at ${Math.round(k * 100)}%`);
+    $('#xPrevZoom')
+      .querySelectorAll('button')
+      .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === prevMode));
+    return;
+  }
   const s = actual ? 1 : Math.min(1, (box.clientWidth - 26) / rw, 400 / rh);
   svg.style.width = Math.round(rw * s) + 'px';
   svg.style.height = Math.round(rh * s) + 'px';
@@ -280,7 +299,13 @@ export async function runExport() {
   const box = $('#xprev'),
     old = box.querySelector('svg');
   if (old && old.player) old.player.destruct();
-  box.innerHTML = r.code;
+  const scrub = isScrubPreview();
+  box.innerHTML = scrub ? scrubPreviewHTML(r.code) : r.code;
+  if (scrub) {
+    // sized and scrolled to the middle before the player starts, so it opens on that frame
+    sizePreview();
+    centreScrubPreview();
+  }
   const ext = doc.ex.mode !== 'css' && doc.ex.player === 'external';
   box.querySelectorAll('script').forEach((sc: HTMLScriptElement) => {
     // Player › External: the JSON and the loader aren't run here (the loader would fetch the player
@@ -297,6 +322,7 @@ export async function runExport() {
     if (sv) bootExternal(sv as SVGSVGElement);
   }
   sizePreview();
+  if (scrub) watchScrubPreview();
   const [w, h] = outDims(),
     size = new Blob([r.code]).size;
   // CSS stores every frame of a shape change (morphs, pins): offer the much smaller JavaScript export
@@ -321,6 +347,19 @@ export async function runExport() {
       ? 'CSS only' + (!note.hidden ? ` · as JavaScript ${kb(jsSize)}` : '')
       : `JavaScript · ${ext ? 'external player' : 'player inside'}`;
   const chip = (k: string, v: string | number) => `<span>${k} <b>${v}</b></span>`;
+  if (scrub) {
+    const sc = scrubSettings();
+    $('#xStats').innerHTML =
+      chip(
+        'Plays over',
+        { cross: 'the window + its height', in: 'half the window', out: 'half the window', custom: 'your range' }[
+          sc.range
+        ],
+      ) +
+      chip('Length', `${fmt(doc.dur)}s`) +
+      chip('Smoothing', smoothLabel(sc.sm));
+    return;
+  }
   $('#xStats').innerHTML =
     (doc.ex.size === 'fixed' ? chip('Output', `${w} × ${h}`) : '') +
     chip('Layers', doc.layers.filter(l => !isHidden(l)).length) +
@@ -437,6 +476,38 @@ export function init(): void {
     save();
     syncExportUI();
     updateExport();
+  });
+  // Linked to scroll
+  const scrubChanged = () => {
+    save();
+    syncExportUI();
+    updateExport();
+  };
+  $('#xsRange').addEventListener('change', (e: Event) => {
+    scrubSettings().range = (e.target as HTMLSelectElement).value as any;
+    scrubChanged();
+  });
+  $('#xsFe').addEventListener('change', (e: Event) => {
+    scrubSettings().fe = (e.target as HTMLSelectElement).value as any;
+    scrubChanged();
+  });
+  $('#xsTe').addEventListener('change', (e: Event) => {
+    scrubSettings().te = (e.target as HTMLSelectElement).value as any;
+    scrubChanged();
+  });
+  const pct = (k: 'fp' | 'tp') => (e: Event) => {
+    const v = parseFloat((e.target as HTMLInputElement).value);
+    if (isFinite(v)) scrubSettings()[k] = Math.max(-100, Math.min(200, v));
+    scrubChanged();
+  };
+  $('#xsFp').addEventListener('change', pct('fp'));
+  $('#xsTp').addEventListener('change', pct('tp'));
+  $('#xsSm').addEventListener('input', (e: Event) => {
+    $('#xsSmv').textContent = smoothLabel(+(e.target as HTMLInputElement).value);
+  });
+  $('#xsSm').addEventListener('change', (e: Event) => {
+    scrubSettings().sm = +(e.target as HTMLInputElement).value || 0;
+    scrubChanged();
   });
   $('#xIt').addEventListener('change', (e: Event) => {
     doc.it = parseInt((e.target as any).value) || 0;

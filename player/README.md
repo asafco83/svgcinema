@@ -13,7 +13,7 @@ Once the page has loaded, the loader inside each SVG:
    change:
 
    ```text
-   https://cdn.jsdelivr.net/npm/svgcinema-player@1.1.0/cin-player.min.js
+   https://cdn.jsdelivr.net/npm/svgcinema-player@1.2.0/cin-player.min.js
    ```
 
    The first SVG on the page loads it, and that one copy starts every SVG on the page.
@@ -56,7 +56,11 @@ State: `currentTime`, `duration`, `totalTime`, `state`, `isPlaying`, `isReversed
 `hasEnded`, `isInfinite`, `isAlternate`, `isBackwards`, `speed`, `fps`, `direction`, `fill`,
 `iterations`.
 
-`window.CinPlayer` has `version`, `f` (the data format it reads), `boot(svg)` (for SVGs added to the
+Start triggers: on load, on mouse over, on click, on scroll into view, linked to scroll (the
+animation follows the page's scroll, or that of the nearest box that scrolls; added in 1.2.0, data
+format 2) and programmatic.
+
+`window.CinPlayer` has `version`, `f` (the data format it reads: 2 since 1.2.0), `boot(svg)` (for SVGs added to the
 page later by script, which doesn't run their loader) and `scan(root)`.
 
 See LICENSE for the terms.

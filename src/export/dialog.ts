@@ -3,7 +3,8 @@ import { facesFor, isLocalFamily, needsShaping, webFont } from '../render/fonts'
 import { $, fmt } from '../core/constants';
 import { S, doc } from '../core/state';
 import { kb } from '../ui/inspector';
-import { PLAYER_VERSION, projectPayload } from './build';
+import { PLAYER_VERSION, SCRUB_DEFAULT, projectPayload } from './build';
+import type { ScrubSettings } from '../model/types';
 import type { Layer } from '../model/types';
 import { syncSizeUI } from './size';
 import { renderSnippet } from './snippets';
@@ -13,6 +14,7 @@ export const XTRIG = [
   ['hover', 'On mouse over'],
   ['click', 'On click'],
   ['scroll', 'On scroll into view'],
+  ['scrub', 'Linked to scroll'],
   ['api', 'Programmatic'],
 ];
 export const XOUT = [
@@ -43,7 +45,7 @@ export function setOpts(sel: HTMLSelectElement, list: string[][], val: string) {
 export function syncExportUI() {
   const ex = doc.ex,
     css = ex.mode === 'css';
-  if (css && ['click', 'scroll', 'api'].includes(ex.trigger)) ex.trigger = 'load';
+  if (css && ['click', 'scroll', 'scrub', 'api'].includes(ex.trigger)) ex.trigger = 'load';
   $('#xMode')
     .querySelectorAll('button')
     .forEach((b: HTMLElement) => b.classList.toggle('on', b.dataset.v === ex.mode));
@@ -103,6 +105,12 @@ export function syncExportUI() {
     ex.trigger === 'click' ? 'Second click' : ex.trigger === 'scroll' ? 'Scrolled away' : 'On mouse out';
   $('#xOut').setAttribute('aria-label', $('#xOutLbl').textContent);
   $('#xFpsRow').hidden = css;
+  // Linked to scroll: where in the scroll it plays and the smoothing, instead of repeat, direction,
+  // the end and speed (which don't apply)
+  const scrub = ex.trigger === 'scrub';
+  $('#xScrubRows').hidden = !scrub;
+  ['#xItRow', '#xDirRow', '#xFillRow', '#xSpeedRow'].forEach(q => ($(q).hidden = scrub));
+  if (scrub) syncScrubUI();
   $('#xIt').value = String(doc.it || 0);
   $('#xDir').value = doc.dir || 'normal';
   $('#xFill').value = ex.fill || 'forwards';
@@ -123,11 +131,39 @@ export function syncExportUI() {
   renderSnippet();
 }
 
+/** Linked to scroll's settings, created with their defaults the first time. */
+export function scrubSettings(): ScrubSettings {
+  if (!doc.ex.scrub) doc.ex.scrub = { ...SCRUB_DEFAULT };
+  return doc.ex.scrub;
+}
+export const SCRUB_RANGE: Record<string, string> = {
+  cross: 'while it crosses the window',
+  in: 'while it scrolls in',
+  out: 'while it scrolls out',
+  custom: 'custom range',
+};
+export function smoothLabel(v: number) {
+  return v > 0 ? fmt(Math.round(v * 100) / 100) + ' s' : 'Off';
+}
+function syncScrubUI() {
+  const sc = scrubSettings(),
+    custom = sc.range === 'custom';
+  ($('#xsRange') as HTMLSelectElement).value = sc.range;
+  $('#xsCustom').hidden = !custom;
+  ($('#xsFe') as HTMLSelectElement).value = sc.fe;
+  ($('#xsTe') as HTMLSelectElement).value = sc.te;
+  if ($('#xsFp') !== document.activeElement) ($('#xsFp') as HTMLInputElement).value = fmt(sc.fp);
+  if ($('#xsTp') !== document.activeElement) ($('#xsTp') as HTMLInputElement).value = fmt(sc.tp);
+  ($('#xsSm') as HTMLInputElement).value = String(sc.sm);
+  $('#xsSmv').textContent = smoothLabel(sc.sm);
+}
+
 const TRIG_SHORT: Record<string, string> = {
   load: 'On load',
   hover: 'On mouse over',
   click: 'On click',
   scroll: 'On scroll',
+  scrub: 'Linked to scroll',
   api: 'Programmatic',
 };
 /** the one-line summaries a closed section shows next to its title */
@@ -141,10 +177,12 @@ export function syncSummaries() {
       ? 'JavaScript · external player'
       : 'JavaScript · embedded player';
   $('#xSumPlay').textContent =
-    (TRIG_SHORT[ex.trigger] || 'On load') +
-    ' · ' +
-    (it === 0 ? 'loops forever' : it === 1 ? 'plays once' : `plays ${it} times`) +
-    ((ex.speed || 1) !== 1 ? ` · ×${fmt(ex.speed)}` : '');
+    ex.trigger === 'scrub'
+      ? 'Linked to scroll · ' + SCRUB_RANGE[scrubSettings().range]
+      : (TRIG_SHORT[ex.trigger] || 'On load') +
+        ' · ' +
+        (it === 0 ? 'loops forever' : it === 1 ? 'plays once' : `plays ${it} times`) +
+        ((ex.speed || 1) !== 1 ? ` · ×${fmt(ex.speed)}` : '');
   $('#xSumSize').textContent = ex.size === 'fixed' ? `${$('#xW').value} × ${$('#xH').value} px` : 'Responsive';
   const fmtSel = $('#xFmt') as HTMLSelectElement,
     fmtTxt = fmtSel.selectedOptions && fmtSel.selectedOptions[0] ? fmtSel.selectedOptions[0].textContent : '';

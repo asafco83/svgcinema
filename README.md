@@ -33,6 +33,7 @@ src/
 
   runtime/engine.ts      The player that ships inside every exported SVG (typed, dependency-free)
   runtime/boot.ts        Starts an SVG exported with the external player (JSON + trigger)
+  runtime/scrub.ts       Linked to scroll: the animation follows the page's scroll (self-contained)
   runtime/player.ts      The external player file (svgcinema-player on npm)
 
   core/
@@ -107,6 +108,7 @@ src/
     video.ts             Export › Video: MP4, WebM or PNG frames (WebCodecs), progress and Cancel
     mux.ts               The MP4 and WebM files (and av1C from an AV1 stream), written by hand
     anim.ts              Export › GIF & Animated WebP: settings, the comparison, the set
+    scrub-preview.ts     The Linked to scroll preview: a test page that scrolls
     anim.worker.ts       Makes the GIFs and Animated WebPs off the main thread
     gif.ts               The GIF encoder: palette, dithering, lossy LZW, changed pixels only
     webp-anim.ts         The Animated WebP file from still WebP frames
@@ -392,6 +394,14 @@ Use the AI assistant you already pay for, such as Claude in Chrome or any assist
 - **Animated WebP compression:** **Quality** or **Lossless**, store only the pixels that change, transparent background.
 - **The preview** is made from the real file each time a setting changes: its size and how much smaller it is than a plain GIF of the same frames (256 colours, full dithering, every frame stored whole), and the frame at the playhead next to the original with a divider to drag (Fit, 100% or 200%). The playhead's track has a tick per frame; **Play** plays the file itself.
 - **Embed in your site:** a GIF as a plain `<img>`; an Animated WebP in a `<picture>` with a GIF behind it for email and older apps. **Download the set (.zip)** makes both.
+
+**Linked to scroll** (Playback › Starts, JavaScript export): the animation follows the page's scroll instead of playing on its own. Scrolling down plays it and scrolling back plays it backwards; Repeat, Direction, After the end and Speed don't apply and are hidden.
+
+- **Plays:** _while it crosses the window_ (from its top entering at the bottom to its bottom leaving at the top), _while it scrolls in, until centred_, _while it scrolls out, from the centre_, or **Custom**: which edge of the SVG (top, centre or bottom) starts and ends it, and where in the window (% from the top).
+- **Smoothing** (0–1 s, 0.3 s by default) lets the animation glide after the scroll instead of jumping with each mouse-wheel step.
+- **The preview** is a small test page with the animation in it: scroll it to try it. Dashed lines show where in the window it starts and ends, and a panel beside it shows how much has played.
+- **Where it works:** pasted inline, or in an `<object>` with a file from the same site (the player measures the `<object>` in the page around it). Inside a box that scrolls on its own, it follows that box. An `<img>` shows the first frame only, and CSS-only exports can't link to scroll (they keep On load).
+- With the external player it needs player 1.2.0 (data format 2); other exports stay format 1, so older players still start them.
 
 **Less motion:** the Export dialog's _Less motion_ setting decides what visitors who ask their system for reduced motion see: _Play normally_ (the default, adds nothing), _Show the first frame_ or _Show the last frame_. The JS player then holds that frame and doesn't start (whatever the trigger); a CSS export pauses every animation on it (a few bytes of CSS). Shape morphs in a CSS export are held with the CSS `d` property, which Safari ignores, so there they keep playing.
 

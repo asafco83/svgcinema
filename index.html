@@ -562,7 +562,70 @@
                   <option value="none">Keep playing</option>
                 </select>
               </div>
-              <div class="row">
+              <div id="xScrubRows" hidden>
+                <div class="row">
+                  <span class="rl">Plays</span
+                  ><select class="sel" id="xsRange" aria-label="Plays">
+                    <option value="cross">While it crosses the window</option>
+                    <option value="in">While it scrolls in, until centred</option>
+                    <option value="out">While it scrolls out, from the centre</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div id="xsCustom" hidden>
+                  <div class="row">
+                    <span class="rl">Starts when</span>
+                    <div class="xedge">
+                      <select class="sel" id="xsFe" aria-label="Which edge starts it">
+                        <option value="top">Its top</option>
+                        <option value="center">Its centre</option>
+                        <option value="bottom">Its bottom</option></select
+                      ><label class="nf"
+                        ><span>at</span
+                        ><input
+                          id="xsFp"
+                          inputmode="decimal"
+                          aria-label="Where in the window it starts, % from the top"
+                        /><em>%</em></label
+                      >
+                    </div>
+                  </div>
+                  <div class="row">
+                    <span class="rl">Ends when</span>
+                    <div class="xedge">
+                      <select class="sel" id="xsTe" aria-label="Which edge ends it">
+                        <option value="top">Its top</option>
+                        <option value="center">Its centre</option>
+                        <option value="bottom">Its bottom</option></select
+                      ><label class="nf"
+                        ><span>at</span
+                        ><input
+                          id="xsTp"
+                          inputmode="decimal"
+                          aria-label="Where in the window it ends, % from the top"
+                        /><em>%</em></label
+                      >
+                    </div>
+                  </div>
+                  <p class="note xind">Where in the window: 0% is its top, 100% its bottom.</p>
+                </div>
+                <div
+                  class="row"
+                  title="Eases the animation toward the scroll position, so mouse-wheel steps glide instead of jumping"
+                >
+                  <span class="rl">Smoothing</span>
+                  <div class="rf">
+                    <input type="range" id="xsSm" min="0" max="1" step="0.05" aria-label="Smoothing" /><span
+                      class="chip"
+                      id="xsSmv"
+                    ></span>
+                  </div>
+                </div>
+                <p class="note xind">
+                  Scrolling down plays it, scrolling back plays it backwards. Repeat, direction and speed don’t apply.
+                </p>
+              </div>
+              <div class="row" id="xItRow">
                 <span class="rl">Repeat</span
                 ><select class="sel" id="xIt" aria-label="Repeat">
                   <option value="0">Loop forever</option>
@@ -572,7 +635,7 @@
                   <option value="5">5 times</option>
                 </select>
               </div>
-              <div class="row">
+              <div class="row" id="xDirRow">
                 <span class="rl">Direction</span
                 ><select class="sel" id="xDir" aria-label="Direction">
                   <option value="normal">Normal</option>
@@ -581,14 +644,14 @@
                   <option value="alternate-reverse">Reverse, then alternate</option>
                 </select>
               </div>
-              <div class="row">
+              <div class="row" id="xFillRow">
                 <span class="rl">After the end</span
                 ><select class="sel" id="xFill" aria-label="After the end">
                   <option value="forwards">Stay on the last frame</option>
                   <option value="backwards">Return to the first frame</option>
                 </select>
               </div>
-              <div class="row">
+              <div class="row" id="xSpeedRow">
                 <span class="rl">Speed</span>
                 <div class="xpair">
                   <label class="nf"><span>×</span><input id="xSpeed" inputmode="decimal" aria-label="Speed" /></label
