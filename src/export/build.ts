@@ -13,6 +13,8 @@ import { rememberedKind, showKind } from './kind';
 import { markup } from '../render/markup';
 import { fontFaceCSS } from '../render/fonts';
 import { CinEngine } from '../runtime/engine';
+import { cinScrub } from '../runtime/scrub';
+import type { ScrubSettings } from '../model/types';
 import { isPinKey } from '../model/pins';
 import { alignOf, meshOf } from '../render/markup';
 import { drawOrder } from '../model/draw-order';
@@ -403,15 +405,39 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
 /** the external player's version (player/package.json) and its address on jsDelivr */
 export const PLAYER_VERSION = __PLAYER_VERSION__;
 export const PLAYER_CDN = `https://cdn.jsdelivr.net/npm/svgcinema-player@${PLAYER_VERSION}/cin-player.min.js`;
-/** the external player's data format (runtime/boot FORMAT): a player only starts SVGs it can read */
-export const PLAYER_FORMAT = 1;
+/** the external player's data format (runtime/boot FORMAT): a player only starts SVGs it can read.
+ *  Format 2 added Linked to scroll; other exports stay format 1, so older players still start them. */
+export const PLAYER_FORMAT = 2;
+/** the data format an export needs */
+export function formatFor(trigger: string) {
+  return trigger === 'scrub' ? 2 : 1;
+}
+/** Linked to scroll, as the player reads it: [from edge, from %, to edge, to %] (edges 0 top, 0.5 centre,
+ *  1 bottom; % of the window from its top), smoothing in seconds */
+export const SCRUB_DEFAULT: ScrubSettings = { range: 'cross', fe: 'top', fp: 80, te: 'center', tp: 35, sm: 0.3 };
+const EDGE = { top: 0, center: 0.5, bottom: 1 };
+export function scrubRange(sc: ScrubSettings = SCRUB_DEFAULT): number[] {
+  if (sc.range === 'in') return [0, 100, 0.5, 50];
+  if (sc.range === 'out') return [0.5, 50, 1, 0];
+  if (sc.range === 'custom') {
+    const pc = (v: number) => Math.max(-100, Math.min(200, +v || 0));
+    return [EDGE[sc.fe] ?? 0, pc(sc.fp), EDGE[sc.te] ?? 0.5, pc(sc.tp)];
+  }
+  return [0, 100, 1, 0];
+}
+export function scrubConfig(sc: ScrubSettings = SCRUB_DEFAULT, base = 1) {
+  const c: { r: number[]; sm?: number; b?: number } = { r: scrubRange(sc) };
+  if (sc.sm > 0) c.sm = Math.round(sc.sm * 100) / 100;
+  if (base === -1) c.b = -1;
+  return c;
+}
 /** Player › External: the tiny start-up script the SVG carries. Once the page has loaded it uses the
  *  page's own player (window.CinPlayer, e.g. a self-hosted copy) when there is one; otherwise the first
  *  SVG on the page loads the player from jsDelivr, and that copy starts every SVG still waiting. */
-export function playerLoader(svgId: string) {
+export function playerLoader(svgId: string, format = 1) {
   return (
     `(function(){var s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;` +
-    `function go(){var C=window.CinPlayer;if(C&&C.boot&&(C.f||0)>=${PLAYER_FORMAT}){C.boot(s);return}` +
+    `function go(){var C=window.CinPlayer;if(C&&C.boot&&(C.f||0)>=${format}){C.boot(s);return}` +
     `if(window.__cinL)return;window.__cinL=1;var e=document.createElementNS('http://www.w3.org/2000/svg','script');` +
     `e.setAttribute('href',${JSON.stringify(PLAYER_CDN)});s.appendChild(e)}` +
     `if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go()})();`
@@ -421,7 +447,7 @@ export function reducedJS(rm: string | undefined) {
   if (rm !== 'first' && rm !== 'last') return '';
   return `if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)P.seekTo(${rm === 'first' ? 0 : Math.max(0, Math.round(doc.dur * 1000) - 1)});else{`;
 }
-export function triggerJS(t: string, out: string, base: number) {
+export function triggerJS(t: string, out: string, base: number, scrub?: ScrubSettings) {
   const pre =
     'P._cleanup=[];function L(t,e,f){t.addEventListener(e,f);P._cleanup.push(function(){t.removeEventListener(e,f);});}' +
     `function fwd(){if(P.direction!==${base}||P.isRollingBack)P.set("direction",${base});P.play();}` +
@@ -437,6 +463,9 @@ export function triggerJS(t: string, out: string, base: number) {
       pre +
       `if("IntersectionObserver" in window){var io=new IntersectionObserver(function(e){if(e[0].isIntersecting)fwd();else if(${JSON.stringify(out)}!=="none"&&(P.isPlaying||P.currentTime>0))out();},{threshold:.35});io.observe(s);P._cleanup.push(function(){io.disconnect();});}else P.play();`
     );
+  if (t === 'scrub')
+    // the animation runs forwards with the scroll: direction doesn't apply
+    return pre + `(${cinScrub.toString()})(s,P,${JSON.stringify(scrubConfig(scrub))});`;
   if (t === 'api') return pre;
   return pre + 'P.play();';
 }
@@ -513,8 +542,7 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
         .replace(/[^a-z0-9-]/g, '')
         .replace(/^[^a-z]+/, '') || 'cin') + '-',
     svgId = pre + 'svg';
-  if (ex.mode === 'css' && (ex.trigger === 'click' || ex.trigger === 'scroll' || ex.trigger === 'api'))
-    ex.trigger = 'load';
+  if (ex.mode === 'css' && ['click', 'scroll', 'scrub', 'api'].includes(ex.trigger)) ex.trigger = 'load';
   // Export selection: only the chosen layers, inside the groups that hold them
   let src = doc.layers;
   if (S.exportOnly && S.exportOnly.size) {
@@ -757,17 +785,18 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
         // the animation as JSON for the external player (runtime/player.ts) and the loader that finds
         // or fetches it; JSON text is escaped so the XML parser can't read markup in it
         const cfg: Record<string, unknown> = {
-          f: PLAYER_FORMAT,
+          f: formatFor(ex.trigger),
           d: data,
           t: ex.trigger,
           o: ex.out,
           b: /reverse/.test(doc.dir) ? -1 : 1,
         };
         if (ex.rm === 'first' || ex.rm === 'last') cfg.rm = ex.rm;
+        if (ex.trigger === 'scrub') cfg.sc = scrubConfig(ex.scrub);
         const json = JSON.stringify(cfg).replace(/[<>&]/g, c => '\\u00' + c.charCodeAt(0).toString(16));
-        out += `<script type="application/json" data-cin="1">${json}</script><script><![CDATA[\n${playerLoader(svgId)}\n]]><\/script>`;
+        out += `<script type="application/json" data-cin="1">${json}</script><script><![CDATA[\n${playerLoader(svgId, formatFor(ex.trigger))}\n]]><\/script>`;
       } else
-        out += `<script><![CDATA[\n(function(){var CinEngine=${CinEngine.toString()};\nvar s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;var P=CinEngine(${JSON.stringify(data)},s);s.player=s.cinPlayer=P;P.stop();${reducedJS(ex.rm)}${triggerJS(ex.trigger, ex.out, /reverse/.test(doc.dir) ? -1 : 1)}${ex.rm === 'first' || ex.rm === 'last' ? '}' : ''}})();\n]]><\/script>`;
+        out += `<script><![CDATA[\n(function(){var CinEngine=${CinEngine.toString()};\nvar s=document.getElementById(${JSON.stringify(svgId)});if(!s)return;var P=CinEngine(${JSON.stringify(data)},s);s.player=s.cinPlayer=P;P.stop();${reducedJS(ex.rm)}${triggerJS(ex.trigger, ex.out, /reverse/.test(doc.dir) ? -1 : 1, ex.scrub)}${ex.rm === 'first' || ex.rm === 'last' ? '}' : ''}})();\n]]><\/script>`;
     }
   }
   H.lookup(id => layerById(id));

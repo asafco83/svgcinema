@@ -8952,3 +8952,176 @@ button.ag-chip:hover {
   padding: 0 14px;
   font-size: 12.5px;
 }
+
+/* ---------- Export › Animated SVG: Linked to scroll (matched to the mockup) ---------- */
+#xScrubRows,
+#xsCustom {
+  display: grid;
+  gap: 6px;
+}
+#xScrubRows[hidden],
+#xsCustom[hidden] {
+  display: none;
+}
+.xedge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  gap: 6px;
+  min-width: 0;
+}
+#xsSm {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+#xsSmv {
+  min-width: 30px;
+  text-align: center;
+}
+/* the preview: a test page that scrolls, with the start and end lines, and how much has played */
+.xs-test {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  gap: 10px;
+}
+.xs-win {
+  position: relative;
+  height: 380px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--raised);
+}
+.xs-page {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+#xprev.actual .xs-page {
+  overflow-x: auto;
+}
+.xs-col {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 0 28px;
+}
+.xs-fill {
+  display: grid;
+  gap: 10px;
+  align-content: end;
+  width: 100%;
+}
+.xs-fill + .xs-art + .xs-fill {
+  align-content: start;
+}
+.xs-fill span {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--line-2);
+}
+.xs-art {
+  margin: 8px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  line-height: 0;
+}
+.xs-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed var(--accent);
+  pointer-events: none;
+}
+.xs-line.end {
+  border-top-color: var(--key);
+}
+.xs-tag {
+  position: absolute;
+  right: 8px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 7px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.xs-tag.end {
+  background: var(--key);
+  color: #fff;
+}
+.xs-side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.xs-side > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+.xs-side span {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.xs-side b {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.xs-rail {
+  position: relative;
+  justify-self: center;
+  width: 6px;
+  border-radius: 3px;
+  background: var(--line-2);
+}
+.xs-rail i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.xs-rail em {
+  position: absolute;
+  left: -4px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--raised);
+  box-shadow:
+    0 0 0 1px var(--line-2),
+    0 1px 2px var(--shade-sm);
+}
+#xprev.scrub {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+}
+#xprev.scrub svg {
+  margin: 0;
+  max-height: none;
+}
+/* chips that hold a value with its unit (0.3 s, Off) keep their case, as in the mockups */
+#xsSmv,
+#xOptsAnim .rf .chip {
+  text-transform: none;
+}

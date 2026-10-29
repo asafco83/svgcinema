@@ -4,17 +4,20 @@
 // player's own start-up code does (export/build: triggerJS, reducedJS). Used by the external player
 // file (runtime/player.ts) and by the Export dialog's preview.
 import { CinEngine, type CinPlayer, type EngineData } from './engine';
+import { cinScrub, type ScrubConfig } from './scrub';
 
 /** what an exported SVG carries for the external player */
 /** the data format this player reads; SVGs exported for a newer format wait for a newer player */
-export const FORMAT = 1;
+export const FORMAT = 2;
 export interface BootConfig {
   /** data format (FORMAT) */
   f?: number;
   /** the animation (the same data the embedded player gets) */
   d: EngineData;
-  /** start trigger: load | click | hover | scroll | api */
+  /** start trigger: load | click | hover | scroll | scrub | api */
   t?: string;
+  /** scrub (Linked to scroll, format 2): the range and smoothing (runtime/scrub) */
+  sc?: ScrubConfig;
   /** what leaving does (hover, click, scroll): pause | reverse | start | restart | none */
   o?: string;
   /** the forward direction: 1, or -1 when the animation plays in reverse */
@@ -65,7 +68,8 @@ function triggers(s: Booted, P: CinPlayer & { _cleanup?: Array<() => void> }, c:
       io.observe(s);
       cleanup.push(() => io.disconnect());
     } else P.play();
-  } else if (t !== 'api') P.play();
+  } else if (t === 'scrub') cinScrub(s, P, c.sc || { r: [0, 100, 1, 0] });
+  else if (t !== 'api') P.play();
 }
 
 /** Start the animation of one exported SVG (once; later calls return its player). */
