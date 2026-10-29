@@ -22,6 +22,7 @@ The logo is read from `public/brand/svgcinema-logo-white.svg` at build time, so 
 node site/build.mjs                                            # editor links → editor/
 node site/build.mjs --editor=https://example.com/app/          # editor links → anywhere else
 npm run build:deploy                                           # editor + page together in deploy/
+npm run build:zip                                              # the full site as svgcinema-site.zip
 ```
 
 `npx prettier --write site` formats the sources; `index.html` and `hero.svg` are generated, so `.prettierignore`
@@ -30,7 +31,11 @@ skips them.
 ## Deploying
 
 `npm run build:deploy` builds the editor and the page and puts them together in `deploy/` (git-ignored): upload its
-contents to any static host. By hand: put `site/index.html` at the root of the site and the editor build (`dist/`
+contents to any static host. The thumbnail installers the page links to aren't in the repository: they're in the
+"thumbnails" release, and `sh site/fetch-downloads.sh` puts them in `public/downloads/` (the GitHub Pages build does
+the same), so run it first. The bundle checks that every local link in the pages reaches a file and stops if one
+doesn't. `npm run build:zip` does all of it and zips the result as `svgcinema-site.zip`, the whole site, ready to
+upload. By hand: put `site/index.html` at the root of the site and the editor build (`dist/`
 from `npm run build`) in an `editor/` folder beside it. The editor builds with relative paths (`base: './'`), so it works from a subfolder unchanged.
 Both live on the same origin, so the page and the editor share the light/dark choice
 (`localStorage['svgcinema:theme']`).

@@ -8,6 +8,7 @@
     "build": "tsc && vite build && node scripts/build-player.mjs",
     "build:site": "node site/build.mjs",
     "build:deploy": "npm run build && node site/build.mjs && node site/bundle.mjs",
+    "build:zip": "sh site/fetch-downloads.sh && npm run build:deploy && cd deploy && rm -f ../svgcinema-site.zip && zip -qr -X ../svgcinema-site.zip .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

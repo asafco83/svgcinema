@@ -497,7 +497,7 @@ One-time setup: **Settings → Pages → Build and deployment → Source: GitHub
 
 The site is served at `https://<user>.github.io/<repo>/`. The Vite `base: './'` setting makes asset paths relative, so no extra configuration is needed.
 
-**Landing page:** `site/` holds the SVGcinema website that introduces the editor and links into it. `node site/build.mjs` builds `site/index.html`, which expects the editor in an `editor/` folder beside it; `npm run build:deploy` puts the two together in `deploy/` for any static host. The Pages workflow does not publish it yet. See [`site/README.md`](site/README.md).
+**Landing page:** `site/` holds the SVGcinema website that introduces the editor and links into it. `node site/build.mjs` builds `site/index.html`, which expects the editor in an `editor/` folder beside it; `npm run build:deploy` puts the two together in `deploy/` for any static host, and `npm run build:zip` makes the whole site (thumbnail installers included) as `svgcinema-site.zip`. The Pages workflow does not publish it yet. See [`site/README.md`](site/README.md).
 
 ## Toward a desktop app (Tauri)
 
