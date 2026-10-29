@@ -60,7 +60,7 @@ async def main():
         st0=await ev("(()=>{const p=document.documentElement.player; p.play(); return p.currentTime})()"); await pg.wait_for_timeout(500)
         st1=await ev("document.documentElement.player.currentTime")
         check('the API works (play, currentTime)', st1>st0, (st0,st1))
-        check('window.CinPlayer with its version and data format', await ev("typeof CinPlayer==='object' && typeof CinPlayer.version==='string' && CinPlayer.f===1"))
+        check('window.CinPlayer with its version and data format', await ev("typeof CinPlayer==='object' && typeof CinPlayer.version==='string' && CinPlayer.f===2"))
         cdn_hits.clear(); await pg.goto(base+'__t/two.html'); await pg.wait_for_timeout(1000)
         both=await ev("['a','b'].map(i=>!!document.getElementById(i).player)")
         check('inline, no player on the page: both SVGs play, the player loaded from jsDelivr once', both==[True,True] and len(cdn_hits)==1, (both, len(cdn_hits)))
