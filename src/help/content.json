@@ -1471,8 +1471,138 @@
     { "id": "gif", "group": "io", "title": "GIF and animated WebP" },
     { "id": "stills", "group": "io", "title": "Still images" },
 
-    { "id": "agent-key", "group": "agent", "title": "Connect your own API key" },
-    { "id": "agent-assistant", "group": "agent", "title": "Use your AI assistant" },
-    { "id": "agent-images", "group": "agent", "title": "Pictures and vector" }
+    {
+      "id": "agent-key",
+      "group": "agent",
+      "title": "Connect your own API key",
+      "ready": true,
+      "intro": "The design agent chats in the Agent panel with a model from a service you have an account with: OpenRouter, OpenAI, Anthropic, Gemini, Groq or any OpenAI-compatible service. You connect it once with your own API key, and its requests use your own credit with that service.",
+      "steps": [
+        {
+          "title": "Open the Agent panel",
+          "text": "Click <b>Agent</b> in the top bar, or press <kbd>Alt</kbd> <kbd>A</kbd>. The panel docks on the right of the editor.",
+          "do": "Click <b>Agent</b> in the top bar."
+        },
+        {
+          "title": "Choose your own API key",
+          "text": "The first time, the panel asks how you want to connect. Pick <b>Your own API key</b> and click <b>Continue</b>. You can switch later, under <b>How you connect</b> in the agent's settings.",
+          "do": "Pick <b>Your own API key</b>, then <b>Continue</b>."
+        },
+        {
+          "title": "Pick the provider",
+          "text": "Pick the service your key is from. <b>OpenRouter</b> is recommended: one key for chat and images, with many models. <b>Custom</b> takes any OpenAI-compatible address and a model name. Click <b>Continue</b>: the agent's settings open.",
+          "do": "Pick <b>OpenRouter</b>, then <b>Continue</b>."
+        },
+        {
+          "title": "Make a key on the provider's website",
+          "text": "Sign in on the provider's website, create an API key and copy it. The website also shows its prices and what you have used: the agent's requests use the credit of that account.",
+          "do": "Create an API key on the provider's website and copy it.",
+          "clip": false
+        },
+        {
+          "title": "Paste the key",
+          "text": "Paste it in <b>API key</b>, under Agent model; the eye button beside it shows it. The key is kept in this browser only and sent straight to the provider: SVGcinema never sees it.",
+          "do": "Paste the key in <b>API key</b>."
+        },
+        {
+          "title": "Pick a model and test it",
+          "text": "Pick a model in <b>Model</b> (<b>Other model…</b> takes any name the provider uses), then click <b>Test</b>. It checks that the service can be reached from this page, knows the model and can use tools, and whether the model can see images.",
+          "do": "Pick a <b>Model</b>, then click <b>Test</b>."
+        },
+        {
+          "title": "Back to the chat",
+          "text": "Click ‹ at the top of the panel. Describe what to make and press <kbd>Enter</kbd>: the agent works in this project, and each request is one undo step. The model's name under the message box switches to another of the provider's models.",
+          "do": "Click ‹ to go back to the chat."
+        }
+      ],
+      "note": "Keys are kept in this browser, one per provider, never in a project file. <b>Remove keys</b>, under Privacy in the agent's settings, clears them; so does clearing the site's data in the browser.",
+      "keys": [["Alt A", "Open or close the agent"]],
+      "related": ["agent-assistant", "agent-images"]
+    },
+    {
+      "id": "agent-assistant",
+      "group": "agent",
+      "title": "Use your AI assistant",
+      "ready": true,
+      "intro": "No API key needed: an AI assistant you already use in your browser, such as Claude in Chrome, can edit the open project with SVGcinema's own editing tools, on its own subscription. You chat with it in its own window; the Agent panel shows what it does.",
+      "steps": [
+        {
+          "title": "Open the Agent panel",
+          "text": "Click <b>Agent</b> in the top bar, or press <kbd>Alt</kbd> <kbd>A</kbd>. The panel docks on the right of the editor.",
+          "do": "Click <b>Agent</b> in the top bar."
+        },
+        {
+          "title": "Choose your AI assistant",
+          "text": "The first time, the panel asks how you want to connect: <b>Your AI assistant</b> is picked first. Click <b>Continue</b>: the panel lists how to connect, step by step.",
+          "do": "Pick <b>Your AI assistant</b>, then <b>Continue</b>."
+        },
+        {
+          "title": "Copy the starting message",
+          "text": "Click <b>Copy</b> under <b>Start with this message</b>. It asks your assistant to run window.svgcinema.help(), SVGcinema's guide to its tools, and follow it. Using Claude? <b>Download the skill</b> once instead, add it in Claude's settings under Skills, and just ask.",
+          "do": "Click <b>Copy</b> under the starting message."
+        },
+        {
+          "title": "Paste it in your assistant",
+          "text": "Open your assistant in the SVGcinema tab, paste the message in its chat and add what to make. It must be able to run scripts on web pages: allow it on this site if it asks.",
+          "do": "Paste the message in your assistant's chat and say what to make.",
+          "clip": false
+        },
+        {
+          "title": "Watch it work",
+          "text": "Its steps show in the panel as it works, with <b>Stop</b>. Editing is paused meanwhile, so everything it does for one request is one undo step. Before it deletes layers, the panel asks you.",
+          "do": "Watch its steps in the Agent panel."
+        },
+        {
+          "title": "Undo, or ask for more",
+          "text": "Under its steps, <b>Undo</b> takes back everything it did, in one step. Ask for changes in your assistant's own window: each request shows here as a new set of steps.",
+          "do": "Click <b>Undo</b> to take it all back."
+        }
+      ],
+      "note": "Pictures follow <b>Images</b> on the connect screen: your assistant's own (when it can't hand one over, the panel asks you to drop it in), the image model of your API key settings, or vector shapes only. <b>Let assistants edit this project</b> turns it all off. Other assistants can read the plain-text guide (<b>the guide for AI assistants</b>, on the connect screen); SVGcinema's llms.txt file points them to it.",
+      "keys": [["Alt A", "Open or close the agent"]],
+      "related": ["agent-key", "agent-images"]
+    },
+    {
+      "id": "agent-images",
+      "group": "agent",
+      "title": "Pictures and vector",
+      "ready": true,
+      "intro": "The design agent can make pictures with an image model and put them on the canvas, or draw artwork as vector layers whose parts can move on their own. You set it up under Images in the agent's settings; pictures use your own credit with the image service.",
+      "steps": [
+        {
+          "title": "Open the agent's settings",
+          "text": "Open the Agent panel (<b>Agent</b> in the top bar) and click the cog at its top. The agent needs to be connected with an API key first: see Connect your own API key.",
+          "do": "Click <b>Agent</b>, then the cog."
+        },
+        {
+          "title": "Pick an image model",
+          "text": "Under <b>Images</b>, <b>Provider</b> is the service that makes the pictures: the agent's own when it makes them (OpenRouter, OpenAI or Gemini), or another one with a key of its own. Pick a model in <b>Image</b>. With <b>None</b>, the agent draws everything as vector shapes.",
+          "do": "Pick a model in <b>Image</b>."
+        },
+        {
+          "title": "Test it",
+          "text": "Click <b>Test</b> under the model: it makes one small test image, which uses a little of your credit. With <b>Transparent background</b> on, it checks that too: when a model can't make one, SVGcinema asks for a flat green background and removes it.",
+          "do": "Click <b>Test</b> under Images."
+        },
+        {
+          "title": "Ask for a picture",
+          "text": "Back in the chat (‹), ask for a picture. Before making one, the agent shows a card with the prompt (you can edit it), the model, the size, the background and about what it costs, when the price is known.",
+          "do": "Ask for a picture in the chat."
+        },
+        {
+          "title": "Generate it",
+          "text": "Click <b>Generate</b>, or <b>Cancel</b>. The picture goes into the project's Assets and the agent puts it on the canvas: one layer, which moves as one piece. <b>Don't ask again</b> skips the card; <b>Ask first</b> in Settings brings it back.",
+          "do": "Click <b>Generate</b>."
+        },
+        {
+          "title": "Vector for parts that move",
+          "text": "With <b>Prefer vector when parts move</b> on, under Images, the agent makes artwork whose parts move on their own as vector: separate, editable layers. <b>Vector</b> says who draws it: the agent itself, or a vector model (on OpenRouter or a Custom service).",
+          "do": "Ask for artwork whose parts move."
+        }
+      ],
+      "note": "OpenRouter's list of image models is read live, so new ones appear by themselves, and the menus show about what one image costs when OpenRouter's price list has it. What you may do with generated images is set by the image service's terms.",
+      "keys": [["Alt A", "Open or close the agent"]],
+      "related": ["agent-key", "agent-assistant", "images"]
+    }
   ]
 }

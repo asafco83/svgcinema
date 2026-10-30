@@ -185,6 +185,19 @@ export async function hover(t: Element | null) {
   pressed(t);
   await wait(600);
 }
+/** Glide to a point without pressing. `from` puts the pointer there first (e.g. below the window, for a file
+ *  dragged in from outside it); `label` rides beside the pointer on the way (the file's name). */
+export async function moveTo(to: XY, o: { from?: XY; label?: string; ms?: number } = {}) {
+  const k = cursor().querySelector('.tg-key') as HTMLElement;
+  if (o.from) place(o.from);
+  if (o.label) {
+    k.textContent = o.label;
+    k.hidden = false;
+  }
+  await glide(to, o.ms || 520);
+  await wait(160);
+  k.hidden = true;
+}
 /** Press and hold a control (e.g. a tool group's button, whose flyout opens on a hold), then glide to
  *  what `then` finds once it has opened and let go over it. */
 export async function hold(t: Element | null, then: () => Element | null, ms = 520) {

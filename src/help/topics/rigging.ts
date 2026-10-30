@@ -16,6 +16,7 @@ import {
   byName,
   keyAt,
   lock,
+  lpRow,
   onRuler,
   pause,
   playStep,
@@ -24,6 +25,7 @@ import {
   screenBox,
   screenOf,
   svg640,
+  trackBits,
 } from '../kit';
 
 /* ---------- helpers ---------- */
@@ -174,6 +176,8 @@ function ensureBones() {
 /* ---------- Pose and animate a rig ---------- */
 
 /** the rig's pose times, as the Pose row shows them */
+/** the Pose row's diamonds (a pose step's clip shows the keys it makes) */
+const poseDots = () => Array.from(document.querySelectorAll('#tlbody .sdot.pose'));
 const poses = () => {
   const b = byName('Bone 1');
   return b ? rigTimes(b) : [];
@@ -400,7 +404,7 @@ export const tours: Record<string, TourStep[]> = {
         await tap(screenOf(300 - 0.62 * 15, 190 + 0.78 * 15));
         await tap(alongBone(topBone(), 0.3));
       },
-      clip: () => [armBox(), q('#lp')],
+      clip: () => [armBox(), lpRow('Upper arm')],
     },
     // the forearm on Bone 2
     {
@@ -416,7 +420,7 @@ export const tours: Record<string, TourStep[]> = {
         await tap(screenOf(406 + 0.21 * 11, 218 + 0.98 * 11));
         await tap(alongBone(childBone(topBone()), 0.3));
       },
-      clip: () => [armBox(), q('#lp')],
+      clip: () => [armBox(), lpRow('Forearm')],
     },
     // V, then turn Bone 2
     {
@@ -462,7 +466,7 @@ export const tours: Record<string, TourStep[]> = {
         const b = byName('Bone 1');
         return drag(alongBone(b, 0.6), turned(b, 0.6, -32), { ms: 1000 });
       },
-      clip: () => [armBox()],
+      clip: () => [armBox(), ...poseDots()],
     },
     playheadStep(2),
     // IK: drag the end of the chain
@@ -475,7 +479,7 @@ export const tours: Record<string, TourStep[]> = {
       },
       done: () => keyAt(byName('Bone 1'), 'rot', 2) && keyAt(byName('Bone 2'), 'rot', 2),
       show: () => drag(tipOf(byName('Bone 2')), screenOf(438, 104), { ms: 1100 }),
-      clip: () => [armBox()],
+      clip: () => [armBox(), ...poseDots()],
     },
     // the Pose row: drag the last pose later
     {
@@ -501,7 +505,15 @@ export const tours: Record<string, TourStep[]> = {
         const a = centre(d);
         await drag(a, { x: onRuler(2.5).x, y: a.y }, { ms: 800 });
       },
-      clip: () => [q('#ruler')],
+      clip: () => {
+        const b = byName('Bone 1');
+        return [
+          b && q(`#tlbody .tl-pose[data-lid="${b.id}"] .tl-name`),
+          ...Array.from(document.querySelectorAll('#tlbody .sdot.pose')),
+          ...trackBits(b, 'rot'),
+          ...trackBits(byName('Bone 2'), 'rot'),
+        ];
+      },
     },
     playStep(),
   ],
@@ -667,7 +679,7 @@ export const tours: Record<string, TourStep[]> = {
           b = screenOf(452, 236);
         await drag(a, b, { ms: 1000 });
       },
-      clip: () => [flagBox()],
+      clip: () => [flagBox(), ...trackBits(flag(), 'pin' + farPin())],
     },
     playStep(),
   ],
