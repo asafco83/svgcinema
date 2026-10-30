@@ -563,6 +563,25 @@ async def clips(b, theme):
 
 
 HELP_W, HELP_H, HELP_OUT, HELP_MIN = 1280, 800, 880, 560
+FONTS = os.path.join(tempfile.gettempdir(), 'svgcinema-fontsource')
+
+
+async def fontsource(route):
+    """Web fonts come from jsDelivr (render/fonts): where that host can't be reached (a sandbox that only reaches
+    the package registry), the same @fontsource files are served from the npm package."""
+    u = route.request.url.split('/npm/', 1)[1].split('?')[0]
+    pkg, path = u.split('/files/', 1)
+    name, ver = pkg.rsplit('@', 1)
+    d = os.path.join(FONTS, pkg.replace('/', '_'))
+    if not os.path.isdir(d):
+        os.makedirs(d, exist_ok=True)
+        out = subprocess.run(['npm', 'pack', f'{name}@{ver}', '--pack-destination', d, '--silent'], capture_output=True, text=True, check=True).stdout.strip().splitlines()[-1]
+        subprocess.run(['tar', 'xzf', os.path.join(d, out), '-C', d], check=True)
+    f = os.path.join(d, 'package', 'files', path)
+    if not os.path.exists(f):
+        return await route.abort()
+    ct = 'font/woff2' if f.endswith('.woff2') else 'font/woff' if f.endswith('.woff') else 'font/ttf'
+    await route.fulfill(status=200, body=open(f, 'rb').read(), headers={'content-type': ct, **CORS})
 
 
 def crop_box(r):
@@ -627,13 +646,16 @@ async def help_clips(b, theme):
         if not any(s.get('clip', True) for s in t['steps']):
             continue
         c = await b.new_context(viewport={'width': HELP_W, 'height': HELP_H}, device_scale_factor=2)
+        await c.route('https://cdn.jsdelivr.net/npm/@fontsource/**', fontsource)
         pg = await c.new_page()
         pg.set_default_timeout(10000)
         await pg.add_init_script(CLOCK)
         await pg.add_init_script(f"localStorage.setItem('svgcinema:theme','{theme}');")
         await pg.goto(BASE + f"?tour={t['id']}&clip=1")
-        await pg.wait_for_function('window.cinTour')
+        await pg.wait_for_function('window.cinTour', timeout=30000)
         await pg.wait_for_timeout(1500)
+        # (a fresh dev server may reload the page once while it prepares its dependencies)
+        await pg.wait_for_function('window.cinTour', timeout=30000)
         n = len(t['steps'])
         for i in range(n):
             step = t['steps'][i]

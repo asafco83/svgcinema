@@ -32,6 +32,11 @@ export function selectedPosKeys(l: Layer): Keyframe[] {
   const ks = S.keys.size && l.t.pos ? l.t.pos.filter(q => S.keys.has(q)) : [];
   return ks.length === 1 && Math.abs(ks[0][0] - S.time) > 0.005 ? [] : ks;
 }
+/** the layer is (inside) a mask group's mask */
+function inMaskFolder(l: Layer) {
+  for (let x: Layer | null = l; x; x = x.parent ? layerById(x.parent) : null) if (x.maskSrc) return true;
+  return false;
+}
 export function insideBox(l: Layer, p: XY) {
   const q = obbOf(l);
   if (!q || q.length < 4) return false;
@@ -297,6 +302,21 @@ export function init(): void {
         if (x && !isLocked(x)) select(pick);
       });
     }
+    // a mask isn't drawn, so a press inside the selected mask's box lands on the artwork it shows: move the
+    // mask (as the box says), not that artwork's group
+    const sm = S.selSet.size <= 1 && S.sel ? layerById(S.sel) : null;
+    if (
+      t === 'select' &&
+      sm &&
+      !e.shiftKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !isLocked(sm) &&
+      inMaskFolder(sm) &&
+      !chain.includes(sm.id) &&
+      insideBox(sm, p)
+    )
+      return dragLayer(sm, p, e);
     if (chain.length) {
       const nb = chain.filter(c => {
         const x = layerById(c);

@@ -699,8 +699,8 @@
         },
         {
           "title": "Move it",
-          "text": "Type 100 in <b>Position</b> X and press <kbd>Enter</kbd>. The window moves over the view, which stays where it is: give the window's Position a track with {◆} and it pans across the view. On the canvas, a drag there would pick the mask group under the pointer and move it all.",
-          "do": "Type <b>100</b> in <b>Position</b> X, then <kbd>Enter</kbd>."
+          "text": "Drag inside the window's box on the canvas, to the right. The window moves over the view, which stays where it is: give the window's Position a track with {◆} and it pans across the view.",
+          "do": "Drag the window to the right."
         }
       ],
       "note": "A mask works by opacity, so a soft or see-through mask shows its layers partly. <b>Mask by</b>, in the mask group's Group section, switches to Brightness: white shows, black hides. A clipping path (right-click › Create clipping path) uses only the mask's shape. <b>Release mask</b>, beside Create mask, puts the layers back.",
@@ -1036,13 +1036,243 @@
       "id": "rig-build",
       "group": "rigging",
       "title": "Build a rig: bones and attaching artwork",
+      "ready": true,
       "tour": true,
-      "minutes": 5
+      "minutes": 5,
+      "intro": "A rig is a chain of bones that carries your artwork: turn a bone and everything attached to it turns with it. Draw the bones over the artwork, chain them at the joints, then attach each part to its bone.",
+      "steps": [
+        {
+          "title": "Pick the Bone tool",
+          "text": "Press <kbd>B</kbd>. The Bone tool is in the bones button of the tools on the left: hold it to see the other bone tools.",
+          "do": "Press <kbd>B</kbd> for the Bone tool."
+        },
+        {
+          "title": "Draw the first bone",
+          "text": "Drag on the canvas from the shoulder to the elbow. A bone turns around its joint, where you started, and ends at its tip. It appears in the Layers panel as Bone 1.",
+          "do": "Drag from the shoulder to the elbow."
+        },
+        {
+          "title": "Chain a second bone",
+          "text": "Start the next drag on the round tip of Bone 1, at the elbow, and drag to the wrist. A bone started on a tip is chained to it: Bone 2 hangs on Bone 1 and moves with it.",
+          "do": "Drag from the tip of Bone 1 to the wrist."
+        },
+        {
+          "title": "Pick the Bind tool",
+          "text": "Hold the bones button in the tools on the left and pick <b>Bind tool</b>. It attaches layers to bones.",
+          "do": "Hold the bones button and pick <b>Bind tool</b>."
+        },
+        {
+          "title": "Attach the upper arm",
+          "text": "Click the upper arm, then click Bone 1. In the Layers panel the upper arm moves into Bone 1; on the canvas it stays where it is.",
+          "do": "Click the upper arm, then Bone 1."
+        },
+        {
+          "title": "Attach the forearm",
+          "text": "Click the forearm, then click Bone 2. Bone 2 hangs on Bone 1, so the forearm follows both.",
+          "do": "Click the forearm, then Bone 2."
+        },
+        {
+          "title": "Try the rig",
+          "text": "Press <kbd>V</kbd> for the Select tool and drag Bone 2 around the elbow: the forearm turns with it. Drag Bone 1 and the whole arm turns at the shoulder.",
+          "do": "<kbd>V</kbd>, then drag Bone 2."
+        }
+      ],
+      "note": "You can also attach a layer by dragging it onto a bone in the Layers panel, or with Attach to bone in the Rig section of its inspector. Each new bone starts with a Rotate keyframe at 0s, so turning a bone at another time animates it (see Pose and animate a rig). To change a bone's length or rest angle without animating it, use the Edit bone tool: attached artwork stays where it is.",
+      "keys": [
+        ["B", "Bone tool"],
+        ["E", "Edit bone tool"],
+        ["V", "Select tool"],
+        ["Alt B", "Show or hide bones"]
+      ],
+      "related": ["rig-pose", "rig-limits", "pins-bones", "layers"]
     },
-    { "id": "rig-pose", "group": "rigging", "title": "Pose and animate a rig: FK and IK", "tour": true, "minutes": 4 },
-    { "id": "rig-limits", "group": "rigging", "title": "Limits and IK stops" },
-    { "id": "pins", "group": "rigging", "title": "Pins and mesh warp", "tour": true, "minutes": 3 },
-    { "id": "pins-bones", "group": "rigging", "title": "Pins that follow bones" },
+    {
+      "id": "rig-pose",
+      "group": "rigging",
+      "title": "Pose and animate a rig: FK and IK",
+      "ready": true,
+      "tour": true,
+      "minutes": 4,
+      "intro": "Pose a rig by dragging its bones. Drag a bone and it turns at its joint, carrying the bones below it (FK, forward kinematics); drag the tip at the end of a chain and the bones above it turn to reach the pointer (IK, inverse kinematics). Each pose is keyed on every bone of the rig.",
+      "goal": "The arm lifts at 1s, reaches up by 2.5s and starts over: two poses, each a keyframe on every bone.",
+      "steps": [
+        {
+          "title": "Move the playhead to 1s",
+          "text": "Drag the red playhead along the time ruler to 1s. The first pose goes there.",
+          "do": "Drag the playhead to <b>1s</b>."
+        },
+        {
+          "title": "Turn the upper arm (FK)",
+          "text": "With the Select tool, drag Bone 1 up around the shoulder. It turns at its joint and everything below it follows: that's FK. Every bone of the rig gets a keyframe at 1s.",
+          "do": "Drag Bone 1 up around the shoulder."
+        },
+        {
+          "title": "Move the playhead to 2s",
+          "text": "Drag the playhead on to 2s, for the next pose.",
+          "do": "Drag the playhead to <b>2s</b>."
+        },
+        {
+          "title": "Reach up with the hand (IK)",
+          "text": "Drag the round tip of Bone 2, at the wrist, upwards. Both bones turn so that the tip follows the pointer: that's IK. <kbd>Alt</kbd>+drag on a bone does the same.",
+          "do": "Drag the tip of Bone 2 upwards."
+        },
+        {
+          "title": "Retime a pose",
+          "text": "In the timeline, Bone 1 has a <b>Pose</b> row with a diamond at each pose. Drag the one at 2s to 2.5s: the keyframes of every bone at that time move with it.",
+          "do": "Drag the <b>Pose</b> diamond at 2s to <b>2.5s</b>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The arm lifts, reaches up, holds until the end of the 3-second animation and starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Key whole rig, in the Bone section of the rig's top bone, is what keys every bone at once; turn it off to key only the bone you drag, for overlapping action. Click a Pose diamond to select all its keyframes, then press Delete to remove the pose.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["J K", "Jump to the previous or next keyframe"],
+        ["Alt B", "Show or hide bones"]
+      ],
+      "related": ["rig-build", "rig-limits", "keyframes", "timeline"]
+    },
+    {
+      "id": "rig-limits",
+      "group": "rigging",
+      "title": "Limits and IK stops",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A limit keeps a bone's turn inside a range, so an elbow or a knee only bends the way it should. An IK stop ends a chain at a bone: dragging a tip below it turns only the bones from there down.",
+      "steps": [
+        {
+          "title": "Select the forearm's bone",
+          "text": "With the Select tool, click Bone 2, the bone along the forearm. The inspector shows its Bone section.",
+          "do": "Click Bone 2 on the canvas."
+        },
+        {
+          "title": "Turn on Limit rotation",
+          "text": "In the Bone section, tick <b>Limit rotation</b>. A Range row appears with a min and a max, −90° and 90° to start with: how far the bone may turn either way from the angle it was drawn at.",
+          "do": "Tick <b>Limit rotation</b>."
+        },
+        {
+          "title": "Let the elbow bend one way",
+          "text": "Type 0 in <b>max</b> and press <kbd>Enter</kbd>. Bone 2 can now bend the elbow further, up to 90°, but never open it wider than it was drawn.",
+          "do": "Type <b>0</b> in max and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Reach down with the hand",
+          "text": "Drag the round tip of Bone 3, at the hand, down and to the right. The elbow stays bent and the shoulder turns instead: IK keeps every bone inside its limits.",
+          "do": "Drag the tip of Bone 3 down and to the right."
+        },
+        {
+          "title": "Make Bone 2 an IK stop",
+          "text": "Click Bone 2 again, then tick <b>Pin: IK stops at this bone</b>. Its joint turns square: a chain dragged from below now starts there.",
+          "do": "Click Bone 2, tick <b>Pin: IK stops at this bone</b>."
+        },
+        {
+          "title": "Drag the hand again",
+          "text": "Drag the tip of Bone 3 up. Only Bone 2 and Bone 3 turn: the upper arm stays where it is.",
+          "do": "Drag the tip of Bone 3 up."
+        }
+      ],
+      "note": "Limits apply while you drag bones, with FK and with IK; a value you type in Rotate isn't limited. An IK stop changes only IK: the pinned bone still turns with the chain below it, and dragging the bones above it works as before.",
+      "related": ["rig-pose", "rig-build"]
+    },
+    {
+      "id": "pins",
+      "group": "rigging",
+      "title": "Pins and mesh warp",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Pins bend artwork without bones. Put pins on a shape and drag one: the artwork bends, held by the pins that stay put. A path bends through its own nodes; an image, a text or a group bends through a mesh of triangles laid over it.",
+      "goal": "The flag's free end swings down in 1.5 seconds, bending the whole flag, then holds and starts over.",
+      "steps": [
+        {
+          "title": "Pick the Pin tool",
+          "text": "Press <kbd>W</kbd>. The Pin tool is in the pins button of the tools on the left.",
+          "do": "Press <kbd>W</kbd> for the Pin tool."
+        },
+        {
+          "title": "Pin the flag by the pole",
+          "text": "Click the flag close to the pole. A pin appears where you clicked, and a mesh of triangles covers the flag: it's a group, so it bends through the mesh.",
+          "do": "Click the flag close to the pole."
+        },
+        {
+          "title": "Pin its free end",
+          "text": "Click near the other end of the flag for a second pin. A pin you don't move holds the artwork where it is.",
+          "do": "Click near the flag's other end."
+        },
+        {
+          "title": "Move the playhead to 1.5s",
+          "text": "Drag the red playhead along the time ruler to 1.5s.",
+          "do": "Drag the playhead to <b>1.5s</b>."
+        },
+        {
+          "title": "Bend the flag",
+          "text": "Drag the second pin down. The flag bends between the two pins, and the pin gets its own track, Pin 2: at rest at 0s, bent at 1.5s.",
+          "do": "Drag the second pin down."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The flag bends until 1.5s, holds until the end of the 3-second animation and starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Drag the ring around the selected pin to turn it, and Alt+drag a pin to move it without bending. The Pins section of the inspector edits the selected pin: Reach sets how far the pins pull, Mesh how fine the triangles are, and Remove pin takes it off. Rectangles and ellipses become paths when they get their first pin.",
+      "keys": [
+        ["W", "Pin tool"],
+        ["Del", "Remove the selected pin"],
+        ["Alt P", "Show or hide pins"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["pins-bones", "morph", "keyframes"]
+    },
+    {
+      "id": "pins-bones",
+      "group": "rigging",
+      "title": "Pins that follow bones",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A pin can follow a bone instead of keyframes of its own: it sits at the bone's joint and moves and turns with it, so the rig bends the artwork. It suits things that bend along their length, like a tail, a sleeve or this worm.",
+      "goal": "The worm wiggles with its three bones: its pins follow them, without a keyframe of their own.",
+      "steps": [
+        {
+          "title": "Select the worm",
+          "text": "With the Select tool, click the worm beside the bones lying along it. The bones already wiggle, but they don't carry the worm.",
+          "do": "Click the worm beside its bones."
+        },
+        {
+          "title": "Pick the Pin tool",
+          "text": "Press <kbd>W</kbd>. The bones stay on the canvas while the Pin tool is on.",
+          "do": "Press <kbd>W</kbd> for the Pin tool."
+        },
+        {
+          "title": "Turn on Bind to bones",
+          "text": "Click <b>Bind to bones</b> in the bar above the canvas. It is there while a layer that takes pins is selected and the scene has bones.",
+          "do": "Click <b>Bind to bones</b> above the canvas."
+        },
+        {
+          "title": "Click each bone",
+          "text": "Click Bone 1, Bone 2 and Bone 3. Each click adds a red pin at that bone's joint, bound to it; clicking a bound bone again unbinds it. Press <kbd>Esc</kbd> when you're done.",
+          "do": "Click Bone 1, Bone 2 and Bone 3."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The bones wiggle and the worm bends with them: in the Pins section, each pin names its bone instead of a Position.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Bound pins work together with ordinary ones on the same layer: add a few more to hold a part still, or to bend it by hand. The Bind tool binds a pin you already have: click the pin, then the bone. A bone inside a pinned group can't take the group's pins, since it already moves the artwork.",
+      "keys": [
+        ["W", "Pin tool"],
+        ["Esc", "Leave Bind to bones"],
+        ["Alt P", "Show or hide pins"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["pins", "rig-build", "rig-pose"]
+    },
 
     {
       "id": "timeline",

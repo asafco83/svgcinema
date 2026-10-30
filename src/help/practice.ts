@@ -298,6 +298,7 @@ export async function startPractice() {
   updateFileInfo();
   topBar(t.title);
   if (sc.menu) ($('#app') as HTMLElement).classList.add('pr-menu');
+  if (sc.agent) ($('#app') as HTMLElement).classList.add('pr-agent');
   spot = document.createElement('div');
   spot.className = 'tg-spot';
   spot.hidden = true;

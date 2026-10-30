@@ -369,22 +369,18 @@ export const tours: Record<string, TourStep[]> = {
       show: () => click(lpRow('Window'), 0.3, 0.5),
     },
     {
-      ...typeStep(
-        'Window',
-        '#i-pos_0',
-        '100',
-        () => false,
-        () => [screenBox(110, 50, 420, 300)],
-      ),
+      // the mask isn't drawn: a drag inside its box moves it (not the view it shows)
+      target: () => q('#wrap'),
       enter: c => {
         keep('Window');
-        reveal(q('#i-pos_0'));
         c.p = posOf(byName('Window')).slice();
       },
       done: c => {
         const p = posOf(byName('Window'));
         return !!c.p && Math.hypot(p[0] - c.p[0], p[1] - c.p[1]) > 20;
       },
+      show: () => dragDoc([360, 250], [460, 250], 900),
+      clip: () => [screenBox(110, 50, 520, 300)],
     },
   ],
 
