@@ -277,7 +277,7 @@ function morph(l: Layer, tr: Keyframe[], note: (s: string) => void) {
     note('A shape animation between shapes with different points jumps instead of blending.');
   l.t.d = tr;
 }
-/** Paint keyframes. SVGator blends colours with colours or gradients, and a gradient with itself;
+/** Paint keyframes. SVGator blends colors with colors or gradients, and a gradient with itself;
  *  anything else (no paint ↔ paint, one gradient ↔ another) switches halfway between the keys, which
  *  a hold keyframe and a key at the midpoint reproduce. */
 function paintTrack(keys: Key[], cv: Converter, l: Layer): Keyframe[] {
@@ -295,7 +295,7 @@ function paintTrack(keys: Key[], cv: Converter, l: Layer): Keyframe[] {
   });
   return out;
 }
-/** a fill / stroke value: none, a colour or a gradient (in the shape's box) */
+/** a fill / stroke value: none, a color or a gradient (in the shape's box) */
 function paint(v: any, cv: Converter, l: Layer): any {
   if (!v) return 'none';
   if (v.t === 'c') return rgbaStr(v.v);

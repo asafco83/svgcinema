@@ -1,8 +1,8 @@
 // SVGcinema — export/gif
-// A GIF encoder written for SVGcinema (no library): palette (median cut, refined for Best), colours
+// A GIF encoder written for SVGcinema (no library): palette (median cut, refined for Best), colors
 // kept exact, dithering (diffusion, pattern or noise, with dots that stay still where the picture
 // doesn't change), noise reduction, lossy compression, frames that store only what changed, and
-// transparency with an edge colour. It runs in a worker (export/anim.worker) on frames drawn by
+// transparency with an edge color. It runs in a worker (export/anim.worker) on frames drawn by
 // export/frames.
 
 export interface GifOpts {
@@ -12,12 +12,12 @@ export interface GifOpts {
   palette: 'one' | 'per';
   /** Best refines the palette (a few k-means passes) */
   pick: 'fast' | 'best';
-  /** colours that always get a palette slot, as 0xRRGGBB */
+  /** colors that always get a palette slot, as 0xRRGGBB */
   keep: number[];
   dither: 'none' | 'diff' | 'pat' | 'noise';
   /** 0–100 */
   strength: number;
-  /** 0–100: smooths grain before the colours are picked */
+  /** 0–100: smooths grain before the colors are picked */
   denoise: number;
   /** 0–200: allows small errors for a smaller file */
   lossy: number;
@@ -103,7 +103,7 @@ function smooth(rgb: Uint8Array, w: number, h: number, amt: number) {
 
 /* ---------------- palette ---------------- */
 
-/** Colour counts on a 5-bit-per-channel grid (32768 boxes), from every `step`th pixel. */
+/** Color counts on a 5-bit-per-channel grid (32768 boxes), from every `step`th pixel. */
 export function histogram(frames: Uint8Array[], step = 1, mask?: (Uint8Array | null)[]) {
   const hist = new Uint32Array(32768);
   frames.forEach((rgb, fi) => {
@@ -115,7 +115,7 @@ export function histogram(frames: Uint8Array[], step = 1, mask?: (Uint8Array | n
   });
   return hist;
 }
-/** Median cut over the histogram: `n` colours (as [r, g, b]). */
+/** Median cut over the histogram: `n` colors (as [r, g, b]). */
 export function medianCut(hist: Uint32Array, n: number): number[][] {
   type Box = { idx: number[]; count: number };
   const all: number[] = [];
@@ -218,7 +218,7 @@ export function nearest(pal: number[][], r: number, g: number, b: number) {
   }
   return best;
 }
-/** The palette for these frames: kept colours first, then the picked ones. */
+/** The palette for these frames: kept colors first, then the picked ones. */
 export function makePalette(frames: Uint8Array[], masks: (Uint8Array | null)[], o: GifOpts, reserve = o.transparent) {
   // one slot is kept for the transparent index when the file needs it
   const slots = Math.max(2, Math.min(256, o.colours)) - (reserve ? 1 : 0),
@@ -251,7 +251,7 @@ function noiseAt(x: number, y: number) {
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) & 0xffff) / 0xffff - 0.5;
 }
-/** The palette's typical gap between neighbouring colours (how far dither must reach). */
+/** The palette's typical gap between neighbouring colors (how far dither must reach). */
 function spread(pal: number[][]) {
   return Math.max(8, Math.min(96, 255 / Math.cbrt(Math.max(2, pal.length))));
 }
@@ -273,7 +273,7 @@ export function mapFrame(
 ): { idx: Uint8Array; ref: Uint8Array } {
   const n = w * h,
     out = new Uint8Array(n),
-    // the colour each index was picked for: a kept pixel keeps its reference, so slow drifts add up
+    // the color each index was picked for: a kept pixel keeps its reference, so slow drifts add up
     ref = rgb.slice(),
     cache = new Map<number, number>(),
     near = (r: number, g: number, b: number) => {
@@ -360,8 +360,8 @@ const clamp8 = (v: number) => (v < 0 ? 0 : v > 255 ? 255 : Math.round(v));
 /* ---------------- LZW (with lossy matching) ---------------- */
 
 /**
- * LZW-compress palette indices. With `lossy` > 0 a code may be extended by a pixel whose colour is
- * close to the one the dictionary expects (the decoded picture then has that colour there); the
+ * LZW-compress palette indices. With `lossy` > 0 a code may be extended by a pixel whose color is
+ * close to the one the dictionary expects (the decoded picture then has that color there); the
  * pixels actually decoded are written back into `px`.
  */
 export function lzw(px: Uint8Array, minSize: number, pal: number[][], lossy: number, tIndex = -1) {
@@ -392,7 +392,7 @@ export function lzw(px: Uint8Array, minSize: number, pal: number[][], lossy: num
   };
   const tol = lossy > 0 ? Math.pow(lossy * 0.35, 2) * 3 : 0,
     dist = (a: number, b: number) => {
-      // the transparent index is never swapped for a colour, nor a colour for it
+      // the transparent index is never swapped for a color, nor a color for it
       if (a === tIndex || b === tIndex) return a === b ? 0 : Infinity;
       const p = pal[a],
         q = pal[b];

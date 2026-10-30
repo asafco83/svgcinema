@@ -504,7 +504,7 @@ export class Converter {
     }
     return null;
   }
-  /** a paint value in SVGcinema's terms: a colour, 'none' or a gradient (else kept as url(#…)) */
+  /** a paint value in SVGcinema's terms: a color, 'none' or a gradient (else kept as url(#…)) */
   paintOf(v: string, p: Props, box: number[] | null): any {
     const s = String(v).trim();
     if (!s || s === 'none') return 'none';

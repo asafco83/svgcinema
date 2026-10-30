@@ -927,16 +927,16 @@
                 <span class="rl">Fill</span>
                 <div class="segc" id="xiBg" role="radiogroup" aria-label="Background">
                   <button data-v="transparent">Transparent</button><button data-v="doc">Document</button
-                  ><button data-v="colour">Colour</button>
+                  ><button data-v="colour">Color</button>
                 </div>
               </div>
               <div class="row" id="xiBgcRow" hidden>
-                <span class="rl">Colour</span>
+                <span class="rl">Color</span>
                 <label class="nf xcol"
-                  ><input type="color" id="xiBgPick" aria-label="Pick the background colour" /><input
+                  ><input type="color" id="xiBgPick" aria-label="Pick the background color" /><input
                     id="xiBgc"
                     spellcheck="false"
-                    aria-label="Background colour"
+                    aria-label="Background color"
                 /></label>
               </div>
               <p class="note xind" id="xiBgNote"></p>
@@ -1021,10 +1021,10 @@
               <div class="row" id="xvBgRow">
                 <span class="rl">Background</span>
                 <label class="nf xcol"
-                  ><input type="color" id="xvBgPick" aria-label="Pick the background colour" /><input
+                  ><input type="color" id="xvBgPick" aria-label="Pick the background color" /><input
                     id="xvBgc"
                     spellcheck="false"
-                    aria-label="Background colour"
+                    aria-label="Background color"
                   /><span class="xmuted" id="xvBgDoc">document</span></label
                 >
               </div>
@@ -1158,9 +1158,9 @@
             <section class="sec" id="xaSecGif">
               <h3>Compression<small id="xaSumGif"></small></h3>
               <div class="row" id="xaColRow">
-                <span class="rl">Colours</span>
+                <span class="rl">Colors</span>
                 <div class="rf">
-                  <input type="range" id="xaCol" min="2" max="256" step="1" aria-label="Number of colours" /><span
+                  <input type="range" id="xaCol" min="2" max="256" step="1" aria-label="Number of colors" /><span
                     class="chip"
                     id="xaColv"
                   ></span>
@@ -1169,7 +1169,7 @@
               <div
                 class="row"
                 id="xaPalRow"
-                title="One palette for every frame is smaller; one per frame keeps colours truer when scenes change"
+                title="One palette for every frame is smaller; one per frame keeps colors truer when scenes change"
               >
                 <span class="rl">Palette</span>
                 <div class="segc" id="xaPal" role="radiogroup" aria-label="Palette">
@@ -1178,7 +1178,7 @@
                 </div>
               </div>
               <div class="row" id="xaPickRow" title="Best takes longer to find the palette that fits the artwork">
-                <span class="rl">Pick colours</span>
+                <span class="rl">Pick colors</span>
                 <div class="segc" id="xaPick" role="radiogroup" aria-label="Palette quality">
                   <button role="radio" data-v="fast">Faster</button><button role="radio" data-v="best">Best</button>
                 </div>
@@ -1186,16 +1186,12 @@
               <div
                 class="row"
                 id="xaKeepRow"
-                title="These colours always get a palette slot, so they stay exact: brand colours, text, logos"
+                title="These colors always get a palette slot, so they stay exact: brand colors, text, logos"
               >
                 <span class="rl">Keep exact</span>
                 <div class="xkeeps" id="xaKeep"></div>
               </div>
-              <div
-                class="row"
-                id="xaDitherRow"
-                title="Mixes the available colours in fine dots so gradients don’t band"
-              >
+              <div class="row" id="xaDitherRow" title="Mixes the available colors in fine dots so gradients don’t band">
                 <span class="rl">Dithering</span>
                 <div class="segc" id="xaDither" role="radiogroup" aria-label="Dithering">
                   <button role="radio" data-v="none">None</button><button role="radio" data-v="diff">Diffusion</button
@@ -1214,7 +1210,7 @@
               <div
                 class="row"
                 id="xaNrRow"
-                title="Smooths grain and speckles (photos, blurs, glows) before the colours are picked: cleaner and smaller. Crisp vector art has little to smooth."
+                title="Smooths grain and speckles (photos, blurs, glows) before the colors are picked: cleaner and smaller. Crisp vector art has little to smooth."
               >
                 <span class="rl">Noise reduction</span>
                 <div class="rf">
@@ -1254,16 +1250,16 @@
               </div>
               <label class="check"><input type="checkbox" id="xaAlpha" /> Transparent background</label>
               <div class="row" id="xaMatteRow" hidden>
-                <span class="rl">Edge colour</span>
+                <span class="rl">Edge color</span>
                 <label class="nf xcol"
-                  ><input type="color" id="xaMattePick" aria-label="Pick the edge colour" /><input
+                  ><input type="color" id="xaMattePick" aria-label="Pick the edge color" /><input
                     id="xaMatte"
                     spellcheck="false"
-                    aria-label="Edge colour"
+                    aria-label="Edge color"
                 /></label>
               </div>
               <p class="note xind" id="xaMatteNote" hidden>
-                GIF pixels are either fully transparent or solid, so soft edges are blended with this colour. Pick the
+                GIF pixels are either fully transparent or solid, so soft edges are blended with this color. Pick the
                 page’s background.
               </p>
             </section>
@@ -1348,7 +1344,7 @@
                   <b id="xaSize">…</b
                   ><span
                     id="xaSaving"
-                    title="Compared with the same frames as a plain GIF: 256 colours, full dithering, every frame stored whole"
+                    title="Compared with the same frames as a plain GIF: 256 colors, full dithering, every frame stored whole"
                   ></span
                   ><span class="sp"></span><span id="xaUpd"></span>
                 </div>
@@ -1789,7 +1785,7 @@
     <div class="ctx" id="ctxmenu" role="menu" hidden></div>
     <div class="ctx lm" id="layermenu" role="menu" aria-label="Layer" hidden></div>
     <div class="ctx view-menu" id="viewMenu" role="menu" hidden></div>
-    <div class="cpop" id="cpop" role="dialog" aria-label="Colour" hidden></div>
+    <div class="cpop" id="cpop" role="dialog" aria-label="Color" hidden></div>
     <div class="modal" id="mLink" hidden>
       <div class="dlg dlg-sm" role="dialog" aria-modal="true" aria-labelledby="hlTitle">
         <header>

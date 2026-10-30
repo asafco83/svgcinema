@@ -8,6 +8,6 @@
 2. Run `window.svgcinema.help()` with your page-script tool and read all of it. It returns a plain-text guide: how to work, the rules, and every tool with its arguments, following the user's current settings (for example how to handle images).
 3. Then: `svgcinema.start({ task, assistant })`, `await svgcinema.call(tool, args)` (or `await svgcinema.batch([{ name, args }, ...])`), and `svgcinema.done(summary)`. Everything between start and done is one undo step for the user, and editing is paused for them meanwhile, so always call done().
 
-What the tools cover: shapes and SVG artwork, layers and groups, animation presets, keyframes on any property (position, rotation, scale, opacity, colours, strokes, filters…) with named or custom (cubic-bezier) easing, shape morphing (Morph keyframes as SVG path data), images, and the project settings.
+What the tools cover: shapes and SVG artwork, layers and groups, animation presets, keyframes on any property (position, rotation, scale, opacity, colors, strokes, filters…) with named or custom (cubic-bezier) easing, shape morphing (Morph keyframes as SVG path data), images, and the project settings.
 
 If `window.svgcinema` is missing, the page isn't SVGcinema or is still loading. If a call answers that the user turned assistants off or pressed Stop, stop and tell them.

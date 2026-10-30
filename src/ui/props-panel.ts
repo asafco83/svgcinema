@@ -170,7 +170,7 @@ export function transformSection(l: Layer) {
 
 /* ---------- Shape settings: polygon sides, star points & ratio, corner radius, line ends ---------- */
 
-/** The eyedropper (browsers that have one): picks a colour anywhere on screen for the layer's fill or
+/** The eyedropper (browsers that have one): picks a color anywhere on screen for the layer's fill or
  *  stroke. Also I (fill) and Alt+I (stroke). */
 export function pickPaint(l: Layer, k: PropKey) {
   if (!l || !(window as any).EyeDropper) return false;
@@ -692,7 +692,7 @@ function setExtra(l: Layer, attr: string, v: string) {
   if (v === '' || v == null) delete l.extra[attr];
   else l.extra[attr] = v;
 }
-/** Swap fill and stroke (colours, opacities and their keyframes). */
+/** Swap fill and stroke (colors, opacities and their keyframes). */
 function swapPaint(l: Layer) {
   const sw = (a: string, b: string) => {
     const x = l.b[a];

@@ -1,10 +1,10 @@
 // SVGcinema — model/background
-// The canvas background is a colour (`Doc.bg`) plus an opacity (`Doc.bgA`, 0–1).
+// The canvas background is a color (`Doc.bg`) plus an opacity (`Doc.bgA`, 0–1).
 // An empty `bg` also means fully transparent (projects saved before `bgA` existed).
 import type { Doc } from './types';
 
 export interface BgPaint {
-  /** CSS colour, never empty */
+  /** CSS color, never empty */
   color: string;
   /** 0–1 */
   alpha: number;
@@ -20,9 +20,9 @@ export function bgPaint(d: Pick<Doc, 'bg' | 'bgA'>): BgPaint {
 }
 
 /**
- * Read a background typed by the user. Accepts any CSS colour, #rgba / #rrggbbaa, rgba(), and
- * `none` / `transparent`. A colour without its own alpha keeps the current opacity, except that a
- * fully transparent background becomes opaque, since typing a colour means you want to see it.
+ * Read a background typed by the user. Accepts any CSS color, #rgba / #rrggbbaa, rgba(), and
+ * `none` / `transparent`. A color without its own alpha keeps the current opacity, except that a
+ * fully transparent background becomes opaque, since typing a color means you want to see it.
  */
 export function parseBg(raw: string, cur: BgPaint): BgPaint {
   const v = String(raw || '').trim();

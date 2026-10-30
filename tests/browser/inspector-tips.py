@@ -23,7 +23,7 @@ async def main():
         paras=lambda: E("[...document.querySelectorAll('#insp .sec > p')].map(p=>p.textContent)")
         PREP="const c=K.H.comp(l,0); l.pins=[{n:1,x:c.x-10,y:c.y},{n:2,x:c.x+10,y:c.y}]; const p=l.b.pos||[0,0]; l.t.pos=[[0,[p[0],p[1]],'linear'],[1,[p[0]+40,p[1]],'linear']]"
 
-        await pick('Hill colour', PREP)
+        await pick('Hill color', PREP)
         check('Pins: the help is the title’s tooltip', (await tip('Pins') or '').startswith('Pins bend the path through its own nodes'))
         check('Motion path: the help is the title’s tooltip', (await tip('Motion path') or '').startswith('Drag the path on the canvas'))
         check('Morph: both explanations in one tooltip', 'Add a Morph keyframe' in (await tip('Morph') or '') and 'turns this rectangle into a plain path' in (await tip('Morph') or ''))

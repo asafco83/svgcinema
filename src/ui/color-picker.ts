@@ -1,9 +1,9 @@
 // SVGcinema — ui/color-picker
-// Our own colour picker popup (the browser's can't hold gradient settings). One window for:
+// Our own color picker popup (the browser's can't hold gradient settings). One window for:
 //   type      None · Solid · Linear · Radial (which types are offered depends on the property)
 //   gradient  the stop bar (drag a stop, click the bar to add one, remove), angle or centre + radius
-//   colour    saturation/brightness area, hue and opacity sliders, eyedropper, hex and R G B A fields
-// For a gradient the colour part edits the selected stop. Changes apply live; closing the window
+//   color    saturation/brightness area, hue and opacity sliders, eyedropper, hex and R G B A fields
+// For a gradient the color part edits the selected stop. Changes apply live; closing the window
 // (click outside, Esc) commits them as one undo step.
 import { $, H, ICON, clamp, clone, esc, fmt, r3 } from '../core/constants';
 
@@ -26,7 +26,7 @@ export function linAngle(g: Grad) {
   return r3(((((Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI + 90) % 360) + 360) % 360);
 }
 export interface PaintTarget {
-  /** current value: a colour string, 'none', or a gradient */
+  /** current value: a color string, 'none', or a gradient */
   get(): any;
   /** apply a value while the window is open */
   set(v: any): void;
@@ -39,7 +39,7 @@ export interface PaintTarget {
   key?: string;
 }
 
-/* ---------- colour maths ---------- */
+/* ---------- color maths ---------- */
 
 type RGBA = [number, number, number, number];
 const isG = (v: any): v is Grad => !!H.isG(v);
@@ -123,12 +123,12 @@ export function isNone(v: any) {
   const s = typeof v === 'string' ? v.trim().toLowerCase() : '';
   return !s || s === 'none' || s === 'transparent' || rgbaOf(s)[3] <= 0;
 }
-/** Show a value on a swatch button: the paint over a checkerboard, or the "no colour" mark. */
+/** Show a value on a swatch button: the paint over a checkerboard, or the "no color" mark. */
 export function showSwatch(b: HTMLElement, v: any) {
   const none = isNone(v);
   b.classList.toggle('none', none);
   (b.querySelector('i') as HTMLElement).style.background = none ? '' : paintCSS(v);
-  b.title = none ? 'No colour' : isG(v) ? (v.g === 'rad' ? 'Radial gradient' : 'Linear gradient') : toValue(rgbaOf(v));
+  b.title = none ? 'No color' : isG(v) ? (v.g === 'rad' ? 'Radial gradient' : 'Linear gradient') : toValue(rgbaOf(v));
 }
 
 /* ---------- the window ---------- */
@@ -166,7 +166,7 @@ export function pickerApply(v: any) {
   });
   paint();
 }
-/** colour the picker edits: the solid value, or the selected stop */
+/** color the picker edits: the solid value, or the selected stop */
 function curColor(): string {
   if (isG(val)) return val.s[Math.min(stop, val.s.length - 1)][1];
   return isNone(val) ? '#000000' : val;
@@ -174,7 +174,7 @@ function curColor(): string {
 function loadHSV() {
   const c = rgbaOf(curColor());
   const h = rgb2hsv(c);
-  // keep the hue when the colour is grey (it has none)
+  // keep the hue when the color is grey (it has none)
   hsv = [h[1] ? h[0] : hsv[0], h[1], h[2]];
   alpha = c[3];
 }
@@ -200,7 +200,7 @@ const ICONS: Record<PaintType, string> = {
 };
 const NAMES: Record<PaintType, string> = {
   none: 'None',
-  solid: 'Solid colour',
+  solid: 'Solid color',
   lin: 'Linear gradient',
   rad: 'Radial gradient',
 };
@@ -232,12 +232,12 @@ function render() {
         }
       </div>`;
   }
-  if (ty === 'none') h += `<p class="cp-none">No colour</p>`;
+  if (ty === 'none') h += `<p class="cp-none">No color</p>`;
   else {
     const eye = typeof (window as any).EyeDropper === 'function';
     h += `<div class="cp-sv" data-cpsv><i class="cp-knob"></i></div>
       <div class="cp-mid">
-        ${eye ? `<button class="btn ib" data-cpeye title="Pick a colour from the screen" aria-label="Pick a colour from the screen">${ICON.eyedropper}</button>` : ''}
+        ${eye ? `<button class="btn ib" data-cpeye title="Pick a color from the screen" aria-label="Pick a color from the screen">${ICON.eyedropper}</button>` : ''}
         <span class="cp-prev"><i></i></span>
         <div class="cp-sliders"><div class="cp-hue" data-cphue><i></i></div><div class="cp-alpha" data-cpalpha><b></b><i></i></div></div>
       </div>
@@ -252,7 +252,7 @@ function render() {
   p.innerHTML = h;
   paint();
 }
-/** update the colour widgets without rebuilding the window */
+/** update the color widgets without rebuilding the window */
 function paint() {
   const p = POP();
   if (!p || p.hidden) return;
@@ -407,7 +407,7 @@ export function init(): void {
       const barEl = (bar || st.parentElement) as HTMLElement;
       if (st) stop = +st.dataset.cpstop;
       else {
-        // a new stop where the bar was clicked, in the colour the gradient has there
+        // a new stop where the bar was clicked, in the color the gradient has there
         const r = barEl.getBoundingClientRect(),
           o = r3(clamp((e.clientX - r.left) / r.width, 0, 1)),
           g = clone(val) as Grad;

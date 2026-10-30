@@ -160,7 +160,7 @@ export interface CinPlayer {
   /** a pin at t: [rest x, rest y, x, y, angle] (a pin bound to a bone follows it) */
   pinAt(L: EngineLayer, p: { n: number; x: number; y: number; bone?: string; bo?: number[] }, t: number): number[];
   get(L: EngineLayer, k: string, t: number): any;
-  /** a filter parameter as its attribute value: raw, or by kind (a colour matrix, a sum, a half…) */
+  /** a filter parameter as its attribute value: raw, or by kind (a color matrix, a sum, a half…) */
   fxv(kind: string | undefined, v: any, w?: number): string;
   dstr(sp: EngineSubPath[] | null | undefined): string;
   /** a dash pattern as stroke-dasharray ('none' for a solid line) */
@@ -175,7 +175,7 @@ export interface CinPlayer {
   gAttrs(v: any): Record<string, string>;
   /** a linear gradient's end points [x1, y1, x2, y2] (0–1 of the box) */
   linP(v: any): number[];
-  /** parse a colour into [r, g, b, a] */
+  /** parse a color into [r, g, b, a] */
   pc(s: unknown): number[] | null;
   /** stroke-dasharray and -dashoffset for a trim [start, end, offset] */
   trimDash(tr: number[]): string[];
@@ -355,13 +355,13 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
     }
     return null;
   }
-  /* ---- gradients: { g: 'lin' | 'rad', s: [[offset 0–1, colour], …], a: angle°, cx, cy, r (0–1 of the box) }
+  /* ---- gradients: { g: 'lin' | 'rad', s: [[offset 0–1, color], …], a: angle°, cx, cy, r (0–1 of the box) }
      linear: p = [x1, y1, x2, y2] places the end points (else they follow the angle a)
      radial: ra = direction of the radius (°), rr = the other radius as a share of r (an ellipse) ---- */
   function isG(v: any): boolean {
     return !!v && typeof v === 'object' && (v.g === 'lin' || v.g === 'rad') && v.s && v.s.length > 0;
   }
-  /** colour of a gradient at offset o */
+  /** color of a gradient at offset o */
   function gAt(G: any, o: number): string {
     var st = G.s;
     if (o <= st[0][0]) return st[0][1];
@@ -373,7 +373,7 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
     return st[st.length - 1][1];
   }
   function mixG(a: any, b: any, p: number): any {
-    // a solid colour blends into a gradient as a gradient of that one colour
+    // a solid color blends into a gradient as a gradient of that one color
     if (!isG(a))
       a = {
         g: b.g,
@@ -1167,7 +1167,7 @@ export function CinEngine(D: EngineData, root: ParentNode | null): CinPlayer {
   function f(n: number) {
     return Math.round(n * 1000) / 1000;
   }
-  /* filter parameters: colour matrices (amounts as fractions, 1 = 100%), the outline's ring radii */
+  /* filter parameters: color matrices (amounts as fractions, 1 = 100%), the outline's ring radii */
   var GRAY = [0.2126, 0.7152, 0.0722, 0.2126, 0.7152, 0.0722, 0.2126, 0.7152, 0.0722],
     SEP = [0.393, 0.769, 0.189, 0.349, 0.686, 0.168, 0.272, 0.534, 0.131];
   function fxv(k: string | undefined, v: any, w?: number) {

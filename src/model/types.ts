@@ -276,7 +276,7 @@ export interface AnimSettings {
   palette: 'one' | 'per';
   /** GIF: Best refines the palette */
   pick: 'fast' | 'best';
-  /** GIF: colours (#RRGGBB) that always get a palette slot */
+  /** GIF: colors (#RRGGBB) that always get a palette slot */
   keep: string[];
   dither: 'none' | 'diff' | 'pat' | 'noise';
   /** dithering strength, 0–100 */
@@ -290,7 +290,7 @@ export interface AnimSettings {
   /** GIF: changes below this (%) count as unchanged */
   tolerance: number;
   transparent: boolean;
-  /** GIF: soft edges are blended with this colour when transparent */
+  /** GIF: soft edges are blended with this color when transparent */
   matte: string;
   /** Animated WebP: quality 1–100, or lossless */
   q: number;
@@ -354,7 +354,7 @@ export interface StillSettings {
   /** still SVG: fills its container, or a fixed size */
   svgFit?: 'resp' | 'fixed';
   bg: 'transparent' | 'doc' | 'colour';
-  /** the colour for bg: 'colour' */
+  /** the color for bg: 'color' */
   bgc?: string;
   /** Embed: also make the fallback formats, and 2× versions */
   fallbacks?: boolean;
@@ -369,7 +369,7 @@ export interface Doc {
   h: number;
   vx: number;
   vy: number;
-  /** background colour; empty means transparent */
+  /** background color; empty means transparent */
   bg: string;
   /** background opacity 0–1 (default 1) */
   bgA?: number;
@@ -483,7 +483,7 @@ export interface EditorState {
   /** pen tool in progress */
   pen: any;
   last: number;
-  /** open colour edit transaction */
+  /** open color edit transaction */
   colorEd: { end(o?: any): void } | null;
   swatch: number;
   lockAR: boolean;

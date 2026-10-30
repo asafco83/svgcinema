@@ -2,7 +2,7 @@
 // Layer filters. Each parameter is an animatable track keyed `fx.<filter id>.<param>`, stored like any
 // other property in Layer.b / Layer.t. A filter is a short chain of SVG filter primitives; the runtime
 // animates their attributes through Layer.fa (track → the primitives and attributes it drives, and how
-// the value turns into the attribute: a matrix for the colour filters, a sum for the outline's rings).
+// the value turns into the attribute: a matrix for the color filters, a sum for the outline's rings).
 import type { Layer } from './types';
 import { H } from '../core/constants';
 
@@ -149,7 +149,7 @@ export const FILTERS: Record<string, FilterDef> = {
       ['dx', 'o', 'dx'],
       ['dy', 'o', 'dy'],
     ],
-    // the colour everywhere outside the shape, grown inward, blurred and moved, kept inside the shape
+    // the color everywhere outside the shape, grown inward, blurred and moved, kept inside the shape
     prims: (l, f, IN, OUT, A) => {
       const u = f.id;
       return (
@@ -169,7 +169,7 @@ export const FILTERS: Record<string, FilterDef> = {
   sepia: matrix('Sepia', 'sep', 1, 1),
   invert: matrix('Invert', 'inv', 1, 1),
   overlay: {
-    label: 'Colour overlay',
+    label: 'Color overlay',
     group: 'colour',
     params: [{ key: 'col', label: 'Color', def: '#3b5bfd' }, amount(0.5, 1)],
     needsIn: () => true,
@@ -225,7 +225,7 @@ export const FILTERS: Record<string, FilterDef> = {
                 ];
       return [...t, ['col', 'c', 'flood-color'], ['op', 'c', 'flood-opacity']];
     },
-    // the ring between the shape grown (or shrunk) by two amounts, filled with the colour
+    // the ring between the shape grown (or shrunk) by two amounts, filled with the color
     prims: (l, f, IN, OUT, A) => {
       const u = f.id,
         pos = f.pos || 'out';
@@ -250,7 +250,7 @@ export const FILTERS: Record<string, FilterDef> = {
 /** the Add filter menu: groups, and the extra entries that add a filter with other settings */
 export const FX_GROUPS: [string, string][] = [
   ['shadow', 'Blur & shadow'],
-  ['colour', 'Colour'],
+  ['colour', 'Color'],
   ['edges', 'Edges'],
 ];
 export interface FxPreset {

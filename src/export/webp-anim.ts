@@ -54,7 +54,7 @@ export function muxAnimatedWebP(frames: WebPFrame[], w: number, h: number, loops
   const parts: Uint8Array[] = [
     Uint8Array.from(fourcc('WEBP')),
     chunk('VP8X', Uint8Array.from([0x02 | (alpha ? 0x10 : 0), 0, 0, 0, ...le(w - 1, 3), ...le(h - 1, 3)])),
-    // background colour (unused by browsers), then the loop count
+    // background color (unused by browsers), then the loop count
     chunk('ANIM', Uint8Array.from([...le(0, 4), ...le(loops, 2)])),
   ];
   for (const f of frames) {

@@ -2,9 +2,9 @@
 // Attachments in the agent's prompt box: the paperclip (or drop files on the panel, or paste them),
 // chips above the text (thumbnail, name, size, ×), a note when the model can't see pictures, and "@"
 // references. Typing "@" opens a list of the attachments under the caret (↑↓, Enter or Tab, Esc);
-// a picked reference is coloured in the text and Backspace removes it whole. "@file.png" with no such
+// a picked reference is colored in the text and Backspace removes it whole. "@file.png" with no such
 // file attached (its chip was removed) stays as plain, editable text in red, with a tip saying why.
-// The colours come from a copy of the text drawn under the (transparent) textarea.
+// The colors come from a copy of the text drawn under the (transparent) textarea.
 import { $ } from '../core/constants';
 import { URLS } from '../core/state';
 import { toast } from '../io/open';
@@ -70,7 +70,7 @@ export function renderChips() {
     : '';
 }
 
-/** The coloured copy of the text under the textarea (and, for placing the "@" list, a mark at `mark`). */
+/** The colored copy of the text under the textarea (and, for placing the "@" list, a mark at `mark`). */
 export function renderHL(mark = -1) {
   const hl = $('#agHL') as HTMLElement,
     ta = TA();

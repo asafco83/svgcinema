@@ -215,7 +215,7 @@ export function init(): void {
   $('#rulerX').addEventListener('pointerdown', start('y'));
   $('#rulerY').addEventListener('pointerdown', start('x'));
   window.addEventListener('resize', () => drawRulers());
-  // the rulers paint with theme colours read from CSS: repaint them when the theme changes
+  // the rulers paint with theme colors read from CSS: repaint them when the theme changes
   window.addEventListener(THEME_EVENT, () => drawRulers());
   void NS;
   void RW;

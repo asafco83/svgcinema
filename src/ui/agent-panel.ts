@@ -1548,7 +1548,7 @@ async function runTest() {
           {
             role: 'user',
             content: [
-              { type: 'text', text: 'What colour is this square? One word.' },
+              { type: 'text', text: 'What color is this square? One word.' },
               { type: 'image', mime: 'image/png', data: RED_PNG },
             ],
           },

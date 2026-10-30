@@ -1,10 +1,10 @@
 // SVGcinema — ui/graph
 // The graph editor: with the timeline bar's Graph button on, one property track opens into a value
 // graph across time (matched to the "Graph editor" mockup). Number properties only: one curve, or X and
-// Y in two colours for points (position, scale, size…). Drag a key to change its value and time; the
+// Y in two colors for points (position, scale, size…). Drag a key to change its value and time; the
 // handles of the selected segment shape its easing (a cubic-bezier, shared by X and Y, so dragging one
 // curve's handle reshapes both). The name column offers the same easing set as the Keyframe panel for
-// that segment. Colours, gradients, dash patterns and morphs have no graph. One undo step per drag.
+// that segment. Colors, gradients, dash patterns and morphs have no graph. One undo step per drag.
 import type { Ease, Keyframe, Layer, PropKey } from '../model/types';
 import { $, clamp, esc, fmt, isFrozen, layerTracks, propKind, propLabel, r3, valueAt } from '../core/constants';
 import { S, doc, layerById, selLayer, sortTrack } from '../core/state';

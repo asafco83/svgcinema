@@ -297,7 +297,7 @@ export function cssFor(anim: Layer[], pre: string, svgId: string, wraps: Wrap[] 
                     ? false
                     : T[k],
       );
-    // gradient stops: CSS can animate their colours (not their positions or the angle)
+    // gradient stops: CSS can animate their colors (not their positions or the angle)
     (['fill', 'stk'] as const).forEach(k => {
       if (!gk[k]) return;
       const n = Math.max(...fr.map(c => (H.isG(c[k]) ? c[k].s.length : 0)));

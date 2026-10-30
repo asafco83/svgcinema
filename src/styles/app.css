@@ -9125,3 +9125,47 @@ button.ag-chip:hover {
 #xOptsAnim .rf .chip {
   text-transform: none;
 }
+
+/* ---------- Select same (matched to the mockup) ---------- */
+.insp-head .ih-same {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+  padding: 0 4px 0 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.insp-head .ih-same:hover {
+  background: var(--panel-2);
+  color: var(--fg);
+}
+.insp-head .ih-same[aria-expanded='true'] {
+  background: var(--line);
+  color: var(--fg);
+}
+/* the choices: group titles, items indented under them, the selection's value on the right */
+.ctx .lm-it.ind > button {
+  padding-left: 20px;
+}
+.ctx kbd.lm-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.ctx kbd.lm-val .sw {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.ctx.same-menu {
+  min-width: 236px;
+}

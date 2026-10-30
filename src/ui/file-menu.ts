@@ -41,7 +41,8 @@ import { currentTheme, toggleTheme } from './theme';
 import { openShortcuts } from './shortcuts';
 import { openSample } from './topbar';
 import { clearRecent, loadRecent, openRecent, recentList, recentWhen } from '../io/recent';
-import { type SameKind, sameKinds, selectSame } from '../core/select-same';
+import { type SameKind, selectSame } from '../core/select-same';
+import { sameItems } from './select-same-menu';
 import LICENSE_TEXT from '../../LICENSE?raw';
 
 export const FM = $('#fileMenu');
@@ -50,19 +51,12 @@ export const BM = $('#bMenu');
 /** where the website is: beside the editor when it runs from the site's editor/ folder */
 const SITE = /\/editor\/(index\.html)?$/.test(location.pathname) ? '../' : null;
 
-const SAME: Array<[SameKind, string]> = [
-  ['fill', 'Fill'],
-  ['stk', 'Stroke'],
-  ['sw', 'Stroke width'],
-  ['font', 'Font'],
-  ['type', 'Kind of layer'],
-];
 function editItems(): Item[] {
   const keys = S.keys.size > 0,
     roots = selectedRoots(),
     any = roots.length > 0,
     l = selLayer(),
-    same = sameKinds(l);
+    same = sameItems();
   return [
     { id: 'ed:undo', label: 'Undo', on: S.undo.length > 0, key: 'Ctrl Z' },
     { id: 'ed:redo', label: 'Redo', on: S.redo.length > 0, key: 'Ctrl ⇧ Z' },
@@ -86,7 +80,7 @@ function editItems(): Item[] {
       id: 'ed:same',
       label: 'Select same',
       on: same.length > 0,
-      sub: SAME.filter(([k]) => same.includes(k)).map(([k, label]): Item => ({ id: 'same:' + k, label, on: true })),
+      sub: same,
     },
   ];
 }
@@ -166,7 +160,7 @@ const SUBS: Record<string, () => Item[]> = {
 function fill(only?: string) {
   FM.querySelectorAll(only ? `[data-sub="${only}"]` : '[data-sub]').forEach((it: HTMLElement) => {
     const list = SUBS[it.dataset.sub](),
-      on = list.some(x => x !== '-' && x.on !== false && (x.on || x.sub)),
+      on = list.some(x => x !== '-' && !('head' in x) && x.on !== false && (x.on || x.sub)),
       b = it.querySelector(':scope > button') as HTMLButtonElement;
     it.classList.remove('open');
     b.disabled = !on;

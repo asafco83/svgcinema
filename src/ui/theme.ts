@@ -2,7 +2,7 @@
 // Light / dark theme. Until the user picks one, the editor follows the system setting; the
 // button in the top bar (right of Keyboard shortcuts) switches to the other theme and remembers
 // the choice. (index.html applies a saved choice before the first paint, so there is no flash.)
-// Anything drawn with colours read from CSS in script (the rulers) listens for THEME_EVENT.
+// Anything drawn with colors read from CSS in script (the rulers) listens for THEME_EVENT.
 export type Theme = 'light' | 'dark';
 const STORE = 'svgcinema:theme';
 export const THEME_EVENT = 'svgcinema:theme';

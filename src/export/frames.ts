@@ -19,13 +19,13 @@ export interface FrameSource {
 export interface FrameOpts {
   w?: number;
   h?: number;
-  /** a colour painted behind everything; omitted: transparent */
+  /** a color painted behind everything; omitted: transparent */
   bg?: Fill | null;
   /** responsive markup (width 100%) instead of a fixed size */
   responsive?: boolean;
 }
 
-/** A background colour and its opacity (0–1). */
+/** A background color and its opacity (0–1). */
 export interface Fill {
   color: string;
   alpha: number;

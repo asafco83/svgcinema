@@ -116,9 +116,9 @@ function tabs(): Tab[] {
           r('Convert to path', 'Ctrl Shift P'),
         ),
         sec(
-          'Colour',
-          r('Pick the fill colour from the screen', 'I'),
-          r('Pick the stroke colour from the screen', 'Alt I'),
+          'Color',
+          r('Pick the fill color from the screen', 'I'),
+          r('Pick the stroke color from the screen', 'Alt I'),
         ),
       ],
     },

@@ -65,7 +65,7 @@ export function animFrames(a: AnimSettings, dur = doc.dur) {
   return Math.max(1, Math.round((e - s) * a.fps));
 }
 const hex = (c: string) => parseInt(c.replace('#', ''), 16) || 0;
-/** The document's colours (fills and strokes), most used first, for Keep exact. */
+/** The document's colors (fills and strokes), most used first, for Keep exact. */
 export function docColours(max = 6): string[] {
   const count = new Map<string, number>();
   const add = (v: unknown) => {
@@ -279,7 +279,7 @@ async function baseline(my: number, a: AnimSettings) {
   syncResult();
 }
 /**
- * A plain GIF of the same frames, as a straightforward GIF export makes it: 256 colours, diffusion
+ * A plain GIF of the same frames, as a straightforward GIF export makes it: 256 colors, diffusion
  * dithering at full strength, every pixel of every frame stored.
  */
 export function plainOpts(a: AnimSettings): GifOpts {
@@ -342,8 +342,8 @@ export function syncAnimUI() {
     [s, e] = animSpan(a);
   segOn('#xaFmt', a.fmt);
   $('#xaFmtNote').textContent = gif
-    ? 'Plays everywhere, including email and chat apps. At most 256 colours per frame.'
-    : 'Full colour and transparency, much smaller than GIF. Every current browser; most email apps don’t show it.';
+    ? 'Plays everywhere, including email and chat apps. At most 256 colors per frame.'
+    : 'Full color and transparency, much smaller than GIF. Every current browser; most email apps don’t show it.';
   // frames
   segOn('#xaPart', a.part ? 'part' : 'whole');
   $('#xaFromRow').hidden = !a.part;
@@ -395,11 +395,11 @@ export function syncAnimUI() {
   $('#xaSumFmt').textContent = gif ? 'GIF' : 'Animated WebP';
   $('#xaSumSize').textContent = `${w} × ${h}`;
   $('#xaSumGif').textContent =
-    `${a.colours} colours · ${a.dither === 'none' ? 'no dithering' : 'dithered'}${a.lossy ? ' · lossy ' + a.lossy : ''}`;
+    `${a.colours} colors · ${a.dither === 'none' ? 'no dithering' : 'dithered'}${a.lossy ? ' · lossy ' + a.lossy : ''}`;
   $('#xaSumWebp').textContent = a.lossless ? 'Lossless' : `Quality ${a.q}%`;
   // compare and track
   $('#xaCompLbl').textContent = gif
-    ? `GIF · ${a.colours} colours${a.dither === 'none' ? '' : ' · dithered'}`
+    ? `GIF · ${a.colours} colors${a.dither === 'none' ? '' : ' · dithered'}`
     : `Animated WebP · ${a.lossless ? 'lossless' : a.q + '%'}`;
   syncTrack();
   $('#xPrevLbl').textContent = `${w} × ${h} · drag the divider to compare` + (zoom === 'fit' ? '' : ' · zoomed in');

@@ -21,7 +21,7 @@ async def main():
         await pg.click('#animMenu [data-presets]'); await pg.wait_for_timeout(200)
         check('the Presets window opens', await ev("!!document.getElementById('presetPop')"))
         grp=await ev("[...document.querySelectorAll('#presetPop .pr-grp span')].map(s=>s.childNodes[0].textContent)")
-        check('groups that fit a text layer (no Strokes)', grp==['Entrances','Exits','Emphasis','Colour','Filters'], grp)
+        check('groups that fit a text layer (no Strokes)', grp==['Entrances','Exits','Emphasis','Color','Filters'], grp)
         check('Filters says JS export only, its tiles carry a JS badge', 'JS export only' in await ev("document.querySelector('[data-pgroup=filter]').textContent"))
         await pg.click('[data-pgroup=filter]'); await pg.wait_for_timeout(100)
         check('…', await ev("document.querySelectorAll('#presetPop .pr-tile .pr-js').length")==5)

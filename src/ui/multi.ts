@@ -1,8 +1,8 @@
 // SVGcinema — ui/multi
 // Editing several layers at once. With more than one layer selected, the inspector shows only the
 // properties every selected layer has (transform, opacity, fill & stroke, stroke style…). A field
-// whose value is the same everywhere shows it; one that differs shows "Mixed" (a colour swatch shows
-// "•••"). Setting a value, a keyframe ◆, a toggle or a colour applies it to every selected layer that
+// whose value is the same everywhere shows it; one that differs shows "Mixed" (a color swatch shows
+// "•••"). Setting a value, a keyframe ◆, a toggle or a color applies it to every selected layer that
 // has the property, as one undo step.
 import type { Layer, PropKey } from '../model/types';
 import { H, valueAt } from '../core/constants';
@@ -44,6 +44,27 @@ export function common<T>(ls: Layer[], get: (l: Layer) => T): T | typeof MIXED {
 export const allHave = (ls: Layer[], k: string) => ls.every(l => propOK(l, k as PropKey));
 const PAINTED = ['rect', 'ellipse', 'path', 'text'];
 export const allPainted = (ls: Layer[]) => ls.every(l => PAINTED.includes(l.type));
+/** the text layers of a multi-selection (Text appearance edits only these) */
+export const multiText = () => multiSel().filter(l => l.type === 'text');
+/** the text layers that text fields and toggles change: all the selected ones, or the one selected */
+export function textTargets(l: Layer | null): Layer[] {
+  const tx = multiText();
+  return tx.length ? tx : l && l.type === 'text' ? [l] : [];
+}
+const TEXT_DEF: Record<string, number> = { ls: 0, lh: 1.2, size: 16 };
+/** whether a text toggle (Bold, Italic, Underline…, Keep width) is on for a layer */
+export function textToggleOn(l: Layer, k: string, v?: string) {
+  const G = l.geo;
+  if (k === 'bold') return +String(G.weight || 400) >= 600;
+  if (k === 'italic') return !!G.italic;
+  if (k === 'deco')
+    return String(G.deco || '')
+      .split(/\s+/)
+      .includes(v || '');
+  if (k === 'wrap') return !!G.wrap;
+  return null;
+}
+export const TEXT_TOGGLES = ['bold', 'italic', 'deco', 'anchor', 'dir', 'tcase', 'wrap'];
 /** the type the selection shares, else "mixed" */
 export const commonType = (ls: Layer[]) => (ls.every(l => l.type === ls[0].type) ? ls[0].type : 'mixed');
 
@@ -64,7 +85,7 @@ export function multiFields() {
     if (rows.length && rows.every(r => r.hidden)) sec.hidden = true;
   });
   const t = S.time;
-  // number and colour fields
+  // number and color fields
   INSP.querySelectorAll<HTMLInputElement>('input[data-f]').forEach(inp => {
     if (inp === document.activeElement) return;
     const [k, i] = inp.dataset.f.split(':');
@@ -117,6 +138,36 @@ export function multiFields() {
       b.setAttribute('aria-pressed', 'false');
     }
   });
+  // Text appearance (shown when the selection has text layers): the text layers' shared values
+  const tx = ls.filter(l => l.type === 'text');
+  if (tx.length) {
+    INSP.querySelectorAll<HTMLInputElement>('input[data-g]').forEach(inp => {
+      if (inp === document.activeElement) return;
+      const g = inp.dataset.g,
+        v = common(tx, l => l.geo[g] ?? TEXT_DEF[g] ?? '');
+      inp.classList.toggle('mixed', v === MIXED);
+      inp.placeholder = v === MIXED ? MIXED : '';
+      inp.value = v === MIXED || v === '' ? '' : String(Math.round(+v * 100) / 100);
+    });
+    const st = INSP.querySelector<HTMLSelectElement>('select[data-tx-sel="style"]');
+    if (st) mixedControl(st, common(tx, l => String(l.geo.weight || '400') + '|' + (l.geo.italic ? 1 : 0)) === MIXED);
+    const fam = INSP.querySelector<HTMLElement>('[data-fontpick] span');
+    if (fam && common(tx, l => l.geo.family) === MIXED) {
+      fam.textContent = MIXED;
+      fam.style.fontFamily = '';
+      fam.style.fontStyle = '';
+    }
+    INSP.querySelectorAll<HTMLElement>('[data-tx]').forEach(b => {
+      const k = b.dataset.tx;
+      if (!TEXT_TOGGLES.includes(k)) return;
+      const on =
+        textToggleOn(tx[0], k, b.dataset.v) !== null
+          ? tx.every(l => textToggleOn(l, k, b.dataset.v))
+          : tx.every(l => String((l.geo as any)[k] ?? '') === String(b.dataset.v ?? ''));
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+  }
   const rng = INSP.querySelector<HTMLInputElement>('input[data-range="op"]');
   if (rng) rng.classList.toggle('mixed', common(ls, l => valueAt(l, 'op', t)) === MIXED);
   // ◆: on when every layer has a key here, "has" when any is animated

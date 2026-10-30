@@ -67,7 +67,7 @@ async def main():
         cmp=await ev("(()=>{const o=document.getElementById('xaOrig'),c=document.getElementById('xaComp');return [o.width,o.height,c.width,c.height,o.style.width===c.style.width]})()")
         check('the original and the GIF frame side by side, same size', cmp==[480,300,480,300,True], cmp)
         lbl=await ev("document.getElementById('xaCompLbl').textContent")
-        check('the compressed side says what it is', lbl=='GIF · 128 colours · dithered', lbl)
+        check('the compressed side says what it is', lbl=='GIF · 128 colors · dithered', lbl)
         # the divider
         await ev("(()=>{const s=document.getElementById('xaSplit');s.value=30;s.dispatchEvent(new Event('input'))})()")
         check('the divider moves', await ev("document.getElementById('xaBox').style.getPropertyValue('--split')")=='30%')
@@ -130,6 +130,7 @@ async def main():
         # Animated WebP
         await pg.click('#xaFmt [data-v="webp"]'); await made()
         check('Animated WebP: its own compression section', await ev("document.getElementById('xaSecGif').hidden && !document.getElementById('xaSecWebp').hidden && document.getElementById('xDlT').textContent==='Download .webp'"))
+        await pg.wait_for_function("document.getElementById('xaSaving').textContent!==''", timeout=60000)
         sv=await ev("document.getElementById('xaSaving').textContent")
         check('…and what a plain GIF would weigh', sv.startswith('a plain GIF would be'), sv)
         await pg.click('#xaWll'); await pg.wait_for_timeout(100)

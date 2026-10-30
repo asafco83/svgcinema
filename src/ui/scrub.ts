@@ -3,7 +3,7 @@
 // value: one unit per pixel (Shift ×10, Alt ×0.1). In a number field, ↑ / ↓ step the value the same
 // way (Shift ×10, Alt ×0.1), live; holding the key down is one undo step. The inspector scrubs its own animatable fields
 // live (inspector.ts, `data-scrub`); this covers every other number field (shape geometry, text,
-// document, timeline length, colour stops, export…) by typing into the field and sending the same
+// document, timeline length, color stops, export…) by typing into the field and sending the same
 // input/change events typing would, so each field keeps its own rules. A whole drag is one undo step.
 import { S, doc } from '../core/state';
 import { clock, fmt, parseClock } from '../core/constants';

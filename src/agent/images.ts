@@ -448,7 +448,7 @@ function check(r: GenResult, g: GenRequest): GenResult {
 
 /**
  * Remove a flat background in place: a flood fill from the edges takes every connected pixel close
- * to the edge colour (the corners must agree on it), and a 1 px soft edge with the colour's tint taken
+ * to the edge color (the corners must agree on it), and a 1 px soft edge with the color's tint taken
  * out. Works on raw RGBA, so it runs in tests too. Returns how much of the picture it cleared (0–1),
  * or 0 when the background isn't flat.
  */
@@ -457,7 +457,7 @@ export function removeBackground(px: Uint8ClampedArray, w: number, h: number, to
   const corners = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)].map(i => [px[i], px[i + 1], px[i + 2]]);
   const d = (i: number, c: number[]) =>
     Math.max(Math.abs(px[i] - c[0]), Math.abs(px[i + 1] - c[1]), Math.abs(px[i + 2] - c[2]));
-  // the key colour: the one most corners share
+  // the key color: the one most corners share
   let key: number[] | null = null;
   for (const c of corners) {
     const n = corners.filter(o => Math.max(...o.map((v, k) => Math.abs(v - c[k]))) <= tol).length;
@@ -490,7 +490,7 @@ export function removeBackground(px: Uint8ClampedArray, w: number, h: number, to
     if (y < h - 1) push(x, y + 1);
   }
   // the soft edge: pixels touching the cleared area, made partly clear by how close they are to the
-  // key colour, with the key's tint taken out
+  // key color, with the key's tint taken out
   const kmax = key.indexOf(Math.max(...key));
   for (let k = 0; k < w * h; k++) {
     if (seen[k]) continue;

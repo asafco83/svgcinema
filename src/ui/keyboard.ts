@@ -325,7 +325,7 @@ export function init(): void {
       e.preventDefault();
       return;
     }
-    // I / Alt+I: pick the fill / stroke colour from the screen
+    // I / Alt+I: pick the fill / stroke color from the screen
     if (k.toLowerCase() === 'i' && !e.shiftKey && l && !isLocked(l)) {
       if (pickPaint(l, e.altKey ? 'stk' : 'fill')) e.preventDefault();
       return;

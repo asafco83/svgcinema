@@ -119,11 +119,11 @@ async def main():
         await pg.click('#bMenu'); await pg.hover('#fileMenu [data-sub=edit] > button'); await pg.wait_for_timeout(150)
         await pg.hover('#fileMenu [data-lm="ed:same"]'); await pg.wait_for_timeout(150)
         items=await ev("[...document.querySelectorAll('#fileMenu [data-lm=\"ed:same\"] + .lm-sub button span')].map(s=>s.textContent)")
-        check('Edit › Select same lists what applies to the layer', 'Fill' in items and 'Kind of layer' in items and 'Font' not in items, items)
+        check('Edit › Select same lists what applies to the layer', 'Fill color' in items and 'Shape' in items and 'Font family' not in items, items)
         await pg.click('#fileMenu [data-lm="same:type"]'); await pg.wait_for_timeout(150)
         want=await ev(f"st.doc.layers.filter(l=>l.type===st.layerById('{sun}').type&&!l.hid&&!l.lock).length")
         got=await ev("[...st.S.selSet].map(id=>st.layerById(id).type)")
-        check('Select same › Kind of layer picks every visible layer of that kind', len(got)>1 and all(t==got[0] for t in got), (len(got), want))
+        check('Select same › Shape picks every visible layer of that kind', len(got)>1 and all(t==got[0] for t in got), (len(got), want))
         check('the clicked layer stays the primary one', await ev("st.S.sel")==sun)
 
         # ---- Open recent
