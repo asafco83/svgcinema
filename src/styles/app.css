@@ -4028,6 +4028,10 @@ select.sel {
   left: 34px;
   top: 34px;
 }
+/* a tool's options bar is above the canvas too (centred): the chip goes under it, so a long chip isn't covered */
+.stage:has(#boneOpts:not([hidden])) .bone-chip.top {
+  top: 58px;
+}
 .bone-chip.tip {
   left: 0;
   top: 0;
