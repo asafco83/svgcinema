@@ -1,5 +1,6 @@
 // Help & tutorials: the topics (src/help/content.json) and the guided tours (src/help/tours.ts) agree.
 import { describe, expect, it } from 'vitest';
+import { existsSync } from 'node:fs';
 import { GROUPS, READY, TOPICS, keyHTML, rich, topic } from '../src/help/content';
 import { TOURS } from '../src/help/tours';
 import { SCENES } from '../src/help/scenes';
@@ -27,8 +28,8 @@ describe('help content', () => {
   it('related topics point at topics with a page', () => {
     READY.forEach(t => (t.related || []).forEach(r => expect(topic(r), `${t.id} → ${r}`).toBeTruthy()));
   });
-  it('every guided tour has a scene and one behaviour per step', () => {
-    READY.filter(t => t.tour).forEach(t => {
+  it('every topic with a page has a scene and one behaviour per step (its Show me records its clips)', () => {
+    READY.forEach(t => {
       expect(SCENES[t.id], t.id).toBeTruthy();
       expect(TOURS[t.id] && TOURS[t.id].length, t.id).toBe(t.steps!.length);
       TOURS[t.id].forEach(s => {
@@ -37,6 +38,25 @@ describe('help content', () => {
         expect(typeof s.show).toBe('function');
       });
     });
+  });
+  it('a guided tour happens in the editor: no step of it is done elsewhere', () => {
+    READY.filter(t => t.tour).forEach(t =>
+      t.steps!.forEach(s => expect(s.clip, `${t.id}: ${s.title}`).not.toBe(false)),
+    );
+  });
+  it('every step done in the editor has its clip, in both themes', () => {
+    READY.forEach(t =>
+      t.steps!.forEach((s, i) => {
+        if (s.clip === false) return;
+        for (const f of [`${t.id}-${i + 1}`, `${t.id}-${i + 1}-dark`])
+          for (const x of ['mp4', 'webp']) expect(existsSync(`public/help/${f}.${x}`), `${f}.${x}`).toBe(true);
+      }),
+    );
+  });
+  it('Start here: a few topics, each a guided tour', () => {
+    const s = READY.filter(t => t.start);
+    expect(s.length).toBeGreaterThanOrEqual(3);
+    s.forEach(t => expect(t.tour, t.id).toBe(true));
   });
   it('the diamond and keys render as markup', () => {
     expect(rich('Click {◆} here')).toContain('<i class="hp-dm"');

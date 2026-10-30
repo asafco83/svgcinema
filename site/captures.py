@@ -562,18 +562,71 @@ async def clips(b, theme):
         await c.close()
 
 
+HELP_W, HELP_H, HELP_OUT, HELP_MIN = 1280, 800, 880, 560
+
+
+def crop_box(r):
+    """A step clip's crop (CSS px): what the step showed (the lit control, where the pointer went, what the step
+    says its clip must show) with some room, at 16:10 like the editor's window, at least HELP_MIN wide."""
+    if not r:
+        return (0, 0, HELP_W, HELP_H)
+    pad = 18
+    x0, y0 = r['x'] - pad, r['y'] - pad
+    x1, y1 = r['x'] + r['width'] + pad, r['y'] + r['height'] + pad
+    w = max(x1 - x0, HELP_MIN, (y1 - y0) * 1.6)
+    h = w / 1.6
+    if w >= HELP_W * 0.9 or h >= HELP_H * 0.9:
+        return (0, 0, HELP_W, HELP_H)
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    x = min(max(0, cx - w / 2), HELP_W - w)
+    y = min(max(0, cy - h / 2), HELP_H - h)
+    return (round(x), round(y), round(w), round(h))
+
+
+class HelpRec(Rec):
+    """A help step's clip: whole frames at 2x go to disk as they come, and end() crops them to the step's region
+    (set .crop before end) and scales them to HELP_OUT wide."""
+
+    async def begin(self):
+        self.dir = tempfile.mkdtemp()
+        self.n = 0
+        self.crop = None
+        await self.tick(0)
+        return self
+
+    async def frame(self, n=1, wait=None):
+        for _ in range(n):
+            await self.tick(1000 / FPS)
+            await self.pg.screenshot(path=f'{self.dir}/{self.n:05d}.jpg', type='jpeg', quality=94, scale='device')
+            self.n += 1
+
+    async def end(self):
+        x, y, w, h = [v * 2 for v in (self.crop or (0, 0, HELP_W, HELP_H))]
+        vf = f'crop={w}:{h}:{x}:{y},scale={HELP_OUT}:-2:flags=lanczos'
+        mp4 = os.path.join(self.out, self.name + '.mp4')
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', f'{self.dir}/%05d.jpg', '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '26', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', mp4], check=True)
+        k = min(self.n - 1, int(self.poster * self.n))
+        p = os.path.join(self.out, self.name + '.webp')
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{self.dir}/{k:05d}.jpg', '-vf', vf, '-q:v', '84', p], check=True)
+        shutil.rmtree(self.dir)
+        print(f'{os.path.relpath(mp4, ROOT)} {self.n / FPS:.1f}s crop {self.crop} {os.path.getsize(mp4) // 1024} KB, poster {os.path.getsize(p) // 1024} KB')
+
+
 async def help_clips(b, theme):
-    """public/help/<topic>-<step>[-dark].mp4/.webp: each step of each guided tour, done by its Show me in the
-    tutorial's practice scene (?tour=<topic>&clip=1: no tour card, and the tour waits for next()), and, in the light
-    run, public/help/<topic>.svg: the finished scene exported as CSS-animated SVG (the topic page's "What you'll
-    make")."""
+    """public/help/<topic>-<step>[-dark].mp4/.webp: each step of each help topic, done by its Show me in the
+    topic's practice scene (?tour=<topic>&clip=1: no tour card, and the tour waits for next()), cropped to the part
+    of the editor the step uses (help/practice region()). Steps marked "clip": false (done outside the editor)
+    have none. In the light run, public/help/<topic>.svg too, for a topic with a goal: the finished scene
+    exported as CSS-animated SVG (the topic page's "What you'll make")."""
     sfx = '' if theme == 'light' else '-dark'
     os.makedirs(HELP, exist_ok=True)
     topics = json.load(open(os.path.join(ROOT, 'src/help/content.json')))['topics']
     for t in topics:
-        if not (t.get('ready') and t.get('tour')) or not (want('help') or want('help:' + t['id'])):
+        if not t.get('ready') or not (want('help') or want('help:' + t['id'])):
             continue
-        c = await b.new_context(viewport={'width': 1280, 'height': 800}, device_scale_factor=1)
+        if not any(s.get('clip', True) for s in t['steps']):
+            continue
+        c = await b.new_context(viewport={'width': HELP_W, 'height': HELP_H}, device_scale_factor=2)
         pg = await c.new_page()
         pg.set_default_timeout(10000)
         await pg.add_init_script(CLOCK)
@@ -583,24 +636,30 @@ async def help_clips(b, theme):
         await pg.wait_for_timeout(1500)
         n = len(t['steps'])
         for i in range(n):
-            last = i == n - 1
-            play = t['steps'][i]['title'].startswith('Play')
-            rec = await Rec(pg, f"{t['id']}-{i + 1}{sfx}", {'x': 0, 'y': 0, 'width': 1280, 'height': 800}, poster=0.97, out=HELP).begin()
-            await rec.hold(0.4)
-            await pg.evaluate('()=>{cinTour.show()}')
-            for _ in range(FPS * 12):
-                await rec.frame(1)
-                if not (await pg.evaluate('cinTour.state().showing')):
-                    break
-            await rec.hold(2.2 if play else 0.8)
-            await rec.end()
+            step = t['steps'][i]
+            play = step['title'].startswith('Play')
+            if step.get('clip', True):
+                rec = await HelpRec(pg, f"{t['id']}-{i + 1}{sfx}", None, poster=0.97, out=HELP).begin()
+                await rec.hold(0.4)
+                await pg.evaluate('()=>{cinTour.show()}')
+                for _ in range(FPS * 15):
+                    await rec.frame(1)
+                    if not (await pg.evaluate('cinTour.state().showing')):
+                        break
+                await rec.hold(2.2 if play else 0.8)
+                await pg.evaluate('cinTour.sample()')
+                rec.crop = crop_box(await pg.evaluate('cinTour.region()'))
+                await rec.end()
+            else:
+                await pg.evaluate('()=>cinTour.show()')
+                await pg.wait_for_function('!cinTour.state().showing')
             st = await pg.evaluate('cinTour.state()')
             if not (st['done'][i] if i < len(st['done']) else False):
                 raise RuntimeError(f"help clip {t['id']} step {i + 1}: Show me didn't finish the step")
-            if not last:
+            if i < n - 1:
                 await pg.evaluate('()=>cinTour.next()')
-                await rec.tick(300)
-        if theme == 'light':
+                await Rec(pg, '', None).tick(300)
+        if theme == 'light' and t.get('goal'):
             svg = await pg.evaluate("""async()=>{const st=await import('/src/core/state.ts');const b=await import('/src/export/build.ts');
               Object.assign(st.doc.ex,{mode:'css',trigger:'load',size:'resp',prefix:'help'});return b.buildExport(null).code}""")
             open(os.path.join(HELP, t['id'] + '.svg'), 'w').write(svg)

@@ -9,13 +9,19 @@ export interface HelpStep {
   text: string;
   /** the short line on the tour card */
   do: string;
+  /** false: the step is done outside the editor (on your page, in your files), so it has no clip */
+  clip?: boolean;
 }
 export interface HelpTopic {
   id: string;
   group: string;
   title: string;
   ready?: boolean;
+  /** a guided tour: the topic's steps run in a practice editor (every topic with a page has its steps in
+   *  help/tours, for its clips; `tour` offers them as a tour) */
   tour?: boolean;
+  /** one of the cards under Start here on the website's help hub */
+  start?: boolean;
   minutes?: number;
   intro?: string;
   goal?: string;

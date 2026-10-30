@@ -15,6 +15,28 @@ const ARROW =
 
 let el: HTMLElement | null = null,
   at: XY = { x: innerWidth / 2, y: innerHeight / 2 };
+/** where the pointer went during a step, and the controls it pressed (a step's clip is cropped to it) */
+let box: DOMRect | null = null;
+export const ghostBox = () => box;
+export const resetGhostBox = () => {
+  box = null;
+};
+/** Adds a box to where the pointer went (the box of a control it pressed, or a point with some room). */
+export function addBox(r: DOMRect) {
+  if (!r.width && !r.height) return;
+  if (!box) box = new DOMRect(r.x, r.y, r.width, r.height);
+  else {
+    const x = Math.min(box.left, r.left),
+      y = Math.min(box.top, r.top);
+    box = new DOMRect(x, y, Math.max(box.right, r.right) - x, Math.max(box.bottom, r.bottom) - y);
+  }
+}
+/** a control pressed: its box, unless it is a big area (the canvas, a panel) */
+function pressed(t: Element | null) {
+  if (!t || !t.isConnected) return;
+  const r = t.getBoundingClientRect();
+  if (r.width < innerWidth * 0.4 && r.height < innerHeight * 0.4) addBox(r);
+}
 
 function cursor() {
   if (!el) {
@@ -40,8 +62,10 @@ export function centre(t: Element, fx = 0.5, fy = 0.5): XY {
   const r = t.getBoundingClientRect();
   return { x: r.left + r.width * fx, y: r.top + r.height * fy };
 }
+const point = (p: XY) => addBox(new DOMRect(p.x - 30, p.y - 24, 60, 52));
 async function glide(to: XY, ms = 520) {
   const from = { ...at };
+  point(to); // where it goes (not the way there from the last step)
   cursor();
   const n = Math.max(1, Math.round(ms / 20));
   for (let i = 1; i <= n; i++) {
@@ -90,6 +114,7 @@ export async function click(t: Element | null, fx = 0.5, fy = 0.5) {
   // the editor may have drawn the control again meanwhile (e.g. while it plays): click what is there now
   if (!t.isConnected) t = hit(p);
   ring();
+  pressed(t);
   pointer('pointerdown', p, { target: t });
   pointer('mousedown', p, { target: t });
   await wait(60);
@@ -105,12 +130,14 @@ export async function drag(a: XY, b: XY, o: { shift?: boolean; ms?: number } = {
   ring();
   // later events go where the press went, as with pointer capture (they bubble to the window as well)
   const t0 = pointer('pointerdown', a, { shift: o.shift });
+  pressed(t0);
   pointer('mousedown', a, { shift: o.shift, target: t0 });
   const n = Math.max(6, Math.round((o.ms || 700) / 20));
   for (let i = 1; i <= n; i++) {
     const k = ease(i / n),
       p = { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
     place(p);
+    point(p);
     pointer('pointermove', p, { shift: o.shift, target: t0 });
     await wait(20);
   }

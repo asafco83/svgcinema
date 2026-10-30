@@ -42,7 +42,8 @@ export function helpPages(content) {
   const pages = [];
 
   // ---------- the hub ----------
-  const starts = ready.filter(t => t.tour);
+  const starts = ready.filter(t => t.start),
+    pending = content.topics.some(t => !t.ready);
   const hub = `<section class="phead mat">
   <div class="wrap">
     <p class="crumb"><a href="{{HOME}}">Home</a><span>/</span>Help</p>
@@ -90,7 +91,11 @@ export function helpPages(content) {
       )
       .join('\n')}</div>
     <p class="hnone" id="helpNone" hidden>Nothing found. Try another word, or browse the topics above.</p>
-    <p class="hsoon">More topics are on the way. Until then, the ⓘ beside a setting in the editor explains it, and F1 lists every key.</p>
+    ${
+      pending
+        ? '<p class="hsoon">More topics are on the way. Until then, the ⓘ beside a setting in the editor explains it, and F1 lists every key.</p>'
+        : ''
+    }
   </div>
 </section>
 <section class="band hband">
@@ -168,7 +173,9 @@ export function helpPages(content) {
     <ol class="hsteps">${t.steps
       .map(
         (s, i) =>
-          `<li><div><h3>${esc(s.title)}</h3><p>${rich(s.text)}</p>{{HCLIP:${t.id}-${i + 1}|${esc(s.title)}|hstep-clip}}</div></li>`,
+          `<li><div><h3>${esc(s.title)}</h3><p>${rich(s.text)}</p>${
+            s.clip === false ? '' : `{{HCLIP:${t.id}-${i + 1}|${esc(s.title)}|hstep-clip}}`
+          }</div></li>`,
       )
       .join('\n')}</ol>
     ${t.note ? `<div class="hnote"><b>Good to know.</b> ${rich(t.note)}</div>` : ''}

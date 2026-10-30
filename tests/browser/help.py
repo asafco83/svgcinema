@@ -16,6 +16,8 @@ ROOT=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HELP=json.load(open(os.path.join(ROOT,'src/help/content.json')))
 READY=[t for t in HELP['topics'] if t.get('ready')]
 TOURS=[t for t in READY if t.get('tour')]
+# every topic with a page runs its steps with Show me (the clips are recordings of it), tour or not
+SHOWN=READY if not os.environ.get('HELP_ONLY') else [t for t in READY if t['id'] in os.environ['HELP_ONLY'].split(',')]
 async def main():
     base=sys.argv[1] if len(sys.argv)>1 else 'http://localhost:5199/'
     R={}; F=[]
@@ -33,7 +35,7 @@ async def main():
         # what the browser keeps for the user's own editing, before any practice
         await pg.evaluate("localStorage.setItem('svgcinema:doc', JSON.stringify({name:'Mine'})); localStorage.setItem('svgcinema:dirty','1'); localStorage.setItem('svgcinema:inspClosed','[]')")
         keep=await pg.evaluate("JSON.stringify(Object.fromEntries(Object.keys(localStorage).sort().map(k=>[k,localStorage.getItem(k)])))")
-        for t in TOURS:
+        for t in SHOWN:
             await pg.goto(base+f"?tour={t['id']}"); await pg.wait_for_function('window.cinTour', timeout=10000)
             st=await pg.evaluate('cinTour.state()')
             check(f"{t['id']}: the tour starts at step 1 of {len(t['steps'])}", st['i']==0 and st['n']==len(t['steps']), st)
@@ -51,10 +53,10 @@ async def main():
                     if st['i']>i or st['finished']: break
                 if not (st['i']>i or st['finished']):
                     ok=False; check(f"{t['id']}: Show me does step {i+1} ({t['steps'][i]['title']})", False, st); break
-            check(f"{t['id']}: Show me alone runs the whole tour", ok and st['finished'], st)
+            check(f"{t['id']}: Show me alone runs every step", ok and st['finished'], st)
             await pg.screenshot(path=OUT+f"help-tour-{t['id']}.png")
         bar=await pg.evaluate("[['#bMenu','#bAgent','#bTheme'].map(s=>getComputedStyle(document.querySelector(s)).display), document.querySelector('.pr-chip')?.textContent, document.querySelector('.pr-name')?.textContent, !!document.getElementById('prExit')]")
-        check('the practice editor\'s top bar: Practice, the tutorial and Exit, no menu, Agent or theme', bar[0]==['none','none','none'] and bar[1]=='Practice' and bar[2]==TOURS[-1]['title'] and bar[3], bar)
+        check('the practice editor\'s top bar: Practice, the tutorial and Exit, no menu, Agent or theme', bar[0]==['none','none','none'] and bar[1]=='Practice' and bar[2]==SHOWN[-1]['title'] and bar[3], bar)
         await pg.goto(base); await pg.wait_for_timeout(1500)
         after=await pg.evaluate("JSON.stringify(Object.fromEntries(Object.keys(localStorage).sort().map(k=>[k,localStorage.getItem(k)])))")
         check('the practice editors kept nothing in the browser', after==keep, (keep[:200],after[:200]))

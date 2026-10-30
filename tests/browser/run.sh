@@ -23,7 +23,8 @@ for f in "$DIR"/*.py; do
   n=$(basename "$f" .py)
   [ "$n" = smoke ] && continue
   pick "$n" || continue
-  out=$(timeout 180 python3 "$f" http://localhost:5199/ 2>&1)
+  to=180; [ "$n" = help ] && to=1500 # every help topic, step by step
+  out=$(timeout $to python3 "$f" http://localhost:5199/ 2>&1)
   res=$(echo "$out" | grep -a '^FAILS' | tail -1)
   if [ "$res" = "FAILS []" ]; then echo "ok    $n"; else echo "FAIL  $n  ${res:-$(echo "$out" | tail -3)}"; bad=1; fi
   echo "$out" > "$LOG/$n.txt"
