@@ -9,6 +9,8 @@
 
 A browser-based SVG animation editor. You draw or import artwork, animate it on a keyframe timeline, and export **one self-contained animated SVG** (or any frame of it as a picture: see Export › Image). The SVG plays with a small JavaScript player (built in, or one shared player for pages with many animations: see [The external player](#the-external-player)) or with pure CSS.
 
+**Icons:** the editor and the website use `favicon.ico` (16–256 px) and an Apple touch icon (`public/brand/apple-touch-icon.png`, the mark on white; the website's copies are in `site/img/`, and the deploy bundle also puts `favicon.ico` at its root).
+
 ## Getting started
 
 ```bash
@@ -514,7 +516,7 @@ A `.SVGcinema` file is a standard zip archive:
 
 `project.json` references assets by id, so images are stored once.
 
-**Thumbnails in your file manager:** optional add-ons read `thumbnail.png` so projects show their first frame instead of a plain icon:
+**Thumbnails in your file manager:** optional add-ons read `thumbnail.png` so projects show their first frame instead of a plain icon. They also give the file type the SVGcinema icon (`public/brand/svgcinema-icon.png`) and its name, for views that show no thumbnail (lists, details, small icons):
 
 - **Windows** File Explorer: `SVGcinema-Thumbnails-Setup.zip`, holding `SVGcinema-Thumbnails-Setup.exe` (zipped because many web hosts refuse to serve `.exe` files). It installs for you only, with no administrator rights. It's unsigned, so Windows may warn about an unknown publisher: choose _More info_, then _Run anyway_.
 - **Linux**: `svgcinema-thumbnails.deb`, or the `.tar.gz` with `install.sh`. Works in GNOME Files, Nemo, Caja and Thunar.
