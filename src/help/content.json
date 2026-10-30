@@ -1,13 +1,45 @@
 {
   "groups": [
-    { "id": "start", "title": "Getting started", "sub": "Start here" },
-    { "id": "create", "title": "Create", "sub": "Make the artwork" },
-    { "id": "style", "title": "Style", "sub": "Colour, strokes, effects" },
-    { "id": "animate", "title": "Animate", "sub": "Put it in motion" },
-    { "id": "rigging", "title": "Rigging", "sub": "Bones, rigs and pins" },
-    { "id": "timing", "title": "Timing", "sub": "When, and how it gets there" },
-    { "id": "io", "title": "Import and export", "sub": "Bring it in, ship it out" },
-    { "id": "agent", "title": "Design agent", "sub": "Describe it, watch it animate" }
+    {
+      "id": "start",
+      "title": "Getting started",
+      "sub": "Start here"
+    },
+    {
+      "id": "create",
+      "title": "Create",
+      "sub": "Make the artwork"
+    },
+    {
+      "id": "style",
+      "title": "Style",
+      "sub": "Colour, strokes, effects"
+    },
+    {
+      "id": "animate",
+      "title": "Animate",
+      "sub": "Put it in motion"
+    },
+    {
+      "id": "rigging",
+      "title": "Rigging",
+      "sub": "Bones, rigs and pins"
+    },
+    {
+      "id": "timing",
+      "title": "Timing",
+      "sub": "When, and how it gets there"
+    },
+    {
+      "id": "io",
+      "title": "Import and export",
+      "sub": "Bring it in, ship it out"
+    },
+    {
+      "id": "agent",
+      "title": "Design agent",
+      "sub": "Describe it, watch it animate"
+    }
   ],
   "topics": [
     {
@@ -149,7 +181,6 @@
       ],
       "related": ["editor-glance", "import-svg", "export-svg"]
     },
-
     {
       "id": "select",
       "group": "create",
@@ -414,7 +445,7 @@
     {
       "id": "layers",
       "group": "create",
-      "title": "Layers, groups and symbols",
+      "title": "Layers and groups",
       "ready": true,
       "tour": true,
       "minutes": 3,
@@ -456,6 +487,20 @@
         ["Ctrl L", "Lock or unlock"]
       ],
       "related": ["masks", "booleans", "select"]
+    },
+    {
+      "id": "symbols",
+      "group": "create",
+      "title": "Symbols",
+      "tour": true,
+      "minutes": 3
+    },
+    {
+      "id": "select-same",
+      "group": "create",
+      "title": "Select same",
+      "tour": true,
+      "minutes": 2
     },
     {
       "id": "hyperlinks",
@@ -529,7 +574,6 @@
       ],
       "related": ["select", "booleans", "layers"]
     },
-
     {
       "id": "fill",
       "group": "style",
@@ -754,7 +798,6 @@
       ],
       "related": ["fill", "masks", "keyframes"]
     },
-
     {
       "id": "keyframes",
       "group": "animate",
@@ -802,6 +845,13 @@
         ["Space", "Play and pause"]
       ],
       "related": ["first-animation", "easing"]
+    },
+    {
+      "id": "freeze",
+      "group": "animate",
+      "title": "Freezing a track",
+      "tour": true,
+      "minutes": 2
     },
     {
       "id": "morph",
@@ -1031,7 +1081,6 @@
       ],
       "related": ["select", "keyframes", "presets"]
     },
-
     {
       "id": "rig-build",
       "group": "rigging",
@@ -1085,6 +1134,20 @@
         ["Alt B", "Show or hide bones"]
       ],
       "related": ["rig-pose", "rig-limits", "pins-bones", "layers"]
+    },
+    {
+      "id": "bone-edit",
+      "group": "rigging",
+      "title": "Edit bone tool",
+      "tour": true,
+      "minutes": 3
+    },
+    {
+      "id": "bone-scale",
+      "group": "rigging",
+      "title": "Scale bone tool",
+      "tour": true,
+      "minutes": 3
     },
     {
       "id": "rig-pose",
@@ -1229,6 +1292,13 @@
       "related": ["pins-bones", "morph", "keyframes"]
     },
     {
+      "id": "pins-edit",
+      "group": "rigging",
+      "title": "Edit pins tool",
+      "tour": true,
+      "minutes": 3
+    },
+    {
       "id": "pins-bones",
       "group": "rigging",
       "title": "Pins that follow bones",
@@ -1273,7 +1343,6 @@
       ],
       "related": ["pins", "rig-build", "rig-pose"]
     },
-
     {
       "id": "timeline",
       "group": "timing",
@@ -1460,7 +1529,13 @@
       ],
       "related": ["timeline", "keyframes", "motion-paths"]
     },
-
+    {
+      "id": "stagger",
+      "group": "timing",
+      "title": "Staggering instances",
+      "tour": true,
+      "minutes": 3
+    },
     {
       "id": "import-svg",
       "group": "io",
@@ -1823,7 +1898,6 @@
       "note": "The background is Transparent, or the document's background, or a color of your own; JPEG has no transparency. Embed in your site gives a picture tag with the newer format first and PNG behind it, and Download the set (.zip) makes every file it names.",
       "related": ["video", "gif", "export-svg"]
     },
-
     {
       "id": "agent-key",
       "group": "agent",
