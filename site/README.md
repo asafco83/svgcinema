@@ -50,8 +50,9 @@ The logo is read from `public/brand/svgcinema-logo-white.svg` at build time, so 
 a clip, a demo card or a tile animation. When the editor's look changes, record the clips again: start the dev
 server (`npx vite --port 5199`) and run `python3 site/captures.py` (or name some: `python3 site/captures.py light
 talk tools`). It needs ffmpeg with libx264. `help` records the help steps' clips into `public/help/` (`help:<topic>` one
-topic's): each is the guided tour's own Show me for that step, in the tutorial's practice scene, so the clips match the
-tour; it also writes `public/help/<topic>.svg`, the finished scene the topic page shows as "What you'll make".
+topic's): each is the topic's own Show me for that step, in its practice scene, so the clips match the tour, recorded at
+2× and cropped to the part of the editor the step uses (16:10, 880 px wide); it also writes `public/help/<topic>.svg` for
+a topic with a goal, the finished scene the topic page shows as "What you'll make".
 
 ## Build
 
