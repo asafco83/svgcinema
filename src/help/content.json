@@ -1477,12 +1477,12 @@
         },
         {
           "title": "Find its layers",
-          "text": "In the Layers panel the new group is open. Its layers keep the SVG's names (its ids, Inkscape labels or SVGator names; the others are named by kind, like Rectangle 1). Click one: shapes stay shapes, with their fill and stroke, to edit as if you had drawn them.",
+          "text": "In the Layers panel the new group is open. Its layers keep the SVG's names (its ids, Inkscape labels or the names an animation tool gave them; the others are named by kind, like Rectangle 1). Click one: shapes stay shapes, with their fill and stroke, to edit as if you had drawn them.",
           "do": "Click a layer inside the new group."
         },
         {
           "title": "Play its animation",
-          "text": "An SVG animated with CSS, or exported from SVGator, keeps its animation as ordinary keyframes: the moon's glow has an <b>Opacity</b> track. Press <kbd>Space</kbd> to play it.",
+          "text": "An SVG animated with CSS, or exported with a JS player from a supported SVG animation tool, keeps its animation as ordinary keyframes: the moon's glow has an <b>Opacity</b> track. Press <kbd>Space</kbd> to play it.",
           "do": "Press <kbd>Space</kbd> to play it."
         },
         {
@@ -1497,7 +1497,7 @@
         },
         {
           "title": "Open an SVG as a project",
-          "text": "<b>Open…</b> (<kbd>Ctrl</kbd> <kbd>O</kbd>) in the ☰ menu opens an .svg as a new project instead: its viewBox becomes the canvas and its title the project's name. An animated SVGator file also brings its length, repeat, direction, speed and start trigger. Save makes it a .SVGcinema file.",
+          "text": "<b>Open…</b> (<kbd>Ctrl</kbd> <kbd>O</kbd>) in the ☰ menu opens an .svg as a new project instead: its viewBox becomes the canvas and its title the project's name. An animated file from a supported animation tool also brings its length, repeat, direction, speed and start trigger. Save makes it a .SVGcinema file.",
           "do": "Find <b>Open…</b> in the ☰ menu."
         }
       ],
