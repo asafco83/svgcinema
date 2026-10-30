@@ -190,22 +190,155 @@
       "id": "canvas-nav",
       "group": "interface",
       "title": "Moving around the canvas",
+      "ready": true,
       "tour": true,
-      "minutes": 2
+      "minutes": 2,
+      "intro": "Zoom in to work on the small parts, move the view to where you need it, and fit the whole artboard back in. The view is only how you see the canvas: it changes nothing in your animation.",
+      "steps": [
+        {
+          "title": "Zoom in",
+          "text": "Click <b>+</b> at the bottom right of the canvas, beside the zoom percentage: each click zooms in a step, around the middle of the view. <b>−</b> zooms out; <kbd>Ctrl</kbd> <kbd>+</kbd> and <kbd>Ctrl</kbd> <kbd>-</kbd> do the same.",
+          "do": "Click <b>+</b> twice, at the bottom right of the canvas."
+        },
+        {
+          "title": "Zoom at the pointer",
+          "text": "Hold <kbd>Ctrl</kbd> and scroll up over the cat in the window: the canvas zooms in where the pointer is, and the point under it stays put. Scroll down to zoom out.",
+          "do": "Hold <kbd>Ctrl</kbd> and scroll up over the cat."
+        },
+        {
+          "title": "Move the view",
+          "text": "Hold <kbd>Space</kbd> and drag on the canvas: the view moves with the pointer, whatever tool is on. The Hand tool at the bottom of the tools (<kbd>H</kbd>) drags it without Space, and scrolling moves it too. A tap of Space, without a drag, still plays and pauses.",
+          "do": "Hold <kbd>Space</kbd> and drag the canvas."
+        },
+        {
+          "title": "Zoom to a layer",
+          "text": "Click <b>Cat</b> in the Layers panel, then press <kbd>2</kbd>: the view zooms in until the selected layers fill the canvas.",
+          "do": "Click <b>Cat</b> in Layers, then press <kbd>2</kbd>."
+        },
+        {
+          "title": "Fit the artboard",
+          "text": "Click the zoom percentage, then <b>Fit</b>, or press <kbd>1</kbd>: the whole artboard fits the canvas again. The same menu has a slider and a box for any zoom, <b>Fit selection</b> and <b>Zoom 100%</b> (<kbd>0</kbd>).",
+          "do": "Click the zoom percentage, then <b>Fit</b>."
+        }
+      ],
+      "note": "Double-clicking the Hand tool fits the artboard too. The zoom goes from 2% to 3200%. The middle mouse button drags the view with any tool, and Shift + scroll moves it sideways. When the window or a panel changes size, a fitted view fits again; at any other zoom the artwork stays where it is.",
+      "keys": [
+        ["Ctrl +", "Zoom in"],
+        ["Ctrl -", "Zoom out"],
+        ["Ctrl + scroll", "Zoom at the pointer"],
+        ["Space + drag", "Pan the canvas"],
+        ["H", "Hand tool"],
+        ["1", "Zoom to fit"],
+        ["2", "Zoom to the selection"],
+        ["0", "Zoom to 100%"]
+      ],
+      "related": ["snapping", "editor-glance", "shortcuts"]
     },
     {
       "id": "copy-paste",
       "group": "interface",
       "title": "Copy, paste and the right-click menu",
+      "ready": true,
       "tour": true,
-      "minutes": 3
+      "minutes": 3,
+      "intro": "Copy layers and paste them as often as you like, a little apart or in the same place. Right-click a layer for a menu of what you can do with it: copy and paste, group, masks, align, arrange, flip and more.",
+      "steps": [
+        {
+          "title": "Copy the fish",
+          "text": "Click the fish on the canvas, then press <kbd>Ctrl</kbd> <kbd>C</kbd>. A message says 1 layer copied: the fish's group, with everything in it. <kbd>Ctrl</kbd> <kbd>X</kbd> cuts it instead.",
+          "do": "Click the fish, then press <kbd>Ctrl</kbd> <kbd>C</kbd>."
+        },
+        {
+          "title": "Paste it",
+          "text": "Press <kbd>Ctrl</kbd> <kbd>V</kbd>. The copy lands a little right of and below the fish, just above the selected layer, and is selected. <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>V</kbd> pastes in place instead, exactly where the copied layer was.",
+          "do": "Press <kbd>Ctrl</kbd> <kbd>V</kbd>."
+        },
+        {
+          "title": "Move the copy",
+          "text": "Drag the new fish to the right, so the two overlap only a little.",
+          "do": "Drag the new fish to the right."
+        },
+        {
+          "title": "Open the right-click menu",
+          "text": "Right-click the new fish. The menu has the commands for the selected layers, among them Copy / Paste, Group, Delete, Select same, Animate, masks, Align, Arrange, Hide, Lock, Rotate 90° and Flip. Commands that don't apply are greyed out. Right-click a row in the Layers panel for the same menu.",
+          "do": "Right-click the new fish."
+        },
+        {
+          "title": "Flip it",
+          "text": "Click <b>Flip horizontal</b>: the copy turns around its origin and swims the other way.",
+          "do": "Click <b>Flip horizontal</b>."
+        },
+        {
+          "title": "Send it backward",
+          "text": "Right-click it again, point at <b>Arrange</b> and click <b>Send backward</b>: the copy goes behind the first fish where they overlap, and below it in the Layers panel. <kbd>Ctrl</kbd> <kbd>[</kbd> does the same.",
+          "do": "Right-click it, then <b>Arrange</b> › <b>Send backward</b>."
+        }
+      ],
+      "note": "Ctrl D duplicates the selected layer in one go (the copy's name ends in “copy”), and Alt-dragging a layer drags a copy of it. With keyframes selected in the timeline, Ctrl C and Ctrl V copy and paste the keyframes instead. The layers you copy stay in this tab; with none copied here, Ctrl V pastes a picture or SVG code copied in another app (Figma's Copy as SVG, for one).",
+      "keys": [
+        ["Ctrl C", "Copy"],
+        ["Ctrl X", "Cut"],
+        ["Ctrl V", "Paste"],
+        ["Ctrl Shift V", "Paste in place"],
+        ["Ctrl D", "Duplicate"],
+        ["Alt + drag", "Duplicate by dragging"],
+        ["Ctrl [", "Send backward"],
+        ["Ctrl ]", "Bring forward"]
+      ],
+      "related": ["layers", "select", "select-same"]
     },
     {
       "id": "doc-settings",
       "group": "interface",
       "title": "Canvas and animation settings",
+      "ready": true,
       "tour": true,
-      "minutes": 3
+      "minutes": 3,
+      "intro": "With nothing selected, the inspector shows the document's own settings: the canvas size and background, and the animation's length, repeat and direction. A new blank project is 640 × 400 with a white background, 3 seconds long, looping forever in the Normal direction.",
+      "steps": [
+        {
+          "title": "Select nothing",
+          "text": "Click an empty part of the canvas, or press <kbd>Esc</kbd>, so nothing is selected. The inspector on the right shows the <b>Document</b> section.",
+          "do": "Click an empty part of the canvas."
+        },
+        {
+          "title": "Change the canvas size",
+          "text": "Type 800 in <b>Canvas</b> W and press <kbd>Enter</kbd>. The artboard grows on the right and the view zooms out to fit it; the artwork stays where it is, at its own size.",
+          "do": "Type <b>800</b> in Canvas W and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Give it a background",
+          "text": "Type #a8d8f0 in <b>Background</b> and press <kbd>Enter</kbd>, or click the swatch beside it for the colour window. This scene had none, so the artboard showed a checkerboard: none also leaves the exported file transparent.",
+          "do": "Type <b>#a8d8f0</b> in Background and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Make it longer",
+          "text": "Type 4 in <b>Length</b> and press <kbd>Enter</kbd>. The timeline now runs to 4 seconds; keyframes keep their times, so the ball rests for a second at the end. The box beside the time in the timeline (<b>/ 0:03.00</b>) sets the length too.",
+          "do": "Type <b>4</b> in Length and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Set how often it plays",
+          "text": "Pick <b>2 times</b> in <b>Repeat</b>: the exported animation plays twice, then stops. The others are Loop forever, Play once, 3 times and 5 times.",
+          "do": "Pick <b>2 times</b> in Repeat."
+        },
+        {
+          "title": "Set the direction",
+          "text": "Pick <b>Alternate</b> in <b>Direction</b>: every second time it plays backwards, so the ball rolls across and back. <b>Reverse</b> plays it backwards every time.",
+          "do": "Pick <b>Alternate</b> in Direction."
+        },
+        {
+          "title": "Play it",
+          "text": "Click Play at the top left of the timeline, or press <kbd>Space</kbd>. With <b>Loop preview</b> on, the button beside Play, the preview goes on repeating in the direction you set; the exported file stops after 2 times.",
+          "do": "Click <b>Play</b>."
+        }
+      ],
+      "note": "These settings are saved with the project. The Export window's Playback section has the same Repeat and Direction, with Starts, After the end and Speed. The canvas can be up to 8000 × 8000, and the animation up to 600 seconds long.",
+      "keys": [
+        ["Esc", "Back to the Select tool"],
+        ["Ctrl Shift A", "Deselect all"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["timeline", "export-svg", "starts"]
     },
     {
       "id": "snapping",
@@ -254,12 +387,81 @@
     {
       "id": "shortcuts",
       "group": "interface",
-      "title": "Keyboard shortcuts"
+      "title": "Keyboard shortcuts",
+      "ready": true,
+      "intro": "Most things in SVGcinema have a key. The Keyboard shortcuts window lists them all, in five tabs that follow the main menu, with a search box across them.",
+      "steps": [
+        {
+          "title": "Open the list",
+          "text": "Click the keyboard button in the top bar, beside Undo and Redo, or press <kbd>F1</kbd>. It is in the main menu too: ☰ › Help › Keyboard shortcuts.",
+          "do": "Click the keyboard button in the top bar, or press <kbd>F1</kbd>."
+        },
+        {
+          "title": "Pick a tab",
+          "text": "The tabs follow the main menu: <b>General</b> (File, Edit and Help), <b>Layers</b>, <b>Tools</b>, <b>Animation</b> and <b>View</b>, each in titled sections. Click <b>Animation</b>: playback, keyframes, easing, and the <kbd>Shift</kbd> keys that animate a property.",
+          "do": "Click the <b>Animation</b> tab."
+        },
+        {
+          "title": "Search it",
+          "text": "Type zoom in <b>Search shortcuts</b>, at the top: the list shows every match from all the tabs, each with where it lives (View · Zoom).",
+          "do": "Type <b>zoom</b> in Search shortcuts."
+        },
+        {
+          "title": "Close it",
+          "text": "Click ✕, or press <kbd>Esc</kbd>. In the search box, the first <kbd>Esc</kbd> clears the search.",
+          "do": "Click ✕ to close the list."
+        }
+      ],
+      "note": "Each row is a command and its keys: “or” separates two ways to do it, and words such as drag or double-click a node are what the mouse does. On a Mac the list shows ⌘ for Ctrl and ⌥ for Alt. Letter keys also work on keyboard layouts without Latin letters (Hebrew, Russian, Greek…), by the key's place.",
+      "keys": [
+        ["F1", "Keyboard shortcuts"],
+        ["Shift F1", "Help & tutorials"],
+        ["Ctrl Z", "Undo"],
+        ["Ctrl Shift Z", "Redo"],
+        ["Ctrl S", "Save the project"],
+        ["Ctrl D", "Duplicate"],
+        ["Del", "Delete"],
+        ["V", "Select & transform"],
+        ["Space", "Play / pause"],
+        ["1", "Zoom to fit"],
+        ["/", "Close or open all inspector sections"]
+      ],
+      "related": ["editor-glance", "canvas-nav", "copy-paste"]
     },
     {
       "id": "thumbnails",
       "group": "interface",
-      "title": "Thumbnails for Windows and Linux"
+      "title": "Thumbnails for Windows and Linux",
+      "ready": true,
+      "intro": "Every project you save carries a picture of its first frame. A small free add-on for Windows or Linux shows it in your file manager, so your .SVGcinema files show their animations instead of a plain icon.",
+      "steps": [
+        {
+          "title": "Download it",
+          "text": "On the website's <b>Downloads</b> page, under Thumbnails, click <b>Download for Windows</b> (Windows 10 and 11, on regular and ARM PCs), or for Linux the <b>.deb package</b> or the <b>.tar.gz with install script</b>. In the editor, ☰ › Help › Thumbnails on your computer… has the same downloads.",
+          "do": "Download the add-on for your system from the Downloads page.",
+          "clip": false
+        },
+        {
+          "title": "Install it on Windows",
+          "text": "Unzip the download and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown: choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights.",
+          "do": "Unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>.",
+          "clip": false
+        },
+        {
+          "title": "Or install it on Linux",
+          "text": "Install the .deb the way you install any package, for example with <b>sudo apt install ./svgcinema-thumbnails.deb</b>. On other Linux systems, unpack the .tar.gz and run <b>./install.sh</b> in its folder: it asks for your password, because it installs in the system's folders (file managers make thumbnails in a sandbox that only sees those).",
+          "do": "Install the .deb, or run <b>./install.sh</b> from the .tar.gz.",
+          "clip": false
+        },
+        {
+          "title": "See your projects",
+          "text": "Open a folder of .SVGcinema files in File Explorer, or in GNOME Files, Nemo, Caja or Thunar: each file shows its first frame. On Linux, close the file manager's window and open it again if they don't show at once.",
+          "do": "Open a folder of projects in your file manager.",
+          "clip": false
+        }
+      ],
+      "note": "The picture is made again each time you save the project. To remove the add-on, use Settings › Apps on Windows; on Linux, remove the svgcinema-thumbnails package, or run ./uninstall.sh from the .tar.gz. There is none for macOS, and KDE's Dolphin uses its own plugins, so it isn't covered.",
+      "related": ["projects", "editor-glance"]
     },
     {
       "id": "select",
