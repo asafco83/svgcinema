@@ -1,7 +1,9 @@
 // SVGcinema — help/topics/timing: Timing (scenes and tour steps; the words are in help/content.json)
 import type { Layer } from '../../model/types';
 import { S } from '../../core/state';
-import { select, setTime } from '../../core/history';
+import { beginEdit, select, setTime } from '../../core/history';
+import { addInstance, makeSymbol, setOffset } from '../../core/symbols';
+import { descendants } from '../../model/tree';
 import { isEasePopOpen } from '../../ui/ease-pop';
 import { GRAPH, toggleGraph } from '../../ui/graph';
 import { ONION, toggleOnion } from '../../ui/onion';
@@ -18,7 +20,9 @@ import {
   playStep,
   playheadStep,
   q,
+  shapeEl,
   svg640,
+  trackBits,
 } from '../kit';
 
 export const scenes: Record<string, Scene> = {
@@ -401,5 +405,85 @@ Object.assign(tours, {
       clip: () => [q('#onionPop'), artboard()],
     },
     playStep(),
+  ],
+} as Record<string, TourStep[]>);
+
+/* ---------- Staggering instances: three instances of a hopping dot ---------- */
+
+Object.assign(scenes, {
+  stagger: {
+    name: 'Practice: staggering instances',
+    svg: svg640(`<rect id="Floor" y="256" width="640" height="144" fill="#1f2b5c"/>
+<g id="Dot"><circle id="Ball" cx="180" cy="230" r="26" fill="#ffb02e"/></g>`),
+    setup() {
+      lock('Sky', 'Floor');
+      const g = byName('Dot'),
+        ball = byName('Ball');
+      if (!g || !ball) return;
+      const [x, y] = (ball.b.pos as number[]) || [0, 0];
+      ball.t.pos = [
+        [0, [x, y], 'outQuad'],
+        [0.35, [x, y - 96], 'inQuad'],
+        [0.7, [x, y], 'linear'],
+      ];
+      const id = makeSymbol(g, 'Dot');
+      g.name = 'Dot 1';
+      [2, 3].forEach(n => {
+        const c = addInstance(id, 140 * (n - 1), 0);
+        if (c) c.name = 'Dot ' + n;
+      });
+    },
+  },
+} as Record<string, Scene>);
+
+const dot = (n: number) => byName('Dot ' + n);
+const offOf = (n: number) => dot(n)?.symOff || 0;
+/** an instance's hopping ball (its own copy of the symbol's contents) */
+const ballOf = (n: number) => {
+  const d = dot(n);
+  return d ? descendants(d)[0] || null : null;
+};
+const offRow = () => q('#sym-off')?.closest('.row') || null;
+/** set an instance's time offset (an enter for the steps after the one that does it) */
+function ensureOff(n: number, v: number) {
+  const d = dot(n);
+  if (!d || Math.abs(offOf(n) - v) < 0.01) return;
+  const ed = beginEdit();
+  setOffset(d, v);
+  ed.end({ insp: true });
+}
+const selDot = (n: number): TourStep => ({
+  target: () => shapeEl(ballOf(n)),
+  enter: () => {
+    pause();
+    if (S.time) setTime(0);
+    select(null);
+  },
+  done: isSel('Dot ' + n),
+  show: () => click(shapeEl(ballOf(n)), 0.3, 0.3),
+});
+const offStep = (n: number, v: number): TourStep => ({
+  target: offRow,
+  enter: pick('Dot ' + n),
+  done: () => Math.abs(offOf(n) - v) < 0.01,
+  show: () => type(q('#sym-off') as HTMLInputElement, String(v)),
+  clip: () => [shapeEl(ballOf(n)), ...trackBits(ballOf(n), 'pos')],
+});
+
+Object.assign(tours, {
+  stagger: [
+    selDot(2),
+    offStep(2, 0.3),
+    { ...selDot(3), enter: () => (ensureOff(2, 0.3), selDot(3).enter!({})) },
+    offStep(3, 0.6),
+    {
+      ...playStep(),
+      enter: () => {
+        pause();
+        setTime(0);
+        ensureOff(2, 0.3);
+        ensureOff(3, 0.6);
+      },
+    },
   ],
 } as Record<string, TourStep[]>);

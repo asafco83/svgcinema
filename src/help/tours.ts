@@ -8,6 +8,7 @@
 // fails the tests.
 import type { TourStep } from './kit';
 import * as start from './topics/start';
+import * as iface from './topics/interface';
 import * as create from './topics/create';
 import * as arrange from './topics/arrange';
 import * as style from './topics/style';
@@ -20,6 +21,7 @@ import * as agent from './topics/agent';
 export type { Ctx, TourStep } from './kit';
 export const TOURS: Record<string, TourStep[]> = {
   ...start.tours,
+  ...iface.tours,
   ...create.tours,
   ...arrange.tours,
   ...style.tours,

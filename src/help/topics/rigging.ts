@@ -4,7 +4,8 @@ import { S, doc, layerById, mkLayer } from '../../core/state';
 import { H, NOFILL, r2 } from '../../core/constants';
 import { select, setTool } from '../../core/history';
 import { drawOverlay } from '../../render/overlay';
-import { bonePts, keyRestRot } from '../../tools/bones';
+import { bonePts, boneTipL, keyRestRot } from '../../tools/bones';
+import { restMat } from '../../tools/bone-edit';
 import { rigTimes } from '../../tools/rig';
 import { moveLayers } from '../../ui/layers-panel';
 import { centre, click, drag, hold, press, type, type XY } from '../ghost';
@@ -748,3 +749,333 @@ export const tours: Record<string, TourStep[]> = {
     },
   ],
 };
+
+/* ---------- Edit bone tool ---------- */
+
+/** a bone's rest pose matrix on the canvas (its base values, up its chain of bones) */
+function restWorld(b: Layer): DOMMatrix {
+  const p = b.parent ? layerById(b.parent) : null;
+  return (p && p.type === 'bone' ? restWorld(p) : new DOMMatrix()).multiply(restMat(b));
+}
+/** a bone's joint and tip at rest (document units) */
+function restPts(b: Layer | null) {
+  if (!b) return null;
+  const M = restWorld(b),
+    tl = boneTipL(b.geo),
+    J = new DOMPoint(b.geo.x, b.geo.y).matrixTransform(M),
+    T = new DOMPoint(tl[0], tl[1]).matrixTransform(M);
+  return { J, T };
+}
+const restJoint = (b: Layer | null): XY => {
+  const p = restPts(b);
+  return p ? screenOf(p.J.x, p.J.y) : screenOf(320, 200);
+};
+const restTip = (b: Layer | null): XY => {
+  const p = restPts(b);
+  return p ? screenOf(p.T.x, p.T.y) : screenOf(320, 200);
+};
+const dist = (p: { x: number; y: number } | undefined | null, q: number[]) =>
+  p ? Math.hypot(p.x - q[0], p.y - q[1]) : Infinity;
+const jointEl = (b: Layer | null) => (b ? q(`#overlay [data-bone="${b.id}"][data-part="joint"]`) : null);
+/** the arm with bones drawn a little off: Bone 1 starts below the shoulder and ends short of the elbow, Bone 2
+ *  (on its tip) reaches past the wrist. Both already wave (whole poses). */
+const OFF_J = [270, 172],
+  OFF_E = [322, 206],
+  OFF_W = [506, 196];
+
+/* ---------- Scale bone tool ---------- */
+
+/** the flower: a stem on Bone 1 (from the ground up), the flower head on Bone 2 (on its tip) */
+const ROOT = [320, 330],
+  NECK = [320, 214],
+  HEADTIP = [320, 150];
+const petals = () => {
+  let d = '';
+  for (let i = 0; i < 6; i++) {
+    const a = (i * Math.PI) / 3 - Math.PI / 2;
+    d += circle(r2(320 + 22 * Math.cos(a)), r2(176 + 22 * Math.sin(a)), 16);
+  }
+  return d;
+};
+const flowerBox = () => screenBox(200, 30, 240, 320);
+const sclOf = (b: Layer | null) => (b ? (H.get(b, 'scl', S.time) as number[]) || [1, 1] : [1, 1]);
+const scaleOpt = (m: string) => q(`#boneOpts [data-bsm="${m}"]`);
+
+/* ---------- Edit pins tool ---------- */
+
+/** the flag's pins: Pin 1 by the pole, Pin 2 in the middle (it swings down at 1.5 s) */
+const MID_PIN = [346, 174],
+  END_PIN = [470, 174];
+const pin2 = () => (flag()?.pins || []).find(p => p.n === 2) || null;
+
+Object.assign(scenes, {
+  // Edit bone tool: the arm of Build a rig, rigged with bones drawn a little off, already waving
+  'bone-edit': {
+    name: 'Practice: edit bone tool',
+    svg: ARM2,
+    setup() {
+      lock('Paper', 'Body', 'Head');
+      const b1 = addBone('Bone 1', OFF_J, OFF_E, null),
+        b2 = addBone('Bone 2', OFF_E, OFF_W, b1);
+      attach('Upper arm', b1);
+      attach('Forearm', b2);
+      const wave = (a: number) =>
+        [
+          [0, 0, 'inOutSine'],
+          [1.5, a, 'inOutSine'],
+          [3, 0, 'inOutSine'],
+        ] as any;
+      b1.t.rot = wave(-30);
+      b2.t.rot = wave(-50);
+    },
+  },
+  // Scale bone tool: a flower on two bones (the stem's bone carries the flower's bone on its tip)
+  'bone-scale': {
+    name: 'Practice: scale bone tool',
+    svg: svg640(`<path id="Ground" d="M0 330h640v70H0z" fill="#1f2b5c"/>
+<path id="Leaf" d="M328 290c16-24 48-30 64-20c-14 22-44 30-64 20z" fill="#5fbf7a"/>
+<path id="Stem" d="M309 330V214a11 11 0 0 1 22 0V330z" fill="#3e9a5a"/>
+<path id="Petals" d="${petals()}" fill="#ff8fb1"/>
+<circle id="Centre" cx="320" cy="176" r="14" fill="#ffd36e"/>`),
+    setup() {
+      lock('Sky', 'Ground');
+      const b1 = addBone('Bone 1', ROOT, NECK, null),
+        b2 = addBone('Bone 2', NECK, HEADTIP, b1);
+      attach('Stem', b1);
+      attach('Leaf', b1);
+      attach('Petals', b2);
+      attach('Centre', b2);
+    },
+  },
+  // Edit pins tool: the flag of Pins and mesh warp, with a pin in the wrong place (the middle)
+  'pins-edit': {
+    name: 'Practice: edit pins tool',
+    svg: scenes.pins.svg,
+    setup() {
+      lock('Sky', 'Hills', 'Pole');
+      const l = byName('Flag');
+      if (!l) return;
+      l.pins = [
+        { n: 1, x: 222, y: 174 },
+        { n: 2, x: MID_PIN[0], y: MID_PIN[1] },
+      ];
+      l.t.pin2 = [
+        [0, [MID_PIN[0], MID_PIN[1]], 'inOutSine'],
+        [1.5, [MID_PIN[0], MID_PIN[1] + 62], 'inOutSine'],
+      ] as any;
+    },
+  },
+} as Record<string, Scene>);
+
+Object.assign(tours, {
+  'bone-edit': [
+    // E: the Edit bone tool (the rest pose)
+    {
+      target: () => bonesBtn(),
+      enter: () => {
+        showRig();
+        pause();
+        if (S.tool === 'boneedit') setTool('select');
+      },
+      done: () => S.tool === 'boneedit',
+      show: () => press('E', 'e', 'KeyE'),
+      clip: () => [q('#boneChip'), armBox()],
+    },
+    // the joint onto the shoulder
+    {
+      target: () => jointEl(byName('Bone 1')),
+      enter: () => {
+        showRig();
+        pause();
+        tool('boneedit');
+      },
+      done: () => dist(restPts(byName('Bone 1'))?.J, SH) < 14,
+      show: () => drag(restJoint(byName('Bone 1')), screenOf(SH[0], SH[1]), { ms: 900 }),
+      clip: () => [armBox()],
+    },
+    // Bone 1's tip onto the elbow (Bone 2's joint comes along)
+    {
+      target: () => tipEl(byName('Bone 1')),
+      enter: () => {
+        showRig();
+        pause();
+        tool('boneedit');
+      },
+      done: () => dist(restPts(byName('Bone 1'))?.T, EL) < 14,
+      show: () => drag(restTip(byName('Bone 1')), screenOf(EL[0], EL[1]), { ms: 900 }),
+      clip: () => [armBox()],
+    },
+    // Bone 2's tip back to the wrist
+    {
+      target: () => tipEl(byName('Bone 2')),
+      enter: () => {
+        showRig();
+        pause();
+        tool('boneedit');
+      },
+      done: () => dist(restPts(byName('Bone 2'))?.T, WR) < 14,
+      show: () => drag(restTip(byName('Bone 2')), screenOf(WR[0], WR[1]), { ms: 900 }),
+      clip: () => [armBox()],
+    },
+    // V, then play: the same keys, turning at the right joints
+    {
+      target: () => q('#tPlay'),
+      enter: () => {
+        showRig();
+        pause();
+      },
+      done: () => S.playing && S.tool === 'select',
+      show: async () => {
+        await press('V', 'v', 'KeyV');
+        await click(q('#tPlay'));
+      },
+      clip: () => [artboard()],
+    },
+  ],
+
+  'bone-scale': [
+    // select Bone 1, the stem's bone
+    {
+      target: () => boneEl(byName('Bone 1')),
+      enter: () => {
+        showRig();
+        pause();
+        tool('select');
+        select(null);
+      },
+      done: () => S.sel === byName('Bone 1')?.id && S.selSet.size === 1,
+      show: () => tap(alongBone(byName('Bone 1'), 0.4)),
+      clip: () => [flowerBox()],
+    },
+    // ◆ Scale: a key at 0 s
+    {
+      target: () => q('#insp .kb[data-kb="scl"]'),
+      enter: () => {
+        pause();
+        pick(byName('Bone 1'));
+        q('#insp .kb[data-kb="scl"]')?.scrollIntoView({ block: 'nearest' });
+      },
+      done: () => !!byName('Bone 1')?.t.scl?.length,
+      show: () => click(q('#insp .kb[data-kb="scl"]')),
+      clip: () => trackBits(byName('Bone 1'), 'scl'),
+    },
+    {
+      ...playheadStep(1.5),
+      enter: () => pause(),
+    },
+    // S: the Scale bone tool and its bar
+    {
+      target: () => q('#tools [data-group="bones"]'),
+      enter: () => {
+        showRig();
+        pause();
+        if (S.tool === 'bonescale') setTool('select');
+      },
+      done: () => S.tool === 'bonescale',
+      show: () => press('S', 's', 'KeyS'),
+      clip: () => [q('#boneOpts')],
+    },
+    // Squash & stretch, in the bar
+    {
+      target: () => scaleOpt('squash'),
+      enter: () => {
+        showRig();
+        tool('bonescale');
+        if (S.boneScaleMode === 'squash') S.boneScaleMode = 'length';
+        drawOverlay();
+      },
+      done: () => S.tool === 'bonescale' && S.boneScaleMode === 'squash',
+      show: () => click(scaleOpt('squash')),
+      clip: () => [q('#boneOpts')],
+    },
+    // drag along Bone 1: the stem stretches and thins, the flower rides on its tip
+    {
+      target: () => boneEl(byName('Bone 1')),
+      enter: c => {
+        showRig();
+        pause();
+        tool('bonescale');
+        S.boneVolume = 'area';
+        drawOverlay();
+        c.w = sclOf(byName('Bone 1'))[0];
+      },
+      done: c => {
+        const b = byName('Bone 1');
+        return !!b && keyAt(b, 'scl', S.time) && Math.abs(sclOf(b)[0] - c.w) > 0.15;
+      },
+      show: () => {
+        const b = byName('Bone 1'),
+          a = alongBone(b, 0.6),
+          z = screenOf(ROOT[0], ROOT[1] - (ROOT[1] - NECK[1]) * 0.6 * 1.6);
+        return drag(a, z, { ms: 1100 });
+      },
+      clip: () => [flowerBox(), ...trackBits(byName('Bone 1'), 'scl')],
+    },
+    playStep(),
+  ],
+
+  'pins-edit': [
+    // select the flag: its pins show
+    {
+      target: () => q('#wrap'),
+      enter: () => {
+        showRig();
+        pause();
+        tool('select');
+        select(null);
+      },
+      done: () => S.sel === flag()?.id && S.selSet.size === 1,
+      show: () => tap(screenOf(300, 120)),
+      clip: () => [flagBox()],
+    },
+    // hold the pins button: Edit pins tool
+    {
+      target: () => {
+        const f = q('#toolfly');
+        return f && !(f as HTMLElement).hidden ? f : pinsBtn();
+      },
+      enter: () => {
+        showRig();
+        pause();
+        if (S.tool === 'pinedit') setTool('select');
+        pick(flag());
+      },
+      done: () => S.tool === 'pinedit',
+      show: () => hold(pinsBtn(), () => q('#toolfly [data-tool="pinedit"]')),
+      clip: () => [q('#boneChip')],
+    },
+    // drag Pin 2 to the free end: the flag keeps its shape, the pin's keys move with it
+    {
+      target: () => pinEl(2),
+      enter: c => {
+        showRig();
+        pause();
+        tool('pinedit');
+        pick(flag());
+        drawOverlay();
+        c.x = pin2()?.x ?? 0;
+      },
+      done: c => (pin2()?.x ?? 0) > Math.max(c.x, MID_PIN[0]) + 60,
+      show: async () => {
+        const e = pinEl(2);
+        if (!e) return;
+        await drag(centre(e), screenOf(END_PIN[0], END_PIN[1]), { ms: 1000 });
+      },
+      clip: () => [flagBox(), ...trackBits(flag(), 'pin2')],
+    },
+    // V, then play
+    {
+      target: () => q('#tPlay'),
+      enter: () => {
+        showRig();
+        pause();
+      },
+      done: () => S.playing && S.tool !== 'pinedit',
+      show: async () => {
+        await press('V', 'v', 'KeyV');
+        await click(q('#tPlay'));
+      },
+      clip: () => [artboard()],
+    },
+  ],
+} as Record<string, TourStep[]>);

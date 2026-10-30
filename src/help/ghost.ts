@@ -123,6 +123,45 @@ export async function click(t: Element | null, fx = 0.5, fy = 0.5) {
   pointer('click', p, { target: t });
   await wait(380);
 }
+/** Glide to an element and double-click it: two quick presses at the same spot (the canvas tells a double
+ *  press by its timing, as the canvas is drawn again after a press). */
+export async function dblclick(t: Element | null, fx = 0.5, fy = 0.5) {
+  if (!t) return;
+  const p = centre(t, fx, fy);
+  await glide(p);
+  await wait(120);
+  pressed(t);
+  for (let i = 0; i < 2; i++) {
+    ring();
+    const u = t.isConnected ? t : hit(p);
+    pointer('pointerdown', p, { target: u });
+    pointer('mousedown', p, { target: u });
+    await wait(50);
+    pointer('pointerup', p, { target: u });
+    pointer('mouseup', p, { target: u });
+    pointer('click', p, { target: u });
+    await wait(90);
+  }
+  await wait(380);
+}
+/** Glide to an element and right-click it (the context menu opens where the pointer is). */
+export async function rightClick(t: Element | null, fx = 0.5, fy = 0.5) {
+  if (!t) return;
+  const p = centre(t, fx, fy);
+  await glide(p);
+  await wait(120);
+  ring();
+  pressed(t);
+  const u = hit(p),
+    init = { bubbles: true, cancelable: true, composed: true, clientX: p.x, clientY: p.y, button: 2, buttons: 2 };
+  u.dispatchEvent(new PointerEvent('pointerdown', { ...init, pointerId: 1, pointerType: 'mouse', isPrimary: true }));
+  u.dispatchEvent(new MouseEvent('mousedown', init));
+  await wait(60);
+  u.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0, pointerId: 1, pointerType: 'mouse' }));
+  u.dispatchEvent(new MouseEvent('mouseup', { ...init, buttons: 0 }));
+  u.dispatchEvent(new MouseEvent('contextmenu', { ...init, buttons: 0 }));
+  await wait(380);
+}
 /** Glide to `a`, press, move to `b` in small steps, let go. */
 export async function drag(a: XY, b: XY, o: { shift?: boolean; ms?: number } = {}) {
   await glide(a);

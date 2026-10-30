@@ -1,10 +1,10 @@
 // SVGcinema — help/topics/animate: Animate (scenes and tour steps; the words are in help/content.json)
 import type { Layer } from '../../model/types';
 import { S, selLayer } from '../../core/state';
-import { valueAt } from '../../core/constants';
-import { select, selectMany, setTime, setTool } from '../../core/history';
+import { isFrozen, valueAt } from '../../core/constants';
+import { select, selectMany, setTime, setTool, toggleFreeze } from '../../core/history';
 import { openPresets, presetsOpen } from '../../ui/presets-panel';
-import { centre, click, drag, type } from '../ghost';
+import { centre, click, drag, hover, type } from '../ghost';
 import {
   type Scene,
   type TourStep,
@@ -16,6 +16,7 @@ import {
   playStep,
   playheadStep,
   q,
+  screenBox,
   screenOf,
   shapeEl,
   svg640,
@@ -442,5 +443,103 @@ Object.assign(tours, {
       clip: () => yellow().map(shapeEl),
     },
     playStep(),
+  ],
+} as Record<string, TourStep[]>);
+
+/* ---------- Freezing a track: a boat that sails and rocks ---------- */
+
+Object.assign(scenes, {
+  freeze: {
+    name: 'Practice: freezing a track',
+    svg: svg640(`<g id="Boat">
+<path id="Sail" d="M160 262V150l52 100z" fill="#fff4c9"/>
+<path id="Hull" d="M100 266h124l-22 30h-80z" fill="#e5484d"/>
+</g>
+<path id="Sea" d="M0 290q40-14 80 0t80 0 80 0 80 0 80 0 80 0 80 0 80 0V400H0z" fill="#1f2b5c"/>`),
+    setup() {
+      lock('Sky', 'Sea');
+      const b = byName('Boat');
+      if (!b) return;
+      const [x, y] = (b.b.pos as number[]) || [0, 0];
+      b.t.pos = [
+        [0, [x, y], 'linear'],
+        [3, [x + 300, y], 'linear'],
+      ];
+      b.t.rot = [0, 0.75, 1.5, 2.25, 3].map((t, i) => [t, [0, 8, 0, -8, 0][i], 'inOutSine']) as any;
+    },
+  },
+} as Record<string, Scene>);
+
+const boat = () => byName('Boat');
+/** the boat's Rotate row in the timeline: its name part (the snowflake sits at its left) */
+const rotName = () => {
+  const l = boat();
+  return l ? q(`#tlbody .tl-row[data-lid="${l.id}"][data-prop="rot"] .tl-name`) : null;
+};
+const snowflake = () => rotName()?.querySelector('.tl-fz') || null;
+const frozen = () => {
+  const l = boat();
+  return !!l && isFrozen(l, 'rot');
+};
+/** the sea the boat sails across (the clip of a step that changes how it moves) */
+const voyage = () => screenBox(80, 130, 480, 180);
+/** hover the row (the snowflake shows on hover: script events don't give it the :hover look, so it is
+ *  shown as the pointer's hover would), then click the snowflake */
+async function clickSnowflake() {
+  await hover(rotName());
+  const s = snowflake() as HTMLElement | null;
+  if (s) s.style.opacity = '1';
+  await click(snowflake());
+}
+const setFrozen = (on: boolean) => {
+  const l = boat();
+  if (l && frozen() !== on) toggleFreeze(l, 'rot');
+};
+
+Object.assign(tours, {
+  freeze: [
+    {
+      target: rotName,
+      enter: () => {
+        pause();
+        if (S.time) setTime(0);
+      },
+      done: frozen,
+      show: clickSnowflake,
+      clip: () => [shapeEl(boat()), ...trackBits(boat(), 'rot')],
+    },
+    {
+      target: () => lpRow('Boat'),
+      enter: () => select(null),
+      done: isSel('Boat'),
+      show: () => click(lpRow('Boat'), 0.3, 0.5),
+    },
+    {
+      target: () => q('#rot-deg')?.closest('.row') || null,
+      enter: () => {
+        pause();
+        setFrozen(true);
+        pick('Boat')();
+      },
+      done: () => frozen() && Math.abs(+(boat()?.b.rot ?? 0) - 8) < 0.5,
+      show: () => type(q('#rot-deg') as HTMLInputElement, '8'),
+      clip: () => [shapeEl(boat()), ...trackBits(boat(), 'rot')],
+    },
+    {
+      ...playStep(),
+      enter: () => {
+        pause();
+        setTime(0);
+        setFrozen(true);
+      },
+      clip: () => [voyage()],
+    },
+    {
+      target: rotName,
+      enter: () => setFrozen(true),
+      done: () => !frozen() && !!boat()?.t.rot,
+      show: () => click(snowflake()),
+      clip: () => [voyage(), ...trackBits(boat(), 'rot')],
+    },
   ],
 } as Record<string, TourStep[]>);
