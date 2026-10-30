@@ -341,7 +341,7 @@ The guides are saved with the project; the other view settings are remembered in
 
 On the website, **Do it in the editor: guided tour** opens the same practice editor in a lightbox over the topic page (with the full card, as there is no panel beside it); on a small screen it opens in its own tab. `editor/?tour=<topic>` opens it directly.
 
-Every tool and feature has a topic, in eight groups (Getting started, Create, Style, Animate, Rigging, Timing, Import and export, Design agent). Most are guided tours; a few are reference pages (things done outside the editor or that need an account or an API key), without the tour button.
+Every tool and feature has a topic (58), in nine groups (Getting started, Interface, Create, Style, Animate, Rigging, Timing, Import and export, Design agent). Most are guided tours; a few are reference pages (things done outside the editor or that need an account or an API key), without the tour button.
 
 The topics are in `src/help/content.json` (shared with the website's help pages); what each step does in the editor (the control it lights, when it's done, its Show me) is in `src/help/topics/<group>.ts` with the topic's practice scene, in the same order (`src/help/kit.ts` has the shared pieces). Every topic with a page has them, tour or not: `tests/browser/help.py` runs every topic's steps with Show me alone, so a change to the editor that breaks a step fails the tests. Each step's clip is a recording of the same Show me, cropped to the part of the editor the step uses (`python3 site/captures.py help`); a step done outside the editor (in your own page) has no clip.
 

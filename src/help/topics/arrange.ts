@@ -1,5 +1,6 @@
 // SVGcinema — help/topics/arrange: Create, part two (booleans and align, layers and groups, symbols, select same,
-// hyperlinks, snapping and guides): scenes and tour steps; the words are in help/content.json
+// hyperlinks; and Snapping, guides and rulers, which is in the Interface group but shares this file's helpers): scenes
+// and tour steps; the words are in help/content.json
 import type { Layer } from '../../model/types';
 import { S, doc, layerById } from '../../core/state';
 import { beginEdit, select } from '../../core/history';
