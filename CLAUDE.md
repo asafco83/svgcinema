@@ -112,8 +112,9 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
 - `src/io/` — open/save `.SVGcinema` projects (zip), SVG import, assets.
 - `site/` — the website (`site/README.md`): one source per page in `site/src/pages/`, shared partials, demo cards
   (`src/specs/`), CSS and script; `node site/build.mjs` writes the pages (commit them; `tests/browser/site.py` checks
-  they are current). Pictures of the editor are real captures in `site/img/` (light and dark), taken by
-  `python3 site/captures.py` from the dev server: never redraw the editor's UI.
+  they are current). Pictures of the editor are clips of the real editor in `site/img/` (MP4 + poster, light and
+  dark), recorded by `python3 site/captures.py` from the dev server: never redraw the editor's UI, and keep every
+  picture moving (clips, demo cards in `src/specs/`, tile animations in `src/art/`).
 - `src/agent/` — the design agent (in-app AI chat, being built in steps; spec: the "SVGcinema design agent — tool
   spec" doc). `tools.ts` = the tools a model calls, each a thin wrapper over an editor function (never edit `doc`
   by hand where one exists); `scene.ts` = the scene summary; `request.ts` = one request = one undo step (tools'

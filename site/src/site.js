@@ -737,6 +737,28 @@
       });
     })();
 
+  /* ---------- clips of the editor: play while in view (none for readers who ask for less motion) ---------- */
+  var vids = d.querySelectorAll('video.vid');
+  if (vids.length && 'IntersectionObserver' in window) {
+    var still = matchMedia('(prefers-reduced-motion: reduce)');
+    var vio = new IntersectionObserver(
+      function (en) {
+        en.forEach(function (e) {
+          var v = e.target;
+          if (e.isIntersecting && !still.matches) {
+            v.preload = 'auto';
+            var p = v.play();
+            if (p && p.catch) p.catch(function () {});
+          } else v.pause();
+        });
+      },
+      { rootMargin: '160px 0px' },
+    );
+    vids.forEach(function (v) {
+      vio.observe(v);
+    });
+  }
+
   /* ---------- Features: the side index follows the group in view ---------- */
   if (d.querySelector('.idx') && 'IntersectionObserver' in window)
     (function () {

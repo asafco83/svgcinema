@@ -7,7 +7,7 @@ OUT=os.environ.get('CIN_OUT','/tmp/svgcinema-shots/'); os.makedirs(OUT, exist_ok
 # code tabs and the image demo; the download links point at the editor's downloads folder.
 ROOT=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PAGES=['','features/','agent/','import/','export/','downloads/','licence/']
-NAV={'':None,'features/':'Features','agent/':'Design agent','import/':'Import','export/':'Export','downloads/':'Downloads','licence/':None}
+NAV={'':'Home','features/':'Features','agent/':'Design agent','import/':'Import','export/':'Export','downloads/':'Downloads','licence/':None}
 async def main():
     R={}; F=[]
     def check(n,c,i=None):
@@ -23,11 +23,11 @@ async def main():
     # every picture a page shows is in site/img/
     missing=[]
     for p,h in built.items():
-        for src in re.findall(r'<img[^>]+src="([^"]+)"',h):
+        for src in re.findall(r'<img[^>]+src="([^"]+)"',h)+re.findall(r'<(?:video[^>]+poster|source[^>]+src)="([^"]+)"',h):
             if src.startswith('data:'): continue
             f=os.path.normpath(os.path.join(ROOT,'site',p,src))
             if not os.path.exists(f): missing.append(f'{p or "(home)"} {src}')
-    check('every picture a page shows exists', missing==[], missing)
+    check('every picture and clip a page shows exists', missing==[], missing)
     hero=open(os.path.join(ROOT,'site/src/hero.svg'),'rb').read()
     kb=f'{len(hero)/1024:.1f} KB'
     # gzipped the way the build measures it (Node's zlib, level 9): other gzip implementations differ by a few bytes
@@ -48,7 +48,7 @@ async def main():
             cur=await ev("[...document.querySelectorAll('.nav a[aria-current=page]')].map(a=>a.textContent)")
             check(f'{path or "home"}: the nav marks the page', cur==([NAV[path]] if NAV[path] else []), cur)
             nav=await ev("[...document.querySelectorAll('.nav a')].map(a=>a.textContent)")
-            check(f'{path or "home"}: the nav lists the pages', nav==['Features','Design agent','Import','Export','Downloads'], nav)
+            check(f'{path or "home"}: the nav lists the pages', nav==['Home','Features','Design agent','Import','Export','Downloads'], nav)
             foot=await ev("[...document.querySelectorAll('footer nav h2')].map(h=>h.textContent)")
             check(f'{path or "home"}: the footer columns', foot==['Product','Resources','About'], foot)
             await pg.set_viewport_size({'width':390,'height':844}); await pg.wait_for_timeout(250)
@@ -98,6 +98,15 @@ async def main():
         check('features: tool keys answer, the newer tools too', got=={'w':'Pin','e':'Edit bone','s':'Scale bone','+':'Add node','=':'Add node','-':'Remove node','b':'Bone'}, got)
         await ev("document.getElementById('timing').scrollIntoView({behavior:'instant'})"); await pg.wait_for_timeout(500)
         check('features: the side index follows the page', await ev("(document.querySelector('.idx a.on')||{}).textContent")=='04 Timing')
+        still=await ev("[...document.querySelectorAll('.tile')].filter(t=>!t.classList.contains('spec')&&!t.querySelector('video')).map(t=>t.querySelector('h3').textContent)")
+        check('features: every tile moves (a demo or a clip of the editor)', still==[], still)
+        spots=await ev("[...document.querySelectorAll('.spot')].filter(s=>!s.querySelector('video')).length")
+        check('features: every spotlight is a clip of the editor', spots==0, spots)
+        await ev("document.getElementById('draw').scrollIntoView({behavior:'instant'})"); await pg.wait_for_timeout(1500)
+        t=await ev("(()=>{const v=[...document.querySelectorAll('#draw .spot video')].find(v=>v.offsetParent);return v?v.currentTime:-1})()")
+        check('features: a clip plays when it scrolls into view', t>0.2, t)
+        await ev("scrollTo(0,document.body.scrollHeight)"); await pg.wait_for_timeout(600)
+        check('features: …and pauses out of view', await ev("[...document.querySelectorAll('#draw .spot video')].every(v=>v.paused)"))
 
         # ---- agent
         await go('agent/')
@@ -105,6 +114,7 @@ async def main():
         check('agent: the 23 tools', len(tools)==23 and len(set(tools))==23, tools)
         check('agent: the skill and the guide', await ev("!!document.querySelector('a[href=\"../editor/downloads/svgcinema-skill.zip\"]') && !!document.querySelector('a[href=\"../editor/llms.txt\"]')"))
         check('agent: both ways to connect', await ev("document.querySelectorAll('.ways-t tbody tr').length")==6)
+        check('agent: its pictures are clips of the panel', await ev("document.querySelectorAll('main video.vid.cap-l').length")==4)
 
         # ---- import
         await go('import/')
@@ -123,6 +133,7 @@ async def main():
         check('export: the image demo encodes', True)
         ids=await ev("['svg','scroll','player','vid','gif','img'].filter(i=>!document.getElementById(i))")
         check('export: a section for every kind, the player and scroll', ids==[], ids)
+        check('export: linked to scroll is part of Animated SVG, not a row of its own', await ev("!!document.querySelector('#svg #scroll')") and 'scrolling story' not in (await ev("document.querySelector('.choose').textContent")).lower())
         check('export: one player download', await ev("[...document.querySelectorAll('a[href$=\".js\"]')].map(a=>a.getAttribute('href'))")==['../editor/downloads/cin-player.min.js'])
 
         # ---- downloads

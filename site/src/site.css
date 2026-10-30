@@ -2743,7 +2743,7 @@ a.tile:hover {
   object-position: 0 0;
 }
 .crop-graph {
-  object-position: 35% 70%;
+  object-position: 82% 50%;
 }
 .crop-agent {
   object-position: 50% 40%;
@@ -3432,4 +3432,1076 @@ figcaption {
 }
 .licence li + li {
   margin-top: 4px;
+}
+.opt {
+  margin-top: 14px;
+  padding: 32px;
+}
+.opt h3 {
+  font: 400 clamp(30px, 3.4vw, 42px) / 1.05 var(--f-mark);
+  margin: 0 0 14px;
+}
+.opt p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 52ch;
+}
+.opt-tag {
+  display: inline-block;
+  margin-bottom: 16px;
+  font: 500 12px/1 var(--f-code);
+  color: var(--accent-fg);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.x-cap {
+  margin-top: 14px;
+}
+
+/* ---------- Features: the tiles' own little animations (site/src/art) ---------- */
+.spec-art .ta {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+}
+.spec-art > svg {
+  color: var(--fg);
+}
+.ta-dark {
+  background: #0d0f14;
+}
+/* pen: the curve draws on behind the pen, nodes and handles land as it passes */
+.ta-pen-line {
+  stroke-dasharray: 1;
+  animation: taDraw 4s var(--ease-io) infinite;
+}
+@keyframes taDraw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  55%,
+  88% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+.ta-pen-tip {
+  offset-path: path('M30 118 C70 30 130 30 150 80 S 210 130 214 40');
+  offset-rotate: 0deg;
+  animation: taTip 4s var(--ease-io) infinite;
+}
+@keyframes taTip {
+  0% {
+    offset-distance: 0%;
+    opacity: 1;
+  }
+  55% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  62%,
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+.ta-pen-n1,
+.ta-pen-h1,
+.ta-pen-n2,
+.ta-pen-h2,
+.ta-pen-n3 {
+  animation: taPop 4s infinite both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ta-pen-h1 {
+  animation-name: taPopH1;
+}
+.ta-pen-n2,
+.ta-pen-h2 {
+  animation-name: taPopN2;
+}
+.ta-pen-n3 {
+  animation-name: taPopN3;
+}
+@keyframes taPop {
+  0%,
+  2% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  6%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taPopH1 {
+  0%,
+  10% {
+    opacity: 0;
+  }
+  16%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taPopN2 {
+  0%,
+  28% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  33%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taPopN3 {
+  0%,
+  53% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  58%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* shapes: each one dragged out from its corner, in turn */
+.ta-sh {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+  animation: taShape 5s var(--ease-out) infinite both;
+}
+.ta-sh2 {
+  animation-delay: 0.5s;
+}
+.ta-sh3 {
+  animation-delay: 1s;
+}
+.ta-sh4 {
+  animation-delay: 1.5s;
+}
+@keyframes taShape {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  12%,
+  80% {
+    transform: none;
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: none;
+    opacity: 0;
+  }
+}
+.ta-sh-box {
+  animation: taShBox 5s linear infinite;
+}
+@keyframes taShBox {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  10% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(57px);
+  }
+  30% {
+    transform: translateX(124px);
+  }
+  40%,
+  80% {
+    transform: translateX(167px);
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: translateX(167px);
+    opacity: 0;
+  }
+}
+/* text: typed one script at a time, caret blinking */
+.spec-art .ta-text {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+}
+.tt {
+  animation: taType 5s steps(1) infinite both;
+}
+.tt1 {
+  font: 400 52px/1 var(--f-mark);
+}
+.tt2 {
+  font:
+    500 40px/1 'Frank Ruhl Libre',
+    'Times New Roman',
+    serif;
+  animation-name: taType2;
+}
+.tt3 {
+  font: 600 36px/1 var(--f-ui);
+  animation-name: taType3;
+}
+@keyframes taType {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  86% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taType2 {
+  0%,
+  28% {
+    opacity: 0;
+  }
+  30%,
+  86% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taType3 {
+  0%,
+  48% {
+    opacity: 0;
+  }
+  50%,
+  86% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-caret {
+  width: 2px;
+  height: 40px;
+  background: var(--accent);
+  margin-left: -10px;
+  animation: taBlink 0.8s steps(1) infinite;
+}
+@keyframes taBlink {
+  50% {
+    opacity: 0;
+  }
+}
+/* images: placed, then scaled and moved like any layer */
+.ta-img {
+  position: relative;
+  width: 150px;
+  height: 94px;
+  animation: taImg 5s var(--ease-io) infinite;
+}
+.ta-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  box-shadow: 0 8px 20px var(--shade);
+}
+@keyframes taImg {
+  0%,
+  8% {
+    transform: translate(0, 0) scale(0.7) rotate(0);
+    opacity: 0;
+  }
+  16% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.7);
+  }
+  40% {
+    transform: translate(-14px, -4px) scale(1.05) rotate(-4deg);
+  }
+  70%,
+  86% {
+    transform: translate(12px, 4px) scale(0.9) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) scale(0.7);
+    opacity: 0;
+  }
+}
+.ta-img-sel {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid var(--accent);
+}
+.ta-img-sel b {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--raised);
+  border: 1px solid var(--accent);
+}
+.ta-img-sel b:nth-child(1) {
+  left: -4px;
+  top: -4px;
+}
+.ta-img-sel b:nth-child(2) {
+  right: -4px;
+  top: -4px;
+}
+.ta-img-sel b:nth-child(3) {
+  left: -4px;
+  bottom: -4px;
+}
+.ta-img-sel b:nth-child(4) {
+  right: -4px;
+  bottom: -4px;
+}
+/* booleans: two circles meet, join, then one cuts the other */
+.ta-bool-a {
+  animation: taBoolA 5s var(--ease-io) infinite;
+}
+.ta-bool-b {
+  animation: taBoolB 5s var(--ease-io) infinite;
+}
+@keyframes taBoolA {
+  0%,
+  6% {
+    transform: translateX(-24px);
+  }
+  24%,
+  92% {
+    transform: none;
+  }
+  100% {
+    transform: translateX(-24px);
+  }
+}
+@keyframes taBoolB {
+  0%,
+  6% {
+    transform: translateX(24px);
+  }
+  24%,
+  92% {
+    transform: none;
+  }
+  100% {
+    transform: translateX(24px);
+  }
+}
+.ta-bool-o {
+  animation: taBoolO 5s infinite;
+}
+@keyframes taBoolO {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  36%,
+  90% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.ta-bool-cut {
+  animation: taBoolCut 5s infinite;
+}
+@keyframes taBoolCut {
+  0%,
+  56% {
+    opacity: 0;
+  }
+  60%,
+  88% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+.spec-art .ta-bool-lbl {
+  place-items: end center;
+  padding-bottom: 8px;
+  font: 500 11px/1 var(--f-code);
+  color: var(--muted);
+}
+.ta-bool-lbl span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  animation: taLbl1 5s infinite;
+}
+.ta-bool-lbl span + span {
+  animation-name: taLbl2;
+}
+@keyframes taLbl1 {
+  32%,
+  54% {
+    opacity: 1;
+  }
+  0%,
+  28%,
+  58%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taLbl2 {
+  60%,
+  88% {
+    opacity: 1;
+  }
+  0%,
+  56%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+/* a pointer, for the interaction tiles */
+.ta-cur {
+  position: absolute;
+  width: 16px;
+  height: 20px;
+  left: 50%;
+  top: 50%;
+  background: no-repeat center / contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='M1 1v15l4-4 3 7 3-1-3-7h6z' fill='%23161a25' stroke='%23fff' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  animation: taCur 4s var(--ease-io) infinite;
+}
+.ta-cur-hand {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='M5.5 9V3.5a1.3 1.3 0 012.6 0V8m0-1.5a1.3 1.3 0 012.6 0V8.5m0-1a1.3 1.3 0 012.6 0v4c0 3.5-2 6-5 6-2.6 0-3.8-1.2-5-3.2L1.6 11a1.3 1.3 0 012-1.5l1.9 1.8' fill='%23fff' stroke='%23161a25' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+@keyframes taCur {
+  0%,
+  10% {
+    transform: translate(70px, 46px);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  40%,
+  75% {
+    transform: translate(10px, 6px);
+    opacity: 1;
+  }
+  92%,
+  100% {
+    transform: translate(70px, 46px);
+    opacity: 0;
+  }
+}
+.ta-trig {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  animation: taTrig 4s var(--ease-out) infinite;
+}
+@keyframes taTrig {
+  0%,
+  38% {
+    transform: none;
+    box-shadow: 0 0 0 0 var(--accent-line);
+  }
+  44% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 10px transparent;
+  }
+  50%,
+  76% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  84%,
+  100% {
+    transform: none;
+  }
+}
+.ta-link {
+  font: 400 30px/1 var(--f-mark);
+  color: var(--accent-fg);
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat;
+  padding-bottom: 6px;
+  animation: taLink 4s var(--ease-out) infinite;
+}
+@keyframes taLink {
+  0%,
+  36% {
+    background-size: 0 1.5px;
+  }
+  52%,
+  84% {
+    background-size: 100% 1.5px;
+  }
+  96%,
+  100% {
+    background-size: 0 1.5px;
+  }
+}
+/* player API: a line runs, the bar follows it */
+.ta-api {
+  grid-template-rows: auto auto;
+  gap: 14px;
+  align-content: center;
+}
+.ta-code {
+  font: 400 13px/1.7 var(--f-code);
+  color: #a9b0c0;
+  display: grid;
+}
+.ta-code i {
+  font-style: normal;
+  color: #a3b2ff;
+}
+.ta-code b {
+  font-weight: 400;
+  color: #f2b63d;
+}
+.ta-code > span {
+  padding: 0 6px;
+  border-radius: 4px;
+  animation: taLine 6s steps(1) infinite;
+}
+.ta-code .l2 {
+  animation-name: taLine2;
+}
+.ta-code .l3 {
+  animation-name: taLine3;
+}
+@keyframes taLine {
+  0%,
+  33% {
+    background: rgba(113, 137, 255, 0.18);
+  }
+  34%,
+  100% {
+    background: none;
+  }
+}
+@keyframes taLine2 {
+  0%,
+  33% {
+    background: none;
+  }
+  34%,
+  66% {
+    background: rgba(113, 137, 255, 0.18);
+  }
+  67%,
+  100% {
+    background: none;
+  }
+}
+@keyframes taLine3 {
+  0%,
+  66% {
+    background: none;
+  }
+  67%,
+  100% {
+    background: rgba(113, 137, 255, 0.18);
+  }
+}
+.ta-bar {
+  position: relative;
+  width: 160px;
+  height: 4px;
+  border-radius: 2px;
+  background: #262a35;
+}
+.ta-bar u {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: #7189ff;
+  animation: taBar 6s linear infinite;
+}
+.ta-bar em {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 12px;
+  background: #ff6b6f;
+  animation: taHead 6s linear infinite;
+}
+@keyframes taBar {
+  0% {
+    width: 0;
+  }
+  10%,
+  33% {
+    width: 40%;
+  }
+  66% {
+    width: 0;
+  }
+  67% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+@keyframes taHead {
+  0% {
+    left: 0;
+  }
+  10%,
+  33% {
+    left: 40%;
+  }
+  66%,
+  67% {
+    left: 0;
+  }
+  100% {
+    left: 100%;
+  }
+}
+/* select same: click one, its twin is picked too */
+.ta-ss1,
+.ta-ss2 {
+  opacity: 0;
+  animation: taSel1 4s infinite;
+}
+.ta-ss2 {
+  animation-name: taSel2;
+}
+@keyframes taSel1 {
+  0%,
+  28% {
+    opacity: 0;
+  }
+  32%,
+  84% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taSel2 {
+  0%,
+  44% {
+    opacity: 0;
+  }
+  48%,
+  84% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-ss-cur {
+  animation: taSsCur 4s var(--ease-io) infinite;
+}
+@keyframes taSsCur {
+  0% {
+    transform: translate(110px, 120px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  26%,
+  80% {
+    transform: translate(60px, 80px);
+    opacity: 1;
+  }
+  95%,
+  100% {
+    transform: translate(110px, 120px);
+    opacity: 0;
+  }
+}
+/* numbers: nudged up with the arrow key, ten at a time with Shift */
+.spec-art .ta-num {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.ta-num-win {
+  display: inline-block;
+  height: 1.3em;
+  overflow: hidden;
+  vertical-align: bottom;
+  color: var(--fg) !important;
+}
+.ta-num-roll {
+  display: block;
+  line-height: 1.3em;
+  color: var(--fg);
+  animation: taRoll 5s steps(1) infinite;
+}
+@keyframes taRoll {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  21%,
+  40% {
+    transform: translateY(-1.3em);
+  }
+  41%,
+  60% {
+    transform: translateY(-2.6em);
+  }
+  61%,
+  88% {
+    transform: translateY(-3.9em);
+  }
+  89%,
+  100% {
+    transform: translateY(-5.2em);
+  }
+}
+.ta-k-up,
+.ta-k-sh {
+  animation: taKey 5s infinite;
+}
+@keyframes taKey {
+  0%,
+  17%,
+  23%,
+  37%,
+  43%,
+  57%,
+  63%,
+  100% {
+    transform: none;
+    border-color: var(--line-2);
+  }
+  20%,
+  40%,
+  60% {
+    transform: translateY(2px);
+    border-color: var(--accent);
+    border-bottom-width: 1px;
+  }
+}
+.ta-k-sh {
+  animation-name: taKeySh;
+}
+@keyframes taKeySh {
+  0%,
+  15%,
+  65%,
+  100% {
+    transform: none;
+    border-color: var(--line-2);
+  }
+  18%,
+  62% {
+    transform: translateY(2px);
+    border-color: var(--accent);
+    border-bottom-width: 1px;
+  }
+}
+/* keys: pressed in turn */
+.spec-art .ta-keys {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+.ta-keys kbd {
+  font-size: 13px;
+  padding: 7px 9px;
+  animation: taPress 3.5s infinite;
+}
+.ta-keys kbd:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.ta-keys kbd:nth-child(3) {
+  animation-delay: 0.8s;
+}
+.ta-keys kbd:nth-child(4) {
+  animation-delay: 1.2s;
+}
+.ta-keys kbd:nth-child(5) {
+  animation-delay: 1.6s;
+}
+.ta-keys kbd:nth-child(6) {
+  animation-delay: 2s;
+}
+.ta-keys kbd:nth-child(7) {
+  animation-delay: 2.4s;
+}
+@keyframes taPress {
+  0%,
+  12%,
+  100% {
+    transform: none;
+    border-color: var(--line-2);
+    color: var(--fg);
+  }
+  4%,
+  8% {
+    transform: translateY(2px);
+    border-color: var(--accent);
+    border-bottom-width: 1px;
+    color: var(--accent-fg);
+  }
+}
+/* help: hover the ⓘ, the explanation shows */
+.ta-help {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ta-help .vh-tip {
+  animation: taTip2 4s var(--ease-out) infinite;
+}
+@keyframes taTip2 {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  38%,
+  82% {
+    opacity: 1;
+    transform: none;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-i {
+  display: inline-block;
+  border-radius: 50%;
+  animation: taI 4s infinite;
+}
+@keyframes taI {
+  0%,
+  26%,
+  86%,
+  100% {
+    background: transparent;
+  }
+  30%,
+  82% {
+    background: var(--accent-soft);
+  }
+}
+/* spell check: the slip is underlined, then fixed */
+.ta-spell {
+  position: relative;
+  display: grid;
+  font: 400 30px/1 var(--f-mark);
+  padding-bottom: 8px;
+}
+.ta-spell > span {
+  grid-area: 1 / 1;
+}
+.ta-sp-bad {
+  animation: taBad 5s steps(1) infinite;
+}
+.ta-sp-ok {
+  opacity: 0;
+  animation: taOk 5s steps(1) infinite;
+}
+@keyframes taBad {
+  0%,
+  64% {
+    opacity: 1;
+  }
+  65%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taOk {
+  0%,
+  64% {
+    opacity: 0;
+  }
+  65%,
+  100% {
+    opacity: 1;
+  }
+}
+.ta-spell u {
+  position: absolute;
+  left: 52%;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: radial-gradient(
+      circle at 3px 0,
+      transparent 2.2px,
+      var(--head) 2.4px,
+      var(--head) 3.4px,
+      transparent 3.6px
+    )
+    0 0 / 6px 6px repeat-x;
+  transform-origin: 0 50%;
+  animation: taWavy 5s var(--ease-out) infinite;
+}
+@keyframes taWavy {
+  0%,
+  10% {
+    transform: scaleX(0);
+  }
+  24%,
+  62% {
+    transform: none;
+    opacity: 1;
+  }
+  66%,
+  100% {
+    transform: none;
+    opacity: 0;
+  }
+}
+/* projects: the first frame becomes the file's thumbnail */
+.ta-thumb {
+  position: relative;
+  width: 52px;
+  height: 33px;
+  border-radius: 3px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.ta-thumb img {
+  display: block;
+  animation: taThumb 4s var(--ease-out) infinite;
+}
+@keyframes taThumb {
+  0%,
+  20% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+  34%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-saved {
+  font-style: normal;
+  color: var(--ok, #3ecf8e);
+  font-weight: 700;
+  animation: taSaved 4s infinite;
+}
+@keyframes taSaved {
+  0%,
+  40% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  46%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-file {
+  padding: 8px 12px;
+  gap: 10px;
+}
+.ta-file > span:nth-child(2) {
+  font-size: 12px;
+}
+/* import: files drop in */
+.ta-exts span {
+  animation: taDrop 4s var(--ease-out) infinite both;
+}
+.ta-exts span:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.ta-exts span:nth-child(3) {
+  animation-delay: 0.5s;
+}
+@keyframes taDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  14%,
+  80% {
+    opacity: 1;
+    transform: none;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+/* six nav links: tighter between the phone layout and a wide window */
+@media (max-width: 1060px) {
+  .nav {
+    margin-left: 4px;
+    gap: 0;
+  }
+  .nav a {
+    padding: 8px 9px;
+    font-size: 14px;
+  }
+  .top .btn .lbl-long {
+    display: none;
+  }
 }

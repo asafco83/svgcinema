@@ -2,7 +2,7 @@
 
 The public website for SVGcinema: a short, pitch-first home page, and a page for each part of the product. Every
 page is one self-contained HTML file (styles and script inlined), with no build tools or runtime dependencies beyond
-Google Fonts; the only other files they load are the editor captures in `img/`. The editor is expected in an
+Google Fonts; the only other files they load are the clips of the editor in `img/`. The editor is expected in an
 `editor/` folder next to the home page.
 
 | Page         | Path         | What's on it                                                                                                                      |
@@ -17,31 +17,34 @@ Google Fonts; the only other files they load are the editor captures in `img/`. 
 
 ## Files
 
-| File                         | What it is                                                                                                 |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `src/pages/*.html`           | One file per page: its settings in a first-line comment (path, nav, title, description), then its sections |
-| `src/partials/`              | `layout.html` (the document around every page), `header.html`, `footer.html`                               |
-| `src/specs/*.html`           | The animated demo cards (morph, motion paths, trim path, …), shared by the pages                           |
-| `src/site.css`               | The styles of every page                                                                                   |
-| `src/site.js`                | The script of every page: each part runs only on a page that has it                                        |
-| `src/hero.svg`               | The editor's sample scene, exported from SVGcinema, that plays in the hero                                 |
-| `src/snippets.json`          | The embed code shown on the Export page, as the export dialog writes it                                    |
-| `img/`                       | Captures of the real editor, light and dark (`name.webp`, `name-dark.webp`), and `sunrise.webp`            |
-| `captures.py`                | Takes the captures from the editor (dev server), with scripted agent replies                               |
-| `build.mjs`                  | Builds every page into `index.html` / `<path>/index.html`                                                  |
-| `bundle.mjs`                 | Puts the website and the editor build together in `deploy/`, and checks every local link                   |
-| `index.html`, `*/index.html` | The built pages (generated, do not edit)                                                                   |
+| File                         | What it is                                                                                                                  |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `src/pages/*.html`           | One file per page: its settings in a first-line comment (path, nav, title, description), then its sections                  |
+| `src/partials/`              | `layout.html` (the document around every page), `header.html`, `footer.html`                                                |
+| `src/specs/*.html`           | The animated demo cards (morph, motion paths, trim path, …), shared by the pages                                            |
+| `src/site.css`               | The styles of every page                                                                                                    |
+| `src/site.js`                | The script of every page: each part runs only on a page that has it                                                         |
+| `src/hero.svg`               | The editor's sample scene, exported from SVGcinema, that plays in the hero                                                  |
+| `src/snippets.json`          | The embed code shown on the Export page, as the export dialog writes it                                                     |
+| `img/`                       | Clips of the real editor, light and dark (`name.mp4` + its poster `name.webp`, `name-dark.*`), and `sunrise.webp`           |
+| `captures.py`, `clock.js`    | Record the clips from the editor (dev server), frame by frame on a clock the recorder controls, with scripted agent replies |
+| `build.mjs`                  | Builds every page into `index.html` / `<path>/index.html`                                                                   |
+| `bundle.mjs`                 | Puts the website and the editor build together in `deploy/`, and checks every local link                                    |
+| `index.html`, `*/index.html` | The built pages (generated, do not edit)                                                                                    |
 
-Placeholders the build fills in: `{{SPEC:slug}}` (a demo card), `{{ART:slug}}` (only its animated picture),
-`{{CAP:name|alt|class}}` (a capture in the reader's theme: both files, the other theme's hidden with CSS, sized from
-the WebP header), `{{SHOT:name|alt|class}}` (one capture for both themes), `{{ROOT}}`, `{{HOME}}`, `{{IMG}}`,
+Placeholders the build fills in: `{{SPEC:slug}}` (a demo card), `{{ART:slug}}` (only its animated picture, or a Features tile's own animation from `src/art/`),
+`{{CLIP:name|alt|class}}` (a clip of the editor in the reader's theme: both videos, the other theme's hidden with
+CSS, sized from the poster's WebP header; it plays while in view, and only the poster shows for readers who ask for
+less motion), `{{CLIPONE:name|alt|class}}` (one clip for both themes), `{{ROOT}}`, `{{HOME}}`, `{{IMG}}`,
 `{{EDITOR_URL}}`, `{{DL}}` (the editor's `downloads/` folder), `{{HERO_SVG}}`, `{{HERO_KB}}`, `{{HERO_GZ}}`,
 `{{PLAYER_VERSION}}`, `{{LICENCE}}`, `{{LOGO}}`. The build stops on any placeholder it doesn't know.
 
 The logo is read from `public/brand/svgcinema-logo-white.svg` at build time, so a new logo shows up on the next build.
 
-**Every picture of the editor is a real capture**, never redrawn. When the editor's look changes, take them again:
-start the dev server (`npx vite --port 5199`) and run `python3 site/captures.py`.
+**Every picture of the editor is a clip of the real editor**, never redrawn, and every picture on the pages moves:
+a clip, a demo card or a tile animation. When the editor's look changes, record the clips again: start the dev
+server (`npx vite --port 5199`) and run `python3 site/captures.py` (or name some: `python3 site/captures.py light
+talk tools`). It needs ffmpeg with libx264.
 
 ## Build
 
@@ -111,5 +114,5 @@ copy(JSON.stringify(out, null, 1)); // → src/snippets.json
 
 Keep the `hero` prefix: the page script finds the player at `#hero-svg`. If the scene's keyframes change, update
 `TRACKS` in `src/site.js` to match. The sizes the pages quote are measured from `src/hero.svg` at build time. Start
-from a fresh editor (clear the site's storage) so the sample scene is the one exported, and take the captures again
+from a fresh editor (clear the site's storage) so the sample scene is the one exported, and record the clips again
 (`captures.py`) and `img/sunrise.webp` (a frame of the hero at 2.4 s) if the scene's look changed.
