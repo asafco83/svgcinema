@@ -4,6 +4,7 @@
 // with a Test, and provider errors. With "Your AI assistant" (agent/assist) the user's own assistant
 // works through window.svgcinema and the panel shows how to connect, its steps, Stop and Undo, and a
 // drop card for images it can't hand over. Opened by the Agent button in the top bar or Alt+A.
+import { PRACTICE } from '../core/batch-mode';
 import { $ } from '../core/constants';
 import { setTime, undo } from '../core/history';
 import { togglePlay } from '../core/playback';
@@ -214,6 +215,8 @@ export function isAgentOpen() {
 }
 export function toggleAgent(open = !ST.open) {
   ST.open = open;
+  // the Help panel docks in the same place: opening the agent closes it
+  if (open) document.dispatchEvent(new Event('svgcinema:agent-open'));
   ($('#agent') as HTMLElement).hidden = !open;
   app().classList.toggle('agent-on', open);
   $('#bAgent').setAttribute('aria-pressed', String(open));
@@ -2151,7 +2154,8 @@ export function init(): void {
   try {
     const w = Number(localStorage.getItem(WIDTH_KEY));
     if (w) setWidth(w);
-    if (localStorage.getItem(OPEN_KEY) === '1') toggleAgent(true);
+    // a practice editor (Help › guided tour) starts with the agent closed and has no Agent button
+    if (localStorage.getItem(OPEN_KEY) === '1' && !PRACTICE) toggleAgent(true);
   } catch (_) {
     /* starts closed */
   }

@@ -9169,3 +9169,583 @@ button.ag-chip:hover {
 .ctx.same-menu {
   min-width: 236px;
 }
+
+/* ---------- Help & tutorials (mockups "Help in the editor", ui/help-panel + help/practice) ---------- */
+/* the Help panel docks where the Agent panel does, at full height */
+#app.help-on {
+  grid-template-columns: 52px 248px minmax(0, 1fr) 296px var(--agent-w, 340px);
+  grid-template-areas: 'top top top top top' 'tools side stage insp help' 'tl tl tl tl help';
+}
+/* while a guided tour runs, the practice editor covers the editor and the panel takes the full height */
+#app.help-on.practicing {
+  grid-template-areas: 'top top top top help' 'tools side stage insp help' 'tl tl tl tl help';
+}
+@media (max-width: 1240px) {
+  #app.help-on {
+    grid-template-columns: 52px 216px minmax(0, 1fr) 272px var(--agent-w, 320px);
+  }
+}
+@media (max-width: 860px) {
+  #app.help-on {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 58vh 320px 300px auto 80vh;
+    grid-template-areas: 'top' 'tools' 'stage' 'side' 'tl' 'insp' 'help';
+  }
+}
+.helpp {
+  grid-area: help;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--fg);
+}
+.helpp[hidden] {
+  display: none;
+}
+.helpp .ag-head {
+  height: 52px;
+}
+.helpp a.ag-ib {
+  color: var(--muted);
+}
+.hp-logo {
+  display: grid;
+  color: var(--accent-fg);
+  margin-left: 2px;
+}
+.hp-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hp-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--panel-2);
+  color: var(--muted);
+}
+.hp-search input {
+  all: unset;
+  flex: 1;
+  min-width: 0;
+  color: var(--fg);
+  font: inherit;
+}
+.hp-start {
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1.45;
+}
+.hp-start small {
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+.hp-start b {
+  font-size: 14px;
+}
+.hp-muted {
+  color: var(--muted);
+}
+.hp-go {
+  align-self: flex-start;
+  gap: 7px;
+}
+.hp-grp h4 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hp-row {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.hp-row:hover {
+  background: var(--panel-2);
+}
+.hp-row:focus-visible,
+.hp-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.hp-row span {
+  flex: 1;
+}
+.hp-tag {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--accent-fg);
+  border: 1px solid var(--accent-line);
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+.hp-crumb {
+  color: var(--muted);
+}
+.hp-h {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 2px 0 0;
+  line-height: 1.2;
+}
+.hp-intro {
+  margin: 0;
+  line-height: 1.5;
+}
+.hp-tourrow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hp-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  counter-reset: s;
+}
+.hp-steps li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 8px;
+  line-height: 1.45;
+}
+.hp-steps:not(.hp-tour) li::before {
+  counter-increment: s;
+  content: counter(s);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--panel-2);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+.hp-n {
+  font-style: normal;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--panel-2);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+.hp-tour li.done {
+  color: var(--muted);
+}
+.hp-tour li.done .hp-n {
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+}
+.hp-tour li.now {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: 9px;
+  padding: 8px;
+  margin: -9px;
+}
+.hp-tour li.now .hp-n {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.hp-now {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.hp-clip {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  margin-top: 8px;
+  background: var(--panel-2);
+}
+.hp-dm,
+.tg-dm {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--key);
+  transform: rotate(45deg);
+  margin: 0 3px 1px;
+}
+.helpp kbd,
+.tg-card kbd {
+  display: inline-block;
+  font: 500 11px/1 var(--f-ui);
+  border: 1px solid var(--line-2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 2px 5px;
+  background: var(--raised);
+  color: var(--fg);
+}
+.hp-note,
+.hp-safe {
+  border-radius: 10px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+.hp-note {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+}
+.hp-safe {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+}
+.hp-safe b {
+  color: var(--fg);
+}
+.hp-keys,
+.hp-rel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hp-key {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  color: var(--muted);
+}
+.hp-link {
+  all: unset;
+  cursor: pointer;
+  color: var(--accent-fg);
+}
+.hp-prog {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.hp-prog b {
+  color: var(--fg);
+}
+.hp-bar {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--panel-2);
+  overflow: hidden;
+  flex: 1;
+}
+.hp-bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+.hp-exit {
+  align-self: flex-start;
+  gap: 7px;
+}
+
+/* the practice editor's frame: over the editor, left of the Help panel */
+.prac-frame {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: calc(100% - var(--agent-w, 340px));
+  height: 100%;
+  border: 0;
+  z-index: 60;
+  background: var(--bg);
+}
+@media (max-width: 1240px) {
+  .prac-frame {
+    width: calc(100% - var(--agent-w, 320px));
+  }
+}
+@media (max-width: 860px) {
+  .prac-frame {
+    width: 100%;
+    height: 60vh;
+  }
+}
+
+/* a practice editor's top bar: Practice, the tutorial, nothing is saved, Exit (no menu, Agent or theme) */
+#app.practice :is(#bMenu, #bAgent, #bTheme, #pname, #fileInfo, .top > .sep:last-of-type) {
+  display: none;
+}
+.pr-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-left: 14px;
+  flex: 1;
+}
+.pr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 99px;
+  background: var(--key-soft);
+  color: var(--key-text);
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.pr-chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--key);
+}
+.pr-name {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.pr-safe {
+  color: var(--muted);
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#app.practice .top > .sp {
+  display: none;
+}
+.pr-exit {
+  gap: 7px;
+  margin-left: 6px;
+}
+
+/* the guided tour: the control for the step stays lit, the rest dims; the card says what to do */
+.tg-spot {
+  position: fixed;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 9999px rgba(10, 12, 18, 0.38),
+    0 0 0 2px var(--accent);
+  pointer-events: none;
+  z-index: 9990;
+  transition:
+    left 0.2s,
+    top 0.2s,
+    width 0.2s,
+    height 0.2s;
+}
+.tg-spot[hidden] {
+  display: none;
+}
+.tg-card {
+  position: fixed;
+  z-index: 9995;
+  width: 300px;
+  box-sizing: border-box;
+  background: var(--raised);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  padding: 14px 14px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.tg-card.compact {
+  width: 240px;
+}
+.tg-clip .tg-card {
+  display: none;
+}
+.tg-card::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--ax, 50%) - 6px);
+  width: 12px;
+  height: 12px;
+  background: var(--raised);
+  transform: rotate(45deg);
+  display: none;
+}
+.tg-card[data-side='up']::after {
+  display: block;
+  top: -7px;
+  border-left: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+}
+.tg-card[data-side='down']::after {
+  display: block;
+  bottom: -7px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.tg-k {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tg-card h5 {
+  font-size: 14px;
+  margin: 4px 0 6px;
+}
+.tg-card p {
+  margin: 0;
+}
+.tg-wait,
+.tg-ok {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 11.5px;
+  margin: 8px 0 10px;
+}
+.tg-wait i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: tg-blink 1.2s ease-in-out infinite;
+}
+.tg-ok {
+  color: var(--ok);
+  font-weight: 600;
+}
+.tg-ok i {
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+@keyframes tg-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+.tg-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tg-foot .sp,
+.tg-dots {
+  flex: 1;
+}
+.tg-dots {
+  display: flex;
+  gap: 4px;
+}
+.tg-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line-2);
+}
+.tg-dots i.on {
+  background: var(--accent);
+}
+.tg-card .btn svg {
+  margin-right: 2px;
+}
+.tg-card.fin {
+  width: 340px;
+}
+/* Show me: a pointer that does the step */
+.tg-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+}
+.tg-ghost[hidden] {
+  display: none;
+}
+.tg-ghost svg {
+  display: block;
+}
+.tg-ring {
+  position: absolute;
+  left: -14px;
+  top: -14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+}
+.tg-ring.go {
+  animation: tg-ring 0.5s ease-out;
+}
+@keyframes tg-ring {
+  from {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+.tg-key {
+  position: absolute;
+  left: 22px;
+  top: 18px;
+  font: 600 12px/1 var(--f-ui);
+  color: var(--fg);
+  background: var(--raised);
+  border: 1px solid var(--line-2);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 4px 7px;
+  white-space: nowrap;
+}
+.tg-key[hidden] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tg-spot,
+  .hp-bar i {
+    transition: none;
+  }
+  .tg-wait i {
+    animation: none;
+  }
+}

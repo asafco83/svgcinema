@@ -9,6 +9,7 @@
     "useUnknownInCatchVariables": false,
     "noEmit": true,
     "isolatedModules": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["vite/client", "vitest/importMeta"]
   },

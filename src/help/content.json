@@ -1,0 +1,209 @@
+{
+  "groups": [
+    { "id": "start", "title": "Getting started", "sub": "Start here" },
+    { "id": "create", "title": "Create", "sub": "Make the artwork" },
+    { "id": "style", "title": "Style", "sub": "Colour, strokes, effects" },
+    { "id": "animate", "title": "Animate", "sub": "Put it in motion" },
+    { "id": "rigging", "title": "Rigging", "sub": "Bones, rigs and pins" },
+    { "id": "timing", "title": "Timing", "sub": "When, and how it gets there" },
+    { "id": "io", "title": "Import and export", "sub": "Bring it in, ship it out" },
+    { "id": "agent", "title": "Design agent", "sub": "Describe it, watch it animate" }
+  ],
+  "topics": [
+    {
+      "id": "first-animation",
+      "group": "start",
+      "title": "Your first animation",
+      "ready": true,
+      "tour": true,
+      "minutes": 4,
+      "intro": "Draw a ball, give it a Position track, key it in two places and play it. That is the whole idea of SVGcinema, in six steps.",
+      "goal": "A ball rolls across the ground and back, on a loop: one track, two keyframes.",
+      "steps": [
+        {
+          "title": "Pick the Ellipse tool",
+          "text": "Press <kbd>O</kbd>. The Ellipse tool lives in the shapes button of the tools on the left: hold it to see the other shapes.",
+          "do": "Press <kbd>O</kbd> for the Ellipse tool."
+        },
+        {
+          "title": "Draw a ball",
+          "text": "Drag on the canvas, just above the ground. Hold <kbd>Shift</kbd> to keep it round. The new ball is selected, and the inspector on the right shows everything you can set on it.",
+          "do": "Drag on the canvas, above the ground. <kbd>Shift</kbd> keeps it round."
+        },
+        {
+          "title": "Start a Position track",
+          "text": "Click {◆} beside <b>Position</b> in the inspector. Position gets its own row on the timeline, with a keyframe at the playhead, and the diamond turns amber.",
+          "do": "Click {◆} beside <b>Position</b>."
+        },
+        {
+          "title": "Move the playhead to 2s",
+          "text": "Drag the red playhead along the time ruler at the top of the timeline, to 2s. The inspector now shows the values at that moment.",
+          "do": "Drag the playhead to <b>2s</b>."
+        },
+        {
+          "title": "Move the ball",
+          "text": "Press <kbd>V</kbd> for the Select tool and drag the ball to the right, or type a bigger X in Position. A second keyframe lands at 2s: the editor fills in everything between the two.",
+          "do": "<kbd>V</kbd>, then drag the ball to the right."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The ball rolls across and the playhead loops. Next, give it a better feel in Easing.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Every property in the inspector works the same way: start its track with {◆}, then change it at another time. A property without a track just changes, everywhere in time.",
+      "keys": [
+        ["O", "Ellipse tool"],
+        ["V", "Select tool"],
+        ["Space", "Play and pause"],
+        ["Shift P", "Add a position keyframe at the playhead"]
+      ],
+      "related": ["keyframes", "easing"]
+    },
+    { "id": "editor-glance", "group": "start", "title": "The editor at a glance", "tour": true, "minutes": 3 },
+    { "id": "projects", "group": "start", "title": "Projects, saving and files" },
+
+    { "id": "select", "group": "create", "title": "Select and transform", "tour": true, "minutes": 3 },
+    { "id": "pen", "group": "create", "title": "Pen and pencil", "tour": true, "minutes": 4 },
+    { "id": "shapes", "group": "create", "title": "Shapes" },
+    { "id": "text", "group": "create", "title": "Text and fonts" },
+    { "id": "images", "group": "create", "title": "Images and assets" },
+    { "id": "booleans", "group": "create", "title": "Booleans and align" },
+    { "id": "layers", "group": "create", "title": "Layers, groups and symbols" },
+    { "id": "hyperlinks", "group": "create", "title": "Hyperlinks" },
+    { "id": "snapping", "group": "create", "title": "Snapping, guides and rulers" },
+
+    { "id": "fill", "group": "style", "title": "Fill and gradients", "tour": true, "minutes": 3 },
+    { "id": "strokes", "group": "style", "title": "Strokes and dashes" },
+    { "id": "filters", "group": "style", "title": "Filters", "tour": true, "minutes": 3 },
+    { "id": "masks", "group": "style", "title": "Masks and clipping" },
+    { "id": "appearance", "group": "style", "title": "Appearance and blending" },
+
+    {
+      "id": "keyframes",
+      "group": "animate",
+      "title": "Keyframes and tracks",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Every property in the inspector can be animated. Start a track on it with {◆}, then change the value at another time: a keyframe lands under the playhead, and the editor fills in everything between.",
+      "goal": "The sun turns a quarter and back, on a loop: two keyframes on one track.",
+      "steps": [
+        {
+          "title": "Select the sun",
+          "text": "Click the sun on the canvas, or its row in the Layers panel. The inspector shows everything you can set on it.",
+          "do": "Click the sun, or its row in Layers."
+        },
+        {
+          "title": "Start a track",
+          "text": "Click {◆} beside <b>Rotate</b>. Rotate gets its own row on the timeline, with a keyframe at the playhead, and the diamond turns amber.",
+          "do": "Click {◆} beside <b>Rotate</b>."
+        },
+        {
+          "title": "Move the playhead",
+          "text": "Drag the red playhead along the time ruler to 2s. The inspector now shows the values at that moment.",
+          "do": "Drag the playhead to <b>2s</b>."
+        },
+        {
+          "title": "Change the value",
+          "text": "Type 90 in Rotate and press <kbd>Enter</kbd>, or drag its label. A second keyframe appears at 2s, and the sun turns on the canvas.",
+          "do": "Type <b>90</b> in Rotate and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. To change how it moves between two keys, see Easing.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "A property without a track just changes, everywhere in time. Once it has a track, every change adds or updates a keyframe at the playhead. To keep a track's keys but stop using them for a while, freeze it with the snowflake beside its name in the timeline.",
+      "keys": [
+        ["Shift P", "Add a position keyframe at the playhead"],
+        ["Shift R", "Add a rotate keyframe at the playhead"],
+        ["Shift S", "Add a scale keyframe at the playhead"],
+        ["Shift O", "Add an opacity keyframe at the playhead"],
+        ["J K", "Jump to the previous or next keyframe"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["first-animation", "easing"]
+    },
+    { "id": "morph", "group": "animate", "title": "Shape morphing" },
+    { "id": "motion-paths", "group": "animate", "title": "Motion paths", "tour": true, "minutes": 4 },
+    { "id": "trim", "group": "animate", "title": "Trim path" },
+    { "id": "presets", "group": "animate", "title": "Animation presets" },
+    { "id": "multi", "group": "animate", "title": "Editing many layers" },
+
+    {
+      "id": "rig-build",
+      "group": "rigging",
+      "title": "Build a rig: bones and attaching artwork",
+      "tour": true,
+      "minutes": 5
+    },
+    { "id": "rig-pose", "group": "rigging", "title": "Pose and animate a rig: FK and IK", "tour": true, "minutes": 4 },
+    { "id": "rig-limits", "group": "rigging", "title": "Limits and IK stops" },
+    { "id": "pins", "group": "rigging", "title": "Pins and mesh warp", "tour": true, "minutes": 3 },
+    { "id": "pins-bones", "group": "rigging", "title": "Pins that follow bones" },
+
+    { "id": "timeline", "group": "timing", "title": "The timeline", "tour": true, "minutes": 3 },
+    {
+      "id": "easing",
+      "group": "timing",
+      "title": "Easing",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Easing is how a property gets from one keyframe to the next: at an even speed, speeding up, slowing down, overshooting or bouncing. Each keyframe has its own, for the way to the next key.",
+      "goal": "The ball drops and bounces to a stop, on a loop: the same two keyframes, with Bounce out.",
+      "steps": [
+        {
+          "title": "Play it as it is",
+          "text": "Press <kbd>Space</kbd>. The ball falls at one even speed and stops dead: its keyframe is set to Linear.",
+          "do": "Press <kbd>Space</kbd> and watch the ball fall."
+        },
+        {
+          "title": "Pick the way between the keys",
+          "text": "In the timeline, click the line between the ball's two keyframes. That selects the first key: its easing is the way to the next one.",
+          "do": "Click the line between the two keyframes."
+        },
+        {
+          "title": "Open the Easing panel",
+          "text": "Click the curve button in the timeline's header, left of Animate. The Easing panel opens above the timeline.",
+          "do": "Click the curve button."
+        },
+        {
+          "title": "Pick Out, then Bounce",
+          "text": "Click <b>Out</b> at the top of the panel, then <b>Bounce</b>. The curve shows the new timing: the ball now lands and bounces.",
+          "do": "Click <b>Out</b>, then <b>Bounce</b>."
+        },
+        {
+          "title": "Play it again",
+          "text": "Press <kbd>Space</kbd>. Same two keys, a different feel. Drag the curve's two handles for a timing of your own, and save it as a preset.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "In, Out and In-Out decide where the change happens: In starts slowly, Out ends slowly, In-Out does both. Hold keeps the value until the next key, then jumps.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["J K", "Jump to the previous or next keyframe"],
+        ["Home", "Go to the start"]
+      ],
+      "related": ["keyframes", "first-animation"]
+    },
+    { "id": "graph", "group": "timing", "title": "Graph editor" },
+    { "id": "onion", "group": "timing", "title": "Onion skin" },
+
+    { "id": "import-svg", "group": "io", "title": "Opening and importing SVG", "tour": true, "minutes": 2 },
+    { "id": "export-svg", "group": "io", "title": "Export an animated SVG", "tour": true, "minutes": 3 },
+    { "id": "starts", "group": "io", "title": "When it starts: load, hover, click, scroll" },
+    { "id": "scroll", "group": "io", "title": "Linked to scroll", "tour": true, "minutes": 3 },
+    { "id": "export-images", "group": "io", "title": "Images and photos in exports" },
+    { "id": "player-api", "group": "io", "title": "The player API" },
+    { "id": "video", "group": "io", "title": "Video" },
+    { "id": "gif", "group": "io", "title": "GIF and animated WebP" },
+    { "id": "stills", "group": "io", "title": "Still images" },
+
+    { "id": "agent-key", "group": "agent", "title": "Connect your own API key" },
+    { "id": "agent-assistant", "group": "agent", "title": "Use your AI assistant" },
+    { "id": "agent-images", "group": "agent", "title": "Pictures and vector" }
+  ]
+}

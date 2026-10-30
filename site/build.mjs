@@ -2,7 +2,8 @@
 // Builds every page of the website from site/src/ into self-contained HTML files (styles and script inlined;
 // the editor captures in site/img/ are the only other files the pages load):
 //   site/index.html, site/features/index.html, site/agent/index.html, site/import/index.html,
-//   site/export/index.html, site/downloads/index.html, site/licence/index.html
+//   site/export/index.html, site/downloads/index.html, site/licence/index.html, and the help pages
+//   (site/help/index.html, site/help/<topic>/index.html: site/help.mjs, from src/help/content.json)
 // Usage:
 //   node site/build.mjs                      # editor links point to editor/ next to the site's home page
 //   node site/build.mjs --editor=https://…   # editor links point somewhere else
@@ -11,6 +12,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { gzipSync } from 'node:zlib';
 import { dirname, isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { helpPages } from './help.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = p => readFileSync(join(here, p), 'utf8');
@@ -79,6 +81,22 @@ function clipTag(file, cls, alt, img) {
   const label = alt ? ` role="img" aria-label="${esc(alt)}"` : ' aria-hidden="true"';
   return `<video class="cap vid${cls ? ' ' + cls : ''}" width="${w / 2}" height="${h / 2}" poster="${img}${file}.webp" muted loop playsinline preload="none"${label}><source src="${img}${file}.mp4" type="video/mp4"></video>`;
 }
+// {{HCLIP:name|alt|class}}: a help step's clip, one of the editor's own files (public/help/, recorded by
+// captures.py), loaded from the editor's folder, in the reader's theme (both, as {{CLIP}})
+function helpClip(spec, editor) {
+  const [name, a = '', cls = ''] = spec.split('|'),
+    alt = a.replace(/\s+/g, ' ').trim(),
+    dir = join(here, '../public/help');
+  const one = (file, c, label) => {
+    const poster = join(dir, file + '.webp');
+    if (!existsSync(poster) || !existsSync(join(dir, file + '.mp4')))
+      throw new Error(`public/help/${file}.mp4 or .webp is missing: run python3 site/captures.py help`);
+    const [w, h] = webpSize(poster);
+    const aria = label ? ` role="img" aria-label="${esc(label)}"` : ' aria-hidden="true"';
+    return `<video class="cap vid ${c}" width="${w}" height="${h}" poster="${editor}help/${file}.webp" muted loop playsinline preload="none"${aria}><source src="${editor}help/${file}.mp4" type="video/mp4"></video>`;
+  };
+  return one(name, ('cap-l ' + cls).trim(), alt) + one(name + '-dark', ('cap-d ' + cls).trim(), '');
+}
 function clip(spec, img, both) {
   const [name, a = '', cls = ''] = spec.split('|'),
     alt = a.replace(/\s+/g, ' ').trim();
@@ -109,6 +127,7 @@ const NAV = [
   ['import', 'Import', 'import/'],
   ['export', 'Export', 'export/'],
   ['downloads', 'Downloads', 'downloads/'],
+  ['help', 'Help', 'help/'],
 ];
 // The licence as paragraphs: the file wraps its lines by hand; "- " lines are list items, "1. " starts a numbered one.
 const licence = read('../LICENSE')
@@ -127,14 +146,17 @@ const licence = read('../LICENSE')
   })
   .join('\n');
 
-const pages = readdirSync(join(here, 'src/pages')).filter(f => f.endsWith('.html'));
+const pages = readdirSync(join(here, 'src/pages'))
+  .filter(f => f.endsWith('.html'))
+  .map(f => {
+    const src = read('src/pages/' + f);
+    const m = src.match(/^<!--\s*(\{[\s\S]*?\})\s*-->\n?/);
+    if (!m) throw new Error(`${f}: the page must start with its settings in a comment`);
+    return { f, meta: JSON.parse(m[1]), src: src.slice(m[0].length) };
+  })
+  .concat(helpPages(JSON.parse(read('../src/help/content.json'))).map(p => ({ ...p, f: p.meta.path + 'index.html' })));
 const written = [];
-for (const f of pages) {
-  let src = read('src/pages/' + f);
-  const m = src.match(/^<!--\s*(\{[\s\S]*?\})\s*-->\n?/);
-  if (!m) throw new Error(`${f}: the page must start with its settings in a comment`);
-  const meta = JSON.parse(m[1]);
-  src = src.slice(m[0].length);
+for (const { f, meta, src } of pages) {
   const path = meta.path || '';
   const rootRel = path ? '../'.repeat(path.split('/').filter(Boolean).length) : '';
   const editor = editorArg || rootRel + 'editor/';
@@ -152,6 +174,7 @@ for (const f of pages) {
     .replace(/\{\{ART:([a-z-]+)\}\}/g, (_, s) => specArt(s))
     .replace(/\{\{CLIP:([^}]+)\}\}/g, (_, s) => clip(s, img, true))
     .replace(/\{\{CLIPONE:([^}]+)\}\}/g, (_, s) => clip(s, img, false))
+    .replace(/\{\{HCLIP:([^}]+)\}\}/g, (_, s) => helpClip(s, editor))
     .replaceAll('{{TITLE}}', esc(meta.title))
     .replaceAll('{{DESCRIPTION}}', esc(meta.description))
     .replaceAll('{{CSS}}', () => css)

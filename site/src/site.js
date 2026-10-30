@@ -785,5 +785,79 @@
       });
     })();
 
+  /* ---------- Help: search the topics, / to search ---------- */
+  var hq = d.getElementById('helpQ');
+  if (hq)
+    (function () {
+      var rows = d.querySelectorAll('.hrow'),
+        none = d.getElementById('helpNone');
+      hq.addEventListener('input', function () {
+        var ws = hq.value.toLowerCase().split(/\s+/).filter(Boolean),
+          any = false;
+        rows.forEach(function (r) {
+          var f = r.getAttribute('data-find') || '',
+            ok = ws.every(function (w) {
+              return f.indexOf(w) >= 0;
+            });
+          r.hidden = !ok;
+          any = any || ok;
+        });
+        d.querySelectorAll('.hgroup').forEach(function (g) {
+          g.hidden = !g.querySelector('.hrow:not([hidden])');
+        });
+        if (none) none.hidden = any;
+      });
+      d.addEventListener('keydown', function (e) {
+        if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) {
+          e.preventDefault();
+          hq.focus();
+        }
+      });
+    })();
+
+  /* ---------- Help: a guided tour opens the practice editor in a lightbox over the page ---------- */
+  // (on a small screen, or with a modifier key, the link opens the practice editor in its own tab instead)
+  d.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-tour]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+    if (innerWidth < 1100 || innerHeight < 620) return;
+    e.preventDefault();
+    var box = d.createElement('div');
+    box.className = 'lb';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', 'Guided tour');
+    box.innerHTML =
+      '<button class="lb-x" type="button" aria-label="Close the tour">✕</button><iframe class="lb-f" title="Guided tour in a practice editor"></iframe>';
+    var f = box.querySelector('iframe');
+    f.src = a.href;
+    function close() {
+      removeEventListener('message', onMsg);
+      d.removeEventListener('keydown', onKey);
+      box.remove();
+      root.classList.remove('lb-open');
+      a.focus();
+    }
+    function onMsg(m) {
+      if (m.source === f.contentWindow && m.data && m.data.svgcinema === 'tour-exit') close();
+    }
+    function onKey(k) {
+      if (k.key === 'Escape') close();
+    }
+    addEventListener('message', onMsg);
+    d.addEventListener('keydown', onKey);
+    box.querySelector('.lb-x').addEventListener('click', close);
+    box.addEventListener('click', function (k) {
+      if (k.target === box) close();
+    });
+    d.body.appendChild(box);
+    root.classList.add('lb-open');
+    f.addEventListener('load', function () {
+      try {
+        f.contentWindow.focus();
+      } catch (_) {}
+    });
+  });
+
   onScroll();
 })();

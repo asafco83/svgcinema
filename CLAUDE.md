@@ -110,6 +110,14 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   the GIFs again to check them. Third-party code shipped in
   the app is listed in `public/third-party-notices.txt`; keep it up to date when adding any.
 - `src/io/` — open/save `.SVGcinema` projects (zip), SVG import, assets.
+- `src/help/` — Help & tutorials: `content.json` (every topic's words; `site/help.mjs` writes the website's help pages
+  from the same file), `tours.ts` (what each guided tour step does: target / enter / done / show, in the steps' order),
+  `scenes.ts` (each tutorial's own small practice scene, never the sample scene), `practice.ts` (the practice editor,
+  `?tour=<topic>`: `core/batch-mode` PRACTICE, which keeps nothing in the browser), `ghost.ts` (Show me: real pointer and
+  key events). The Help panel is `ui/help-panel.ts` (Shift F1, docked where the Agent docks). To add a topic: write it
+  in `content.json` (`ready: true`), its tour steps in `tours.ts` and its scene in `scenes.ts` if it has a tour, record
+  its clips (`python3 site/captures.py help:<topic>`, both themes, into `public/help/`), rebuild the site;
+  `tests/help.test.ts` and `tests/browser/help.py` (every tour run by Show me alone) must pass.
 - `site/` — the website (`site/README.md`): one source per page in `site/src/pages/`, shared partials, demo cards
   (`src/specs/`), CSS and script; `node site/build.mjs` writes the pages (commit them; `tests/browser/site.py` checks
   they are current). Pictures of the editor are clips of the real editor in `site/img/` (MP4 + poster, light and

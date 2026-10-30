@@ -2,14 +2,14 @@
 import { $, esc } from '../core/constants';
 import { S } from '../core/state';
 import { IDB } from './assets';
-import { BATCH } from '../core/batch-mode';
+import { EPHEMERAL } from '../core/batch-mode';
 
 export function markDirty() {
   if (S.loading) return;
   if (!S.dirty) {
     S.dirty = true;
     try {
-      if (!BATCH) localStorage.setItem('svgcinema:dirty', '1');
+      if (!EPHEMERAL) localStorage.setItem('svgcinema:dirty', '1');
     } catch (e) {}
   }
   updateFileInfo();
@@ -17,7 +17,7 @@ export function markDirty() {
 export function markClean() {
   S.dirty = false;
   try {
-    if (!BATCH) localStorage.setItem('svgcinema:dirty', '0');
+    if (!EPHEMERAL) localStorage.setItem('svgcinema:dirty', '0');
   } catch (e) {}
   updateFileInfo();
 }

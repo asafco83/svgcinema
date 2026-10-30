@@ -8,12 +8,13 @@ Google Fonts; the only other files they load are the clips of the editor in `img
 | Page         | Path         | What's on it                                                                                                                      |
 | ------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | Home         | `index.html` | The live hero, the proof strip, the workflow, the design agent, highlights, export, fit                                           |
-| Features     | `features/`  | Everything the editor does, in six groups (Draw, Style, Animate, Timing, Interaction, Workflow)                                   |
+| Features     | `features/`  | Everything the editor does, in six groups (Draw, Style, Animate, Timing, SVG interactions, Workflow)                              |
 | Design agent | `agent/`     | What the agent can do, the two ways to connect, images and vector, guard rails, privacy                                           |
 | Import       | `import/`    | A clip of an animated SVG coming in; other tools, animated SVGs, adding images                                                    |
 | Export       | `export/`    | Which export for what, animated SVG (embed code, image optimization), the external player, linked to scroll, video, GIF and image |
 | Downloads    | `downloads/` | The thumbnail installers, the player, the Claude skill and the guide for AI assistants                                            |
 | Licence      | `licence/`   | The `LICENSE` file                                                                                                                |
+| Help         | `help/`      | Help & tutorials: search, Start here, every topic by group; a page per topic (`help/<topic>/`) with its steps, clips and tour     |
 
 ## Files
 
@@ -30,6 +31,7 @@ Google Fonts; the only other files they load are the clips of the editor in `img
 | `clips/`                     | Files the clips use (`night-flight.svg`, the CSS-animated SVG dropped on the editor for the Import page)                    |
 | `captures.py`, `clock.js`    | Record the clips from the editor (dev server), frame by frame on a clock the recorder controls, with scripted agent replies |
 | `build.mjs`                  | Builds every page into `index.html` / `<path>/index.html`                                                                   |
+| `help.mjs`                   | Writes the help pages from `src/help/content.json` (the editor's Help panel reads the same file)                            |
 | `bundle.mjs`                 | Puts the website and the editor build together in `deploy/`, and checks every local link                                    |
 | `index.html`, `*/index.html` | The built pages (generated, do not edit)                                                                                    |
 
@@ -37,7 +39,8 @@ Placeholders the build fills in: `{{SPEC:slug}}` (a demo card), `{{ART:slug}}` (
 `{{CLIP:name|alt|class}}` (a clip of the editor in the reader's theme: both videos, the other theme's hidden with
 CSS, sized from the poster's WebP header; it plays while in view, and only the poster shows for readers who ask for
 less motion), `{{CLIPONE:name|alt|class}}` (one clip for both themes), `{{ROOT}}`, `{{HOME}}`, `{{IMG}}`,
-`{{EDITOR_URL}}`, `{{DL}}` (the editor's `downloads/` folder), `{{HERO_SVG}}`, `{{HERO_KB}}`, `{{HERO_GZ}}`,
+`{{EDITOR_URL}}`, `{{DL}}` (the editor's `downloads/` folder), `{{HCLIP:name|alt|class}}` (a help step's clip: the editor's own
+`public/help/<name>.mp4`, loaded from the editor's folder, both themes), `{{HERO_SVG}}`, `{{HERO_KB}}`, `{{HERO_GZ}}`,
 `{{PLAYER_VERSION}}`, `{{LICENCE}}`, `{{LOGO}}`. The build stops on any placeholder it doesn't know.
 
 The logo is read from `public/brand/svgcinema-logo-white.svg` at build time, so a new logo shows up on the next build.
@@ -45,7 +48,9 @@ The logo is read from `public/brand/svgcinema-logo-white.svg` at build time, so 
 **Every picture of the editor is a clip of the real editor**, never redrawn, and every picture on the pages moves:
 a clip, a demo card or a tile animation. When the editor's look changes, record the clips again: start the dev
 server (`npx vite --port 5199`) and run `python3 site/captures.py` (or name some: `python3 site/captures.py light
-talk tools`). It needs ffmpeg with libx264.
+talk tools`). It needs ffmpeg with libx264. `help` records the help steps' clips into `public/help/` (`help:<topic>` one
+topic's): each is the guided tour's own Show me for that step, in the tutorial's practice scene, so the clips match the
+tour; it also writes `public/help/<topic>.svg`, the finished scene the topic page shows as "What you'll make".
 
 ## Build
 
@@ -87,6 +92,9 @@ Every "Open the editor" link opens the editor in a new tab, so the website stays
   export's image panel: it draws a test photo and compresses it with the visitor's own browser encoders, the same
   ones the editor uses.
 - **Home finale:** film strips that run while it is in view.
+- **Help:** the hub's search filters the topics as you type (`/` jumps to it). **Do it in the editor: guided tour** opens
+  the practice editor (`editor/?tour=<topic>`) in a lightbox over the page; its Exit practice (or ✕, Esc) closes it. On a
+  small screen the link opens the practice editor in its own tab.
 
 `tests/browser/site.py` checks the pages: that they are built from the current sources, that every picture exists,
 that they run without errors and fit a phone, the navigation and footer, the hero, the workflow, the cards, the
