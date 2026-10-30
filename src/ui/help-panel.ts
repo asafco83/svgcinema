@@ -146,7 +146,10 @@ function topicView(t: HelpTopic) {
   if (t.tour)
     h += `<div class="hp-tourrow"><button class="btn pri hp-go" data-tour="${t.id}">${I.play}Start guided tour</button><span class="hp-muted">${tourMeta(t)}</span></div>`;
   h += `<ol class="hp-steps">${(t.steps || [])
-    .map((s, i) => `<li><div><b>${esc(s.title)}.</b> ${rich(s.text)}${clip(t.id, i + 1, s.title)}</div></li>`)
+    .map(
+      (s, i) =>
+        `<li><div><b>${esc(s.title)}.</b> ${rich(s.text)}${s.clip === false ? '' : clip(t.id, i + 1, s.title)}</div></li>`,
+    )
     .join('')}</ol>`;
   if (t.note) h += `<div class="hp-note"><b>Good to know.</b> ${rich(t.note)}</div>`;
   if (t.keys && t.keys.length)

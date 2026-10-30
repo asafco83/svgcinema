@@ -4028,6 +4028,10 @@ select.sel {
   left: 34px;
   top: 34px;
 }
+/* a tool's options bar is above the canvas too (centred): the chip goes under it, so a long chip isn't covered */
+.stage:has(#boneOpts:not([hidden])) .bone-chip.top {
+  top: 58px;
+}
 .bone-chip.tip {
   left: 0;
   top: 0;
@@ -9502,9 +9506,13 @@ button.ag-chip:hover {
 }
 
 /* a practice editor's top bar: Practice, the tutorial, nothing is saved, Exit (no menu, Agent or theme) */
-#app.practice :is(#bMenu, #bAgent, #bTheme, #pname, #fileInfo, .top > .sep:last-of-type) {
+#app.practice :is(#bTheme, #pname, #fileInfo, .top > .sep:last-of-type),
+#app.practice:not(.pr-menu) #bMenu,
+#app.practice:not(.pr-agent) #bAgent {
   display: none;
 }
+/* (the menu stays for a tutorial about something in it: help/kit Scene.menu; the Agent button for one about
+   the agent: Scene.agent) */
 .pr-strip {
   display: flex;
   align-items: center;

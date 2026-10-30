@@ -8,7 +8,6 @@ import { ASSETS, S, URLS, doc, setDoc, syncAidc, syncIdc } from '../core/state';
 import { IDB, assetURL } from '../io/assets';
 import { updateFileInfo } from '../io/file-state';
 import { EPHEMERAL, PRACTICE } from '../core/batch-mode';
-import { startPractice } from '../help/practice';
 import { initBatch } from '../io/batch';
 import { normalizeDoc } from '../io/open';
 import { sampleDoc } from '../model/sample';
@@ -73,8 +72,8 @@ export async function boot() {
   renderAll();
   S.loading = false;
   updateFileInfo();
-  // a practice editor (Help › guided tour): the tutorial's own scene and its tour
-  if (PRACTICE) await startPractice();
+  // a practice editor (Help › guided tour): the tutorial's own scene and its tour (their code loads only here)
+  if (PRACTICE) await (await import('../help/practice')).startPractice();
   track('editor_open', { returning: !!saved, theme: currentTheme(), version: __APP_VERSION__ });
   // fits the artboard now the document is here (and on later resizes: tools/hand)
   workAreaResized();

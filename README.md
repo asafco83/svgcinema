@@ -333,7 +333,7 @@ The guides are saved with the project; the other view settings are remembered in
 
 **Guided tours.** Topics with a tour have **Start guided tour**. It opens a **practice editor** over the editor, in a frame, and the Help panel stays beside it at full height:
 
-- The practice editor opens the tutorial's own small scene (only what that tutorial needs, never the sample scene or your project). Its top bar says **Practice**, names the tutorial and says nothing there is saved; it has no ☰ menu, Agent or theme button, and **Exit practice** on the right.
+- The practice editor opens the tutorial's own small scene (only what that tutorial needs, never the sample scene or your project). Its top bar says **Practice**, names the tutorial and says nothing there is saved; it has no Agent or theme button and no ☰ menu (unless the tutorial is about something in it), and **Exit practice** on the right.
 - It keeps nothing: the saved project, its images, the file name and every setting stay as they were (it reads your settings, so it looks like your editor, but what it writes stays in memory).
 - The control for the step stays lit while the rest dims, and a card points at it and waits until you've done it, then the tour moves on. **Show me** does the step with a pointer you can watch, with the same pointer and key events you would make.
 - The Help panel lists the steps (done ones ticked, the current one lit with Show me and Back, a progress bar) and says your project is waiting underneath. While the tour runs, keys go to the practice editor only, never to your project.
@@ -341,7 +341,9 @@ The guides are saved with the project; the other view settings are remembered in
 
 On the website, **Do it in the editor: guided tour** opens the same practice editor in a lightbox over the topic page (with the full card, as there is no panel beside it); on a small screen it opens in its own tab. `editor/?tour=<topic>` opens it directly.
 
-The topics are in `src/help/content.json` (shared with the website's help pages); what each tour step does is in `src/help/tours.ts`, in the same order. `tests/browser/help.py` runs every tour with Show me alone, so a change to the editor that breaks a step fails the tests. The step clips are recordings of the same Show me (`python3 site/captures.py help`).
+Every tool and feature has a topic, in eight groups (Getting started, Create, Style, Animate, Rigging, Timing, Import and export, Design agent). Most are guided tours; a few are reference pages (things done outside the editor or that need an account or an API key), without the tour button.
+
+The topics are in `src/help/content.json` (shared with the website's help pages); what each step does in the editor (the control it lights, when it's done, its Show me) is in `src/help/topics/<group>.ts` with the topic's practice scene, in the same order (`src/help/kit.ts` has the shared pieces). Every topic with a page has them, tour or not: `tests/browser/help.py` runs every topic's steps with Show me alone, so a change to the editor that breaks a step fails the tests. Each step's clip is a recording of the same Show me, cropped to the part of the editor the step uses (`python3 site/captures.py help`); a step done outside the editor (in your own page) has no clip.
 
 ## Privacy and usage counts
 

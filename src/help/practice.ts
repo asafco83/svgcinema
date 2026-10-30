@@ -24,7 +24,7 @@ import { setTlHeight } from '../ui/tl-resize';
 import { SCENES } from './scenes';
 import { TOURS, type Ctx } from './tours';
 import { topic, rich } from './content';
-import { hideGhost } from './ghost';
+import { addBox, ghostBox, hideGhost, resetGhostBox } from './ghost';
 
 const PANEL = /[?&]panel=1/.test(location.search);
 /** recording the help clips (site/captures.py): no card, and the tour moves on only when told (next) */
@@ -100,10 +100,34 @@ function enter(i: number) {
   render();
   send();
 }
+/** What a step's clip shows (site/captures.py crops it to this): the lit control, what the step says its
+ *  clip must show, and where the pointer went, while Show me runs. */
+function sample() {
+  const s = steps()[T.i];
+  if (!s) return;
+  const t = s.target();
+  if (t && t.isConnected && !t.closest('[hidden]')) {
+    const r = t.getBoundingClientRect();
+    if (r.width < innerWidth * 0.45 && r.height < innerHeight * 0.45) addBox(r);
+  }
+  if (s.clip)
+    for (const x of s.clip()) {
+      if (!x) continue;
+      if (x instanceof Element) {
+        if (x.isConnected && !x.closest('[hidden]')) addBox(x.getBoundingClientRect());
+      } else addBox(x);
+    }
+}
+function region() {
+  const b = ghostBox();
+  return b ? { x: b.x, y: b.y, width: b.width, height: b.height } : null;
+}
 async function show() {
   const s = steps()[T.i];
   if (!s || T.showing) return;
   T.showing = true;
+  resetGhostBox();
+  sample();
   render();
   send();
   try {
@@ -111,6 +135,7 @@ async function show() {
   } finally {
     T.showing = false;
     hideGhost();
+    sample();
     tick();
     render();
     send();
@@ -142,6 +167,7 @@ function tick() {
       } else enter(at + 1);
     }, 900);
   }
+  if (T.showing) sample();
   place();
 }
 
@@ -267,10 +293,12 @@ export async function startPractice() {
   S.sel = null;
   S.selSet = new Set();
   // a short timeline: a practice scene has a track or two, and the canvas gets the room
-  setTlHeight(184); // saved, but only in this page's memory (core/batch-mode)
+  setTlHeight(sc.tl || 184); // saved, but only in this page's memory (core/batch-mode)
   renderAll();
   updateFileInfo();
   topBar(t.title);
+  if (sc.menu) ($('#app') as HTMLElement).classList.add('pr-menu');
+  if (sc.agent) ($('#app') as HTMLElement).classList.add('pr-agent');
   spot = document.createElement('div');
   spot.className = 'tg-spot';
   spot.hidden = true;
@@ -306,5 +334,5 @@ export async function startPractice() {
   T.timer = setInterval(tick, 200);
   enter(0);
   // for tests and the clip recorder
-  (window as any).cinTour = { state: tourState, show, next, back, exit: exitPractice };
+  (window as any).cinTour = { state: tourState, show, next, back, exit: exitPractice, region, sample };
 }

@@ -209,7 +209,7 @@ export function localMat(l: Layer, t: number, rot?: number) {
 }
 export function ikDrag(b: Layer, p0: XY) {
   const ch = ikChain(b),
-    PM = parentMatrix(ch[0]),
+    PM = DOMMatrix.fromMatrix(parentMatrix(ch[0])), // getScreenCTM gives an SVGMatrix, whose multiply() refuses a DOMMatrix
     t = S.time,
     rots = ch.map(x => H.get(x, 'rot', t)),
     tip = boneTipL(b.geo),

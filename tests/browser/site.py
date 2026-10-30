@@ -161,14 +161,16 @@ async def main():
         check('help: the hub lists every topic that has a page', rows==[t['title'] for g in HELP['groups'] for t in READY if t['group']==g['id']], rows)
         gs=await ev("[...document.querySelectorAll('.hgroup h3')].map(e=>e.textContent)")
         check('help: only groups with a topic show', gs==[g['title'] for g in HELP['groups'] if any(t['group']==g['id'] for t in READY)], gs)
-        check('help: a Start here card per guided tour, each moving', await ev("[...document.querySelectorAll('.hcard')].every(c=>c.querySelector('video.vid'))") and await ev("document.querySelectorAll('.hcard').length")==len([t for t in READY if t.get('tour')]))
+        cards=await ev("[...document.querySelectorAll('.hcard h3')].map(e=>e.textContent)")
+        check('help: Start here: a card for each topic marked start, each moving', await ev("[...document.querySelectorAll('.hcard')].every(c=>c.querySelector('video.vid'))") and cards==[t['title'] for t in READY if t.get('start')], cards)
+        check('help: no "more topics are on the way" once every topic has its page', await ev("!document.querySelector('.hsoon')")==all(t.get('ready') for t in HELP['topics']))
         await pg.fill('#helpQ','bounce'); await pg.wait_for_timeout(150)
         vis=await ev("[...document.querySelectorAll('.hrow')].filter(r=>!r.hidden).map(r=>r.querySelector('span').textContent)")
         check('help: search finds a topic by its steps', vis==['Easing'], vis)
         await pg.fill('#helpQ','zzzz'); await pg.wait_for_timeout(150)
         check('help: …and says when nothing matches', await ev("!document.getElementById('helpNone').hidden"))
         await pg.fill('#helpQ','')
-        t0=READY[1] if len(READY)>1 else READY[0]
+        t0=next(t for t in READY[1:] if t.get('tour') and t.get('goal'))
         await go(f"help/{t0['id']}/")
         steps=await ev("[...document.querySelectorAll('.hsteps h3')].map(e=>e.textContent)")
         check('help: a topic page has its steps', steps==[s['title'] for s in t0['steps']], steps)
@@ -182,6 +184,11 @@ async def main():
         check('help: …in a lightbox over the page', await ev(f"!!document.querySelector('.lb iframe[src$=\"?tour={t0['id']}\"]')"))
         await pg.click('.lb-x'); await pg.wait_for_timeout(200)
         check('help: …that closes', await ev("!document.querySelector('.lb')"))
+        # a reference topic: no tour, and a step done outside the editor has no clip
+        ref=next(t for t in READY if not t.get('tour') and any(s.get('clip') is False for s in t['steps']))
+        await go(f"help/{ref['id']}/")
+        n=await ev("[...document.querySelectorAll('.hsteps li')].map(l=>l.querySelectorAll('video.vid').length)")
+        check('help: a reference topic has no tour button, and steps done outside the editor have no clip', not await ev("!!document.querySelector('a[data-tour]')") and n==[0 if s.get('clip') is False else 2 for s in ref['steps']], n)
 
         # ---- licence
         await go('licence/')

@@ -12,7 +12,7 @@ Gradients and trim path have been taken off this list and are being built.
 
 ## Workflow
 
-- **Help & tutorials, the rest of the topics**: three topics have their pages and guided tours (Your first animation, Keyframes and tracks, Easing); the other planned topics (listed in `src/help/content.json` without `ready`) follow a group at a time, with ⓘ tips and the F1 list linking to them, and a keyboard reference page on the website.
+- **Help & tutorials, more ways in**: ⓘ tips and the F1 list linking to the help topics, and a keyboard reference page on the website.
 - **Path tools**: outline stroke (stroke → fill), offset path, simplify, reverse path direction.
 - **Copy / paste extras**: copy and paste a layer's style or animation onto other layers.
 
