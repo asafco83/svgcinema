@@ -44,8 +44,8 @@ export const topic = (id: string) => TOPICS.find(t => t.id === id && t.ready) ||
 /** The keyframe diamond token, as markup with the given class. */
 export const rich = (html: string, dm = 'hp-dm') => html.replace(/\{◆\}/g, `<i class="${dm}" aria-label="◆"></i>`);
 /** "Shift P" → <kbd>Shift</kbd> <kbd>P</kbd> */
-export const keyHTML = (k: string) =>
-  k
-    .split(' ')
-    .map(p => `<kbd>${p}</kbd>`)
-    .join(' ');
+export const keyHTML = (k: string) => {
+  const ps = k.split(' ');
+  // "Alt + drag": the + between keys and a word for the pointer (drag, click, scroll) are plain text
+  return ps.map(p => (ps.length > 1 && (p === '+' || /^[a-z]{2,}$/.test(p)) ? p : `<kbd>${p}</kbd>`)).join(' ');
+};

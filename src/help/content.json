@@ -813,7 +813,7 @@
       "note": "Alt-drag an instance for another one, or click the symbol's card in Assets › Symbols, which lists every symbol with its number of instances (✎ edits it, × deletes it and leaves its instances as plain groups). An instance's Instance section in the inspector has Edit symbol, a Time offset (see Staggering instances) and Detach instance, which turns it into a plain group that no longer follows the symbol.",
       "keys": [
         ["Ctrl D", "Duplicate"],
-        ["Alt + drag", "Duplicate by dragging"]
+        ["Esc", "Finish editing the symbol, once nothing is selected"]
       ],
       "related": ["layers", "stagger", "select"]
     },

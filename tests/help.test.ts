@@ -61,5 +61,7 @@ describe('help content', () => {
   it('the diamond and keys render as markup', () => {
     expect(rich('Click {◆} here')).toContain('<i class="hp-dm"');
     expect(keyHTML('Shift F1')).toBe('<kbd>Shift</kbd> <kbd>F1</kbd>');
+    expect(keyHTML('Alt + drag')).toBe('<kbd>Alt</kbd> + drag');
+    expect(keyHTML('+')).toBe('<kbd>+</kbd>');
   });
 });
