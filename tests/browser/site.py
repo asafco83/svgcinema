@@ -122,6 +122,7 @@ async def main():
         # ---- import
         await go('import/')
         imp=await ev("[...document.querySelectorAll('#open .fact h3')].map(h=>h.textContent)")
+        check('import: a clip of an animated SVG coming in', await ev("document.querySelectorAll('.imp-hero video.vid').length")==2)
         check('import: other tools, animated SVGs, CSS animations, own exports', len(imp)==6 and 'Animated SVGs' in imp and any('CSS' in x for x in imp), imp)
 
         # ---- export

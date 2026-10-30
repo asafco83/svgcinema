@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
+  <!-- A small CSS-animated SVG, as other tools export them: site/captures.py drops it on the editor for the
+       Import page's clip. -->
+  <style>
+    #moon { animation: rise 3s ease-out infinite; }
+    #cloud { animation: drift 3s ease-in-out infinite; }
+    #star1 { animation: twinkle 1.5s ease-in-out infinite; }
+    #star2 { animation: twinkle 1.5s ease-in-out 0.75s infinite; }
+    #plane { animation: fly 3s linear infinite; }
+    #title { animation: fade 3s ease-out infinite; }
+    @keyframes rise { 0% { transform: translate(0px, 120px); } 60%, 100% { transform: translate(0px, 0px); } }
+    @keyframes drift { 0%, 100% { transform: translate(0px, 0px); } 50% { transform: translate(60px, 0px); } }
+    @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+    @keyframes fly { 0% { transform: translate(-120px, 40px); } 100% { transform: translate(560px, -30px); } }
+    @keyframes fade { 0%, 40% { opacity: 0; } 70%, 100% { opacity: 1; } }
+  </style>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1330" />
+      <stop offset="1" stop-color="#3a3f8f" />
+    </linearGradient>
+  </defs>
+  <g id="sky-group">
+    <rect id="sky-fill" width="640" height="400" fill="url(#sky)" />
+    <circle id="star1" cx="120" cy="70" r="3" fill="#fff" />
+    <circle id="star2" cx="520" cy="60" r="2.5" fill="#fff" />
+  </g>
+  <circle id="moon" cx="450" cy="150" r="46" fill="#fff3c4" />
+  <g id="cloud">
+    <ellipse cx="190" cy="150" rx="70" ry="22" fill="#c9cdf2" opacity="0.85" />
+    <ellipse cx="220" cy="134" rx="40" ry="22" fill="#c9cdf2" opacity="0.85" />
+  </g>
+  <path id="plane" d="M100 240l40-8-6 8 6 8z" fill="#ff6b6f" />
+  <path id="hills" d="M0 300c90-40 180-40 270-10s200 30 370-20v130H0z" fill="#1a2858" />
+  <text id="title" x="320" y="360" text-anchor="middle" font-family="Georgia, serif" font-size="40" fill="#f5f2e8">Night flight</text>
+</svg>

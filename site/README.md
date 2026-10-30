@@ -10,7 +10,7 @@ Google Fonts; the only other files they load are the clips of the editor in `img
 | Home         | `index.html` | The live hero, the proof strip, the workflow, the design agent, highlights, export, fit                                           |
 | Features     | `features/`  | Everything the editor does, in six groups (Draw, Style, Animate, Timing, Interaction, Workflow)                                   |
 | Design agent | `agent/`     | What the agent can do, the two ways to connect, images and vector, guard rails, privacy                                           |
-| Import       | `import/`    | Opening SVGs from other tools and animated SVGs, adding images                                                                    |
+| Import       | `import/`    | A clip of an animated SVG coming in; other tools, animated SVGs, adding images                                                    |
 | Export       | `export/`    | Which export for what, animated SVG (embed code, image optimization), the external player, linked to scroll, video, GIF and image |
 | Downloads    | `downloads/` | The thumbnail installers, the player, the Claude skill and the guide for AI assistants                                            |
 | Licence      | `licence/`   | The `LICENSE` file                                                                                                                |
@@ -27,6 +27,7 @@ Google Fonts; the only other files they load are the clips of the editor in `img
 | `src/hero.svg`               | The editor's sample scene, exported from SVGcinema, that plays in the hero                                                  |
 | `src/snippets.json`          | The embed code shown on the Export page, as the export dialog writes it                                                     |
 | `img/`                       | Clips of the real editor, light and dark (`name.mp4` + its poster `name.webp`, `name-dark.*`), and `sunrise.webp`           |
+| `clips/`                     | Files the clips use (`night-flight.svg`, the CSS-animated SVG dropped on the editor for the Import page)                    |
 | `captures.py`, `clock.js`    | Record the clips from the editor (dev server), frame by frame on a clock the recorder controls, with scripted agent replies |
 | `build.mjs`                  | Builds every page into `index.html` / `<path>/index.html`                                                                   |
 | `bundle.mjs`                 | Puts the website and the editor build together in `deploy/`, and checks every local link                                    |
