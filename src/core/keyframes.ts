@@ -331,9 +331,16 @@ export function init(): void {
       const k = row.dataset.prop,
         add = e.shiftKey || e.ctrlKey || e.metaKey;
       if (!add) S.keys.clear();
-      (l.t[k] || []).forEach((q: any) => S.keys.add(q));
-      if (!S.selSet.has(l.id)) select(l.id, add ? 'toggle' : undefined);
-      else {
+      const pick = () => (l.t[k] || []).forEach((q: any) => S.keys.add(q));
+      if (!S.selSet.has(l.id)) {
+        // selecting the layer clears the keyframe selection: pick the track's keys after it
+        const kept = add ? [...S.keys] : [];
+        select(l.id, add ? 'toggle' : undefined);
+        kept.forEach(q => S.keys.add(q));
+        pick();
+        renderTimeline();
+      } else {
+        pick();
         S.sel = l.id;
         renderTimeline();
         renderLayers();

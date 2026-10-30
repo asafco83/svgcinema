@@ -48,7 +48,7 @@ export function renderTimeline() {
       .filter(hasTracks);
   let h = `<div class="tl-row tl-ruler"><div class="tl-name">Animated layers</div><div class="tl-lane" id="ruler" style="width:${LW}px">${ticks(W, span)}</div></div>`;
   if (!list.length)
-    h += `<div class="tl-empty">Layers with keyframes appear here. Click ◆ beside a property in the inspector, or use Animate in the Layers panel, to start animating it. After that, changing it at any point in time adds a keyframe there.</div>`;
+    h += `<div class="tl-empty">Layers with keyframes appear here. Click ◆ beside a property in the inspector, or use Animate in the timeline's header, to start animating it. After that, changing it at any point in time adds a keyframe there.</div>`;
   // the Presets window's preview: its span on each layer, and the keyframes it would replace
   const pv = S.presetPv,
     pvSpan = (lid: string, k?: string) => {

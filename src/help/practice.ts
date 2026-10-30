@@ -293,7 +293,7 @@ export async function startPractice() {
   S.sel = null;
   S.selSet = new Set();
   // a short timeline: a practice scene has a track or two, and the canvas gets the room
-  setTlHeight(184); // saved, but only in this page's memory (core/batch-mode)
+  setTlHeight(sc.tl || 184); // saved, but only in this page's memory (core/batch-mode)
   renderAll();
   updateFileInfo();
   topBar(t.title);

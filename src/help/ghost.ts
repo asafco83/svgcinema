@@ -175,3 +175,59 @@ export async function type(t: HTMLInputElement | null, text: string) {
   t.blur();
   await wait(400);
 }
+/** Glide to a control and rest the pointer on it, without pressing (a menu item to point out). */
+export async function hover(t: Element | null) {
+  if (!t) return;
+  const p = centre(t);
+  await glide(p);
+  for (const ty of ['pointerover', 'pointerenter', 'mouseover', 'pointermove', 'mousemove'])
+    pointer(ty, p, { target: t, buttons: 0 });
+  pressed(t);
+  await wait(600);
+}
+/** Press and hold a control (e.g. a tool group's button, whose flyout opens on a hold), then glide to
+ *  what `then` finds once it has opened and let go over it. */
+export async function hold(t: Element | null, then: () => Element | null, ms = 520) {
+  if (!t) return;
+  const a = centre(t);
+  await glide(a);
+  await wait(120);
+  ring();
+  pressed(t);
+  pointer('pointerdown', a, { target: t });
+  pointer('mousedown', a, { target: t });
+  await wait(ms);
+  const u = then();
+  const b = u ? centre(u) : a;
+  if (u) await glide(b, 420);
+  await wait(120);
+  pressed(u);
+  pointer('pointerup', b);
+  pointer('mouseup', b);
+  await wait(380);
+}
+/** Press at the first point, move through the others (a freehand line), let go at the last. */
+export async function trace(pts: XY[], o: { ms?: number } = {}) {
+  if (pts.length < 2) return;
+  await glide(pts[0]);
+  await wait(120);
+  ring();
+  const t0 = pointer('pointerdown', pts[0]);
+  pointer('mousedown', pts[0], { target: t0 });
+  const per = Math.max(1, Math.round((o.ms || 1200) / 20 / (pts.length - 1)));
+  for (let s = 1; s < pts.length; s++) {
+    const a = pts[s - 1],
+      b = pts[s];
+    for (let i = 1; i <= per; i++) {
+      const p = { x: a.x + ((b.x - a.x) * i) / per, y: a.y + ((b.y - a.y) * i) / per };
+      place(p);
+      point(p);
+      pointer('pointermove', p, { target: t0 });
+      await wait(20);
+    }
+  }
+  const z = pts[pts.length - 1];
+  pointer('pointerup', z, { target: t0 });
+  pointer('mouseup', z, { target: t0 });
+  await wait(380);
+}

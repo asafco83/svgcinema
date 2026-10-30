@@ -453,7 +453,7 @@ export function docPanel() {
     <section class="sec"><h3>How to animate</h3><ol class="tip">
       <li><b>Bring in artwork.</b> Draw, paste Figma's “Copy as SVG”, or drop SVG and image files on the canvas.</li>
       <li><b>Organize layers.</b> Group and nest them in the Layers panel by dragging.</li>
-      <li><b>Start animating a property</b> with ◆ beside it (or Animate in the Layers panel). Then move the playhead and change it: every change adds a keyframe there.</li>
+      <li><b>Start animating a property</b> with ◆ beside it (or Animate in the timeline's header). Then move the playhead and change it: every change adds a keyframe there.</li>
       <li><b>Shape the timing.</b> Click a keyframe or the line between two keyframes to pick an easing or draw a custom curve.</li>
       <li><b>Export</b> one animated .svg with a JavaScript player (built in or shared) or pure CSS. Images are embedded inside it.</li></ol></section>`;
 }

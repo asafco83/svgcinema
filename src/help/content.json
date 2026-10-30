@@ -61,24 +61,699 @@
       ],
       "related": ["keyframes", "easing"]
     },
-    { "id": "editor-glance", "group": "start", "title": "The editor at a glance", "tour": true, "minutes": 3 },
-    { "id": "projects", "group": "start", "title": "Projects, saving and files" },
+    {
+      "id": "editor-glance",
+      "group": "start",
+      "title": "The editor at a glance",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A quick look around the five areas you work in: the tools on the left, the canvas in the middle, the Layers panel, the inspector on the right and the timeline at the bottom. Each step asks for one small thing in one of them.",
+      "steps": [
+        {
+          "title": "Pick a tool",
+          "text": "The tools are in the narrow column on the left. Press <kbd>M</kbd> for the Rectangle tool: it lights up in the shapes button. A button with a small triangle holds more tools: press and hold it to see them.",
+          "do": "Press <kbd>M</kbd> for the Rectangle tool."
+        },
+        {
+          "title": "Draw on the canvas",
+          "text": "The canvas in the middle holds the artboard, your picture. Drag on it to draw a rectangle. A drawing tool stays on after each shape: press <kbd>V</kbd> or <kbd>Esc</kbd> to go back to Select.",
+          "do": "Drag on the canvas to draw a rectangle."
+        },
+        {
+          "title": "Select in Layers",
+          "text": "The Layers panel lists every layer, the frontmost at the top; a padlock means it is locked. Click <b>Sun</b> to select it: it is selected on the canvas too.",
+          "do": "Click <b>Sun</b> in the Layers panel."
+        },
+        {
+          "title": "Change it in the inspector",
+          "text": "The inspector on the right shows everything about the selected layer. Type 170 in <b>Position</b> Y, in Transforms, and press <kbd>Enter</kbd>: the sun moves down, behind the hills.",
+          "do": "Type <b>170</b> in Position Y and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Scrub the timeline",
+          "text": "The timeline at the bottom shows what moves: the cloud already has a <b>Position</b> track. Drag the red playhead along the time ruler and the cloud drifts with it.",
+          "do": "Drag the playhead along the ruler."
+        },
+        {
+          "title": "Export it",
+          "text": "On the right of the top bar are Undo, Redo, the keyboard shortcuts and <b>Export</b>. Click Export: the Export window previews the animation and makes it one animated .svg file (or an image, a video or a GIF).",
+          "do": "Click <b>Export</b> in the top bar."
+        }
+      ],
+      "note": "The ☰ menu at the top left has the file commands and everything else (Edit, Element, Animate, View, Help). F1 lists every keyboard shortcut.",
+      "keys": [
+        ["M", "Rectangle tool"],
+        ["V", "Select tool"],
+        ["Space", "Play and pause"],
+        ["F1", "Keyboard shortcuts"],
+        ["Shift F1", "Help & tutorials"]
+      ],
+      "related": ["first-animation", "projects", "select"]
+    },
+    {
+      "id": "projects",
+      "group": "start",
+      "title": "Projects, saving and files",
+      "ready": true,
+      "intro": "SVGcinema keeps the project you are working on in this browser as you go: close the tab, and it is there when you come back. To keep a project for good, share it or work on several, save it as a .SVGcinema file.",
+      "steps": [
+        {
+          "title": "Open the main menu",
+          "text": "Click ☰ at the top left. The file commands are in it: New project, Open, Open recent, Save, Save as, Import files and Export.",
+          "do": "Click ☰ at the top left."
+        },
+        {
+          "title": "Save it as a file",
+          "text": "Click <b>Save as…</b>, name the file and click <b>Save</b>. A .SVGcinema file holds the whole project, images included. In Chrome and Edge you choose where it goes, and from then on <b>Save</b> (<kbd>Ctrl</kbd> <kbd>S</kbd>) overwrites it; other browsers download a new copy each time.",
+          "do": "Click <b>Save as…</b> in the menu."
+        },
+        {
+          "title": "Open a project",
+          "text": "<b>Open…</b> (<kbd>Ctrl</kbd> <kbd>O</kbd>) opens a .SVGcinema file, or an .svg file as a new project. <b>Open recent</b> lists the last projects you opened or saved here. With unsaved changes, you are asked to save them first.",
+          "do": "Find <b>Open…</b> in the menu."
+        },
+        {
+          "title": "Start a new project",
+          "text": "Click <b>New project…</b>, set the canvas size and click <b>Blank canvas</b>. <b>Open sample scene</b> opens a tour of every feature instead.",
+          "do": "Click <b>New project…</b> in the menu."
+        }
+      ],
+      "note": "The browser keeps one project at a time, and clearing the site's data in the browser removes it: save the projects you want to keep. Beside the project's name, the top bar shows its file and whether it has unsaved changes.",
+      "keys": [
+        ["Ctrl S", "Save"],
+        ["Ctrl Shift S", "Save as"],
+        ["Ctrl O", "Open"],
+        ["Ctrl I", "Import files"],
+        ["Ctrl E", "Export"]
+      ],
+      "related": ["editor-glance", "import-svg", "export-svg"]
+    },
 
-    { "id": "select", "group": "create", "title": "Select and transform", "tour": true, "minutes": 3 },
-    { "id": "pen", "group": "create", "title": "Pen and pencil", "tour": true, "minutes": 4 },
-    { "id": "shapes", "group": "create", "title": "Shapes" },
-    { "id": "text", "group": "create", "title": "Text and fonts" },
-    { "id": "images", "group": "create", "title": "Images and assets" },
-    { "id": "booleans", "group": "create", "title": "Booleans and align" },
-    { "id": "layers", "group": "create", "title": "Layers, groups and symbols" },
-    { "id": "hyperlinks", "group": "create", "title": "Hyperlinks" },
-    { "id": "snapping", "group": "create", "title": "Snapping, guides and rulers" },
+    {
+      "id": "select",
+      "group": "create",
+      "title": "Select and transform",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "With the Select tool you pick layers and change them right on the canvas: drag to move, pull a handle to scale, turn the handle above to rotate. Every change shows in the inspector's numbers too.",
+      "steps": [
+        {
+          "title": "Select the box",
+          "text": "Click the box on the canvas. Handles appear around it, and the inspector on the right shows its properties.",
+          "do": "Click the box."
+        },
+        {
+          "title": "Move it",
+          "text": "Drag the box somewhere else. Hold <kbd>Shift</kbd> to move it straight across or straight up and down; the arrow keys nudge it by a pixel (10 with <kbd>Shift</kbd>).",
+          "do": "Drag the box."
+        },
+        {
+          "title": "Scale it",
+          "text": "Drag the lower right corner handle with <kbd>Shift</kbd> held: the box grows and keeps its proportions, while the opposite corner stays put. <kbd>Alt</kbd> scales from the middle; the side handles stretch one way.",
+          "do": "<kbd>Shift</kbd>-drag the lower right corner."
+        },
+        {
+          "title": "Move the origin",
+          "text": "The small circle in the middle is the origin, the point the layer turns and scales around. Drag it to the lower left corner: it snaps to the corners and edges as it gets close.",
+          "do": "Drag the origin to the lower left corner."
+        },
+        {
+          "title": "Rotate it",
+          "text": "Drag the round handle above the box: it turns around its origin, now the corner. <kbd>Shift</kbd> turns it in 15° steps.",
+          "do": "Drag the round handle above the box."
+        },
+        {
+          "title": "Select both",
+          "text": "<kbd>Shift</kbd>-click the ball: one box goes around both, and dragging moves them together. Dragging across both, starting beside them, selects them too.",
+          "do": "<kbd>Shift</kbd>-click the ball."
+        }
+      ],
+      "note": "Ctrl-click picks a layer inside a group. For exact values, type them in the inspector's Transforms section: Position, Scale, Skew, Rotate and Origin. Alt-drag a layer to drag a copy of it.",
+      "keys": [
+        ["V", "Select tool"],
+        ["Ctrl A", "Select all layers"],
+        ["Ctrl Shift A", "Deselect all"],
+        ["← ↑ → ↓", "Nudge 1px"],
+        ["Shift ← ↑ → ↓", "Nudge 10px"],
+        ["Ctrl Shift O", "Center the origin"]
+      ],
+      "related": ["shapes", "layers", "snapping"]
+    },
+    {
+      "id": "pen",
+      "group": "create",
+      "title": "Pen and pencil",
+      "ready": true,
+      "tour": true,
+      "minutes": 4,
+      "intro": "The Pen draws exact paths, a point at a time: click for a corner, drag for a curve. The Pencil draws freehand and smooths the line for you.",
+      "steps": [
+        {
+          "title": "Pick the Pen",
+          "text": "Press <kbd>P</kbd>. The Pen lives in the pen button of the tools: hold it for the Pencil and the tools that add, remove and convert points.",
+          "do": "Press <kbd>P</kbd> for the Pen."
+        },
+        {
+          "title": "Click for corners",
+          "text": "Click on the canvas, then click again somewhere else: two corner points, joined by a straight line.",
+          "do": "Click twice on the canvas."
+        },
+        {
+          "title": "Drag for a curve",
+          "text": "Press where the next point goes and drag: the point gets two handles, and the line bends toward them. <kbd>Alt</kbd> while dragging breaks the handle in two, <kbd>Shift</kbd> snaps it to 45° steps.",
+          "do": "Press and drag for a curved point."
+        },
+        {
+          "title": "Close the shape",
+          "text": "Click once more, then click the first point: the path closes and gets a fill. To leave a path open, press <kbd>Enter</kbd> or <kbd>Esc</kbd> instead: it gets a stroke.",
+          "do": "Click once more, then click the first point."
+        },
+        {
+          "title": "Edit the points",
+          "text": "Press <kbd>A</kbd> for Edit path nodes and drag a point: the shape follows. Drag a handle to reshape a curve; double-click a point to switch it between smooth and corner.",
+          "do": "Press <kbd>A</kbd> and drag a point."
+        },
+        {
+          "title": "Draw with the Pencil",
+          "text": "Press <kbd>N</kbd> and drag a line: it is simplified and smoothed when you let go. End near where you started to close it into a shape.",
+          "do": "Press <kbd>N</kbd> and draw a line."
+        }
+      ],
+      "note": "With the Pen on a selected path, click its outline to add a point, click a point to remove it, or click an open end to carry on drawing. While drawing, Backspace removes the last point.",
+      "keys": [
+        ["P", "Pen tool"],
+        ["A", "Edit path nodes"],
+        ["N", "Pencil tool"],
+        ["+", "Add node tool"],
+        ["-", "Remove node tool"],
+        ["Shift C", "Convert point tool"],
+        ["Enter", "Finish the path"]
+      ],
+      "related": ["shapes", "select", "morph"]
+    },
+    {
+      "id": "shapes",
+      "group": "create",
+      "title": "Shapes",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Rectangles, ellipses, polygons, stars and lines share one button in the tools. Draw one, then set its corners, sides or points in the inspector.",
+      "steps": [
+        {
+          "title": "Draw a rectangle",
+          "text": "Press <kbd>M</kbd> for the Rectangle and drag on the canvas. <kbd>Shift</kbd> makes a square, <kbd>Alt</kbd> draws from the middle.",
+          "do": "Press <kbd>M</kbd>, then drag on the canvas."
+        },
+        {
+          "title": "Round its corners",
+          "text": "In the <b>Rectangle</b> section of the inspector, type 24 in <b>Radius</b> or drag its slider. Its {◆} animates the radius.",
+          "do": "Type <b>24</b> in Radius."
+        },
+        {
+          "title": "Pick the Star",
+          "text": "Press and hold the shapes button in the tools, then pick <b>Star</b>. Ellipse, Polygon and Line are there too.",
+          "do": "Hold the shapes button and pick <b>Star</b>."
+        },
+        {
+          "title": "Draw a star",
+          "text": "Drag out from where its middle goes: the drag sets its size and angle. <kbd>Shift</kbd> keeps it upright, and <kbd>↑</kbd> <kbd>↓</kbd> while dragging add or remove points.",
+          "do": "Drag out from the star's middle."
+        },
+        {
+          "title": "Set its points",
+          "text": "In the <b>Star</b> section, type 8 in <b>Points</b> or drag its slider. <b>Ratio</b> makes the points shorter or longer.",
+          "do": "Type <b>8</b> in Points."
+        }
+      ],
+      "note": "A click without a drag places a shape at a standard size. A polygon or star keeps its settings until you edit its points by hand or give it Morph keyframes; then it becomes a plain path. Convert to path, in the shape's section, does that on purpose.",
+      "keys": [
+        ["M", "Rectangle"],
+        ["O", "Ellipse"],
+        ["L", "Line"],
+        ["V", "Select tool"]
+      ],
+      "related": ["select", "pen", "fill"]
+    },
+    {
+      "id": "text",
+      "group": "create",
+      "title": "Text and fonts",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "The Text tool puts editable text on the canvas. Type right there, then pick its font and size in the inspector: Google Fonts, basic system fonts, or fonts on your computer.",
+      "steps": [
+        {
+          "title": "Pick the Text tool",
+          "text": "Press <kbd>T</kbd>, or click the T in the tools.",
+          "do": "Press <kbd>T</kbd> for the Text tool."
+        },
+        {
+          "title": "Click on the canvas",
+          "text": "Click where the text should start. A new text appears with its word selected, ready to type over. Drag instead to draw a box: the lines wrap to its width.",
+          "do": "Click on the canvas."
+        },
+        {
+          "title": "Type your words",
+          "text": "Type: your words replace the selected one. Press <kbd>Esc</kbd> or click away to finish. Double-click a text to type in it again.",
+          "do": "Type, then press <kbd>Esc</kbd>."
+        },
+        {
+          "title": "Pick a font",
+          "text": "Click the <b>Font</b> field in Text appearance. Each font in the list shows your own text; type Pacifico in the search box and press <kbd>Enter</kbd>, or click a font.",
+          "do": "Click <b>Font</b>, type Pacifico, press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Set the size",
+          "text": "Type 72 in <b>Size</b> and press <kbd>Enter</kbd>. Style, bold and italic, letter spacing, alignment and case are in the same section.",
+          "do": "Type <b>72</b> in Size and press <kbd>Enter</kbd>."
+        }
+      ],
+      "note": "Convert to shapes, in the Text section, turns the letters into one path layer, which looks the same everywhere; it works with Google Fonts and fonts on your computer.",
+      "keys": [
+        ["T", "Text tool"],
+        ["Esc", "Finish typing"],
+        ["V", "Select tool"]
+      ],
+      "related": ["select", "fill", "export-svg"]
+    },
+    {
+      "id": "images",
+      "group": "create",
+      "title": "Images and assets",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Images wait in the Assets tab, beside Layers. Put one on the canvas as often as you like: the file is kept once in the project, and the export embeds it.",
+      "steps": [
+        {
+          "title": "Open Assets",
+          "text": "Click <b>Assets</b> above the Layers panel. Your images and SVG files are here; <b>Add files</b> brings in more, and so does dropping files on this tab.",
+          "do": "Click <b>Assets</b>."
+        },
+        {
+          "title": "Place the picture",
+          "text": "Click the sunset: it goes in the middle of the canvas, as an image layer. Drag it to the canvas instead to drop it where you let go.",
+          "do": "Click the picture."
+        },
+        {
+          "title": "Size it",
+          "text": "In the <b>Image</b> section of the inspector, type 240 in Size <b>W</b> and press <kbd>Enter</kbd>: the height follows, as an image keeps its proportions. <b>Original size</b> takes it back to its own pixels.",
+          "do": "Type <b>240</b> in Size W and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Move it into place",
+          "text": "Drag the picture into the frame. An image moves, scales, turns and fades like any other layer, and animates the same way.",
+          "do": "Drag the picture into the frame."
+        }
+      ],
+      "note": "Dropping image files on the canvas, or pasting an image, puts them straight on the canvas; so does Import files in the ☰ menu. PNG, JPG, GIF, WebP, AVIF, BMP, ICO, TIFF and HEIC work, and an SVG file comes in as layers you can edit.",
+      "keys": [
+        ["Ctrl I", "Import files"],
+        ["Ctrl V", "Paste"]
+      ],
+      "related": ["import-svg", "export-images", "select"]
+    },
+    {
+      "id": "booleans",
+      "group": "create",
+      "title": "Booleans and align",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Booleans combine two or more shapes into one new path: union, subtract, intersect or exclude. The align buttons beside them line layers up with each other, or a single layer with the canvas.",
+      "steps": [
+        {
+          "title": "Select both circles",
+          "text": "Drag a box on the canvas from an empty spot of the sky across both circles. Both are selected, and the bar at the top of the inspector offers the align and boolean buttons.",
+          "do": "Drag a box across both circles."
+        },
+        {
+          "title": "Line them up",
+          "text": "Click <b>Align vertical centers</b> at the top of the inspector. With several layers selected they align to each other: the two circles now sit at the same height.",
+          "do": "Click <b>Align vertical centers</b>."
+        },
+        {
+          "title": "Subtract",
+          "text": "Click <b>Subtract</b>, in the same bar. The upper shape is cut out of the bottom one: one new path called Subtract, with the moon's colour, in the moon's place.",
+          "do": "Click <b>Subtract</b>."
+        },
+        {
+          "title": "Centre it on the canvas",
+          "text": "Click <b>Align horizontal centers</b>. With one layer selected, it aligns to the canvas: the new moon moves to the middle.",
+          "do": "Click <b>Align horizontal centers</b>."
+        }
+      ],
+      "note": "Union combines the shapes, Intersect keeps only their overlap, and Exclude keeps where they don't overlap. The shapes are combined as they look at the playhead, and undo brings the originals back. Distributing needs three layers or more. The right-click menu has the same commands, under Boolean and Align.",
+      "keys": [["Ctrl Z", "Undo"]],
+      "related": ["layers", "shapes", "snapping"]
+    },
+    {
+      "id": "layers",
+      "group": "create",
+      "title": "Layers, groups and symbols",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "The Layers panel lists everything in the scene, the front layer at the top. Rename layers, change their order, group them, and hide or lock them to keep them out of the way.",
+      "steps": [
+        {
+          "title": "Rename a layer",
+          "text": "The snowman's head is selected, and it is still called Circle. Click its name at the top of the inspector, type Head and press <kbd>Enter</kbd>. Double-clicking a name in the Layers panel renames it too.",
+          "do": "Type <b>Head</b> in the name at the top of the inspector."
+        },
+        {
+          "title": "Bring the scarf forward",
+          "text": "The scarf is behind the body. Click <b>Scarf</b> in the Layers panel, then <b>Move layer up</b>, the first button of the panel's top bar: the scarf moves above the body, in the list and on the canvas.",
+          "do": "Click <b>Scarf</b>, then <b>Move layer up</b>."
+        },
+        {
+          "title": "Select the whole snowman",
+          "text": "Drag a box on the canvas from an empty spot of the sky across the snowman. It selects every layer it touches; the sky and the snow are locked, so they stay out of it.",
+          "do": "Drag a box across the snowman."
+        },
+        {
+          "title": "Group them",
+          "text": "Click <b>Group</b> in the Layers panel's top bar, or press <kbd>Ctrl</kbd> <kbd>G</kbd>. The four layers go into one group, which moves, turns and fades as one.",
+          "do": "Click <b>Group</b>."
+        },
+        {
+          "title": "Lock the group",
+          "text": "Click the padlock on the group's row. A locked layer can't be picked or moved on the canvas; the eye beside the padlock hides a layer.",
+          "do": "Click the padlock on the group's row."
+        }
+      ],
+      "note": "Drag a row in the Layers panel to move it, or drop it into a group. A symbol is artwork whose copies share their contents: right-click a group and choose Make symbol (☰ › Element has it too), add copies from Assets › Symbols, and an edit to one reaches them all.",
+      "keys": [
+        ["Ctrl G", "Group"],
+        ["Ctrl Shift G", "Ungroup"],
+        ["Ctrl ]", "Bring forward"],
+        ["Ctrl [", "Send backward"],
+        ["Ctrl H", "Hide or show"],
+        ["Ctrl L", "Lock or unlock"]
+      ],
+      "related": ["masks", "booleans", "select"]
+    },
+    {
+      "id": "hyperlinks",
+      "group": "create",
+      "title": "Hyperlinks",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Give a layer a link, and clicking it in the exported SVG opens a web page, an email, a phone number or an #anchor on the same page.",
+      "steps": [
+        {
+          "title": "Select the button",
+          "text": "Click <b>Button</b> in the Layers panel.",
+          "do": "Click <b>Button</b> in the Layers panel."
+        },
+        {
+          "title": "Type the address",
+          "text": "In <b>Hyperlink</b>, the inspector's last section, type svgcinema.com in <b>Link</b> and press <kbd>Enter</kbd>. https:// is added for you, and the button's row in the Layers panel gets a link mark.",
+          "do": "Type <b>svgcinema.com</b> in <b>Link</b>, then <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Choose where it opens",
+          "text": "Once there is a link, <b>Opens</b> appears below it. Pick <b>Same tab</b> to open the page in place of yours; a new tab is the default.",
+          "do": "Pick <b>Same tab</b> in <b>Opens</b>."
+        }
+      ],
+      "note": "Links work in the exported SVG, not on the editor's canvas. A browser follows them when the SVG is part of the page (pasted in, or in an object tag, where Same tab opens the page inside the object's box), not when it is shown as an image. Web addresses, mailto:, tel: and #anchors only. Clear the field to remove the link; right-click › Hyperlink… edits the same link.",
+      "related": ["layers", "export-svg"]
+    },
+    {
+      "id": "snapping",
+      "group": "create",
+      "title": "Snapping, guides and rulers",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Snapping lines things up as you move and draw: to other layers' edges and centres, to path nodes, to guides, to the grid and to whole pixels. Rulers and guides show where things are; the grid gives an even spacing.",
+      "steps": [
+        {
+          "title": "Show the rulers",
+          "text": "Click the grid button at the bottom right of the canvas, then <b>Show rulers</b>. Rulers appear along the top and the left of the canvas.",
+          "do": "Click the grid button, then <b>Show rulers</b>."
+        },
+        {
+          "title": "Pull a guide",
+          "text": "Drag down from the top ruler onto the canvas and let go at 250: a tag shows where the guide is. Dropping a guide back on a ruler removes it.",
+          "do": "Drag down from the top ruler to <b>250</b>."
+        },
+        {
+          "title": "Snap the box to it",
+          "text": "Drag the box down towards the guide. Close to it, the box's bottom edge jumps onto the guide, and a magenta line shows the match. Hold <kbd>Ctrl</kbd> to move without snapping.",
+          "do": "Drag the box down to the guide."
+        },
+        {
+          "title": "Show the grid",
+          "text": "Click the grid button again, then <b>Front grid</b>. The grid's size is at the bottom of the same menu.",
+          "do": "Click the grid button, then <b>Front grid</b>."
+        },
+        {
+          "title": "Snap to the grid",
+          "text": "Click the magnet beside it, then <b>Snap to grid</b>. Moving and drawing now snap to the grid lines too; <b>Enable snapping</b>, in the same menu, turns all snapping off and on.",
+          "do": "Click the magnet, then <b>Snap to grid</b>."
+        }
+      ],
+      "note": "The guides are saved with the project; the rulers, grids and snapping settings are remembered in this browser. Keyframes in the timeline have their own switch, Snap keyframes, at the bottom of the magnet's menu.",
+      "keys": [
+        ["Alt S", "Snapping on or off"],
+        ["Alt R", "Rulers"],
+        ["Alt L", "Guides"],
+        ["Alt G", "Front grid"]
+      ],
+      "related": ["select", "booleans", "layers"]
+    },
 
-    { "id": "fill", "group": "style", "title": "Fill and gradients", "tour": true, "minutes": 3 },
-    { "id": "strokes", "group": "style", "title": "Strokes and dashes" },
-    { "id": "filters", "group": "style", "title": "Filters", "tour": true, "minutes": 3 },
-    { "id": "masks", "group": "style", "title": "Masks and clipping" },
-    { "id": "appearance", "group": "style", "title": "Appearance and blending" },
+    {
+      "id": "fill",
+      "group": "style",
+      "title": "Fill and gradients",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A shape's fill can be one colour, a linear or radial gradient, or nothing. The colour window edits them all, and while it edits a gradient you can drag the gradient's ends on the canvas.",
+      "steps": [
+        {
+          "title": "Select the beam",
+          "text": "Click the beam of light under the lamp. The inspector shows its <b>Fill & stroke</b> section.",
+          "do": "Click the beam of light."
+        },
+        {
+          "title": "Open the colour window",
+          "text": "In <b>Fill & stroke</b>, click the swatch beside <b>Fill</b>. The colour window opens beside it: a colour area, hue and opacity sliders, and Hex and R G B A fields.",
+          "do": "Click the swatch beside <b>Fill</b>."
+        },
+        {
+          "title": "Make it a gradient",
+          "text": "Click <b>Linear gradient</b> in the window's top row (None, Solid, Linear, Radial). The fill now fades from its colour to clear, and a bar of stops appears: click a stop to change its colour, or click the bar to add one.",
+          "do": "Click <b>Linear gradient</b> at the top of the window."
+        },
+        {
+          "title": "Point it down",
+          "text": "While the window is open, the beam shows the gradient's two ends. Drag the hollow start to the top of the beam and the filled end to the bottom: the light now fades as it falls.",
+          "do": "Drag the hollow end to the top, the filled end to the bottom."
+        },
+        {
+          "title": "Fade the fill alone",
+          "text": "Press <kbd>Esc</kbd> to close the window: all you changed in it is one undo step. Then type 70 in the <b>Opacity</b> row under Fill and press <kbd>Enter</kbd>. This opacity is the fill's own; the stroke has its own, and so does the whole layer, in Appearance.",
+          "do": "<kbd>Esc</kbd>, then type <b>70</b> in Fill's <b>Opacity</b>."
+        }
+      ],
+      "note": "Fill and its Opacity each have their own {◆}. A gradient animates like a colour: its stops, angle, centre and radius blend, even from a solid colour. A CSS-only export animates only the stops' colours; the JavaScript export animates everything. A radial gradient shows a centre, a round handle for its size and direction, and a square one that makes it an ellipse.",
+      "keys": [["I", "Pick the fill colour from the screen (in browsers with an eyedropper)"]],
+      "related": ["strokes", "appearance", "keyframes"]
+    },
+    {
+      "id": "strokes",
+      "group": "style",
+      "title": "Strokes and dashes",
+      "ready": true,
+      "tour": true,
+      "minutes": 4,
+      "intro": "A stroke is the line along a path or a shape's edge: its colour, width, ends, corners and dash pattern. Animate the dash offset and the dashes travel along the line.",
+      "steps": [
+        {
+          "title": "Select the trail",
+          "text": "Click <b>Trail</b> in the Layers panel: a thin line is easier to pick there than on the canvas.",
+          "do": "Click <b>Trail</b> in the Layers panel."
+        },
+        {
+          "title": "Make it thicker",
+          "text": "In <b>Fill & stroke</b>, type 10 in <b>Width</b> and press <kbd>Enter</kbd>. The <b>Stroke</b> swatch above it opens the same colour window as Fill, gradients included.",
+          "do": "Type <b>10</b> in <b>Width</b>, then <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Round the ends",
+          "text": "In <b>Appearance</b>, under Stroke style, click the round <b>Line ends</b> button: the line now ends in half circles. The <b>Line join</b> buttons below it shape the corners the same way.",
+          "do": "Click the round <b>Line ends</b> button."
+        },
+        {
+          "title": "Dash it",
+          "text": "Type 0, 22 in <b>Dashes</b> and press <kbd>Enter</kbd>: dashes of no length, 22 apart. With round ends, each of them is a dot.",
+          "do": "Type <b>0, 22</b> in <b>Dashes</b>, then <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Start a Dash offset track",
+          "text": "Click {◆} beside <b>Dash offset</b>, under Dashes. Dash offset gets its own row on the timeline, with a keyframe at the playhead.",
+          "do": "Click {◆} beside <b>Dash offset</b>."
+        },
+        {
+          "title": "Move the playhead to the end",
+          "text": "Drag the red playhead along the time ruler to 3s, the end of the animation.",
+          "do": "Drag the playhead to <b>3s</b>."
+        },
+        {
+          "title": "Move the dashes",
+          "text": "Type -110 in <b>Dash offset</b> and press <kbd>Enter</kbd>, then press <kbd>Space</kbd>: the dots travel along the line. As 110 is five whole dash-and-gap lengths, they start over without a jump.",
+          "do": "Type <b>-110</b> in <b>Dash offset</b>, then <kbd>Enter</kbd>."
+        }
+      ],
+      "note": "On a closed shape, <b>Align</b> under Stroke style puts the stroke inside, on or outside the edge. Dashes have their own {◆} too, and patterns of different lengths blend. To draw a line on, animate Trim path's End from 0% to 100% instead.",
+      "keys": [
+        ["Shift F", "Add a dash offset keyframe at the playhead"],
+        ["Shift W", "Add a stroke width keyframe at the playhead"],
+        ["Shift B", "Add a stroke colour keyframe at the playhead"],
+        ["Shift D", "Add a trim end (draw on) keyframe at the playhead"],
+        ["Alt I", "Pick the stroke colour from the screen (in browsers with an eyedropper)"]
+      ],
+      "related": ["fill", "trim", "keyframes"]
+    },
+    {
+      "id": "filters",
+      "group": "style",
+      "title": "Filters",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Filters add effects to a layer: blurs, shadows and glows, colour changes and outlines. They stack in a list, and every setting of every filter can be animated.",
+      "steps": [
+        {
+          "title": "Select the moon",
+          "text": "Click the moon on the canvas, or its row in the Layers panel.",
+          "do": "Click the moon."
+        },
+        {
+          "title": "Open the filter menu",
+          "text": "In the inspector's <b>Filters</b> section, click <b>+ Add filter…</b>. The menu has three groups: Blur & shadow, Color and Edges.",
+          "do": "Click <b>+ Add filter…</b> in Filters."
+        },
+        {
+          "title": "Pick Glow",
+          "text": "Click <b>Glow</b>. It appears as a card with its settings (X, Y, Blur, Spread, Color and Opacity), and the moon glows.",
+          "do": "Click <b>Glow</b>."
+        },
+        {
+          "title": "Start a Spread track",
+          "text": "Click {◆} beside the glow's <b>Spread</b>. It gets its own row on the timeline, with a keyframe at the playhead.",
+          "do": "Click {◆} beside <b>Spread</b>."
+        },
+        {
+          "title": "Move the playhead to 2s",
+          "text": "Drag the red playhead along the time ruler to 2s.",
+          "do": "Drag the playhead to <b>2s</b>."
+        },
+        {
+          "title": "Widen the glow",
+          "text": "Type 12 in <b>Spread</b> and press <kbd>Enter</kbd>. A second keyframe lands at 2s, and the glow grows into a wide halo.",
+          "do": "Type <b>12</b> in <b>Spread</b>, then <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The glow swells for two seconds, rests, and starts over. Filters animate in the JavaScript export; a CSS export keeps them still, as the note in Filters says.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Filters apply from the top of the list down: drag a card by its head to reorder them, or use its arrows; the bin removes it. A card's chevron folds it to one row that sums it up, with a ◆ mark when something in it is animated.",
+      "keys": [["Space", "Play and pause"]],
+      "related": ["appearance", "keyframes", "presets"]
+    },
+    {
+      "id": "masks",
+      "group": "style",
+      "title": "Masks and clipping",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A mask shows the layers under it only where the mask is. Select the mask shape and what it should show, choose Create mask, and the top layer becomes the mask. It stays a layer you can move, edit and animate.",
+      "steps": [
+        {
+          "title": "Select the window and the view",
+          "text": "Drag a box on the canvas from the wall's top-left corner across the window. It selects every layer it touches: the window and the sea view behind it.",
+          "do": "Drag a box from the top-left corner across the window."
+        },
+        {
+          "title": "Create the mask",
+          "text": "Click <b>Create mask</b> in the Layers panel's top bar, second from the right. The top layer, the window, goes into a <b>Masks</b> folder inside a new <b>Mask group</b>, and the view now shows only through it.",
+          "do": "Click <b>Create mask</b> in the Layers panel."
+        },
+        {
+          "title": "Select the mask",
+          "text": "Click <b>Window</b> in the Layers panel, inside the Masks folder. A mask isn't drawn itself, but it is still a layer: its box shows where it is.",
+          "do": "Click <b>Window</b> in the Layers panel."
+        },
+        {
+          "title": "Move it",
+          "text": "Type 100 in <b>Position</b> X and press <kbd>Enter</kbd>. The window moves over the view, which stays where it is: give the window's Position a track with {◆} and it pans across the view. On the canvas, a drag there would pick the mask group under the pointer and move it all.",
+          "do": "Type <b>100</b> in <b>Position</b> X, then <kbd>Enter</kbd>."
+        }
+      ],
+      "note": "A mask works by opacity, so a soft or see-through mask shows its layers partly. <b>Mask by</b>, in the mask group's Group section, switches to Brightness: white shows, black hides. A clipping path (right-click › Create clipping path) uses only the mask's shape. <b>Release mask</b>, beside Create mask, puts the layers back.",
+      "related": ["layers", "appearance", "keyframes"]
+    },
+    {
+      "id": "appearance",
+      "group": "style",
+      "title": "Appearance and blending",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Appearance sets how a layer is drawn over what is behind it: its opacity and its blending, and for shapes the paint order and the stroke style. Opacity has its own {◆}, so a layer can fade in and out.",
+      "goal": "The blue light fades out of the mix in two seconds and comes back as the animation starts over: screen blending and two Opacity keyframes.",
+      "steps": [
+        {
+          "title": "Select the blue light",
+          "text": "Click <b>Blue</b> in the Layers panel.",
+          "do": "Click <b>Blue</b> in the Layers panel."
+        },
+        {
+          "title": "Blend it",
+          "text": "In <b>Appearance</b>, pick <b>Screen</b> in <b>Blending</b>. The red and green lights blend this way already: where the three overlap, their colours add up, to white in the middle.",
+          "do": "Pick <b>Screen</b> in <b>Blending</b>."
+        },
+        {
+          "title": "Start an Opacity track",
+          "text": "Click {◆} beside <b>Opacity</b> in Appearance. Opacity gets its own row on the timeline, with a keyframe at the playhead.",
+          "do": "Click {◆} beside <b>Opacity</b>."
+        },
+        {
+          "title": "Move the playhead to 2s",
+          "text": "Drag the red playhead along the time ruler to 2s.",
+          "do": "Drag the playhead to <b>2s</b>."
+        },
+        {
+          "title": "Fade it out",
+          "text": "Type 0 in <b>Opacity</b> and press <kbd>Enter</kbd>, or drag its slider all the way to the left. A keyframe lands at 2s, and the blue light is gone.",
+          "do": "Type <b>0</b> in <b>Opacity</b>, then <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The blue light fades out over two seconds, stays out until the end of the 3-second animation, and comes back as it starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "This Opacity is the whole layer's; the fill and the stroke have their own, in Fill & stroke. <b>Isolate</b>, beside Blending, keeps the layers inside a group blending with each other only, not with what is behind the group. <b>Order</b> paints a shape's stroke under its fill instead of over it.",
+      "keys": [
+        ["Shift O", "Add an opacity keyframe at the playhead"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["fill", "masks", "keyframes"]
+    },
 
     {
       "id": "keyframes",
@@ -128,11 +803,234 @@
       ],
       "related": ["first-animation", "easing"]
     },
-    { "id": "morph", "group": "animate", "title": "Shape morphing" },
-    { "id": "motion-paths", "group": "animate", "title": "Motion paths", "tour": true, "minutes": 4 },
-    { "id": "trim", "group": "animate", "title": "Trim path" },
-    { "id": "presets", "group": "animate", "title": "Animation presets" },
-    { "id": "multi", "group": "animate", "title": "Editing many layers" },
+    {
+      "id": "morph",
+      "group": "animate",
+      "title": "Shape morphing",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A path's shape can be animated like any other property: its Morph track keeps the shape at each keyframe, and the editor blends the nodes between them. Morph into turns one shape into another in one go.",
+      "goal": "The blob grows points and flies into the star's place in a second and a half, holds there, and starts over.",
+      "steps": [
+        {
+          "title": "Select the blob",
+          "text": "Click the blob on the canvas, or its row in the Layers panel. The <b>Morph</b> section near the bottom of the inspector has what shapes can do: the node count, the Morph {◆}, <b>Edit nodes</b> and <b>Morph into</b>.",
+          "do": "Click the blob, or its row in Layers."
+        },
+        {
+          "title": "Move the playhead to 1.5s",
+          "text": "Drag the red playhead along the time ruler to 1.5s. That is where the new shape will be.",
+          "do": "Drag the playhead to <b>1.5s</b>."
+        },
+        {
+          "title": "Morph into the star",
+          "text": "In the Morph section, open <b>Morph into</b> and pick <b>Star</b>. The blob gets a Morph track: its own shape at 0s, the star's at the playhead. The star layer is hidden, since the blob now becomes it.",
+          "do": "<b>Morph into</b> › <b>Star</b>."
+        },
+        {
+          "title": "Click Edit nodes",
+          "text": "Click <b>Edit nodes</b> in the Morph section (it now reads <b>Done editing</b>). The blob's nodes show on the canvas, as they are at the playhead.",
+          "do": "Click <b>Edit nodes</b>."
+        },
+        {
+          "title": "Drag a node",
+          "text": "Drag the star's top point up. With a Morph track, moving a node changes the Morph keyframe at the playhead, or adds one when there is none there yet.",
+          "do": "Drag the top point up."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The blob grows its points on the way to the star, holds the new shape until the end of the 3-second animation, and starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Shapes morph best when they have about the same number of nodes, in the same order: the editor adds nodes where one has fewer. Rectangles and ellipses become plain paths when they start morphing. Add nodes (subdivide) gives a shape more nodes to bend.",
+      "keys": [
+        ["Shift M", "Add a morph keyframe at the playhead"],
+        ["Esc", "Back to the Select tool"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["keyframes", "pen", "easing"]
+    },
+    {
+      "id": "motion-paths",
+      "group": "animate",
+      "title": "Motion paths",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A motion path makes a layer travel along a line you drew. Set motion path turns the line into Position keyframes, one per node, timed so the layer moves at an even speed over the whole animation.",
+      "goal": "The paper plane flies along the dashed line over the 3-second animation, turning with each curve, and starts over.",
+      "steps": [
+        {
+          "title": "Select the plane",
+          "text": "Click the plane on the canvas, or its row in the Layers panel.",
+          "do": "Click the plane, or its row in Layers."
+        },
+        {
+          "title": "Pick the path to follow",
+          "text": "In the inspector's <b>Motion path</b> section, open <b>Follow</b> (<b>Set motion path…</b>) and pick <b>Flight path</b>. The plane jumps to the start of the line, and its Position track gets a keyframe for every node of it.",
+          "do": "<b>Set motion path…</b> › <b>Flight path</b>."
+        },
+        {
+          "title": "Turn it along the path",
+          "text": "Click the arrow button at the end of the <b>Rotate</b> row, under Transforms: <b>Rotate along the motion path</b>. The plane now points where it is going.",
+          "do": "Click <b>Rotate along the motion path</b>, beside Rotate."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The plane flies the whole line in 3 seconds, banking through the curves, and starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "The plane's path is now its own: the dashed line is just another layer, so hide or delete it if it shouldn't show. Drag the path on the canvas to curve it, drag its handles to fine-tune, and double-click a segment to straighten it. Even speed along curves keeps the speed steady inside each curved segment too.",
+      "keys": [
+        ["Shift P", "Add a position keyframe at the playhead"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["keyframes", "easing", "timeline"]
+    },
+    {
+      "id": "trim",
+      "group": "animate",
+      "title": "Trim path",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Trim path shows only part of a stroke: from Start to End, in percent of its length, moved along it by Offset. Animate End from 0% to 100% and the line draws itself on.",
+      "goal": "The trail draws itself across the hills in two seconds, stays for a second, and starts over.",
+      "steps": [
+        {
+          "title": "Select the trail",
+          "text": "Click the yellow line, or its row in the Layers panel.",
+          "do": "Click the trail, or its row in Layers."
+        },
+        {
+          "title": "Set End to 0",
+          "text": "In the inspector's <b>Appearance</b> section, under <b>Trim path</b>, type 0 in <b>End</b> and press <kbd>Enter</kbd>. The line disappears: none of it is shown.",
+          "do": "Type <b>0</b> in End and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Start an End track",
+          "text": "Click {◆} beside <b>End</b>. End gets its own row on the timeline, <b>Trim end</b>, with a keyframe of 0% at the start.",
+          "do": "Click {◆} beside <b>End</b>."
+        },
+        {
+          "title": "Move the playhead to 2s",
+          "text": "Drag the red playhead along the time ruler to 2s.",
+          "do": "Drag the playhead to <b>2s</b>."
+        },
+        {
+          "title": "Set End to 100",
+          "text": "Type 100 in <b>End</b> and press <kbd>Enter</kbd>. A second keyframe lands at 2s, and the whole line shows again.",
+          "do": "Type <b>100</b> in End and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The line draws itself on from its first node to its last.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Animate Start the same way to erase the line from its beginning, or keep a short Start-to-End piece and animate Offset to send it along the path. The Strokes presets (Draw on, Erase, Travel…) write these keyframes for you.",
+      "keys": [
+        ["Shift D", "Add a trim end (draw on) keyframe at the playhead"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["keyframes", "presets", "strokes"]
+    },
+    {
+      "id": "presets",
+      "group": "animate",
+      "title": "Animation presets",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Presets are ready-made animations, in six groups: Entrances, Exits, Emphasis, Strokes, Color and Filters. A preset starts at the playhead and writes keyframes on the selected layers, only for the properties it animates.",
+      "goal": "The three balloons pop in one after another, then stay until the animation starts over.",
+      "steps": [
+        {
+          "title": "Select the balloons",
+          "text": "With the Select tool, drag a box around the three balloons on the canvas, starting on the empty sky. Every layer the box touches is selected.",
+          "do": "Drag a box around the three balloons."
+        },
+        {
+          "title": "Open the presets",
+          "text": "Click <b>Animate</b> in the timeline's header, then <b>Presets…</b> at the top of its menu. The Presets window opens, on <b>Entrances</b>.",
+          "do": "<b>Animate</b> › <b>Presets…</b>"
+        },
+        {
+          "title": "Pick Pop in",
+          "text": "Click <b>Pop in</b>. Every tile plays its preset and names the tracks it writes (Scale · Opacity). The line beside Apply says when it runs and what it replaces; with several layers selected, <b>Stagger</b> starts each one 0.1s after the last.",
+          "do": "Click <b>Pop in</b>."
+        },
+        {
+          "title": "Apply it",
+          "text": "Click <b>Apply</b> (or double-click a tile). Each balloon gets Scale and Opacity keyframes: the first starts at the playhead, each next one 0.1s later. It is one undo step.",
+          "do": "Click <b>Apply</b>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The balloons pop in, one after another, and stay until the 3-second animation starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Length, Stagger and Strength (how far it moves, grows or turns) change the preset before you apply it. Hovering a tile also shades its span on layers already in the timeline, and outlines in red the keyframes it would replace. A preset replaces only keyframes of its own properties inside its span, and ends (or starts) on the values the layer already has, so it slots into an animation you've made; one that runs past the end makes the animation longer. The Filters presets play in JS exports only.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["Home", "Go to the start"]
+      ],
+      "related": ["keyframes", "multi", "easing"]
+    },
+    {
+      "id": "multi",
+      "group": "animate",
+      "title": "Editing many layers",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Select several layers and change them as one: the inspector shows what they have in common, and every value, colour or keyframe you set goes on all of them. Select same picks every layer that shares a colour, a stroke or a type.",
+      "goal": "The three yellow stars turn together, then rest until the animation starts over; the white ones stay still.",
+      "steps": [
+        {
+          "title": "Select a yellow star",
+          "text": "Click the first star, or its row in the Layers panel.",
+          "do": "Click <b>Star 1</b>."
+        },
+        {
+          "title": "Select the same fill",
+          "text": "Click the <b>Select same</b> button beside the layer name at the top of the inspector, then <b>Fill color</b>. All three yellow stars are selected, and the inspector's header reads 3 layers.",
+          "do": "<b>Select same</b> › <b>Fill color</b>."
+        },
+        {
+          "title": "Start a track on all three",
+          "text": "Click {◆} beside <b>Rotate</b>. Each selected star gets its own Rotate track, with a keyframe at the playhead.",
+          "do": "Click {◆} beside <b>Rotate</b>."
+        },
+        {
+          "title": "Move the playhead to 2s",
+          "text": "Drag the red playhead along the time ruler to 2s.",
+          "do": "Drag the playhead to <b>2s</b>."
+        },
+        {
+          "title": "Turn them all",
+          "text": "Type 144 in Rotate and press <kbd>Enter</kbd>. Each star turns around its own centre, and gets its keyframe at 2s.",
+          "do": "Type <b>144</b> in Rotate and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The yellow stars turn together; the white ones stay still.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "On the canvas, Shift+click adds a layer to the selection or takes it out; in the Layers panel, Ctrl+click does, and Shift+click selects a run of rows. A field whose value differs between the selected layers reads Mixed. On the canvas, one box goes around the whole selection: drag it to move them all, or its handles to scale and turn them together. To start layers one after another, use a preset's Stagger.",
+      "keys": [
+        ["Ctrl A", "Select all layers"],
+        ["Ctrl Shift A", "Deselect all"],
+        ["Shift R", "Add a rotate keyframe at the playhead"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["select", "keyframes", "presets"]
+    },
 
     {
       "id": "rig-build",
@@ -146,7 +1044,61 @@
     { "id": "pins", "group": "rigging", "title": "Pins and mesh warp", "tour": true, "minutes": 3 },
     { "id": "pins-bones", "group": "rigging", "title": "Pins that follow bones" },
 
-    { "id": "timeline", "group": "timing", "title": "The timeline", "tour": true, "minutes": 3 },
+    {
+      "id": "timeline",
+      "group": "timing",
+      "title": "The timeline",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "The timeline shows time from left to right: the ruler and the red playhead on top, then a row for each animated layer with a row for each of its tracks and their keyframes. A new project is 3 seconds long and loops forever.",
+      "goal": "The bird sets off at half a second and crosses the sky as the cloud drifts by, then the 3-second animation starts over.",
+      "steps": [
+        {
+          "title": "Scrub through it",
+          "text": "Drag the red playhead along the time ruler. The canvas shows every moment as you go, and the time in the timeline's header follows.",
+          "do": "Drag the playhead to <b>1.5s</b>."
+        },
+        {
+          "title": "Zoom the timeline",
+          "text": "Drag the zoom slider at the right of the timeline's header to the right, or hold <kbd>Ctrl</kbd> and scroll over the timeline. The seconds spread out, so keyframes are easier to pick; scroll sideways for the rest.",
+          "do": "Drag the zoom slider to the right."
+        },
+        {
+          "title": "Box-select keyframes",
+          "text": "On the bird's Position row, drag a box from the empty space after its last keyframe, left past its first one. Both keyframes are selected. A click selects one keyframe, and <kbd>Shift</kbd>+click adds one or takes it out.",
+          "do": "Drag a box around the bird's two Position keyframes."
+        },
+        {
+          "title": "Drag them later",
+          "text": "Drag one of the selected keyframes half a second to the right: they all move together, and the bird now sets off at 0.5s. A tip shows the time as you drag; keyframes snap to the playhead, to other keyframes and to 0.05s steps.",
+          "do": "Drag the first keyframe <b>0.5s</b> to the right."
+        },
+        {
+          "title": "Turn off Loop preview",
+          "text": "Click the loop button, right of play. With it off, the preview plays once and stops at the end. It changes only the preview: the animation still loops forever when exported.",
+          "do": "Click the loop button, right of play."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The animation plays once, to the end of its 3 seconds, and stops. <kbd>Home</kbd> takes you back to the start.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "The white line after the last second marks the end of the animation: drag it, or click the length after the time in the header, to make the animation longer or shorter. Repeat and Direction are in the inspector when nothing is selected. Ctrl+C and Ctrl+V copy the selected keyframes and paste them at the playhead; right-click a keyframe for more.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["Home", "Go to the start"],
+        ["End", "Go to the end"],
+        [", .", "Previous or next frame"],
+        ["J K", "Jump to the previous or next keyframe"],
+        ["← →", "Move the selected keyframes one frame (Shift: 10)"],
+        ["Ctrl C", "Copy the selected keyframes"],
+        ["Ctrl V", "Paste keyframes at the playhead"],
+        ["Del", "Delete the selected keyframes"]
+      ],
+      "related": ["keyframes", "easing", "graph"]
+    },
     {
       "id": "easing",
       "group": "timing",
@@ -192,8 +1144,92 @@
       ],
       "related": ["keyframes", "first-animation"]
     },
-    { "id": "graph", "group": "timing", "title": "Graph editor" },
-    { "id": "onion", "group": "timing", "title": "Onion skin" },
+    {
+      "id": "graph",
+      "group": "timing",
+      "title": "Graph editor",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "The graph editor opens one track into a curve of its value over time. Drag a key to change its time and value, and drag the handles between two keys to shape the easing yourself.",
+      "goal": "The sails turn a quarter turn over the whole 3 seconds, at a steadier pace, so the loop never stops.",
+      "steps": [
+        {
+          "title": "Select the sails",
+          "text": "Click the sails on the canvas, or their row in the Layers panel. They have a Rotate track: a quarter turn in 2 seconds, slow at both ends.",
+          "do": "Click the sails, or their row in Layers."
+        },
+        {
+          "title": "Turn on Graph",
+          "text": "Click <b>Graph</b> at the right of the timeline's header. The Rotate track opens into a curve, with its value at the playhead beside it.",
+          "do": "Click <b>Graph</b>."
+        },
+        {
+          "title": "Drag a key",
+          "text": "Drag the key at 2s to the right, to 3s. A readout shows the time and value as you drag; up or down changes the value (<kbd>Shift</kbd> keeps the drag to one direction). Now the turn lasts the whole animation.",
+          "do": "Drag the 2s key right, to <b>3s</b>."
+        },
+        {
+          "title": "Shape the curve",
+          "text": "Drag the round handle on the left up, toward the middle of the curve. The turn now starts faster: the curve is an easing of your own.",
+          "do": "Drag the left handle up."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The sails speed up and slow down as the curve says. Four sails look the same after a quarter turn, so the loop is seamless.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "The graph shows one number track at a time: the selected keyframe's, or else the selected layer's first one; click another track's name to graph that one. Points such as Position and Scale show X and Y as two curves. Colours, gradients, dash patterns and morphs have no graph.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["J K", "Jump to the previous or next keyframe"]
+      ],
+      "related": ["easing", "timeline", "keyframes"]
+    },
+    {
+      "id": "onion",
+      "group": "timing",
+      "title": "Onion skin",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Onion skin draws faint copies of the selected layers a few moments before (blue) and after (red) the playhead, so you can see where they come from and where they go. The copies are only on the canvas: they are never exported.",
+      "steps": [
+        {
+          "title": "Select the ball",
+          "text": "Click the ball on the canvas, or its row in the Layers panel. Onion skin shows the selected layers only.",
+          "do": "Click the ball, or its row in Layers."
+        },
+        {
+          "title": "Turn on Onion skin",
+          "text": "Click <b>Onion skin</b> at the right of the timeline's header. Faint copies of the ball appear ahead of it in red: where it will be in the next three tenths of a second. At 0s there is nothing before it.",
+          "do": "Click <b>Onion skin</b>."
+        },
+        {
+          "title": "Move the playhead to 1s",
+          "text": "Drag the red playhead along the time ruler to 1s, the top of the hop. The copies follow: blue ones where the ball was, red ones where it is going. Their spacing shows the speed.",
+          "do": "Drag the playhead to <b>1s</b>."
+        },
+        {
+          "title": "Space them out",
+          "text": "Click the arrow beside Onion skin for its settings, and type 0.2 in <b>Every</b>. <b>Before</b> and <b>After</b> set how many copies (up to 10), <b>Fade</b> how strong the nearest ones are.",
+          "do": "Click the arrow, then type <b>0.2</b> in Every."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The copies hide while it plays, and come back when you pause.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Onion skin is also in View › Onion skin. Whether it is on, and its settings, are remembered in this browser, for every project.",
+      "keys": [
+        ["Alt O", "Onion skin on or off"],
+        [", .", "Previous or next frame"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["timeline", "keyframes", "motion-paths"]
+    },
 
     { "id": "import-svg", "group": "io", "title": "Opening and importing SVG", "tour": true, "minutes": 2 },
     { "id": "export-svg", "group": "io", "title": "Export an animated SVG", "tour": true, "minutes": 3 },

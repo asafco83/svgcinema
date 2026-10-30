@@ -9,6 +9,7 @@
 import type { TourStep } from './kit';
 import * as start from './topics/start';
 import * as create from './topics/create';
+import * as arrange from './topics/arrange';
 import * as style from './topics/style';
 import * as animate from './topics/animate';
 import * as rigging from './topics/rigging';
@@ -20,6 +21,7 @@ export type { Ctx, TourStep } from './kit';
 export const TOURS: Record<string, TourStep[]> = {
   ...start.tours,
   ...create.tours,
+  ...arrange.tours,
   ...style.tours,
   ...animate.tours,
   ...rigging.tours,

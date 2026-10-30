@@ -35,6 +35,8 @@ export interface Scene {
   setup?: () => void;
   /** the tutorial uses the ☰ menu (File, Edit, View…): a practice editor shows it (it is hidden otherwise) */
   menu?: boolean;
+  /** the timeline's height in this practice editor (184 px when not given; e.g. taller for the graph) */
+  tl?: number;
 }
 
 export const q = (sel: string) => document.querySelector(sel);

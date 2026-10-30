@@ -6,6 +6,7 @@
 import type { Scene } from './kit';
 import * as start from './topics/start';
 import * as create from './topics/create';
+import * as arrange from './topics/arrange';
 import * as style from './topics/style';
 import * as animate from './topics/animate';
 import * as rigging from './topics/rigging';
@@ -18,6 +19,7 @@ export { allLayers, byName } from './kit';
 export const SCENES: Record<string, Scene> = {
   ...start.scenes,
   ...create.scenes,
+  ...arrange.scenes,
   ...style.scenes,
   ...animate.scenes,
   ...rigging.scenes,
