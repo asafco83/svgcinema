@@ -450,33 +450,85 @@ async def clips(b, theme):
             await pg.keyboard.press('Escape')
         await c.close()
 
-    # ---------- import: an animated SVG dropped on an empty canvas comes in as layers and keyframes, and plays ----------
+    # ---------- import: an animated SVG (playing, as a file) is dragged onto an empty canvas, comes in as layers and
+    # keyframes, plays in the editor, and a keyframe is changed: it's editable, not a flat picture ----------
     if want('import'):
-        c, pg = await page(b, theme)
+        c, pg = await page(b, theme, tl=300)
         E = pg.evaluate
         await E("(async()=>{(await import('/src/io/open.ts')).applyProject(st.blankDoc(640,400),{},null)})()")
         await pg.wait_for_timeout(1000)
         svg = open(os.path.join(ROOT, 'site/clips/night-flight.svg')).read()
-        rec = await Rec(pg, 'import' + sfx, {'x': 0, 'y': 0, 'width': 1440, 'height': 900}, maxw=1600, poster=0.8, wait=40).begin()
-        await rec.hold(1.0)
+        # the file being dragged in: a card with the SVG itself playing (inline, so the recorder's clock runs its CSS
+        # animation), and a pointer that follows the mouse (the recorder's mouse has none)
         await E(
-            """(svg)=>{const w=document.getElementById('wrap'),r=document.getElementById('artboard').getBoundingClientRect(),
-            dt=new DataTransfer();dt.items.add(new File([svg],'night-flight.svg',{type:'image/svg+xml'}));
-            const o={bubbles:true,cancelable:true,dataTransfer:dt,clientX:r.x+r.width/2,clientY:r.y+r.height/2};
-            w.dispatchEvent(new DragEvent('dragover',o));w.dispatchEvent(new DragEvent('drop',o))}""",
+            """(svg)=>{const w=document.getElementById('wrap').getBoundingClientRect();
+            const f=document.createElement('div');f.id='capFile';
+            f.style.cssText='position:fixed;z-index:9000;width:330px;padding:10px 10px 12px;border-radius:14px;background:var(--raised);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.28);font:600 13px var(--f-ui);color:var(--fg);transform-origin:0 0;transition:none';
+            f.innerHTML=svg.replace('<svg ','<svg style="display:block;width:310px;height:auto;border-radius:8px" ')+'<div style="display:flex;gap:8px;align-items:center;margin-top:9px"><span>night-flight.svg</span><span style="font-weight:500;color:var(--muted)">· animated with CSS</span></div>';
+            f.style.left=(w.left+40)+'px';f.style.top=(w.top+w.height-330)+'px';document.body.appendChild(f);
+            const a=document.createElement('div');a.id='capPtr';
+            a.style.cssText='position:fixed;left:0;top:0;z-index:9001;pointer-events:none;transform:translate(-100px,-100px)';
+            a.innerHTML='<svg width="22" height="26" viewBox="0 0 22 26"><path d="M2 2l17 11.5-7.4 1.4 4.4 8.3-3.2 1.7-4.4-8.4L2 21.6z" fill="#161a25" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+            document.body.appendChild(a);
+            addEventListener('mousemove',e=>{a.style.transform=`translate(${e.clientX}px,${e.clientY}px)`},true)}""",
             svg,
+        )
+        rec = await Rec(pg, 'import' + sfx, {'x': 0, 'y': 0, 'width': 1440, 'height': 900}, maxw=1600, poster=0.62, wait=30).begin()
+        await rec.hold(2.4)  # the file, animated: this is what comes in
+        fb = await E("(()=>{const r=document.getElementById('capFile').getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")
+        ab = await E("(()=>{const r=document.getElementById('artboard').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]})()")
+        a = (fb[0] + fb[2] * 0.55, fb[1] + fb[3] * 0.4)
+        await pg.mouse.move(a[0] - 60, a[1] + 80)
+        for i in range(1, 9):
+            t = i / 8
+            await pg.mouse.move(a[0] - 60 + 60 * t, a[1] + 80 - 80 * t)
+            await rec.frame(1)
+        await rec.frame(4)
+        n = 22
+        for i in range(1, n + 1):
+            t = i / n
+            t = t * t * (3 - 2 * t)
+            x, y = a[0] + (ab[0] - a[0]) * t, a[1] + (ab[1] - a[1]) * t
+            await pg.mouse.move(x, y)
+            await E("([dx,dy,k])=>{const f=document.getElementById('capFile');f.style.transform=`translate(${dx}px,${dy}px) scale(${k})`;f.style.opacity=String(1-0.15*(1-k))}", [x - a[0], y - a[1], 1 - 0.25 * t])
+            await rec.frame(1)
+        await rec.frame(3)
+        await E(
+            """([svg,x,y])=>{document.getElementById('capFile').remove();const w=document.getElementById('wrap'),
+            dt=new DataTransfer();dt.items.add(new File([svg],'night-flight.svg',{type:'image/svg+xml'}));
+            const o={bubbles:true,cancelable:true,dataTransfer:dt,clientX:x,clientY:y};
+            w.dispatchEvent(new DragEvent('dragover',o));w.dispatchEvent(new DragEvent('drop',o))}""",
+            [svg, ab[0], ab[1]],
         )
         for _ in range(100):
             await rec.frame(1, 80)
             if await E('st.doc.layers.length>0'):
                 break
-        await E('hi.select(null)')
-        await rec.hold(1.4)
+        # its layers and its animation, as keyframes on the timeline
+        moon = "st.doc.layers.find(l=>l.name==='moon')"
+        await E(f"hi.select({moon}.id)")
+        await rec.hold(1.6)
         await E('hi.setTime(0)')
         await pg.keyboard.press('Space')
         await rec.hold(3.0)
         await pg.keyboard.press('Space')
-        await rec.hold(0.6)
+        await rec.hold(0.4)
+        # change it: at the end of the moon's rise (its 1.8 s keyframe), drag the moon higher and to the left
+        await E('hi.setTime(1.8)')
+        await rec.hold(0.8)
+        m = await E(f"(()=>{{const e=document.getElementById('e-'+{moon}.id+'-s')||document.getElementById('e-'+{moon}.id);const r=e.getBoundingClientRect();return [r.left+r.width*0.7,r.top+r.height*0.7]}})()")
+        k = await E("(()=>{const m=document.getElementById('content').getScreenCTM();return m.a})()")
+        await pg.mouse.move(m[0] + 40, m[1] + 50)
+        for i in range(1, 7):
+            await pg.mouse.move(m[0] + 40 - 40 * i / 6, m[1] + 50 - 50 * i / 6)
+            await rec.frame(1)
+        await drag(rec, m, (m[0] - 150 * k, m[1] - 70 * k), frames=20)
+        await rec.hold(1.2)
+        await E('hi.setTime(0)')
+        await pg.keyboard.press('Space')
+        await rec.hold(3.2)
+        await pg.keyboard.press('Space')
+        await rec.hold(0.4)
         await rec.end()
         await c.close()
 
