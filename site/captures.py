@@ -413,6 +413,36 @@ async def clips(b, theme):
             await pg.keyboard.press('Escape')
         await c.close()
 
+    # ---------- import: an animated SVG dropped on an empty canvas comes in as layers and keyframes, and plays ----------
+    if want('import'):
+        c, pg = await page(b, theme)
+        E = pg.evaluate
+        await E("(async()=>{(await import('/src/io/open.ts')).applyProject(st.blankDoc(640,400),{},null)})()")
+        await pg.wait_for_timeout(1000)
+        svg = open(os.path.join(ROOT, 'site/clips/night-flight.svg')).read()
+        rec = await Rec(pg, 'import' + sfx, {'x': 0, 'y': 0, 'width': 1440, 'height': 900}, maxw=1600, poster=0.8, wait=40).begin()
+        await rec.hold(1.0)
+        await E(
+            """(svg)=>{const w=document.getElementById('wrap'),r=document.getElementById('artboard').getBoundingClientRect(),
+            dt=new DataTransfer();dt.items.add(new File([svg],'night-flight.svg',{type:'image/svg+xml'}));
+            const o={bubbles:true,cancelable:true,dataTransfer:dt,clientX:r.x+r.width/2,clientY:r.y+r.height/2};
+            w.dispatchEvent(new DragEvent('dragover',o));w.dispatchEvent(new DragEvent('drop',o))}""",
+            svg,
+        )
+        for _ in range(100):
+            await rec.frame(1, 80)
+            if await E('st.doc.layers.length>0'):
+                break
+        await E('hi.select(null)')
+        await rec.hold(1.4)
+        await E('hi.setTime(0)')
+        await pg.keyboard.press('Space')
+        await rec.hold(3.0)
+        await pg.keyboard.press('Space')
+        await rec.hold(0.6)
+        await rec.end()
+        await c.close()
+
     # ---------- the graph editor: a bone's rotation curve, with the playhead running ----------
     if want('graph'):
         c, pg = await page(b, theme, tl=420)
