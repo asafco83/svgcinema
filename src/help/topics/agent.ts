@@ -136,7 +136,7 @@ async function assistant() {
       name: 'Star',
       cx: 170,
       cy: 90,
-      r: 20,
+      r: 30,
       n: 5,
       inner: 0.45,
       fill: '#fff4c2',
