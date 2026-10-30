@@ -1,4 +1,5 @@
 // SVGcinema — export/build
+import { track } from '../core/analytics';
 import { bgAttrs } from '../model/background';
 import type { Composite } from '../runtime/engine';
 import type { Layer } from '../model/types';
@@ -812,6 +813,7 @@ export function buildExport(imgs: Record<string, OptImage> | null) {
   };
 }
 export function openExport() {
+  track('export_open');
   if (S.playing) togglePlay();
   syncExportUI();
   $('#mExport').hidden = false;

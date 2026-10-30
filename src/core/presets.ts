@@ -6,6 +6,7 @@
 // end of the span, exits start from its value at the start, emphasis starts and ends on it, so a
 // preset slots into an existing animation. Several layers can be staggered. Running past the end
 // lengthens the animation. One undo step.
+import { featureUsed } from './analytics';
 import type { Keyframe, Layer, PropKey } from '../model/types';
 import { clone, r3, valueAt } from './constants';
 import { beginEdit } from './history';
@@ -1301,6 +1302,7 @@ export function planPreset(p: Preset, at: number, len: number, stagger = 0, ids?
  */
 export function applyPreset(p: Preset, at: number, len: number, stagger = 0, strength = 1, ids?: Iterable<string>) {
   if (!presetTargets(p, ids).length) return null;
+  featureUsed('preset');
   const ed = beginEdit(),
     r = writePreset(p, at, len, stagger, strength, ids);
   ed.end({ insp: true });

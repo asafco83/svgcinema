@@ -3,6 +3,7 @@
 // Assets). The file is turned into editable layers (io/svg-convert); an animated SVG from SVGator keeps
 // its animation as keyframes (io/svgator), and an SVG exported by SVGcinema with its project inside
 // opens as that project.
+import { track } from '../core/analytics';
 import type { Asset, Doc, Layer, XY } from '../model/types';
 import { $, NOFILL, NS, byId, esc, r3 } from '../core/constants';
 import { beginEdit } from '../core/history';
@@ -119,6 +120,7 @@ function openAsProject(
   anim: AnimReader | null,
 ) {
   setIdc(0);
+  track('project_open', { kind: anim ? 'animated_svg' : 'svg' });
   const box = svgBox(root),
     d: Doc = blankDoc(box[2], box[3]);
   d.vx = box[0];

@@ -4,6 +4,7 @@
 // with a Test, and provider errors. With "Your AI assistant" (agent/assist) the user's own assistant
 // works through window.svgcinema and the panel shows how to connect, its steps, Stop and Undo, and a
 // drop card for images it can't hand over. Opened by the Agent button in the top bar or Alt+A.
+import { track } from '../core/analytics';
 import { PRACTICE } from '../core/batch-mode';
 import { $ } from '../core/constants';
 import { setTime, undo } from '../core/history';
@@ -1197,6 +1198,7 @@ async function send(text: string) {
     turn: Turn = { id: CHAT.next++, user: text.trim(), reply: '', model: choice.model, steps: [], msgs: [] };
   if (atts.length) turn.att = atts.map(a => ({ id: a.id, name: a.name, kind: a.kind }));
   CHAT.turns.push(turn);
+  track('agent_request', { way: 'key', provider: choice.provider });
   // the last request stays open; earlier ones fold to a line
   ST.unfolded.clear();
   turn.budget = s.maxSteps;
@@ -1615,6 +1617,7 @@ async function copyStarter() {
   }
 }
 async function downloadSkill() {
+  track('skill_download', { where: 'editor' });
   const blob = await makeZip([{ name: 'svgcinema/SKILL.md', data: new TextEncoder().encode(SKILL_MD) }]);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);

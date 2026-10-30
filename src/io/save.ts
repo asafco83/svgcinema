@@ -1,4 +1,5 @@
 // SVGcinema — io/save
+import { track } from '../core/analytics';
 import { $ } from '../core/constants';
 import { ASSETS, S, doc } from '../core/state';
 import { fileName } from '../export/images';
@@ -70,6 +71,7 @@ export async function saveProject() {
     try {
       await writeHandle(S.file.handle, blob);
       markClean();
+      track('project_saved', { method: 'file' });
       addRecent(S.file.name, S.file.handle as any, null);
       toast('Saved ' + S.file.name);
       return true;
@@ -85,6 +87,7 @@ export async function saveProject() {
     S.file = { name: got, handle: null };
     persistFile();
     markClean();
+    track('project_saved', { method: 'download' });
     addRecent(got, null, blob);
     toast('Downloaded ' + got + '. Browsers can’t overwrite downloads, so this is a fresh copy.');
     return true;
@@ -155,6 +158,7 @@ export function init(): void {
         S.file = { name: handle.name, handle };
         persistFile();
         markClean();
+        track('project_saved', { method: 'file' });
         addRecent(handle.name, handle, null);
         toast('Saved ' + handle.name);
         endSave(true);
@@ -168,6 +172,7 @@ export function init(): void {
       S.file = { name: got, handle: null };
       persistFile();
       markClean();
+      track('project_saved', { method: 'download' });
       addRecent(got, null, blob);
       toast('Saved ' + got + ' to your downloads.');
       endSave(true);

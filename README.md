@@ -343,6 +343,32 @@ On the website, **Do it in the editor: guided tour** opens the same practice edi
 
 The topics are in `src/help/content.json` (shared with the website's help pages); what each tour step does is in `src/help/tours.ts`, in the same order. `tests/browser/help.py` runs every tour with Show me alone, so a change to the editor that breaks a step fails the tests. The step clips are recordings of the same Show me (`python3 site/captures.py help`).
 
+## Privacy and usage counts
+
+No account and no cookies: projects, images and settings stay in the browser and in the files you save. On **svgcinema.com** only, the website and the editor count visits and what gets used with [Umami](https://umami.is) (cookieless, no IP addresses kept, data in the EU), so the owner can see how SVGcinema is used. Nothing loads anywhere else (the GitHub Pages copy, a local copy, the dev server, tests), in a practice editor or the batch converter, or for a browser that sends Do Not Track. The website's Privacy page (`privacy/`) says what is counted; Help › About says it in the editor.
+
+Events carry categories and counts only, never what someone makes (`track()` in `src/core/analytics.ts` keeps only short plain values):
+
+| Event                                      | When                                               | Data                                                                                                                                                             |
+| ------------------------------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `editor_open`                              | the editor loads                                   | `returning`, `theme`, `version`                                                                                                                                  |
+| `project_new`                              | New project, the sample scene                      | `from`: blank, sample                                                                                                                                            |
+| `project_open`                             | a file is opened                                   | `kind`: svgcinema, svg, animated_svg, svgcinema_json                                                                                                             |
+| `project_saved`                            | Save, Save as                                      | `method`: file, download                                                                                                                                         |
+| `export_open`                              | the Export window opens                            |                                                                                                                                                                  |
+| `animation_exported`                       | a download or Copy in the Export window            | `kind`, `format`, `method`, and for Animated SVG `mode`, `player`, `trigger`; `length_s`, `layers` (a range)                                                     |
+| `embed_code_copied`                        | Copy snippet                                       | `kind`, `framework`                                                                                                                                              |
+| `player_download`                          | the player file (Export window, website)           | `where`, `version`                                                                                                                                               |
+| `thumbnails_download`                      | the thumbnail installers (website)                 | `platform`                                                                                                                                                       |
+| `skill_download`                           | the Claude skill                                   | `where`                                                                                                                                                          |
+| `editor_open_click`                        | Open the editor (website)                          | `place`: header, page                                                                                                                                            |
+| `agent_request`                            | a design agent request, or an AI assistant session | `way`, `provider`                                                                                                                                                |
+| `help_open`, `help_topic`, `help_search`   | the Help panel, a topic, a search (after a pause)  | `where`, `topic`, `term`                                                                                                                                         |
+| `tour_start`, `tour_complete`, `tour_exit` | guided tours (editor and website)                  | `topic`, `where`, `step`                                                                                                                                         |
+| `feature_used`                             | once per visit for each feature                    | `feature`: `tool_<tool>`, `animate_<property>`, `boolean_<op>`, `mask`, `clip`, `filter_<type>`, `preset`, `motion_path`, `symbol`, `graph_editor`, `onion_skin` |
+
+`tests/analytics.test.ts` and `tests/browser/analytics.py` check it (the browser test points svgcinema.com at the dev server and stands in for Umami's script).
+
 ## Design agent
 
 Click **Agent** in the top bar (Alt A) to open a chat docked on the right. Describe what you want, for example “draw a cartoon rocket and make it launch”, and the agent draws, edits and animates in this project with the editor's own tools: shapes and SVG artwork, layer edits, groups, presets, keyframes, shape morphing (Morph keyframes written as SVG path data; a rectangle, ellipse or star becomes a plain path) and the project settings. Its steps are listed as it works, and **each request is one undo step**: Undo, or _Undo this request_ under its answer, rolls the whole request back.
@@ -515,6 +541,7 @@ Conventions:
 - `tests/engine.test.ts`: easing, interpolation, the player API, and that the player can be embedded.
 - `tests/zip.test.ts`: the `.SVGcinema` container.
 - `tests/geometry.test.ts`: path parsing and morph helpers.
+- `tests/analytics.test.ts`: usage counts only on svgcinema.com, with only short plain values.
 - `tests/help.test.ts`: the help topics and the guided tours agree (a scene and one behaviour per step).
 - `tests/output.test.ts`: compares the exported SVG (JS and CSS modes, every trigger) and every embed snippet against `tests/fixtures/export-sample.json`. It also checks that no editor TypeScript syntax leaks into a snippet. After an intended change to the output, regenerate the reference with `UPDATE_FIXTURES=1 npx vitest run tests/output.test.ts` and review the diff.
 

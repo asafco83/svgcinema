@@ -1,4 +1,5 @@
 // SVGcinema — export/images
+import { track, bucket } from '../core/analytics';
 import { isLocalFamily, prepareFonts, webFont } from '../render/fonts';
 import { boot as bootExternal } from '../runtime/boot';
 import type { Asset, Layer } from '../model/types';
@@ -389,7 +390,23 @@ export function fileName(s: unknown, fallback = 'animation') {
       .slice(0, 120) || fallback
   );
 }
+/** `animation_exported`: what kind and format, how (download, copy), and the export's settings; never its content. */
+export function exported(method: 'download' | 'copy', format: string) {
+  const k = exportKind(),
+    svg = k === 'svg';
+  track('animation_exported', {
+    kind: k,
+    format,
+    method,
+    mode: svg ? doc.ex.mode : null,
+    player: svg && doc.ex.mode !== 'css' ? doc.ex.player || 'embed' : null,
+    trigger: svg ? doc.ex.trigger : null,
+    length_s: Math.round(doc.dur),
+    layers: bucket(doc.layers.length),
+  });
+}
 export async function saveFile(name: string, data: BlobPart, type: string) {
+  exported('download', (/\.(\w+)$/.exec(name) || ['', ''])[1].toLowerCase());
   if ((window as any).claude && (window as any).claude.use) {
     let dl = null;
     try {
@@ -552,7 +569,10 @@ export function init(): void {
       toast(ok ? 'SVG code copied.' : 'Copying isn’t allowed here. Use Download .svg instead.');
     };
     try {
-      navigator.clipboard.writeText(lastExport).then(() => toast('SVG code copied.'), fallback);
+      navigator.clipboard.writeText(lastExport).then(() => {
+        toast('SVG code copied.');
+        exported('copy', 'svg');
+      }, fallback);
     } catch (e) {
       fallback();
     }

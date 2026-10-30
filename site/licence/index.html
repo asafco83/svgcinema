@@ -5113,6 +5113,64 @@ figcaption {
   overflow: hidden;
 }
 
+/* ---------- privacy ---------- */
+.pv {
+  padding-block: 24px 96px;
+}
+.pv-in {
+  max-width: 760px;
+}
+.pv h2 {
+  font: 600 24px/1.2 var(--f-ui);
+  letter-spacing: 0;
+  margin: 44px 0 10px;
+}
+.pv p,
+.pv li {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.pv p b {
+  color: var(--fg);
+}
+.pv-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (max-width: 720px) {
+  .pv-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.pv-box {
+  padding: 18px 20px;
+}
+.pv-box h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+.pv-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.pv-box li {
+  margin: 4px 0;
+}
+.pv-no {
+  border-color: rgba(31, 157, 106, 0.35);
+  background: rgba(31, 157, 106, 0.06);
+}
+.pv-mail {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.pv-note {
+  font-size: 14px !important;
+}
+
     </style>
   </head>
   <body>
@@ -5222,6 +5280,7 @@ figcaption {
     <nav aria-label="About">
       <h2>About</h2>
       <a href="../licence/">Licence</a>
+      <a href="../privacy/">Privacy</a>
       <a href="../editor/third-party-notices.txt">Open-source parts</a>
     </nav>
   </div>
@@ -5246,6 +5305,48 @@ figcaption {
     try {
       localStorage.setItem('svgcinema:theme', t);
     } catch (e) {}
+  });
+
+  /* ---------- anonymous usage counts: Umami (cookieless, no IP addresses kept), on svgcinema.com only ---------- */
+  // Nowhere else (a local copy, a preview, tests), and not for a browser that asks not to be tracked. Events carry
+  // categories only: which download, which button, which help topic.
+  var counted = /^(www\.)?svgcinema\.com$/.test(location.hostname);
+  if (counted) {
+    var um = d.createElement('script');
+    um.defer = true;
+    um.src = 'https://cloud.umami.is/script.js';
+    um.setAttribute('data-website-id', '3e441baa-e061-4501-8fff-9470c140b799');
+    um.setAttribute('data-domains', 'svgcinema.com,www.svgcinema.com');
+    um.setAttribute('data-do-not-track', 'true');
+    d.head.appendChild(um);
+  }
+  function track(name, data) {
+    if (counted && window.umami && typeof umami.track === 'function') umami.track(name, data || {});
+  }
+  // what a link is: opening the editor, or one of the downloads
+  d.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    var h = a.getAttribute('href') || '',
+      inTop = !!a.closest('header');
+    if (a.hasAttribute('data-editor')) track('editor_open_click', { place: inTop ? 'header' : 'page' });
+    else if (/SVGcinema-Thumbnails-Setup\.zip$/.test(h)) track('thumbnails_download', { platform: 'windows' });
+    else if (/\.deb$/.test(h)) track('thumbnails_download', { platform: 'linux_deb' });
+    else if (/thumbnails-linux\.tar\.gz$/.test(h)) track('thumbnails_download', { platform: 'linux_tar' });
+    else if (/cin-player[\w.-]*\.js$/.test(h)) track('player_download', { where: 'website' });
+    else if (/svgcinema-skill\.zip$/.test(h)) track('skill_download', { where: 'website' });
+  });
+
+  /* ---------- an email address put together only when asked for (spam robots read pages, they don't click) ---------- */
+  d.querySelectorAll('a[data-m]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var m = a.getAttribute('data-m').split('').reverse().join('');
+      a.textContent = m;
+      a.href = 'mailto:' + m;
+      a.removeAttribute('data-m');
+      location.href = 'mailto:' + m;
+    });
   });
 
   var hooks = [];
@@ -6021,7 +6122,13 @@ figcaption {
     (function () {
       var rows = d.querySelectorAll('.hrow'),
         none = d.getElementById('helpNone');
+      var hqT;
       hq.addEventListener('input', function () {
+        clearTimeout(hqT);
+        hqT = setTimeout(function () {
+          var q = hq.value.trim().toLowerCase();
+          if (q.length > 1) track('help_search', { term: q.slice(0, 40) });
+        }, 1200);
         var ws = hq.value.toLowerCase().split(/\s+/).filter(Boolean),
           any = false;
         rows.forEach(function (r) {
@@ -6059,9 +6166,13 @@ figcaption {
     box.setAttribute('aria-label', 'Guided tour');
     box.innerHTML =
       '<button class="lb-x" type="button" aria-label="Close the tour">✕</button><iframe class="lb-f" title="Guided tour in a practice editor"></iframe>';
-    var f = box.querySelector('iframe');
+    var f = box.querySelector('iframe'),
+      topic = a.getAttribute('data-tour'),
+      tour = { i: 0, finished: false };
     f.src = a.href;
+    track('tour_start', { topic: topic, where: 'website' });
     function close() {
+      if (!tour.finished) track('tour_exit', { topic: topic, step: tour.i + 1, where: 'website' });
       removeEventListener('message', onMsg);
       d.removeEventListener('keydown', onKey);
       box.remove();
@@ -6069,7 +6180,12 @@ figcaption {
       a.focus();
     }
     function onMsg(m) {
-      if (m.source === f.contentWindow && m.data && m.data.svgcinema === 'tour-exit') close();
+      if (m.source !== f.contentWindow || !m.data) return;
+      if (m.data.svgcinema === 'tour-exit') close();
+      else if (m.data.svgcinema === 'tour') {
+        if (m.data.finished && !tour.finished) track('tour_complete', { topic: topic, where: 'website' });
+        tour = { i: m.data.i || 0, finished: !!m.data.finished };
+      }
     }
     function onKey(k) {
       if (k.key === 'Escape') close();

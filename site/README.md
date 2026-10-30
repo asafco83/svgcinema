@@ -14,6 +14,7 @@ Google Fonts; the only other files they load are the clips of the editor in `img
 | Export       | `export/`    | Which export for what, animated SVG (embed code, image optimization), the external player, linked to scroll, video, GIF and image |
 | Downloads    | `downloads/` | The thumbnail installers, the player, the Claude skill and the guide for AI assistants                                            |
 | Licence      | `licence/`   | The `LICENSE` file                                                                                                                |
+| Privacy      | `privacy/`   | What stays on your machine, what is counted (Umami, cookieless) and what never is; Email us (the address appears on click)        |
 | Help         | `help/`      | Help & tutorials: search, Start here, every topic by group; a page per topic (`help/<topic>/`) with its steps, clips and tour     |
 
 ## Files
@@ -101,6 +102,8 @@ that they run without errors and fit a phone, the navigation and footer, the her
 quoted sizes against `src/hero.svg`, the tool keys, the embed tabs, the image demo and the download links.
 
 Motion is turned off for visitors who ask for reduced motion.
+
+**Usage counts:** on svgcinema.com only, `site.js` loads Umami (cookieless, no IP addresses kept, respects Do Not Track) and sends a few events: Open the editor clicks, the downloads, help searches and guided tours. Nothing loads on any other host. The Privacy page's email address is in the page only reversed, and put together when someone clicks Email us.
 
 ## Updating the exported content
 

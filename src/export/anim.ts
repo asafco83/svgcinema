@@ -2,6 +2,7 @@
 // Export › GIF & Animated WebP: the frames are drawn once (export/frames) at the chosen size, rate and
 // part, then encoded in a worker (export/anim.worker) every time a setting changes, so the size and
 // the comparison with the original are always those of the real file.
+import { track } from '../core/analytics';
 import { $, clamp, esc } from '../core/constants';
 import { save, setTime } from '../core/history';
 import { S, doc } from '../core/state';
@@ -732,6 +733,7 @@ export function init(): void {
     syncAnimUI();
   });
   $('#xaSnipCopy').addEventListener('click', () => {
+    track('embed_code_copied', { kind: 'anim' });
     const ta = $('#xaSnip') as HTMLTextAreaElement;
     navigator.clipboard.writeText(ta.value).then(
       () => toast('Snippet copied.'),

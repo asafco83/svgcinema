@@ -7,6 +7,7 @@
 // The shapes are combined as they look at the playhead (with all their transforms) into one new path
 // layer that takes the bottom layer's place and style. paper.js does the curve maths; it's loaded only
 // the first time a boolean is used.
+import { featureUsed } from './analytics';
 import type { Layer, PathData, PathNode } from '../model/types';
 import { H, clone, r2 } from './constants';
 import { beginEdit } from './history';
@@ -80,6 +81,7 @@ function docPathData(l: Layer): string {
 export async function booleanOp(op: BoolOp) {
   const ls = boolTargets();
   if (!ls) return toast('Select two or more shapes or paths for a boolean operation.');
+  featureUsed('boolean_' + op);
   let paper: any;
   try {
     paper = await loadPaper();

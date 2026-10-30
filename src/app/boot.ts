@@ -1,4 +1,6 @@
 // SVGcinema — app/boot
+import { currentTheme } from '../ui/theme';
+import { startAnalytics, track } from '../core/analytics';
 import { $, HINTS, ICON, hintHTML, ic } from '../core/constants';
 import { WRAP } from '../core/dom';
 import { loop, updatePlayBtn } from '../core/playback';
@@ -16,6 +18,7 @@ import { fitTimeline } from '../ui/topbar';
 import { workAreaResized } from '../tools/hand';
 
 export async function boot() {
+  startAnalytics(); // svgcinema.com only (core/analytics)
   $('#bUndo').innerHTML = ICON.undo;
   $('#bRedo').innerHTML = ICON.redo;
   $('#tStart').innerHTML = ICON.start;
@@ -72,6 +75,7 @@ export async function boot() {
   updateFileInfo();
   // a practice editor (Help › guided tour): the tutorial's own scene and its tour
   if (PRACTICE) await startPractice();
+  track('editor_open', { returning: !!saved, theme: currentTheme(), version: __APP_VERSION__ });
   // fits the artboard now the document is here (and on later resizes: tools/hand)
   workAreaResized();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => frame());

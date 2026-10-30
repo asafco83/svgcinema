@@ -1,4 +1,5 @@
 // SVGcinema — ui/topbar
+import { track } from '../core/analytics';
 import { applyPan } from '../tools/hand';
 import { $, clamp } from '../core/constants';
 import { TLS, WRAP } from '../core/dom';
@@ -154,6 +155,7 @@ export function init(): void {
       hh = parseInt($('#nH').value) || 400;
     setIdc(0);
     applyProject(blankDoc(clamp(w, 16, 8000), clamp(hh, 16, 8000)), {}, null);
+    track('project_new', { from: 'blank' });
     $('#mNew').hidden = true;
   });
   $('#nSample').addEventListener('click', () => openSample(true));
@@ -164,4 +166,5 @@ export async function openSample(asked = false) {
     return;
   applyProject(sampleDoc(), {}, null);
   $('#mNew').hidden = true;
+  track('project_new', { from: 'sample' });
 }

@@ -3,6 +3,7 @@
 // other property in Layer.b / Layer.t. A filter is a short chain of SVG filter primitives; the runtime
 // animates their attributes through Layer.fa (track → the primitives and attributes it drives, and how
 // the value turns into the attribute: a matrix for the color filters, a sum for the outline's rings).
+import { featureUsed } from '../core/analytics';
 import type { Layer } from './types';
 import { H } from '../core/constants';
 
@@ -339,6 +340,7 @@ export function syncFa(l: Layer) {
 export function addFilter(l: Layer, type: string, preset?: string) {
   const def = FILTERS[type];
   if (!def) return null;
+  featureUsed('filter_' + type);
   const used = new Set((l.fx || []).map(f => f.id));
   let n = 1;
   while (used.has('f' + n)) n++;

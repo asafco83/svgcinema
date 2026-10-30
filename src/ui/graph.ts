@@ -5,6 +5,7 @@
 // handles of the selected segment shape its easing (a cubic-bezier, shared by X and Y, so dragging one
 // curve's handle reshapes both). The name column offers the same easing set as the Keyframe panel for
 // that segment. Colors, gradients, dash patterns and morphs have no graph. One undo step per drag.
+import { featureUsed } from '../core/analytics';
 import type { Ease, Keyframe, Layer, PropKey } from '../model/types';
 import { $, clamp, esc, fmt, isFrozen, layerTracks, propKind, propLabel, r3, valueAt } from '../core/constants';
 import { S, doc, layerById, selLayer, sortTrack } from '../core/state';
@@ -52,6 +53,7 @@ export function setGraphTrack(lid: string, k: string) {
 }
 export function toggleGraph(on = !GRAPH.on) {
   GRAPH.on = on;
+  if (on) featureUsed('graph_editor');
   try {
     localStorage.setItem(KEY, on ? '1' : '0');
   } catch (_) {}

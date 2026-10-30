@@ -2,6 +2,7 @@
 // The Animate button at the bottom of the Layers panel: pick a property and every
 // selected layer that has it gets a keyframe at the playhead, so it joins the timeline.
 // Shortcuts: Shift + the letter shown next to each property.
+import { featureUsed } from '../core/analytics';
 import { keyLower } from '../core/keys';
 import type { Keyframe, Layer, PropKey } from '../model/types';
 import { $, DEFAULT_EASE, H, ICON, clone, ic, isFrozen, r3, valueAt } from '../core/constants';
@@ -57,6 +58,7 @@ export function canAnimate() {
 export function animateProp(k: PropKey) {
   const ls = animTargets().filter(l => propOK(l, k) && !isFrozen(l, k));
   if (!ls.length) return false;
+  featureUsed('animate_' + k);
   const ed = beginEdit(),
     t = r3(S.time),
     made: Keyframe[] = [];
