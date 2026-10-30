@@ -431,7 +431,7 @@ export function syncVideoUI() {
   $('#xvBgDoc').hidden = !!v.bgc;
   const note =
     v.fmt === 'mp4' || (v.fmt === 'webm' && v.codec === 'av1')
-      ? 'MP4 and AV1 can’t be transparent: the background colour fills it. For a transparent video, choose WebM with VP9.'
+      ? 'MP4 and AV1 can’t be transparent: the background color fills it. For a transparent video, choose WebM with VP9.'
       : v.alpha && v.fmt === 'webm'
         ? 'Transparent in Chrome, Edge and Firefox. Safari needs a different kind of file for transparency, so it shows the WebM on black.'
         : '';

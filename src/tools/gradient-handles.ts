@@ -1,5 +1,5 @@
 // SVGcinema — tools/gradient-handles
-// While the colour window edits a gradient, the canvas shows where it sits and lets you drag it:
+// While the color window edits a gradient, the canvas shows where it sits and lets you drag it:
 //   linear  a bar from the start point (hollow) to the end point (filled); drag either end, or the
 //           bar to move both. Shift keeps the bar at 15° steps.
 //   radial  the centre (hollow), the radius handle (filled; sets size and direction) and a square

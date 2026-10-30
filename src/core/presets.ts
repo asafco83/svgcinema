@@ -1,6 +1,6 @@
 // SVGcinema — core/presets
 // Animation presets: ready-made keyframes for the selected layers, starting at the playhead.
-// Groups: Entrances, Exits, Emphasis, Strokes, Colour, Filters. A preset writes keyframes only for the
+// Groups: Entrances, Exits, Emphasis, Strokes, Color, Filters. A preset writes keyframes only for the
 // properties it animates, and only inside its own span: keyframes of those properties already in the
 // span are replaced, everything else stays. Entrances end on the value the layer already has at the
 // end of the span, exits start from its value at the start, emphasis starts and ends on it, so a
@@ -20,7 +20,7 @@ export const PRESET_GROUPS: Array<[PresetGroup, string]> = [
   ['exit', 'Exits'],
   ['emph', 'Emphasis'],
   ['stroke', 'Strokes'],
-  ['colour', 'Colour'],
+  ['colour', 'Color'],
   ['filter', 'Filters'],
 ];
 /** [fraction of the span 0–1, value, easing to the next key] */
@@ -1060,7 +1060,7 @@ export const PRESETS: Preset[] = [
       ],
     }),
   },
-  // Colour
+  // Color
   {
     id: 'flash',
     name: 'Flash',
@@ -1116,7 +1116,7 @@ export const PRESETS: Preset[] = [
   },
   {
     id: 'colour-pulse',
-    name: 'Colour pulse',
+    name: 'Color pulse',
     group: 'colour',
     dur: 0.9,
     icon: ic.flash,

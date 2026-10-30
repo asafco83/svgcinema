@@ -201,7 +201,7 @@ function checkValue(l: Layer, k: string, v: unknown): void {
     label = `${propLabel(l, k)} (${k})`;
   if (kind === 'v' && !(Array.isArray(v) && v.length === 2 && v.every(isNum))) fail(`${label} takes [x, y].`);
   if (kind === 'n' && !isNum(v)) fail(`${label} takes a number.`);
-  if (kind === 'c' && !isPaint(v)) fail(`${label} takes a colour such as "#ff8800", "none", or a gradient.`);
+  if (kind === 'c' && !isPaint(v)) fail(`${label} takes a color such as "#ff8800", "none", or a gradient.`);
   if (kind === 'a' && !(Array.isArray(v) && v.every(n => isNum(n) && n >= 0)))
     fail(`${label} takes a list of dash and gap lengths ([] for solid).`);
   if (kind === 'm') morphValue(v);
@@ -226,7 +226,7 @@ const obj = (properties: Record<string, Schema>, required: string[] = []): Schem
   required,
   additionalProperties: false,
 });
-const VALUE: Schema = { description: 'A number, [x, y], a colour string, or a list of numbers' };
+const VALUE: Schema = { description: 'A number, [x, y], a color string, or a list of numbers' };
 const EASE: Schema = {
   description: `How the move to the next key goes: ${EASES.join(', ')} (CSS / GSAP names like ease-in-out or power2.out work too), or a Bézier [x1, y1, x2, y2] (or "cubic-bezier(x1, y1, x2, y2)"; x1 and x2 between 0 and 1). get_layer lists each key's easing (a name, or [x1, y1, x2, y2] for a custom curve).`,
 };
@@ -367,7 +367,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'list_presets',
     description:
-      'The animation presets (tested entrances, exits, emphasis, stroke, colour and filter animations). Prefer a preset over hand-made keyframes when one fits. cssOk false: it only plays in the JS export.',
+      'The animation presets (tested entrances, exits, emphasis, stroke, color and filter animations). Prefer a preset over hand-made keyframes when one fits. cssOk false: it only plays in the JS export.',
     parameters: obj({ group: { type: 'string', enum: PRESET_GROUPS.map(g => g[0]) } }),
     mutates: false,
     run: a =>
@@ -555,7 +555,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'update_layer',
     description:
-      'Change a layer. values: property → value (pos [x, y], rot degrees, scl [x, y] with 1 = 100%, skw [x, y], op 0–1, fill / stk colour, fo / so 0–1, sw, ts / te / to %, dof, da [dash, gap…], sz [w, h], rad, d: SVG path data for a new shape, in the coordinates get_layer gives as path.d; a rectangle, ellipse or star becomes a plain path). A property that is already animated gets a keyframe at the playhead instead of a new base value; `keyed` lists those. geometry: rect x, y, w, h, rx · ellipse cx, cy, rx, ry · text x, y, text, size, family, weight, anchor · image x, y, w, h · polygon / star cx, cy, r, n, inner, rotation.',
+      'Change a layer. values: property → value (pos [x, y], rot degrees, scl [x, y] with 1 = 100%, skw [x, y], op 0–1, fill / stk color, fo / so 0–1, sw, ts / te / to %, dof, da [dash, gap…], sz [w, h], rad, d: SVG path data for a new shape, in the coordinates get_layer gives as path.d; a rectangle, ellipse or star becomes a plain path). A property that is already animated gets a keyframe at the playhead instead of a new base value; `keyed` lists those. geometry: rect x, y, w, h, rx · ellipse cx, cy, rx, ry · text x, y, text, size, family, weight, anchor · image x, y, w, h · polygon / star cx, cy, r, n, inner, rotation.',
     parameters: obj(
       {
         id: ID,
@@ -994,7 +994,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'set_document',
     description:
-      'Canvas and timing: length (seconds), repeat (number of plays, 0 = forever), direction, w and h (canvas size), background (a colour or "transparent").',
+      'Canvas and timing: length (seconds), repeat (number of plays, 0 = forever), direction, w and h (canvas size), background (a color or "transparent").',
     parameters: obj({
       length: { type: 'number', minimum: 0.1, maximum: 600 },
       repeat: { type: 'integer', minimum: 0, maximum: 1000 },

@@ -90,7 +90,7 @@ export function propLabel(l: Layer, k: string) {
   const f = fxOf(l, k);
   return f ? `${fxName(f.fx)} · ${f.param.label}` : k;
 }
-/** Value kind of a property: v = 2D vector, n = number, c = colour, m = path, a = number list. */
+/** Value kind of a property: v = 2D vector, n = number, c = color, m = path, a = number list. */
 export function propKind(l: Layer, k: string): 'v' | 'n' | 'c' | 'm' | 'a' {
   if ((PROPS as any)[k]) return (PROPS as any)[k][1];
   if (isPinKey(k)) return isPinRot(k) ? 'n' : 'v';

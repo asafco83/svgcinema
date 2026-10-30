@@ -78,7 +78,7 @@ describe('Select same', () => {
     expect(sameKey(a, 'fill')).toBe(sameKey(b, 'fill'));
     expect(sameKey(a, 'type')).not.toBe(sameKey(b, 'type'));
     expect(sameKey(a, 'sw')).toBeNull();
-    expect(sameKinds(a)).toEqual(['fill', 'stk', 'type']);
+    expect(sameKinds(a)).toEqual(['type', 'fillstk', 'fill', 'stk', 'op', 'fo', 'blend']);
     expect(sameKinds(t)).toContain('font');
   });
 });

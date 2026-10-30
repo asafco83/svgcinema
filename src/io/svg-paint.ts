@@ -1,5 +1,5 @@
 // SVGcinema — io/svg-paint
-// Helpers for reading SVG files: style cascade, colours, transforms (as matrices and as SVGcinema's
+// Helpers for reading SVG files: style cascade, colors, transforms (as matrices and as SVGcinema's
 // position / rotate / skew / scale / origin), gradients in SVGcinema's model, and names.
 import type { Layer } from '../model/types';
 import { H, r3 } from '../core/constants';
@@ -192,10 +192,10 @@ export function ownProps(el: Element, rules: Rule[]): Record<string, string> {
   return o;
 }
 
-/* ---------- colours ---------- */
+/* ---------- colors ---------- */
 
 let cctx: CanvasRenderingContext2D | null | undefined;
-/** a CSS colour as #rrggbb or rgba(…) (what the runtime parses); null when it isn't one */
+/** a CSS color as #rrggbb or rgba(…) (what the runtime parses); null when it isn't one */
 export function normColor(v: string | null | undefined): string | null {
   if (v == null) return null;
   const s = String(v).trim();
@@ -217,7 +217,7 @@ export function normColor(v: string | null | undefined): string | null {
   if (out === '#010203' && !/^#010203$/i.test(s)) return null;
   return out.replace(/\s+/g, '');
 }
-/** a colour with an extra opacity folded into its alpha */
+/** a color with an extra opacity folded into its alpha */
 export function withAlpha(c: string, a: number): string {
   if (a >= 0.9995) return c;
   const q = H.pc(c);
@@ -242,7 +242,7 @@ export interface GradSpec {
   c?: number[];
   r?: number;
   M: Mat;
-  /** stops [offset 0–1, colour] */
+  /** stops [offset 0–1, color] */
   s: Array<[number, string]>;
   /** units are the shape's box (else user space) */
   bbox: boolean;

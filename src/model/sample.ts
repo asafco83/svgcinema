@@ -250,7 +250,7 @@ export function sampleDoc(): any {
   // Hills — a clipping group: the drifting mist only shows inside the hill silhouette
   const hills = mkLayer('group', 'Hills', {}, NOFILL);
   hills.mask = 'clip';
-  const hillFill = mkLayer('rect', 'Hill colour', { x: 0, y: 220, w: 640, h: 110, rx: 0 }, {});
+  const hillFill = mkLayer('rect', 'Hill color', { x: 0, y: 220, w: 640, h: 110, rx: 0 }, {});
   hillFill.b.fill = lin(180, [
     [0, '#2B4C6F'],
     [1, '#162A45'],
@@ -420,7 +420,7 @@ export function sampleDoc(): any {
     [1.2, 0, 'inOutSine'],
     [2, 3, 'ease'],
   ];
-  // a colour filter: the pennant brightens as the wind catches it
+  // a color filter: the pennant brightens as the wind catches it
   const bright = addFilter(pennant, 'bright');
   pennant.b['fx.' + bright.id + '.a'] = 1;
   pennant.t['fx.' + bright.id + '.a'] = [

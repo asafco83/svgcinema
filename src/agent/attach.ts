@@ -2,7 +2,7 @@
 // Files attached to a message for the design agent: images (PNG, JPG, WebP, GIF) and SVG, up to 4.
 // Each one goes into the project's Assets as it is attached, so the agent can put it on the canvas
 // (place_image; an SVG comes in as editable layers). In the text, "@name" refers to an attachment;
-// the composer colours those references, and shows "@file.png" in red when that file isn't attached.
+// the composer colors those references, and shows "@file.png" in red when that file isn't attached.
 // The message tells the model each file's asset id; a model that can see also gets the pictures.
 import type { Asset } from '../model/types';
 import { ASSETS, URLS } from '../core/state';

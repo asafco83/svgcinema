@@ -9,6 +9,7 @@ import type { Layer } from '../model/types';
 import { FONTS, byId, esc } from '../core/constants';
 import { S, layerById } from '../core/state';
 import { beginEdit } from '../core/history';
+import { multiEdit, multiText, textTargets } from './multi';
 import { WEB_FONTS, type WebFont } from '../model/font-catalog';
 import {
   ensureFaces,
@@ -394,7 +395,10 @@ export function applyFont(l: Layer, family: string) {
 function pick(family: string) {
   const l = layerId ? layerById(layerId) : null;
   closeFontPicker();
-  if (l && l.type === 'text') applyFont(l, family);
+  // several layers selected: every selected text layer takes the font, as one undo step
+  const tx = multiText();
+  if (tx.length) multiEdit(t => applyFont(t, family), tx);
+  else if (l && l.type === 'text') applyFont(l, family);
   const b = byId('g-family');
   if (b) (b as HTMLElement).focus();
 }
@@ -431,8 +435,8 @@ export function init(): void {
   INSP.addEventListener('click', (e: MouseEvent) => {
     const b = (e.target as Element).closest('[data-fontpick]') as HTMLElement | null;
     if (!b) return;
-    const l = layerById(S.sel);
-    if (!l || l.type !== 'text') return;
+    const l = textTargets(layerById(S.sel))[0];
+    if (!l) return;
     if (pop && btn === b) closeFontPicker();
     else openFontPicker(b, l);
   });
@@ -440,8 +444,8 @@ export function init(): void {
     const b = (e.target as Element).closest('[data-fontpick]') as HTMLElement | null;
     if (b && (e.key === 'ArrowDown' || e.key === 'ArrowUp') && !pop) {
       e.preventDefault();
-      const l = layerById(S.sel);
-      if (l && l.type === 'text') openFontPicker(b, l);
+      const l = textTargets(layerById(S.sel))[0];
+      if (l) openFontPicker(b, l);
     }
   });
   document.addEventListener('click', (e: MouseEvent) => {

@@ -3,7 +3,7 @@
 // into a "Masks" folder inside it, and everything else in the group shows only where the mask is
 // (by the mask's opacity, so soft and semi-transparent masks work; or by its brightness, Mask mode).
 // A clipping path is the same group
-// but only the mask's shape counts (its colours, strokes and opacity are ignored).
+// but only the mask's shape counts (its colors, strokes and opacity are ignored).
 // Mask layers stay ordinary layers: they can be moved, edited and animated.
 import type { Layer } from '../model/types';
 import { NOFILL } from './constants';

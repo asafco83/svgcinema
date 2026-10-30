@@ -23,6 +23,8 @@ import { hitChain, insideBox } from '../tools/stage-input';
 import { docPt } from '../render/overlay';
 import { canMask, makeMask, releaseMask } from '../core/masks';
 import { BOOL_OPS, type BoolOp, boolTargets, booleanOp } from '../core/booleans';
+import { type SameKind, selectSame } from '../core/select-same';
+import { sameItems } from './select-same-menu';
 
 /* ---------- layer clipboard ---------- */
 
@@ -190,18 +192,39 @@ function saveHyperlink(remove?: boolean): void {
 
 /** A menu entry (also used by the main menu): `check` shows a tick column, `sub` a submenu. */
 export type Item =
-  | { id: string; label: string; on?: boolean; key?: string; check?: boolean; sub?: Item[]; tip?: string }
+  | {
+      id: string;
+      label: string;
+      on?: boolean;
+      key?: string;
+      check?: boolean;
+      sub?: Item[];
+      tip?: string;
+      /** a value shown on the right instead of a shortcut (HTML: may hold a color swatch) */
+      val?: string;
+      /** indented under a group title */
+      ind?: boolean;
+    }
+  /** a group title */
+  | { head: string }
   | '-';
 const M = () => $('#layermenu') as HTMLElement;
 export function closeLayerMenu() {
   const m = M();
-  if (m) m.hidden = true;
+  if (m) {
+    m.hidden = true;
+    m.classList.remove('same-menu');
+  }
+  // the panel header's Select same button shows its menu is closed
+  const b = document.getElementById('bSame');
+  if (b) b.setAttribute('aria-expanded', 'false');
 }
 /** The Element commands for the selection; `main` leaves out what the main menu has elsewhere
  *  (Copy / Paste is in Edit, Animate has its own menu). */
 export function layerItems(main = false): Item[] {
   const all = items();
-  return main ? all.filter(it => it === '-' || (it.id !== 'cp' && it.id !== 'anim')) : all;
+  // the main menu has Copy / Paste and Select same under Edit, and Animate as a menu of its own
+  return main ? all.filter(it => it === '-' || ('id' in it && !['cp', 'anim', 'same'].includes(it.id))) : all;
 }
 function items(): Item[] {
   const roots = selectedRoots(),
@@ -230,6 +253,8 @@ function items(): Item[] {
     { id: 'group', label: 'Group', on: any, key: 'Ctrl G' },
     { id: 'ungroup', label: 'Ungroup', on: one && l.type === 'group', key: 'Ctrl ⇧ G' },
     { id: 'del', label: 'Delete', on: any, key: 'Del' },
+    '-',
+    { id: 'same', label: 'Select same', sub: sameItems() },
     '-',
     { id: 'center', label: 'Center origin', on: one && free && l.type !== 'bone', key: 'Ctrl ⇧ O' },
     {
@@ -311,11 +336,15 @@ function html(list: Item[]): string {
       if (out.length && out[out.length - 1] !== '<hr>') out.push('<hr>');
       return;
     }
-    const dis = it.sub ? it.on === false || !it.sub.some(s => s !== '-' && s.on) : !it.on,
+    if ('head' in it) {
+      out.push(`<div class="ctx-h" role="presentation">${esc(it.head)}</div>`);
+      return;
+    }
+    const dis = it.sub ? it.on === false || !it.sub.some(s => s !== '-' && !('head' in s) && s.on) : !it.on,
       chk = it.check !== undefined,
       role = chk ? `menuitemcheckbox" aria-checked="${it.check}` : 'menuitem';
     out.push(
-      `<div class="lm-it${it.sub ? ' has-sub' : ''}"><button role="${role}" data-lm="${it.id}"${it.tip ? ` title="${esc(it.tip)}"` : ''}${dis ? ' disabled' : ''}${it.sub ? ' aria-haspopup="true"' : ''}>${chk ? `<span class="lm-chk">${it.check ? '✓' : ''}</span>` : ''}<span>${esc(it.label)}</span>${it.sub ? '<i class="lm-arrow">▸</i>' : `<kbd>${it.key || ''}</kbd>`}</button>${
+      `<div class="lm-it${it.sub ? ' has-sub' : ''}${it.ind ? ' ind' : ''}"><button role="${role}" data-lm="${it.id}"${it.tip ? ` title="${esc(it.tip)}"` : ''}${dis ? ' disabled' : ''}${it.sub ? ' aria-haspopup="true"' : ''}>${chk ? `<span class="lm-chk">${it.check ? '✓' : ''}</span>` : ''}<span>${esc(it.label)}</span>${it.sub ? '<i class="lm-arrow">▸</i>' : it.val != null ? `<kbd class="lm-val">${it.val}</kbd>` : `<kbd>${it.key || ''}</kbd>`}</button>${
         it.sub && !dis ? `<div class="ctx lm-sub" role="menu">${html(it.sub)}</div>` : ''
       }</div>`,
     );
@@ -323,9 +352,10 @@ function html(list: Item[]): string {
   while (out[out.length - 1] === '<hr>') out.pop();
   return out.join('');
 }
-export function openLayerMenu(x: number, y: number) {
+export function openLayerMenu(x: number, y: number, list: Item[] = items()) {
   const m = M();
-  m.innerHTML = html(items());
+  closeLayerMenu();
+  m.innerHTML = html(list);
   m.hidden = false;
   const r = m.getBoundingClientRect();
   m.style.left = Math.max(4, Math.min(x, innerWidth - r.width - 8)) + 'px';
@@ -461,6 +491,7 @@ function run(id: string) {
   else if (id === 'group') groupSel();
   else if (id === 'ungroup') l && ungroup(l);
   else if (id === 'del') deleteSel();
+  else if (id.startsWith('same:')) selectSame(id.slice(5) as SameKind);
   else if (id === 'center') l && centerOrigin(l);
   else if (id.startsWith('anim:')) animateProp(id.slice(5) as PropKey);
   else if (id.startsWith('mp:')) l && setMotionPath(l, id.slice(3));
@@ -553,7 +584,8 @@ export function init(): void {
   m.addEventListener('keydown', (e: KeyboardEvent) => menuKeydown(m, e, closeLayerMenu));
   trackSubs(m);
   document.addEventListener('pointerdown', (e: PointerEvent) => {
-    if (!m.hidden && !m.contains(e.target as Node)) closeLayerMenu();
+    // (the panel's Select same button toggles the menu itself)
+    if (!m.hidden && !m.contains(e.target as Node) && !(e.target as Element).closest?.('#bSame')) closeLayerMenu();
   });
   // Hyperlink dialog
   $('#hlDone').addEventListener('click', () => saveHyperlink());

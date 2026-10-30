@@ -23,7 +23,7 @@ async def main():
         # the menu
         await pg.click('#fx-add'); await pg.wait_for_timeout(150)
         menu=await ev("[...document.querySelectorAll('#fxMenu > *')].map(e=>e.classList.contains('ctx-h')?'#'+e.textContent:e.querySelector('span').textContent+(e.querySelector('kbd')?' ('+e.querySelector('kbd').textContent+')':''))")
-        check('menu: groups and filters in order', menu==['#Blur & shadow','Blur','Drop shadow','Glow (shadow)','Inner shadow','Inner glow (inner shadow)','#Colour','Brightness','Contrast','Saturation','Hue rotate','Grayscale','Sepia','Invert','Colour overlay','#Edges','Outline'], menu)
+        check('menu: groups and filters in order', menu==['#Blur & shadow','Blur','Drop shadow','Glow (shadow)','Inner shadow','Inner glow (inner shadow)','#Color','Brightness','Contrast','Saturation','Hue rotate','Grayscale','Sepia','Invert','Color overlay','#Edges','Outline'], menu)
         pad=await ev("[getComputedStyle(document.querySelector('#fxMenu button')).paddingLeft, getComputedStyle(document.querySelector('#fxMenu .ctx-h')).paddingLeft]")
         check('menu items are indented under their titles', float(pad[0][:-2])>float(pad[1][:-2]), pad)
         check('menu below the Add button', await ev("document.getElementById('fxMenu').getBoundingClientRect().top>=document.getElementById('fx-add').getBoundingClientRect().bottom"))

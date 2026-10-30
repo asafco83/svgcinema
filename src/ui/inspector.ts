@@ -1,9 +1,21 @@
 // SVGcinema — ui/inspector
 import { safeLink } from './layer-menu';
-import { flip, rotate } from './layer-menu';
+import { closeLayerMenu, flip, rotate } from './layer-menu';
+import { openSameMenu, sameButton } from './select-same-menu';
 import { infoTip } from './info-tip';
 import { propOK } from '../core/keyframes';
-import { allPainted, commonType, isMulti, multiEdit, multiFields, multiKey, multiSel } from './multi';
+import {
+  TEXT_TOGGLES,
+  allPainted,
+  commonType,
+  isMulti,
+  multiEdit,
+  multiFields,
+  multiKey,
+  multiSel,
+  multiText,
+  textToggleOn,
+} from './multi';
 import { instanceChip, instanceSection } from './symbols-ui';
 import { layerBox } from '../render/mesh';
 import { bgPaint, parseBg, setBg } from '../model/background';
@@ -83,19 +95,19 @@ export function num(f: string, lab: string, unit?: string) {
 export function gnum(g: string, lab: string, unit?: string) {
   return `<label class="nf"><span>${lab}</span><input id="g-${g}" data-g="${g}" inputmode="decimal" spellcheck="false" aria-label="${lab}">${unit ? `<em>${unit}</em>` : ''}</label>`;
 }
-/** A colour swatch that opens the colour picker. `types`: which paints it offers. */
+/** A color swatch that opens the color picker. `types`: which paints it offers. */
 const EYE = ICON.eyedropper;
 /** the eyedropper button next to a swatch (only in browsers that have one) */
 export function eyeBtn(attrs: string) {
   return typeof (window as any).EyeDropper === 'function'
-    ? `<button class="btn ib" ${attrs} title="Pick a colour from the screen" aria-label="Pick a colour from the screen">${EYE}</button>`
+    ? `<button class="btn ib" ${attrs} title="Pick a color from the screen" aria-label="Pick a color from the screen">${EYE}</button>`
     : '';
 }
-/** A colour swatch that opens the colour window, an eyedropper and the value as text.
+/** A color swatch that opens the color window, an eyedropper and the value as text.
  *  `types`: which paints the window offers. */
 export function colf(f: string, types = 'solid') {
   const id = f.replace(/\./g, '_');
-  return `<div class="cf"><div class="cbox"><button class="pswatch" data-paint="${f}" data-ptypes="${types}" id="c-${id}" aria-haspopup="dialog" aria-expanded="false" aria-label="Colour"><i></i></button><input class="txt mono" data-f="${f}" id="t-${id}" spellcheck="false" aria-label="Colour value"></div>${eyeBtn(`data-act="pick" data-k="${f}"`)}</div>`;
+  return `<div class="cf"><div class="cbox"><button class="pswatch" data-paint="${f}" data-ptypes="${types}" id="c-${id}" aria-haspopup="dialog" aria-expanded="false" aria-label="Color"><i></i></button><input class="txt mono" data-f="${f}" id="t-${id}" spellcheck="false" aria-label="Color value"></div>${eyeBtn(`data-act="pick" data-k="${f}"`)}</div>`;
 }
 export function krow(k: string, label: string, body: string) {
   return `<div class="row"><button class="kb" data-kb="${k}" aria-label="Keyframe ${label}" title="Add / remove keyframe at playhead"></button><span class="rl">${label}</span><div class="rf">${body}</div></div>`;
@@ -151,7 +163,7 @@ function renderInspector0() {
   const ms = multiSel();
   if (ms.length) {
     // several layers: only what they all have, edited on all of them (ui/multi)
-    let m = `<div class="insp-head"><span class="ih-name ih-multi">${ms.length} layers</span><span class="chip">${commonType(ms)}</span></div>`;
+    let m = `<div class="insp-head"><span class="ih-name ih-multi">${ms.length} layers</span>${sameButton(l, true)}<span class="chip">${commonType(ms)}</span></div>`;
     m += alignBar();
     const sbn = (f: string, lab: string) =>
         `<label class="nf"><span>${lab}</span><input id="sb-${f}" data-sb="${f}" inputmode="decimal" spellcheck="false" aria-label="Selection ${lab}"></label>`,
@@ -163,6 +175,9 @@ function renderInspector0() {
         `<button class="btn ib tg${keep ? ' on' : ''}" data-act="sblock" aria-pressed="${keep}" title="Keep proportions" aria-label="Keep proportions">${LINK_IC}</button>`,
     )}<div class="btns"><button class="btn" data-act="grp">Group them</button><button class="btn danger" data-act="delsel">Delete all</button></div></section>`;
     m += transformSection(l);
+    // Text appearance when the selection has text layers (shapes beside them too): it edits the text layers
+    const tx = ms.filter(x => x.type === 'text');
+    if (tx.length) m += textAppearanceSection(tx.includes(l) ? l : tx[0]);
     if (allPainted(ms)) m += paintSection(l);
     m += appearanceSection(allPainted(ms) ? l : ({ ...l, type: 'group' } as Layer));
     INSP.innerHTML = m;
@@ -170,7 +185,7 @@ function renderInspector0() {
     refreshInspector(true);
     return;
   }
-  let h = `<div class="insp-head"><input class="txt ih-name" id="ln" data-name value="${esc(l.name)}" spellcheck="false" aria-label="Layer name"><span class="chip${l.sym ? ' sym' : ''}">${l.sym ? instanceChip(l) || l.type : l.type}</span></div>`;
+  let h = `<div class="insp-head"><input class="txt ih-name" id="ln" data-name value="${esc(l.name)}" spellcheck="false" aria-label="Layer name">${sameButton(l)}<span class="chip${l.sym ? ' sym' : ''}">${l.sym ? instanceChip(l) || l.type : l.type}</span></div>`;
   h += alignBar();
   // the order: instance, keyframe easing, the layer's own section (its shape, text, image…), then the
   // properties every layer shares, and Morph and Rig last
@@ -381,7 +396,7 @@ function docBgValue() {
   const q = rgbaOf(bp.color);
   return toValue([q[0], q[1], q[2], bp.alpha]);
 }
-/** Open the colour picker for a swatch: a layer's fill / stroke / filter colour, or the background. */
+/** Open the color picker for a swatch: a layer's fill / stroke / filter color, or the background. */
 function openPaint(btn: HTMLElement, l: Layer | null) {
   const begin = () => {
       if (!S.colorEd) S.colorEd = beginEdit();
@@ -416,10 +431,10 @@ function openPaint(btn: HTMLElement, l: Layer | null) {
     get: () => valueAt(l, k, S.time),
     set(v) {
       begin();
-      // several layers: the colour goes on all of them
+      // several layers: the color goes on all of them
       (multiSel().length ? multiSel().filter(x => propOK(x, k as PropKey)) : [l]).forEach(x => {
         setProp(x, k, v);
-        // a stroke colour needs a width to be seen
+        // a stroke color needs a width to be seen
         if (k === 'stk' && !isNone(v) && !(valueAt(x, 'sw', S.time) > 0)) setProp(x, 'sw', 2);
       });
       renderStage();
@@ -431,7 +446,7 @@ function openPaint(btn: HTMLElement, l: Layer | null) {
 export function docPanel() {
   return `<section class="sec"><h3>Document</h3>
     ${nrow('Canvas', `<label class="nf"><span>W</span><input id="d-w" data-doc="w" inputmode="numeric"></label><label class="nf"><span>H</span><input id="d-h" data-doc="h" inputmode="numeric"></label>`)}
-    ${nrow('Background', `<div class="cf"><div class="cbox"><button class="pswatch" id="d-bgc" data-docpaint aria-haspopup="dialog" aria-expanded="false" aria-label="Background colour"><i></i></button><input class="txt mono" id="d-bg" data-doc="bg" placeholder="none" spellcheck="false" aria-label="Background value"></div>${eyeBtn('data-docpick')}</div>`)}
+    ${nrow('Background', `<div class="cf"><div class="cbox"><button class="pswatch" id="d-bgc" data-docpaint aria-haspopup="dialog" aria-expanded="false" aria-label="Background color"><i></i></button><input class="txt mono" id="d-bg" data-doc="bg" placeholder="none" spellcheck="false" aria-label="Background value"></div>${eyeBtn('data-docpick')}</div>`)}
     ${nrow('Length', `<label class="nf"><span>t</span><input id="d-dur" data-doc="dur" inputmode="decimal"><em>s</em></label>`)}
     ${nrow('Repeat', `<select class="sel" id="d-it" data-doc="it"><option value="0">Loop forever</option><option value="1">Play once</option><option value="2">2 times</option><option value="3">3 times</option><option value="5">5 times</option></select>`)}
     ${nrow('Direction', `<select class="sel" id="d-dir" data-doc="dir"><option value="normal">Normal</option><option value="alternate">Alternate</option><option value="reverse">Reverse</option><option value="alternate-reverse">Reverse, then alternate</option></select>`)}</section>
@@ -523,8 +538,8 @@ export function refreshInspector(full?: boolean) {
   }
   multiFields();
 }
-/** Show "no colour" on a colour swatch (a checkerboard with a red line, like other design apps), and
- *  let the checkerboard show through partly transparent colours. */
+/** Show "no color" on a color swatch (a checkerboard with a red line, like other design apps), and
+ *  let the checkerboard show through partly transparent colors. */
 export function swatch(inp: HTMLInputElement, v: unknown, alpha?: number) {
   const box = inp.parentElement;
   if (!box || !box.classList.contains('swt')) return;
@@ -534,7 +549,7 @@ export function swatch(inp: HTMLInputElement, v: unknown, alpha?: number) {
     none = !s || s === 'none' || s === 'transparent' || a <= 0;
   box.classList.toggle('none', none);
   inp.style.opacity = none ? '0' : a < 1 ? String(Math.max(0.15, a)) : '';
-  box.title = none ? 'No colour' : '';
+  box.title = none ? 'No color' : '';
 }
 export function toHex(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
@@ -748,6 +763,25 @@ export function init(): void {
       else refreshInspector();
       return;
     }
+    // Text appearance with several layers selected: the text layers' style, size and spacing
+    const tx = isMulti() ? multiText() : [];
+    if (tx.length && t.dataset.txSel) {
+      multiEdit(t2 => propsChange(t, t2), tx);
+      return;
+    }
+    if (tx.length && t.dataset.fname !== undefined) {
+      const v = t.value.trim().replace(/["';<>]/g, '');
+      if (v) multiEdit(t2 => (t2.geo.family = v), tx);
+      return;
+    }
+    if (tx.length && ['size', 'ls', 'ww', 'lh'].includes(t.dataset.g)) {
+      const g = t.dataset.g,
+        v = parseFloat(t.value);
+      if (!isFinite(v)) return refreshInspector(true);
+      const nv = g === 'lh' ? clamp(v, 0.5, 5) : g === 'ww' ? Math.max(1, v) : g === 'size' ? Math.max(0, v) : v;
+      multiEdit(t2 => (t2.geo[g] = nv), tx);
+      return;
+    }
     if (isMulti() && (t.dataset.x !== undefined || t.dataset.da !== undefined || t.dataset.ly !== undefined)) {
       multiEdit(t2 => propsChange(t, t2));
       return;
@@ -916,6 +950,13 @@ export function init(): void {
         return;
       }
     }
+    const sameB = (e.target as any).closest('#bSame');
+    if (sameB) {
+      const m = document.getElementById('layermenu') as HTMLElement;
+      if (!m.hidden && m.classList.contains('same-menu')) closeLayerMenu();
+      else openSameMenu(sameB);
+      return;
+    }
     const kbt = (e.target as any).closest('[data-kb]'),
       l = selLayer();
     if (kbt && l) return isMulti() ? multiKey(kbt.dataset.kb, toggleKey) : toggleKey(l, kbt.dataset.kb);
@@ -942,7 +983,19 @@ export function init(): void {
       return void (k === 'fliph' || k === 'flipv' ? flip(k === 'fliph' ? 0 : 1) : rotate(k === 'rotr' ? 90 : -90));
     }
     const tx = (e.target as any).closest('[data-tx]');
-    if (tx && l) return isMulti() ? multiEdit(t2 => propsToggle(tx, t2)) : propsToggle(tx, l);
+    if (tx && l) {
+      if (!isMulti()) return propsToggle(tx, l);
+      if (!TEXT_TOGGLES.includes(tx.dataset.tx)) return multiEdit(t2 => propsToggle(tx, t2));
+      // a text toggle on several layers: the text layers only, all ending the same way (on when any was off)
+      const texts = multiText(),
+        k = tx.dataset.tx,
+        v = tx.dataset.v,
+        allOn = texts.every(t2 => textToggleOn(t2, k, v));
+      return multiEdit(t2 => {
+        const on = textToggleOn(t2, k, v);
+        if (on === null || on === allOn) propsToggle(tx, t2);
+      }, texts);
+    }
     const an = (e.target as any).closest('[data-anchor]');
     if (an && l) {
       const [u, v] = an.dataset.anchor.split(',').map(Number);
