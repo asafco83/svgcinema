@@ -297,6 +297,7 @@ export async function startPractice() {
   renderAll();
   updateFileInfo();
   topBar(t.title);
+  if (sc.menu) ($('#app') as HTMLElement).classList.add('pr-menu');
   spot = document.createElement('div');
   spot.className = 'tg-spot';
   spot.hidden = true;

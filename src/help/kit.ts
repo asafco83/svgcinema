@@ -33,6 +33,8 @@ export interface Scene {
   name: string;
   svg: string;
   setup?: () => void;
+  /** the tutorial uses the ☰ menu (File, Edit, View…): a practice editor shows it (it is hidden otherwise) */
+  menu?: boolean;
 }
 
 export const q = (sel: string) => document.querySelector(sel);

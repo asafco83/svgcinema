@@ -9502,9 +9502,11 @@ button.ag-chip:hover {
 }
 
 /* a practice editor's top bar: Practice, the tutorial, nothing is saved, Exit (no menu, Agent or theme) */
-#app.practice :is(#bMenu, #bAgent, #bTheme, #pname, #fileInfo, .top > .sep:last-of-type) {
+#app.practice :is(#bAgent, #bTheme, #pname, #fileInfo, .top > .sep:last-of-type),
+#app.practice:not(.pr-menu) #bMenu {
   display: none;
 }
+/* (the menu stays for a tutorial about something in it: help/kit Scene.menu) */
 .pr-strip {
   display: flex;
   align-items: center;
