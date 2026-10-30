@@ -4,10 +4,14 @@ OUT=os.environ.get('CIN_OUT','/tmp/svgcinema-shots/'); os.makedirs(OUT, exist_ok
 # The website (site/): every page is built from the current sources, runs without errors and fits a phone; the
 # home page's live hero, scroll-driven workflow and demo cards play; the quoted file sizes match the hero file;
 # the Features page's tiles animate and its tool keys answer real key presses; the Export page keeps the embed
-# code tabs and the image demo; the download links point at the editor's downloads folder.
+# code tabs and the image demo; the download links point at the editor's downloads folder; the help pages
+# (Help & tutorials) are written from src/help/content.json, their clips are the editor's own files, and a guided
+# tour opens the practice editor in a lightbox.
 ROOT=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PAGES=['','features/','agent/','import/','export/','downloads/','licence/']
-NAV={'':'Home','features/':'Features','agent/':'Design agent','import/':'Import','export/':'Export','downloads/':'Downloads','licence/':None}
+HELP=json.load(open(os.path.join(ROOT,'src/help/content.json')))
+READY=[t for t in HELP['topics'] if t.get('ready')]
+PAGES=['','features/','agent/','import/','export/','downloads/','licence/','help/']+[f"help/{t['id']}/" for t in READY]
+NAV={'':'Home','features/':'Features','agent/':'Design agent','import/':'Import','export/':'Export','downloads/':'Downloads','licence/':None,'help/':'Help',**{f"help/{t['id']}/":'Help' for t in READY}}
 async def main():
     R={}; F=[]
     def check(n,c,i=None):
@@ -26,6 +30,9 @@ async def main():
         for src in re.findall(r'<img[^>]+src="([^"]+)"',h)+re.findall(r'<(?:video[^>]+poster|source[^>]+src)="([^"]+)"',h):
             if src.startswith('data:'): continue
             f=os.path.normpath(os.path.join(ROOT,'site',p,src))
+            # the help clips are the editor's own files (public/, deployed as editor/)
+            ed=os.path.join(ROOT,'site','editor')
+            if f.startswith(ed+os.sep): f=os.path.join(ROOT,'public',f[len(ed)+1:])
             if not os.path.exists(f): missing.append(f'{p or "(home)"} {src}')
     check('every picture and clip a page shows exists', missing==[], missing)
     hero=open(os.path.join(ROOT,'site/src/hero.svg'),'rb').read()
@@ -48,7 +55,7 @@ async def main():
             cur=await ev("[...document.querySelectorAll('.nav a[aria-current=page]')].map(a=>a.textContent)")
             check(f'{path or "home"}: the nav marks the page', cur==([NAV[path]] if NAV[path] else []), cur)
             nav=await ev("[...document.querySelectorAll('.nav a')].map(a=>a.textContent)")
-            check(f'{path or "home"}: the nav lists the pages', nav==['Home','Features','Design agent','Import','Export','Downloads'], nav)
+            check(f'{path or "home"}: the nav lists the pages', nav==['Home','Features','Design agent','Import','Export','Downloads','Help'], nav)
             foot=await ev("[...document.querySelectorAll('footer nav h2')].map(h=>h.textContent)")
             check(f'{path or "home"}: the footer columns', foot==['Product','Resources','About'], foot)
             await pg.set_viewport_size({'width':390,'height':844}); await pg.wait_for_timeout(250)
@@ -85,7 +92,7 @@ async def main():
         # ---- features
         await go('features/')
         groups=await ev("[...document.querySelectorAll('.grp .ghead h2')].map(h=>h.textContent)")
-        check('features: six groups and Beyond the editor', groups==['Draw','Style','Animate','Timing','Interaction','Workflow','Beyond the editor'], groups)
+        check('features: six groups and Beyond the editor', groups==['Draw','Style','Animate','Timing','SVG interactions','Workflow','Beyond the editor'], groups)
         check('features: the side index links every group', await ev("[...document.querySelectorAll('.idx a:not(.sub)')].slice(0,6).map(a=>a.getAttribute('href'))")==['#draw','#style','#animate','#timing','#interact','#workflow'])
         check('features: every animated tile animates', await ev(animated)==[])
         check('features: the Import tile shows an SVG coming in as layers', await ev("!!document.querySelector('.tile .ta-imp')"))
@@ -147,6 +154,34 @@ async def main():
         check('downloads: thumbnails, the player and the skill, from the editor\'s downloads folder', dl==[rel+'SVGcinema-Thumbnails-Setup.zip',rel+'svgcinema-thumbnails.deb',rel+'svgcinema-thumbnails-linux.tar.gz',rel+'cin-player.min.js',rel+'svgcinema-skill.zip'], dl)
         check('downloads: six projects in the folder, and the Windows warning', await ev("document.querySelectorAll('.th-file').length")==6 and await ev("!!document.querySelector('.th-warn')"))
         check('downloads: the guide for AI assistants', await ev("!!document.querySelector('a[href=\"../editor/llms.txt\"]')"))
+
+        # ---- help: the hub, a topic page, the lightbox
+        await go('help/')
+        rows=await ev("[...document.querySelectorAll('.hrow span:first-child')].map(e=>e.textContent)")
+        check('help: the hub lists every topic that has a page', rows==[t['title'] for g in HELP['groups'] for t in READY if t['group']==g['id']], rows)
+        gs=await ev("[...document.querySelectorAll('.hgroup h3')].map(e=>e.textContent)")
+        check('help: only groups with a topic show', gs==[g['title'] for g in HELP['groups'] if any(t['group']==g['id'] for t in READY)], gs)
+        check('help: a Start here card per guided tour, each moving', await ev("[...document.querySelectorAll('.hcard')].every(c=>c.querySelector('video.vid'))") and await ev("document.querySelectorAll('.hcard').length")==len([t for t in READY if t.get('tour')]))
+        await pg.fill('#helpQ','bounce'); await pg.wait_for_timeout(150)
+        vis=await ev("[...document.querySelectorAll('.hrow')].filter(r=>!r.hidden).map(r=>r.querySelector('span').textContent)")
+        check('help: search finds a topic by its steps', vis==['Easing'], vis)
+        await pg.fill('#helpQ','zzzz'); await pg.wait_for_timeout(150)
+        check('help: …and says when nothing matches', await ev("!document.getElementById('helpNone').hidden"))
+        await pg.fill('#helpQ','')
+        t0=READY[1] if len(READY)>1 else READY[0]
+        await go(f"help/{t0['id']}/")
+        steps=await ev("[...document.querySelectorAll('.hsteps h3')].map(e=>e.textContent)")
+        check('help: a topic page has its steps', steps==[s['title'] for s in t0['steps']], steps)
+        check('help: …each with a clip in both themes', await ev("[...document.querySelectorAll('.hsteps li')].every(l=>l.querySelectorAll('video.vid').length==2)"))
+        side=await ev("[...document.querySelectorAll('.hs-g summary')].map(e=>e.childNodes[0].textContent)")
+        check('help: the sidebar follows the hub\'s groups, the topic\'s group open', side==gs and await ev("document.querySelector('.hs-g[open] a[aria-current=page]').textContent")==t0['title'], side)
+        check('help: what you\'ll make is the exported SVG', await ev(f"!!document.querySelector('.hgoal img[src$=\"help/{t0['id']}.svg\"]')"))
+        href=await ev("document.querySelector('a[data-tour]').getAttribute('href')")
+        check('help: the tour opens a practice editor', href.endswith(f"editor/?tour={t0['id']}"), href)
+        await pg.click('.htour a[data-tour]'); await pg.wait_for_timeout(300)
+        check('help: …in a lightbox over the page', await ev(f"!!document.querySelector('.lb iframe[src$=\"?tour={t0['id']}\"]')"))
+        await pg.click('.lb-x'); await pg.wait_for_timeout(200)
+        check('help: …that closes', await ev("!document.querySelector('.lb')"))
 
         # ---- licence
         await go('licence/')

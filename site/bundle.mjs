@@ -17,14 +17,20 @@ const site = join(root, 'site'),
   page = join(site, 'index.html'),
   dist = join(root, 'dist');
 if (!existsSync(page)) throw new Error('site/index.html is missing: run node site/build.mjs');
-// the inner pages: every folder of site/ with an index.html (features/, agent/, …)
-const pages = readdirSync(site).filter(f => f !== 'src' && existsSync(join(site, f, 'index.html')));
 if (!existsSync(join(dist, 'index.html'))) throw new Error('dist/ is missing: run npm run build');
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
-cpSync(page, join(out, 'index.html'));
-for (const p of pages) cpSync(join(site, p, 'index.html'), join(out, p, 'index.html'));
+// the home page and the inner pages: every folder of site/ with an index.html (features/, agent/, …, and the
+// help topics inside help/)
+const pageDirs = [];
+(function pages(rel) {
+  if (rel !== '.') pageDirs.push(rel + '/');
+  cpSync(join(site, rel, 'index.html'), join(out, rel, 'index.html'));
+  for (const f of readdirSync(join(site, rel)))
+    if (f !== 'src' && statSync(join(site, rel, f)).isDirectory() && existsSync(join(site, rel, f, 'index.html')))
+      pages(join(rel, f));
+})('.');
 cpSync(join(site, 'img'), join(out, 'img'), { recursive: true });
 // source maps would publish the full source: never ship them, even from an older dist/
 cpSync(dist, join(out, 'editor'), { recursive: true, filter: src => !src.endsWith('.map') });
@@ -75,5 +81,5 @@ let n = 0,
   }
 })(out);
 console.log(
-  `${out}: ${n} files, ${(bytes / 1048576).toFixed(1)} MB (the website: index.html, ${pages.join(', ')}, img/; editor/)`,
+  `${out}: ${n} files, ${(bytes / 1048576).toFixed(1)} MB (the website: index.html, ${pageDirs.join(', ')}, img/; editor/)`,
 );

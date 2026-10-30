@@ -1,5 +1,7 @@
 // SVGcinema — entry point
 import './styles/app.css';
+// first: a practice editor (Help › guided tour) keeps what it writes in memory from the start
+import './core/batch-mode';
 import { init as init0 } from './ui/tools-rail';
 import { init as init1 } from './tools/stage-input';
 import { init as init2 } from './ui/layers-panel';
@@ -45,6 +47,7 @@ import { initShortcuts } from './ui/shortcuts';
 import { initScrub } from './ui/scrub';
 import { init as initAgent } from './ui/agent-panel';
 import { init as initEasePop } from './ui/ease-pop';
+import { init as initHelp } from './ui/help-panel';
 
 // Same order as the original single-file build
 initTheme(); // ui/theme (before the rail renders its button)
@@ -89,6 +92,7 @@ init12(); // io/save
 init13(); // io/guard
 init14(); // io/open
 initAgent(); // ui/agent-panel (the design agent, docked on the right)
+initHelp(); // ui/help-panel (Help & tutorials, docked where the agent docks; guided tours)
 initEasePop(); // ui/ease-pop (the Easing panel of the timeline header)
 init15(); // ui/keyboard
 init16(); // app/boot

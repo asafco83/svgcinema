@@ -82,6 +82,14 @@ src/
     props-panel.ts (inspector sections)  align.ts (align bar, Set motion path)  font-picker.ts (the font list)  multi.ts (editing several layers)
     presets-panel.ts (the Presets window)  onion.ts (onion skin)  graph.ts (graph editor)
     symbols-ui.ts (editing a symbol, Assets ▸ Symbols, the Instance section)
+    help-panel.ts (Help & tutorials: the Help panel, and the practice editor beside it)
+
+  help/                  Help & tutorials
+    content.json         Every help topic: its words, steps, keys and related topics (the website reads it too)
+    tours.ts             What each guided tour's steps do: the control to light, when it's done, Show me
+    scenes.ts            Each tutorial's own small practice scene
+    practice.ts          The practice editor (?tour=<topic>): keeps nothing, runs the tour
+    ghost.ts             Show me: a pointer that does the step with real pointer and key events
 
   io/                    Files
     assets.ts            Image import (incl. TIFF/HEIC conversion), IndexedDB, asset panel
@@ -114,7 +122,9 @@ src/
     webp-anim.ts         The Animated WebP file from still WebP frames
     encoder.worker.ts    WebP, AVIF and JPEG XL encoders (WebAssembly, in a worker)
 
-  app/boot.ts            Startup: restore the last project, assets and file handle
+  app/boot.ts            Startup: restore the last project, assets and file handle (or open a tutorial's scene)
+
+public/help/             The help steps' clips (light and dark) and each tutorial's finished scene, recorded by site/captures.py
 
 tests/                   Vitest: runtime player and easing, zip container, path geometry, export output
 site/                    The website (home, features, design agent, import, export, downloads, licence), see site/README.md
@@ -317,6 +327,22 @@ The guides are saved with the project; the other view settings are remembered in
 
 **Web fonts in exports:** Google Fonts are converted to outlines by default (no font download, identical everywhere, also inside `<img>`). _Embed font_ instead keeps live, selectable text and embeds only the alphabets the text uses, which is smaller for long text. Hebrew is drawn in its right-to-left order; Arabic-script text is always embedded so its letters join. Fonts from this computer are converted or embedded the same way once the browser has shared them (embedding includes the whole font file); otherwise the SVG only names the font.
 
+## Help & tutorials
+
+**☰ › Help › Help & tutorials** (Shift F1) opens the Help panel, docked on the right where the Agent panel docks (one of the two at a time). It has the same pages as the website's help: a hub (search, Start here, the topics by group) and a page per topic with what it does, numbered steps with a clip of each, the keys and related topics, and ↗ to the same page on the website (when the editor runs from the site's `editor/` folder). The pages come with the editor, so they work offline.
+
+**Guided tours.** Topics with a tour have **Start guided tour**. It opens a **practice editor** over the editor, in a frame, and the Help panel stays beside it at full height:
+
+- The practice editor opens the tutorial's own small scene (only what that tutorial needs, never the sample scene or your project). Its top bar says **Practice**, names the tutorial and says nothing there is saved; it has no ☰ menu, Agent or theme button, and **Exit practice** on the right.
+- It keeps nothing: the saved project, its images, the file name and every setting stay as they were (it reads your settings, so it looks like your editor, but what it writes stays in memory).
+- The control for the step stays lit while the rest dims, and a card points at it and waits until you've done it, then the tour moves on. **Show me** does the step with a pointer you can watch, with the same pointer and key events you would make.
+- The Help panel lists the steps (done ones ticked, the current one lit with Show me and Back, a progress bar) and says your project is waiting underneath. While the tour runs, keys go to the practice editor only, never to your project.
+- **Exit practice** (top bar or panel) closes it and you're back in your project exactly as you left it. At the end, **Download this project** saves the practice scene as a `.SVGcinema` file if you want to keep it.
+
+On the website, **Do it in the editor: guided tour** opens the same practice editor in a lightbox over the topic page (with the full card, as there is no panel beside it); on a small screen it opens in its own tab. `editor/?tour=<topic>` opens it directly.
+
+The topics are in `src/help/content.json` (shared with the website's help pages); what each tour step does is in `src/help/tours.ts`, in the same order. `tests/browser/help.py` runs every tour with Show me alone, so a change to the editor that breaks a step fails the tests. The step clips are recordings of the same Show me (`python3 site/captures.py help`).
+
 ## Design agent
 
 Click **Agent** in the top bar (Alt A) to open a chat docked on the right. Describe what you want, for example “draw a cartoon rocket and make it launch”, and the agent draws, edits and animates in this project with the editor's own tools: shapes and SVG artwork, layer edits, groups, presets, keyframes, shape morphing (Morph keyframes written as SVG path data; a rectangle, ellipse or star becomes a plain path) and the project settings. Its steps are listed as it works, and **each request is one undo step**: Undo, or _Undo this request_ under its answer, rolls the whole request back.
@@ -489,6 +515,7 @@ Conventions:
 - `tests/engine.test.ts`: easing, interpolation, the player API, and that the player can be embedded.
 - `tests/zip.test.ts`: the `.SVGcinema` container.
 - `tests/geometry.test.ts`: path parsing and morph helpers.
+- `tests/help.test.ts`: the help topics and the guided tours agree (a scene and one behaviour per step).
 - `tests/output.test.ts`: compares the exported SVG (JS and CSS modes, every trigger) and every embed snippet against `tests/fixtures/export-sample.json`. It also checks that no editor TypeScript syntax leaks into a snippet. After an intended change to the output, regenerate the reference with `UPDATE_FIXTURES=1 npx vitest run tests/output.test.ts` and review the diff.
 
 ## Deploying (GitHub Pages)

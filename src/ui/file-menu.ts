@@ -39,6 +39,7 @@ import { toggleView } from './view-menu';
 import { toggleAllSections } from './inspector';
 import { currentTheme, toggleTheme } from './theme';
 import { openShortcuts } from './shortcuts';
+import { openHelp } from './help-panel';
 import { openSample } from './topbar';
 import { clearRecent, loadRecent, openRecent, recentList, recentWhen } from '../io/recent';
 import { type SameKind, selectSame } from '../core/select-same';
@@ -122,6 +123,8 @@ const SPELL_TIP =
   "No red underlines? Turn on spell check in your browser's settings (Chrome: Settings ▸ Languages ▸ Spell check).";
 function helpItems(): Item[] {
   return [
+    { id: 'hp:help', label: 'Help & tutorials', on: true, key: 'Shift F1' },
+    '-',
     { id: 'hp:keys', label: 'Keyboard shortcuts', on: true, key: 'F1' },
     { id: 'hp:sample', label: 'Open the sample scene…', on: true },
     { id: 'hp:spell', label: 'Spell check', on: true, check: spellOn(), tip: SPELL_TIP },
@@ -207,6 +210,7 @@ function run(id: string) {
   else if (id === 'vw:sections') toggleAllSections();
   else if (id === 'vw:theme') toggleTheme();
   else if (id.startsWith('vw:')) toggleView(id.slice(3));
+  else if (id === 'hp:help') openHelp();
   else if (id === 'hp:keys') openShortcuts();
   else if (id === 'hp:sample') openSample();
   else if (id === 'hp:spell') {

@@ -3,6 +3,10 @@
 # short looping clips (MP4, H.264) with a poster frame (WebP), in the light and the dark theme, in site/img/.
 # Run it after a UI change that shows in them, with the dev server on port 5199 (npx vite --port 5199):
 #   python3 site/captures.py [http://localhost:5199/] [light|dark] [clip names…]
+# The help topics' step clips (Help & tutorials) are recorded too, into public/help/ (the editor's Help panel
+# shows them, and the website's help pages load them from the editor): `help` records them all, `help:<topic>`
+# one topic's. Each is a recording of the tour's own "Show me" for that step, in the tutorial's practice
+# scene, so the clips always match the tour.
 # Needs Playwright for Python (Chromium), Pillow and ffmpeg (libx264).
 #
 # Frames are exactly 1/FPS apart however long a screenshot takes: site/clock.js runs in every frame of the page
@@ -15,6 +19,7 @@ from playwright.async_api import async_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMG = os.path.join(ROOT, 'site/img')
+HELP = os.path.join(ROOT, 'public/help')
 ARGS = [a for a in sys.argv[1:] if not a.startswith('http') and a not in ('light', 'dark')]
 THEMES = [a for a in sys.argv[1:] if a in ('light', 'dark')] or ['light', 'dark']
 BASE = next((a for a in sys.argv[1:] if a.startswith('http')), 'http://localhost:5199/')
@@ -73,8 +78,8 @@ class Rec:
     """Records one clip: begin() freezes the page's clock, each frame ticks it by 1/FPS and takes a screenshot of
     the region, end() writes site/img/<name>.mp4 and its poster <name>.webp."""
 
-    def __init__(self, pg, name, region, squeeze=False, maxw=1800, poster=0.5, wait=0):
-        self.pg, self.name, self.region, self.squeeze, self.maxw, self.poster, self.wait = pg, name, region, squeeze, maxw, poster, wait
+    def __init__(self, pg, name, region, squeeze=False, maxw=1800, poster=0.5, wait=0, out=IMG):
+        self.pg, self.name, self.region, self.squeeze, self.maxw, self.poster, self.wait, self.out = pg, name, region, squeeze, maxw, poster, wait, out
         self.frames = []
 
     async def begin(self):
@@ -114,15 +119,15 @@ class Rec:
             if rows:
                 im = keep_rows(im, rows)
             im.save(f'{d}/{i:05d}.png')
-        mp4 = os.path.join(IMG, self.name + '.mp4')
+        mp4 = os.path.join(self.out, self.name + '.mp4')
         vf = f'scale=trunc(min(iw\\,{self.maxw})/2)*2:-2:flags=lanczos'
         subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', f'{d}/%05d.png', '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '25', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', mp4], check=True)
         # the poster: the same frame size as the video
         n = min(len(self.frames) - 1, int(self.poster * len(self.frames)))
-        p = os.path.join(IMG, self.name + '.webp')
+        p = os.path.join(self.out, self.name + '.webp')
         subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{d}/{n:05d}.png', '-vf', vf, '-q:v', '86', p], check=True)
         shutil.rmtree(d)
-        print(f'site/img/{self.name}.mp4 {len(self.frames) / FPS:.1f}s {os.path.getsize(mp4) // 1024} KB, poster {os.path.getsize(p) // 1024} KB')
+        print(f'{os.path.relpath(mp4, ROOT)} {len(self.frames) / FPS:.1f}s {os.path.getsize(mp4) // 1024} KB, poster {os.path.getsize(p) // 1024} KB')
 
 
 async def page(b, theme, settings=None, route=None, tl=None):
@@ -178,6 +183,38 @@ async def drag(rec, a, b, frames=14):
 async def clips(b, theme):
     sfx = '' if theme == 'light' else '-dark'
     key = {'provider': 'openrouter', 'model': 'anthropic/claude-sonnet-5.5', 'connect': 'key'}
+
+    # ---------- Help & tutorials: the Help panel on a topic, then a guided tour beside it ----------
+    if want('help-panel'):
+        c, pg = await page(b, theme)
+        rec = await Rec(pg, 'help-panel' + sfx, {'x': 0, 'y': 0, 'width': 1440, 'height': 900}, maxw=1440, poster=0.85, wait=20).begin()
+        await rec.hold(0.5)
+        await pg.keyboard.press('Shift+F1')
+        await rec.hold(1.2)
+        await pg.click('#help [data-topic="keyframes"]')
+        await rec.hold(1.6)
+        for i in range(20):
+            await pg.evaluate("document.getElementById('hpBody').scrollTop += 9")
+            await rec.frame(1)
+        await rec.hold(0.6)
+        await pg.evaluate("document.getElementById('hpBody').scrollTop = 0")
+        await rec.frame(1)
+        await pg.click('#help [data-tour="keyframes"]')
+        for i in range(60):
+            await rec.frame(1, wait=40)
+            ok = await pg.evaluate("(()=>{const f=document.querySelector('.prac-frame');return !!(f&&f.contentWindow&&f.contentWindow.cinTour)})()")
+            if ok:
+                break
+        await rec.hold(1.0)
+        for step in range(2):
+            await pg.click('#help [data-cmd="show"]')
+            for i in range(FPS * 6):
+                await rec.frame(1)
+                if not await pg.evaluate("!!document.querySelector('#help [data-cmd=\"show\"][disabled]')") and i > 10:
+                    break
+            await rec.hold(1.4)
+        await rec.end()
+        await c.close()
 
     # ---------- the design agent: a request, its steps, the answer ----------
     if want('talk'):
@@ -525,11 +562,59 @@ async def clips(b, theme):
         await c.close()
 
 
+async def help_clips(b, theme):
+    """public/help/<topic>-<step>[-dark].mp4/.webp: each step of each guided tour, done by its Show me in the
+    tutorial's practice scene (?tour=<topic>&clip=1: no tour card, and the tour waits for next()), and, in the light
+    run, public/help/<topic>.svg: the finished scene exported as CSS-animated SVG (the topic page's "What you'll
+    make")."""
+    sfx = '' if theme == 'light' else '-dark'
+    os.makedirs(HELP, exist_ok=True)
+    topics = json.load(open(os.path.join(ROOT, 'src/help/content.json')))['topics']
+    for t in topics:
+        if not (t.get('ready') and t.get('tour')) or not (want('help') or want('help:' + t['id'])):
+            continue
+        c = await b.new_context(viewport={'width': 1280, 'height': 800}, device_scale_factor=1)
+        pg = await c.new_page()
+        pg.set_default_timeout(10000)
+        await pg.add_init_script(CLOCK)
+        await pg.add_init_script(f"localStorage.setItem('svgcinema:theme','{theme}');")
+        await pg.goto(BASE + f"?tour={t['id']}&clip=1")
+        await pg.wait_for_function('window.cinTour')
+        await pg.wait_for_timeout(1500)
+        n = len(t['steps'])
+        for i in range(n):
+            last = i == n - 1
+            play = t['steps'][i]['title'].startswith('Play')
+            rec = await Rec(pg, f"{t['id']}-{i + 1}{sfx}", {'x': 0, 'y': 0, 'width': 1280, 'height': 800}, poster=0.97, out=HELP).begin()
+            await rec.hold(0.4)
+            await pg.evaluate('()=>{cinTour.show()}')
+            for _ in range(FPS * 12):
+                await rec.frame(1)
+                if not (await pg.evaluate('cinTour.state().showing')):
+                    break
+            await rec.hold(2.2 if play else 0.8)
+            await rec.end()
+            st = await pg.evaluate('cinTour.state()')
+            if not (st['done'][i] if i < len(st['done']) else False):
+                raise RuntimeError(f"help clip {t['id']} step {i + 1}: Show me didn't finish the step")
+            if not last:
+                await pg.evaluate('()=>cinTour.next()')
+                await rec.tick(300)
+        if theme == 'light':
+            svg = await pg.evaluate("""async()=>{const st=await import('/src/core/state.ts');const b=await import('/src/export/build.ts');
+              Object.assign(st.doc.ex,{mode:'css',trigger:'load',size:'resp',prefix:'help'});return b.buildExport(null).code}""")
+            open(os.path.join(HELP, t['id'] + '.svg'), 'w').write(svg)
+            print(f"public/help/{t['id']}.svg {len(svg) // 1024} KB")
+        await c.close()
+
+
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
         for theme in THEMES:
-            await clips(b, theme)
+            if not ARGS or [a for a in ARGS if a != 'help' and not a.startswith('help:')]:
+                await clips(b, theme)
+            await help_clips(b, theme)
         await b.close()
 
 

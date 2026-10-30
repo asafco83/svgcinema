@@ -1,4 +1,5 @@
 // SVGcinema — ui/keyboard
+import { toggleHelp } from './help-panel';
 import { zoomShortcut } from './zoom-menu';
 import { animateShortcut } from './animate-menu';
 import { viewShortcut } from './view-menu';
@@ -111,7 +112,8 @@ export function init(): void {
     }
     if (e.key === 'F1') {
       e.preventDefault();
-      openShortcuts();
+      if (e.shiftKey) toggleHelp();
+      else openShortcuts();
       return;
     }
     if (typing) return;

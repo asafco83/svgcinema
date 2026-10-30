@@ -5,7 +5,8 @@ import { loop, updatePlayBtn } from '../core/playback';
 import { ASSETS, S, URLS, doc, setDoc, syncAidc, syncIdc } from '../core/state';
 import { IDB, assetURL } from '../io/assets';
 import { updateFileInfo } from '../io/file-state';
-import { BATCH } from '../core/batch-mode';
+import { EPHEMERAL, PRACTICE } from '../core/batch-mode';
+import { startPractice } from '../help/practice';
 import { initBatch } from '../io/batch';
 import { normalizeDoc } from '../io/open';
 import { sampleDoc } from '../model/sample';
@@ -23,15 +24,17 @@ export async function boot() {
   BM.innerHTML = ic('<path d="M4 7h16M4 12h16M4 17h16"/>', 18);
   updatePlayBtn();
   try {
-    S.dirty = localStorage.getItem('svgcinema:dirty') === '1';
+    if (!EPHEMERAL) S.dirty = localStorage.getItem('svgcinema:dirty') === '1';
   } catch (e) {}
   try {
-    const fi = await Promise.race([IDB.get('file'), new Promise<any>(r => setTimeout(() => r(null), 1200))]);
+    const fi = EPHEMERAL
+      ? null
+      : await Promise.race([IDB.get('file'), new Promise<any>(r => setTimeout(() => r(null), 1200))]);
     if (fi && fi.name) S.file = fi;
   } catch (e) {}
   let saved = null;
   try {
-    if (!BATCH) saved = localStorage.getItem('svgcinema:doc');
+    if (!EPHEMERAL) saved = localStorage.getItem('svgcinema:doc');
   } catch (e) {}
   if (saved) {
     try {
@@ -42,7 +45,7 @@ export async function boot() {
   }
   if (!doc) setDoc(sampleDoc());
   try {
-    const a = BATCH
+    const a = EPHEMERAL
       ? null
       : await Promise.race([IDB.get('assets'), new Promise<any>(r => setTimeout(() => r(null), 1500))]);
     if (a)
@@ -67,6 +70,8 @@ export async function boot() {
   renderAll();
   S.loading = false;
   updateFileInfo();
+  // a practice editor (Help › guided tour): the tutorial's own scene and its tour
+  if (PRACTICE) await startPractice();
   // fits the artboard now the document is here (and on later resizes: tools/hand)
   workAreaResized();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => frame());

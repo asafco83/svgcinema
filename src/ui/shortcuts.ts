@@ -73,6 +73,7 @@ function tabs(): Tab[] {
         ),
         sec(
           'Help',
+          r('Help & tutorials', 'Shift F1'),
           r('Keyboard shortcuts', 'F1'),
           r('Close a menu or dialog', 'Esc'),
           r('Back to the Select tool', 'Esc'),

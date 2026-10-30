@@ -34,7 +34,7 @@ async def main():
         check('Animate: the properties with their ⇧ keys', 'Position' in an and await ev("[...document.querySelectorAll('#fileMenu [data-sub=animate] kbd')].some(k=>k.textContent==='⇧ P')"), an)
         vw=await sub('view'); hp=await sub('help')
         check('View: zoom and the view toggles with ticks', 'Zoom to fit' in vw and 'Rulers' in vw and await ev("document.querySelectorAll('#fileMenu [data-sub=view] [role=menuitemcheckbox]').length")>=6, vw)
-        check('Help: shortcuts, the sample scene, About', hp[0]=='Keyboard shortcuts' and 'Open the sample scene…' in hp and hp[-1]=='About SVGcinema', hp)
+        check('Help: Help & tutorials, shortcuts, the sample scene, About', [x for x in hp if x!='-'][:2]==['Help & tutorials','Keyboard shortcuts'] and 'Open the sample scene…' in hp and hp[-1]=='About SVGcinema', hp)
         # hover opens a submenu; a click runs the command
         await pg.hover('#fileMenu [data-sub=element] > button'); await pg.wait_for_timeout(120)
         check('hovering a submenu opens it', await ev("getComputedStyle(document.querySelector('#fileMenu [data-sub=element] > .lm-sub')).display")!='none')

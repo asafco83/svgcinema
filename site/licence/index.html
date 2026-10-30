@@ -4604,6 +4604,515 @@ figcaption {
   max-width: 70ch;
 }
 
+/* ========== Help & tutorials (help/, help/<topic>/: site/help.mjs) ========== */
+.hsearch {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 10px 30px -14px var(--shade);
+  color: var(--muted);
+  max-width: 720px;
+}
+.hsearch input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  color: var(--fg);
+  outline: none;
+}
+.hsearch:focus-within {
+  border-color: var(--accent-line);
+}
+.hsec {
+  padding-block: 56px 16px;
+}
+.hsec + .hsec {
+  padding-bottom: 88px;
+}
+.hcards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+}
+.hcard {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hcard-vis {
+  display: block;
+  height: 168px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--mat);
+}
+.hcard-vis .cap {
+  height: 100%;
+  object-fit: cover;
+  object-position: 46% 30%;
+  /* closer in: the practice scene and the controls around it */
+  transform: scale(1.55);
+  transform-origin: 46% 34%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.hcard-k {
+  margin: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hcard h3 {
+  margin: 0;
+  font-size: 20px;
+}
+.hcard h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+.hcard h3 a:hover {
+  color: var(--accent-fg);
+}
+.hcard > p:not(.hcard-k) {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+  flex: 1;
+}
+.hcard .btn {
+  align-self: flex-start;
+}
+.htag {
+  font: 500 11px/1 var(--f-ui);
+  color: var(--accent-fg);
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  border-radius: 99px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+.hmin,
+.hmeta {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.hgroups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 16px;
+}
+.hgroup {
+  padding: 22px 22px 14px;
+}
+.hgroup h3 {
+  margin: 0;
+  font-size: 19px;
+}
+.hgroup > p {
+  margin: 4px 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.hrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  color: var(--fg);
+  font-size: 15px;
+  text-decoration: none;
+}
+.hrow span:first-child {
+  flex: 1;
+}
+.hrow:hover {
+  color: var(--accent-fg);
+}
+.hrow[hidden],
+.hgroup[hidden] {
+  display: none;
+}
+.hnone,
+.hsoon {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 24px 0 0;
+}
+.hband-in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 48px;
+  align-items: center;
+  padding-block: 56px;
+}
+.hband-in > div {
+  flex: 1;
+  min-width: 280px;
+}
+.hband h2 {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+.hband p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 560px;
+}
+.hband .cap {
+  width: 480px;
+  max-width: 100%;
+}
+
+/* a topic */
+.hcrumb {
+  border-bottom: 1px solid var(--line);
+}
+.hcrumb .crumb {
+  margin: 0;
+  padding-block: 18px;
+}
+.htopic {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 200px;
+  gap: 48px;
+  padding-block: 40px 96px;
+}
+@media (max-width: 1100px) {
+  .htopic {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hside,
+  .htoc {
+    display: none;
+  }
+}
+.hside-in {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
+.hs-all {
+  color: var(--accent-fg);
+  text-decoration: none;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.hs-g summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font: 600 11px/1 var(--f-code);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  list-style: none;
+}
+.hs-g summary::-webkit-details-marker {
+  display: none;
+}
+.hs-g summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  margin-right: 2px;
+}
+.hs-g[open] summary {
+  color: var(--fg);
+}
+.hs-g[open] summary::before {
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.hs-g summary em {
+  margin-left: auto;
+  font: 500 11px/1 var(--f-ui);
+  color: var(--faint);
+  font-style: normal;
+  letter-spacing: 0;
+}
+.hs-g[open] summary em {
+  display: none;
+}
+.hs-g summary:hover {
+  background: var(--panel);
+}
+.hs-g a {
+  display: block;
+  padding: 5px 10px;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+.hs-g a:hover {
+  color: var(--fg);
+}
+.hs-g a[aria-current='page'] {
+  background: var(--panel);
+  color: var(--fg);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.htt {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.55;
+  margin-left: 7px;
+  vertical-align: 2px;
+}
+.hart h1 {
+  font: 400 clamp(44px, 6vw, 64px) / 0.98 var(--f-mark);
+  letter-spacing: -0.015em;
+  margin: 0 0 18px;
+}
+.hlead {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 22px;
+  max-width: 640px;
+}
+.hgoal {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  padding: 14px;
+  margin: 0 0 22px;
+}
+.hgoal img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 9px;
+}
+.hgoal .tc {
+  margin-bottom: 10px;
+}
+.hgoal p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+@media (max-width: 640px) {
+  .hgoal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.htour {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.hmeta {
+  font-size: 13.5px;
+  white-space: normal;
+}
+.hh2 {
+  font: 600 24px/1.2 var(--f-ui);
+  letter-spacing: 0;
+  margin: 0 0 20px;
+}
+.hsteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: s;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.hsteps li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+}
+.hsteps li::before {
+  counter-increment: s;
+  content: counter(s);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font: 400 20px/1 var(--f-mark);
+  color: var(--accent);
+}
+.hsteps h3 {
+  margin: 6px 0 6px;
+  font-size: 18px;
+}
+.hsteps p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 15.5px;
+}
+.hsteps p b {
+  color: var(--fg);
+}
+.hstep-clip {
+  margin-top: 14px;
+}
+.hdm {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: 1.6px solid var(--key);
+  transform: rotate(45deg);
+  margin: 0 4px 1px;
+}
+.hnote {
+  margin-top: 36px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  padding: 16px 18px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.hart #keys {
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+.hkeys {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14.5px;
+}
+.hkeys td {
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+.hkeys td:first-child {
+  width: 150px;
+}
+.hpn {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 40px;
+}
+.hpn a {
+  padding: 18px;
+  color: var(--fg);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hpn a span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.hpn a:hover {
+  border-color: var(--accent-line);
+}
+.hpn-n {
+  text-align: right;
+  grid-column: 2;
+}
+.htoc {
+  position: sticky;
+  top: 88px;
+  align-self: start;
+  font-size: 13.5px;
+  display: flex;
+  flex-direction: column;
+}
+.htoc p {
+  margin: 22px 0 8px;
+  font: 600 11px/1 var(--f-code);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.htoc p:first-child {
+  margin-top: 0;
+}
+.htoc a,
+.htoc span {
+  padding: 4px 0;
+  color: var(--muted);
+  text-decoration: none;
+}
+.htoc a:hover {
+  color: var(--fg);
+}
+
+/* the guided tour's lightbox: the practice editor over the page */
+.lb {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(13, 15, 20, 0.62);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  padding: 44px 48px 28px;
+}
+.lb-f {
+  width: min(100%, 1440px);
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  background: var(--panel);
+}
+.lb-x {
+  position: absolute;
+  right: 16px;
+  top: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.lb-x:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+.lb-open,
+.lb-open body {
+  overflow: hidden;
+}
+
     </style>
   </head>
   <body>
@@ -4620,7 +5129,8 @@ figcaption {
       <a href="../agent/">Design agent</a>
       <a href="../import/">Import</a>
       <a href="../export/">Export</a>
-      <a href="../downloads/">Downloads</a></nav>
+      <a href="../downloads/">Downloads</a>
+      <a href="../help/">Help</a></nav>
     <div class="top-r">
       <button class="ib" id="themeBtn" type="button" aria-label="Switch theme" title="Switch theme">
         <svg
@@ -4703,6 +5213,7 @@ figcaption {
     </nav>
     <nav aria-label="Resources">
       <h2>Resources</h2>
+      <a href="../help/">Help &amp; tutorials</a>
       <a href="../downloads/">Downloads</a>
       <a href="../downloads/#thumbs">Thumbnails for Windows and Linux</a>
       <a href="../downloads/#player">The player</a>
@@ -5503,6 +6014,80 @@ figcaption {
         io.observe(g);
       });
     })();
+
+  /* ---------- Help: search the topics, / to search ---------- */
+  var hq = d.getElementById('helpQ');
+  if (hq)
+    (function () {
+      var rows = d.querySelectorAll('.hrow'),
+        none = d.getElementById('helpNone');
+      hq.addEventListener('input', function () {
+        var ws = hq.value.toLowerCase().split(/\s+/).filter(Boolean),
+          any = false;
+        rows.forEach(function (r) {
+          var f = r.getAttribute('data-find') || '',
+            ok = ws.every(function (w) {
+              return f.indexOf(w) >= 0;
+            });
+          r.hidden = !ok;
+          any = any || ok;
+        });
+        d.querySelectorAll('.hgroup').forEach(function (g) {
+          g.hidden = !g.querySelector('.hrow:not([hidden])');
+        });
+        if (none) none.hidden = any;
+      });
+      d.addEventListener('keydown', function (e) {
+        if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) {
+          e.preventDefault();
+          hq.focus();
+        }
+      });
+    })();
+
+  /* ---------- Help: a guided tour opens the practice editor in a lightbox over the page ---------- */
+  // (on a small screen, or with a modifier key, the link opens the practice editor in its own tab instead)
+  d.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-tour]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+    if (innerWidth < 1100 || innerHeight < 620) return;
+    e.preventDefault();
+    var box = d.createElement('div');
+    box.className = 'lb';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', 'Guided tour');
+    box.innerHTML =
+      '<button class="lb-x" type="button" aria-label="Close the tour">✕</button><iframe class="lb-f" title="Guided tour in a practice editor"></iframe>';
+    var f = box.querySelector('iframe');
+    f.src = a.href;
+    function close() {
+      removeEventListener('message', onMsg);
+      d.removeEventListener('keydown', onKey);
+      box.remove();
+      root.classList.remove('lb-open');
+      a.focus();
+    }
+    function onMsg(m) {
+      if (m.source === f.contentWindow && m.data && m.data.svgcinema === 'tour-exit') close();
+    }
+    function onKey(k) {
+      if (k.key === 'Escape') close();
+    }
+    addEventListener('message', onMsg);
+    d.addEventListener('keydown', onKey);
+    box.querySelector('.lb-x').addEventListener('click', close);
+    box.addEventListener('click', function (k) {
+      if (k.target === box) close();
+    });
+    d.body.appendChild(box);
+    root.classList.add('lb-open');
+    f.addEventListener('load', function () {
+      try {
+        f.contentWindow.focus();
+      } catch (_) {}
+    });
+  });
 
   onScroll();
 })();
