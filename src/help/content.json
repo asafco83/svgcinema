@@ -455,7 +455,7 @@
         },
         {
           "title": "See your projects",
-          "text": "Open a folder of .SVGcinema files in File Explorer, or in GNOME Files, Nemo, Caja or Thunar: each file shows its first frame. On Linux, close the file manager's window and open it again if they don't show at once.",
+          "text": "Open a folder of .SVGcinema files in File Explorer, or in GNOME Files, Nemo, Caja or Thunar: each file shows its first frame, and where no picture shows, as in a list, the SVGcinema icon. On Linux, close the file manager's window and open it again if they don't show at once.",
           "do": "Open a folder of projects in your file manager.",
           "clip": false
         }

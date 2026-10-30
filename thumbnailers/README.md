@@ -2,7 +2,11 @@
 
 Small add-ons that show the first frame of `.SVGcinema` projects as their thumbnail in the file
 manager. SVGcinema saves that frame in every project as `thumbnail.png`: the zip's first entry,
-stored uncompressed, 512 px on its long side. The add-ons only read it.
+stored uncompressed, 512 px on its long side. The add-ons only read it. They also give the file type
+its icon (where no thumbnail shows: lists, details, small icons) and its name: on Windows the
+`SVGcinema.Project` file type with `svgcinema-file.ico`, on Linux the mime type's icon
+(`application-x-svgcinema-project`, `linux/icons/` in the hicolor theme). Both are made from
+`public/brand/svgcinema-icon.png`.
 
 Downloads (built by `.github/workflows/thumbnailers.yml`, published to the rolling `thumbnails`
 release):

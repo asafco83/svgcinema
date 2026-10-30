@@ -32,6 +32,8 @@ const pageDirs = [];
       pages(join(rel, f));
 })('.');
 cpSync(join(site, 'img'), join(out, 'img'), { recursive: true });
+// browsers also ask for /favicon.ico at the site's root
+cpSync(join(site, 'img', 'favicon.ico'), join(out, 'favicon.ico'));
 // source maps would publish the full source: never ship them, even from an older dist/
 cpSync(dist, join(out, 'editor'), { recursive: true, filter: src => !src.endsWith('.map') });
 // …and the scripts' pointers to them go too (the GitHub Pages build keeps both, for debugging)

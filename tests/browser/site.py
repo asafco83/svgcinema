@@ -24,6 +24,9 @@ async def main():
     check('every page in site/ is built from the current sources', stale==[], stale)
     built={p:open(os.path.join(tmp,p,'index.html')).read() for p in PAGES}
     check('no page names another product', not any('svgator' in h.lower() for h in built.values()))
+    check('every page has the favicon and the touch icon', all('img/favicon.ico" sizes="any"' in h and 'img/apple-touch-icon.png"' in h for h in built.values()) and os.path.exists(os.path.join(ROOT,'site/img/favicon.ico')))
+    ed=open(os.path.join(ROOT,'index.html')).read()
+    check('the editor has the favicon and the touch icon', 'href="favicon.ico"' in ed and os.path.exists(os.path.join(ROOT,'public/favicon.ico')) and os.path.exists(os.path.join(ROOT,'public/brand/apple-touch-icon.png')))
     # every picture a page shows is in site/img/
     missing=[]
     for p,h in built.items():

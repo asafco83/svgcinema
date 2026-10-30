@@ -2,6 +2,7 @@
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-svgcinema-project">
     <comment>SVGcinema project</comment>
+    <icon name="application-x-svgcinema-project"/>
     <sub-class-of type="application/zip"/>
     <glob pattern="*.svgcinema" weight="60"/>
   </mime-type>

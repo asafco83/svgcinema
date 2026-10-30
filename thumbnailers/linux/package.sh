@@ -3,12 +3,12 @@
 # .tar.gz with install.sh for other distributions.
 set -e
 cd "$(dirname "$0")"
-VERSION=1.0.0
+VERSION=1.1.0
 rm -rf dist && mkdir -p dist
 # tarball
 T=dist/svgcinema-thumbnails
 mkdir -p "$T"
-cp svgcinema-thumbnailer svgcinema.thumbnailer svgcinema-mime.xml install.sh uninstall.sh "$T"/
+cp -r svgcinema-thumbnailer svgcinema.thumbnailer svgcinema-mime.xml install.sh uninstall.sh icons "$T"/
 tar -C dist -czf dist/svgcinema-thumbnails-linux.tar.gz svgcinema-thumbnails
 rm -rf "$T"
 # .deb
@@ -16,6 +16,9 @@ D=dist/deb
 install -Dm755 svgcinema-thumbnailer "$D/usr/bin/svgcinema-thumbnailer"
 install -Dm644 svgcinema.thumbnailer "$D/usr/share/thumbnailers/svgcinema.thumbnailer"
 install -Dm644 svgcinema-mime.xml "$D/usr/share/mime/packages/svgcinema.xml"
+for s in 16 24 32 48 64 128 256; do
+  install -Dm644 "icons/${s}x${s}/application-x-svgcinema-project.png" "$D/usr/share/icons/hicolor/${s}x${s}/mimetypes/application-x-svgcinema-project.png"
+done
 mkdir -p "$D/DEBIAN"
 cat > "$D/DEBIAN/control" <<CTRL
 Package: svgcinema-thumbnails
@@ -34,6 +37,7 @@ CTRL
 cat > "$D/DEBIAN/postinst" <<'POST'
 #!/bin/sh
 command -v update-mime-database >/dev/null 2>&1 && update-mime-database /usr/share/mime || true
+command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -q -t /usr/share/icons/hicolor || true
 POST
 cp "$D/DEBIAN/postinst" "$D/DEBIAN/postrm"
 chmod 755 "$D/DEBIAN/postinst" "$D/DEBIAN/postrm"

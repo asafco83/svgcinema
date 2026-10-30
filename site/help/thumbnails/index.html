@@ -6,10 +6,8 @@
     <title>Thumbnails for Windows and Linux · Help · SVGcinema</title>
     <meta name="description" content="Every project you save carries a picture of its first frame. A small free add-on for Windows or Linux shows it in your file manager, so your .SVGcinema files show their animations instead of a plain icon." />
     <meta name="svgcinema-editor" content="../../editor/" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314171e'/%3E%3Cg fill='%23728afc'%3E%3Crect x='6' y='6' width='4' height='4'/%3E%3Crect x='14' y='6' width='4' height='4'/%3E%3Crect x='22' y='6' width='4' height='4'/%3E%3C/g%3E%3Cpath d='M9 15h14l-5 5 5 5H9z' fill='%23f2b63d'/%3E%3C/svg%3E"
-    />
+    <link rel="icon" href="../../img/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="../../img/apple-touch-icon.png" />
     <script>
       try {
         var t = localStorage.getItem('svgcinema:theme');
@@ -5233,7 +5231,7 @@ figcaption {
     <ol class="hsteps"><li><div><h3>Download it</h3><p>On the website's <b>Downloads</b> page, under Thumbnails, click <b>Download for Windows</b> (Windows 10 and 11, on regular and ARM PCs), or for Linux the <b>.deb package</b> or the <b>.tar.gz with install script</b>. In the editor, ☰ › Help › Thumbnails on your computer… has the same downloads.</p></div></li>
 <li><div><h3>Install it on Windows</h3><p>Unzip the download and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown: choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights.</p></div></li>
 <li><div><h3>Or install it on Linux</h3><p>Install the .deb the way you install any package, for example with <b>sudo apt install ./svgcinema-thumbnails.deb</b>. On other Linux systems, unpack the .tar.gz and run <b>./install.sh</b> in its folder: it asks for your password, because it installs in the system's folders (file managers make thumbnails in a sandbox that only sees those).</p></div></li>
-<li><div><h3>See your projects</h3><p>Open a folder of .SVGcinema files in File Explorer, or in GNOME Files, Nemo, Caja or Thunar: each file shows its first frame. On Linux, close the file manager's window and open it again if they don't show at once.</p></div></li></ol>
+<li><div><h3>See your projects</h3><p>Open a folder of .SVGcinema files in File Explorer, or in GNOME Files, Nemo, Caja or Thunar: each file shows its first frame, and where no picture shows, as in a list, the SVGcinema icon. On Linux, close the file manager's window and open it again if they don't show at once.</p></div></li></ol>
     <div class="hnote"><b>Good to know.</b> The picture is made again each time you save the project. To remove the add-on, use Settings › Apps on Windows; on Linux, remove the svgcinema-thumbnails package, or run ./uninstall.sh from the .tar.gz. There is none for macOS, and KDE's Dolphin uses its own plugins, so it isn't covered.</div>
     
     <nav class="hpn" aria-label="Previous and next topic"><a class="card" href="../../help/shortcuts/"><span>← Previous</span><b>Keyboard shortcuts</b></a><a class="card hpn-n" href="../../help/select/"><span>Next →</span><b>Select and transform</b></a></nav>
