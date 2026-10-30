@@ -1,4 +1,5 @@
 // SVGcinema — core/history
+import { featureUsed } from './analytics';
 import { EPHEMERAL } from './batch-mode';
 import { syncSymbols } from './symbols';
 import { renderSymbols } from '../ui/symbols-ui';
@@ -152,8 +153,10 @@ export function toggleKey(l: Layer, k: PropKey) {
   }
   const tr = l.t[k],
     cur = clone(valueAt(l, k, S.time));
-  if (!tr || !tr.length) l.t[k] = [[r3(S.time), cur, DEFAULT_EASE]];
-  else {
+  if (!tr || !tr.length) {
+    l.t[k] = [[r3(S.time), cur, DEFAULT_EASE]];
+    featureUsed('animate_' + k);
+  } else {
     const i = tr.findIndex(q => Math.abs(q[0] - S.time) < 0.005);
     if (i >= 0) {
       S.keys.delete(tr[i]);
@@ -259,6 +262,7 @@ export function setTime(t: number) {
   frame();
 }
 export function setTool(t: Tool) {
+  featureUsed('tool_' + t);
   if (S.pen && t !== 'pen') finishPen(false);
   const wasBind = S.tool === 'bonebind';
   S.tool = t;

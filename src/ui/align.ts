@@ -1,6 +1,7 @@
 // SVGcinema — ui/align
 // Align / distribute bar at the top of the inspector, and "Set motion path" (turn a path into position keyframes).
 // One selected layer aligns to the canvas; several align to the box around the selection.
+import { featureUsed } from '../core/analytics';
 import type { Keyframe, Layer, PathData } from '../model/types';
 import { ellNodes, rectNodes } from '../geometry/nodes';
 import { H, byId, clone, esc, ic, r2, r3, valueAt, xfp } from '../core/constants';
@@ -215,6 +216,7 @@ export function pathNodesFor(src: Layer, l: Layer): { n: N6[]; closed: boolean }
 export function setMotionPath(l: Layer, srcId: string) {
   const src = layerById(srcId);
   if (!src) return false;
+  featureUsed('motion_path');
   const P = pathNodesFor(src, l);
   if (!P) return false;
   const n = P.closed ? [...P.n, P.n[0]] : P.n,

@@ -5,6 +5,7 @@
 // A clipping path is the same group
 // but only the mask's shape counts (its colors, strokes and opacity are ignored).
 // Mask layers stay ordinary layers: they can be moved, edited and animated.
+import { featureUsed } from './analytics';
 import type { Layer } from '../model/types';
 import { NOFILL } from './constants';
 import { beginEdit } from './history';
@@ -22,6 +23,7 @@ export function maskFolder(g: Layer, list = doc.layers) {
 }
 export function makeMask(kind: 'mask' | 'clip') {
   if (!canMask()) return;
+  featureUsed(kind);
   const roots = selectedRoots(),
     order = (l: Layer) => doc.layers.indexOf(l),
     top = roots.reduce((a, b) => (order(b) > order(a) ? b : a)),

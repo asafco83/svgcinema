@@ -7,6 +7,7 @@
 // symbol's last known contents is copied to the others (keyframes shifted by the time offsets).
 // The JS export writes one instance in full and the others as <use> of it (when they have the same
 // offset); the CSS export writes every instance.
+import { featureUsed } from './analytics';
 import type { Layer } from '../model/types';
 import { S, doc, layerById, mkLayer, uid } from './state';
 import { NOFILL, clone } from './constants';
@@ -108,6 +109,7 @@ export function syncSymbols(prefer?: string | null): boolean {
 /** Element ▸ Make symbol: the selected group (or a new group of the selected layers) becomes a symbol's
  *  first instance. Expects to run inside an edit. */
 export function makeSymbol(g: Layer, name?: string): string {
+  featureUsed('symbol');
   const defs = symbols();
   let n = Object.keys(defs).length + 1,
     id = 'sym' + n;

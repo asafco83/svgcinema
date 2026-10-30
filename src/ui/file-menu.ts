@@ -5,6 +5,7 @@
 // so they follow the selection: Element reuses the right-click menu's commands, Animate the Animate
 // menu's properties, View the zoom and view settings. Help › About SVGcinema shows the version, the
 // copyright and the licence.
+import { analyticsOn, track } from '../core/analytics';
 import { $, esc } from '../core/constants';
 import type { PropKey } from '../model/types';
 import { openExport } from '../export/build';
@@ -210,8 +211,10 @@ function run(id: string) {
   else if (id === 'vw:sections') toggleAllSections();
   else if (id === 'vw:theme') toggleTheme();
   else if (id.startsWith('vw:')) toggleView(id.slice(3));
-  else if (id === 'hp:help') openHelp();
-  else if (id === 'hp:keys') openShortcuts();
+  else if (id === 'hp:help') {
+    track('help_open', { where: 'menu' });
+    openHelp();
+  } else if (id === 'hp:keys') openShortcuts();
   else if (id === 'hp:sample') openSample();
   else if (id === 'hp:spell') {
     setSpell(!spellOn());
@@ -276,6 +279,11 @@ export function openAbout() {
       <dt>Version</dt><dd id="abVersion">${esc(APP_VERSION)}</dd>
       ${build ? `<dt>Build</dt><dd id="abBuild">${esc(build)}</dd>` : ''}
       <dt>Copyright</dt><dd id="abCopy">${esc(copyrightLine())}</dd>
+      <dt>Privacy</dt><dd id="abPrivacy">No account and no cookies; your projects stay in this browser and in your files. ${
+        analyticsOn()
+          ? 'On svgcinema.com, visits and the features used are counted anonymously (Umami), never what you make.'
+          : 'This copy counts nothing.'
+      }${SITE ? ` <a href="${SITE}privacy/" target="_blank" rel="noopener">Privacy</a>` : ''}</dd>
       <dt>Licence</dt><dd>Proprietary. You may use the app to create, save and export animations. The files you export, with the player inside them, are yours to use for any purpose, including commercially; the external player may be loaded or hosted unmodified to play them. The owner may change or revoke these terms and access at any time.</dd>
     </dl>
     <details class="ab-lic"><summary>The full licence</summary><pre>${esc(LICENSE_TEXT.trim())}</pre></details>

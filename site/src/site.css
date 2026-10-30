@@ -5086,3 +5086,61 @@ figcaption {
 .lb-open body {
   overflow: hidden;
 }
+
+/* ---------- privacy ---------- */
+.pv {
+  padding-block: 24px 96px;
+}
+.pv-in {
+  max-width: 760px;
+}
+.pv h2 {
+  font: 600 24px/1.2 var(--f-ui);
+  letter-spacing: 0;
+  margin: 44px 0 10px;
+}
+.pv p,
+.pv li {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.pv p b {
+  color: var(--fg);
+}
+.pv-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (max-width: 720px) {
+  .pv-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.pv-box {
+  padding: 18px 20px;
+}
+.pv-box h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+.pv-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.pv-box li {
+  margin: 4px 0;
+}
+.pv-no {
+  border-color: rgba(31, 157, 106, 0.35);
+  background: rgba(31, 157, 106, 0.06);
+}
+.pv-mail {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.pv-note {
+  font-size: 14px !important;
+}

@@ -1,4 +1,5 @@
 // SVGcinema — export/snippets
+import { track } from '../core/analytics';
 import { $, clamp, r3 } from '../core/constants';
 import { save } from '../core/history';
 import { doc } from '../core/state';
@@ -111,8 +112,13 @@ export function init(): void {
     fwSel = b.dataset.v;
     renderSnippet();
   });
+  // the player file for self-hosting (Embed › HTML, external player)
+  $('#xPlayerDl').addEventListener('click', () =>
+    track('player_download', { where: 'editor', version: PLAYER_VERSION }),
+  );
   $('#xSnipCopy').addEventListener('click', () => {
     const ta = $('#xSnip');
+    track('embed_code_copied', { kind: 'svg', framework: fwSel });
     try {
       navigator.clipboard.writeText(ta.value).then(
         () => toast('Snippet copied.'),

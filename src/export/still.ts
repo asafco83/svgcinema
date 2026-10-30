@@ -2,6 +2,7 @@
 // Export › Image: one frame of the animation as a picture. PNG and JPEG come from the browser's own
 // encoders; WebP, AVIF and JPEG XL from the official libraries (export/encoder.worker); SVG is the
 // frame as still vector markup. The frame is the editor's playhead: moving it here moves it there.
+import { track } from '../core/analytics';
 import { $, clamp, esc } from '../core/constants';
 import { save, setTime } from '../core/history';
 import { S, doc } from '../core/state';
@@ -13,7 +14,7 @@ import { kb } from '../ui/inspector';
 import { LINK_OFF, LINK_ON } from './size';
 import { docBg, frameSource, prepareFrameFonts, rasterFrame } from './frames';
 import type { Fill, FrameSource } from './frames';
-import { fileName, saveFile, toBlobP } from './images';
+import { fileName, saveFile, toBlobP, exported } from './images';
 import { exportKind, registerKind } from './kind';
 import type { EncodeJob, EncodeReply } from './encoder.worker';
 
@@ -630,6 +631,7 @@ export function init(): void {
     changed(false);
   });
   $('#xiSnipCopy').addEventListener('click', () => {
+    track('embed_code_copied', { kind: 'image' });
     const ta = $('#xiSnip') as HTMLTextAreaElement;
     navigator.clipboard.writeText(ta.value).then(
       () => toast('Snippet copied.'),
@@ -651,6 +653,7 @@ export function init(): void {
       if (shown.fmt === 'svg') {
         await navigator.clipboard.writeText(await shown.blob.text());
         toast('SVG code copied.');
+        exported('copy', 'svg');
         return;
       }
       // pictures are pasted as PNG everywhere, whatever the format chosen
@@ -658,6 +661,7 @@ export function init(): void {
       if (!png) throw new Error('png');
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
       toast('Image copied (as PNG).');
+      exported('copy', 'png');
     } catch (_) {
       toast('Copying images isn’t allowed here. Use Download instead.');
     }

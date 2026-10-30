@@ -10,8 +10,8 @@ OUT=os.environ.get('CIN_OUT','/tmp/svgcinema-shots/'); os.makedirs(OUT, exist_ok
 ROOT=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 HELP=json.load(open(os.path.join(ROOT,'src/help/content.json')))
 READY=[t for t in HELP['topics'] if t.get('ready')]
-PAGES=['','features/','agent/','import/','export/','downloads/','licence/','help/']+[f"help/{t['id']}/" for t in READY]
-NAV={'':'Home','features/':'Features','agent/':'Design agent','import/':'Import','export/':'Export','downloads/':'Downloads','licence/':None,'help/':'Help',**{f"help/{t['id']}/":'Help' for t in READY}}
+PAGES=['','features/','agent/','import/','export/','downloads/','licence/','privacy/','help/']+[f"help/{t['id']}/" for t in READY]
+NAV={'':'Home','features/':'Features','agent/':'Design agent','import/':'Import','export/':'Export','downloads/':'Downloads','licence/':None,'privacy/':None,'help/':'Help',**{f"help/{t['id']}/":'Help' for t in READY}}
 async def main():
     R={}; F=[]
     def check(n,c,i=None):

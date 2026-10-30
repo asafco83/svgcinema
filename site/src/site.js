@@ -18,6 +18,48 @@
     } catch (e) {}
   });
 
+  /* ---------- anonymous usage counts: Umami (cookieless, no IP addresses kept), on svgcinema.com only ---------- */
+  // Nowhere else (a local copy, a preview, tests), and not for a browser that asks not to be tracked. Events carry
+  // categories only: which download, which button, which help topic.
+  var counted = /^(www\.)?svgcinema\.com$/.test(location.hostname);
+  if (counted) {
+    var um = d.createElement('script');
+    um.defer = true;
+    um.src = 'https://cloud.umami.is/script.js';
+    um.setAttribute('data-website-id', '3e441baa-e061-4501-8fff-9470c140b799');
+    um.setAttribute('data-domains', 'svgcinema.com,www.svgcinema.com');
+    um.setAttribute('data-do-not-track', 'true');
+    d.head.appendChild(um);
+  }
+  function track(name, data) {
+    if (counted && window.umami && typeof umami.track === 'function') umami.track(name, data || {});
+  }
+  // what a link is: opening the editor, or one of the downloads
+  d.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    var h = a.getAttribute('href') || '',
+      inTop = !!a.closest('header');
+    if (a.hasAttribute('data-editor')) track('editor_open_click', { place: inTop ? 'header' : 'page' });
+    else if (/SVGcinema-Thumbnails-Setup\.zip$/.test(h)) track('thumbnails_download', { platform: 'windows' });
+    else if (/\.deb$/.test(h)) track('thumbnails_download', { platform: 'linux_deb' });
+    else if (/thumbnails-linux\.tar\.gz$/.test(h)) track('thumbnails_download', { platform: 'linux_tar' });
+    else if (/cin-player[\w.-]*\.js$/.test(h)) track('player_download', { where: 'website' });
+    else if (/svgcinema-skill\.zip$/.test(h)) track('skill_download', { where: 'website' });
+  });
+
+  /* ---------- an email address put together only when asked for (spam robots read pages, they don't click) ---------- */
+  d.querySelectorAll('a[data-m]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var m = a.getAttribute('data-m').split('').reverse().join('');
+      a.textContent = m;
+      a.href = 'mailto:' + m;
+      a.removeAttribute('data-m');
+      location.href = 'mailto:' + m;
+    });
+  });
+
   var hooks = [];
   function fmt(t) {
     var s = Math.floor(t),
@@ -791,7 +833,13 @@
     (function () {
       var rows = d.querySelectorAll('.hrow'),
         none = d.getElementById('helpNone');
+      var hqT;
       hq.addEventListener('input', function () {
+        clearTimeout(hqT);
+        hqT = setTimeout(function () {
+          var q = hq.value.trim().toLowerCase();
+          if (q.length > 1) track('help_search', { term: q.slice(0, 40) });
+        }, 1200);
         var ws = hq.value.toLowerCase().split(/\s+/).filter(Boolean),
           any = false;
         rows.forEach(function (r) {
@@ -829,9 +877,13 @@
     box.setAttribute('aria-label', 'Guided tour');
     box.innerHTML =
       '<button class="lb-x" type="button" aria-label="Close the tour">✕</button><iframe class="lb-f" title="Guided tour in a practice editor"></iframe>';
-    var f = box.querySelector('iframe');
+    var f = box.querySelector('iframe'),
+      topic = a.getAttribute('data-tour'),
+      tour = { i: 0, finished: false };
     f.src = a.href;
+    track('tour_start', { topic: topic, where: 'website' });
     function close() {
+      if (!tour.finished) track('tour_exit', { topic: topic, step: tour.i + 1, where: 'website' });
       removeEventListener('message', onMsg);
       d.removeEventListener('keydown', onKey);
       box.remove();
@@ -839,7 +891,12 @@
       a.focus();
     }
     function onMsg(m) {
-      if (m.source === f.contentWindow && m.data && m.data.svgcinema === 'tour-exit') close();
+      if (m.source !== f.contentWindow || !m.data) return;
+      if (m.data.svgcinema === 'tour-exit') close();
+      else if (m.data.svgcinema === 'tour') {
+        if (m.data.finished && !tour.finished) track('tour_complete', { topic: topic, where: 'website' });
+        tour = { i: m.data.i || 0, finished: !!m.data.finished };
+      }
     }
     function onKey(k) {
       if (k.key === 'Escape') close();

@@ -9,6 +9,7 @@
 // keeps nothing; your project stays open underneath, untouched, and comes back on Exit. While the tour
 // runs, this panel lists its steps (done ones ticked, the current one lit, Show me) and the frame tells it
 // how far the tour is (postMessage, same origin).
+import { track } from '../core/analytics';
 import { $, esc } from '../core/constants';
 import { doc } from '../core/state';
 import { workAreaResized } from '../tools/hand';
@@ -30,6 +31,7 @@ const ST = {
   tour: null as null | { id: string; i: number; n: number; done: boolean[]; finished: boolean; showing: boolean },
 };
 let frame: HTMLIFrameElement | null = null;
+let searchT: ReturnType<typeof setTimeout> | undefined;
 
 const svg = (d: string, s = 16, w = 1.4) =>
   `<svg width="${s}" height="${s}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -234,6 +236,7 @@ export function startTour(id: string) {
   ST.view = 'topic';
   ST.id = id;
   ST.tour = { id, i: 0, n: (t.steps || []).length, done: [], finished: false, showing: false };
+  track('tour_start', { topic: id, where: 'editor' });
   frame = document.createElement('iframe');
   frame.className = 'prac-frame';
   frame.title = 'Practice: ' + t.title;
@@ -252,6 +255,7 @@ export function closePractice() {
   }
   app().classList.remove('practicing');
   if (ST.tour) {
+    if (!ST.tour.finished) track('tour_exit', { topic: ST.tour.id, step: ST.tour.i + 1, where: 'editor' });
     ST.tour = null;
     render();
   }
@@ -273,6 +277,7 @@ function onClick(e: MouseEvent) {
   } else if (b.dataset.topic) {
     ST.view = 'topic';
     ST.id = b.dataset.topic;
+    track('help_topic', { topic: ST.id });
     render();
     ($('#hpBody') as HTMLElement).scrollTop = 0;
   } else if (b.dataset.tour) startTour(b.dataset.tour);
@@ -288,6 +293,12 @@ export function init(): void {
     if (t.id === 'hpQ') {
       ST.q = t.value;
       render();
+      // what people look for in help (help words only), once they stop typing
+      clearTimeout(searchT);
+      searchT = setTimeout(
+        () => ST.q.trim().length > 1 && track('help_search', { term: ST.q.trim().toLowerCase().slice(0, 40) }),
+        1200,
+      );
     }
   });
   window.addEventListener('message', e => {
@@ -296,6 +307,7 @@ export function init(): void {
     if (!d) return;
     if (d.svgcinema === 'tour-exit') closePractice();
     else if (d.svgcinema === 'tour' && ST.tour && d.id === ST.tour.id) {
+      if (d.finished && !ST.tour.finished) track('tour_complete', { topic: d.id, where: 'editor' });
       ST.tour = { id: d.id, i: d.i, n: d.n, done: d.done || [], finished: !!d.finished, showing: !!d.showing };
       render();
     }

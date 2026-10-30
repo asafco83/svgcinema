@@ -19,6 +19,11 @@ the published app, and use their exported files (with the embedded player) for a
 including commercially, and load or host the external player file unmodified to play them. The owner keeps the
 unilateral right to modify the terms, revoke permissions and change or end access. Earlier versions were PolyForm Noncommercial 1.0.0; the owner may reopen it later.
 
+**Usage counts (Umami):** `src/core/analytics.ts` (editor) and the top of `site/src/site.js` (website) load Umami on
+svgcinema.com only, never in a practice editor, the batch converter, tests or other hosts. Send events with `track()` /
+`featureUsed()` and only categories or counts, never names, text or content; add new events to README's table and to
+the Privacy page if they count something new. The Privacy page's email is only in the page reversed (`data-m`).
+
 **Assistant API, guide and skill:** any tool or functional change that affects what an AI assistant can do or
 how it should work must be reflected in all three, in the same PR:
 

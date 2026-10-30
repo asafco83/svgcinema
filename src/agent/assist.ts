@@ -9,6 +9,7 @@
 // Images follow the panel's Images setting: the assistant's own (it hands them over as data or a web
 // address with add_image, or asks the user to drop them in with request_image), the image model of the
 // API key settings (generate_image, which asks first, with the price), or vector shapes only.
+import { track } from '../core/analytics';
 import { ASSETS } from '../core/state';
 import { addAsset, dataToBlob, fileToAsset, renderAssets } from '../io/assets';
 import { BUSY, setBusy } from './busy';
@@ -317,6 +318,7 @@ function arm() {
 }
 
 export function startSession(o: { task?: string; assistant?: string } = {}): Session {
+  track('agent_request', { way: 'assistant' });
   if (ASSIST.now && ASSIST.now.open) finish(ASSIST.now, '');
   if (ASSIST.now) {
     ASSIST.past.push(ASSIST.now);

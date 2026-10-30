@@ -4,6 +4,7 @@
 // exported, and hidden while playing. The timeline bar's Onion skin button turns it on; the arrow
 // beside it opens its settings (frames before / after, the step between them, and how strong the
 // nearest ones are). The settings are remembered in this browser.
+import { featureUsed } from '../core/analytics';
 import type { Layer } from '../model/types';
 import { $, fmt } from '../core/constants';
 import { S, doc, layerById } from '../core/state';
@@ -86,6 +87,7 @@ function syncButton() {
 }
 export function toggleOnion(on = !ONION.on) {
   ONION.on = on;
+  if (on) featureUsed('onion_skin');
   save();
   syncButton();
   drawOnion();

@@ -3,6 +3,7 @@
 // is drawn exactly (export/frames) and encoded by the browser's own video encoder (WebCodecs), faster
 // than real time, then written into the file by export/mux. Codecs the browser can't encode aren't
 // offered; with no video encoder at all, the Video tab isn't shown.
+import { track } from '../core/analytics';
 import { $, clamp, esc } from '../core/constants';
 import { save, setTime } from '../core/history';
 import { S, doc } from '../core/state';
@@ -814,6 +815,7 @@ export function init(): void {
     changed(false);
   });
   $('#xvSnipCopy').addEventListener('click', () => {
+    track('embed_code_copied', { kind: 'video' });
     const ta = $('#xvSnip') as HTMLTextAreaElement;
     navigator.clipboard.writeText(ta.value).then(
       () => toast('Snippet copied.'),

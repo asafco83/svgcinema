@@ -1,4 +1,5 @@
 // SVGcinema — io/open
+import { track } from '../core/analytics';
 import { fitView, zoomAt } from '../tools/hand';
 import type { Asset, BaseValues, Doc, Layer, OpenFile } from '../model/types';
 import { $, clamp, clock } from '../core/constants';
@@ -84,6 +85,7 @@ export async function loadProjectFile(f: File, handle: FileSystemFileHandle | nu
         assets[a.id] = o;
       }
       applyProject(d, assets, { name: f.name, handle: handle || null });
+      track('project_open', { kind: 'svgcinema' });
       await readExtras(z);
       addRecent(f.name, handle || null, handle ? null : f);
       const missing = idx.length - Object.keys(assets).length;
@@ -94,6 +96,7 @@ export async function loadProjectFile(f: File, handle: FileSystemFileHandle | nu
       dd = d && d.format === 'svgcinema' ? d.doc : d;
     if (!dd || !Array.isArray(dd.layers)) throw new Error('it isn’t an SVGcinema project');
     applyProject(dd, d.assets || {}, null);
+    track('project_open', { kind: 'svgcinema_json' });
     S.dirty = true;
     updateFileInfo();
     toast('Opened an older project file. Use Save to keep it as .SVGcinema.');
