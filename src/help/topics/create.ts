@@ -9,7 +9,19 @@ import { addAsset, renderAssets } from '../../io/assets';
 import { addLayer, liveShape } from '../../tools/shapes';
 import { startTextEdit, textEditing } from '../../tools/text-edit';
 import { centre, click, drag, hold, press, trace, type, type XY } from '../ghost';
-import { type Scene, type TourStep, allLayers, byName, lock, offCentre, q, screenOf, shapeEl, svg640 } from '../kit';
+import {
+  type Scene,
+  type TourStep,
+  allLayers,
+  byName,
+  lock,
+  offCentre,
+  q,
+  screenBox,
+  screenOf,
+  shapeEl,
+  svg640,
+} from '../kit';
 
 /** A light sheet of paper behind the drawing (new shapes and text read well on it). */
 const PAPER = `<rect id="Paper" width="640" height="400" fill="#f4efe6"/>`;
@@ -24,7 +36,7 @@ const pick = (l: Layer | null) => {
   if (l && (S.sel !== l.id || S.selSet.size > 1)) select(l.id);
 };
 const state = (l: Layer | null) => (l ? JSON.stringify([l.geo, l.b, l.t]) : '');
-/** the screen box of a handle of the selection (Select tool): nw, se, rot, org… */
+/** a handle of the selection on the canvas (Select tool): nw, se, rot, org… */
 const handle = (h: string) => q(`#overlay [data-h="${h}"]`);
 /** scrolls a field of the inspector into view, as a person would before using it */
 const into = (sel: string) => {
@@ -80,6 +92,8 @@ function drawnPath() {
   }
   return l;
 }
+/** where the Pen's shape is drawn, on the screen (the clips of the drawing steps show all of it) */
+const penArea = () => screenBox(130, 100, 330, 220);
 /** a wave across the lower part of the paper, in screen points */
 const wave = () => Array.from({ length: 13 }, (_, i) => screenOf(140 + i * 30, 348 + Math.sin(i * 0.75) * 22));
 
@@ -304,6 +318,7 @@ export const tours: Record<string, TourStep[]> = {
         await tap(screenOf(150, 280));
         await tap(screenOf(250, 120));
       },
+      clip: () => [penArea()],
     },
     // drag: a curve
     {
@@ -315,6 +330,7 @@ export const tours: Record<string, TourStep[]> = {
           a = screenOf(380, 150);
         return drag(a, { x: a.x + k, y: a.y + k * 0.66 }, { ms: 800 });
       },
+      clip: () => [penArea()],
     },
     // click the first point: closed
     {
@@ -329,6 +345,7 @@ export const tours: Record<string, TourStep[]> = {
         const f = penPts()[0];
         if (f) await tap(screenOf(f[0], f[1]));
       },
+      clip: () => [penArea()],
     },
     // A: drag a node
     {
@@ -404,6 +421,7 @@ export const tours: Record<string, TourStep[]> = {
       },
       done: c => count(isStar) > c.n,
       show: () => drag(screenOf(440, 200), screenOf(440, 110), { ms: 800 }),
+      clip: () => [shapeEl(last(isStar))],
     },
     // more points
     {
@@ -440,6 +458,7 @@ export const tours: Record<string, TourStep[]> = {
       },
       done: c => count(l => l.type === 'text') > c.n,
       show: () => tap(screenOf(70, 150)),
+      clip: () => [shapeEl(lastText())],
     },
     // type, then Esc
     {
@@ -502,6 +521,7 @@ export const tours: Record<string, TourStep[]> = {
       },
       done: () => S.tab === 'assets',
       show: () => click(q('#sideTabs [data-v="assets"]')),
+      clip: () => [q('#ag .at[data-aid]')],
     },
     // click the picture: it goes on the canvas
     {

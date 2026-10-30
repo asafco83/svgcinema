@@ -9,6 +9,7 @@ import {
   type Scene,
   type TourStep,
   allLayers,
+  artboard,
   byName,
   keyAt,
   lock,
@@ -149,6 +150,7 @@ export const tours: Record<string, TourStep[]> = {
       },
       done: c => allLayers().filter(l => l.type === 'rect').length > c.n,
       show: () => drag(screenOf(250, 236), screenOf(330, 300), { ms: 800 }),
+      clip: () => [artboard()],
     },
     // the Layers panel: pick the sun
     {
@@ -184,6 +186,7 @@ export const tours: Record<string, TourStep[]> = {
       enter: () => calm(),
       done: () => shown('#mExport'),
       show: () => click(q('#bExport')),
+      clip: () => [shown('#mExport') ? q('#mExport .dlg') : null],
     },
   ],
 
@@ -194,6 +197,7 @@ export const tours: Record<string, TourStep[]> = {
       enter: () => calm(),
       done: () => menuOpen(),
       show: () => click(q('#bMenu')),
+      clip: () => [menuOpen() ? q('#fileMenu') : null],
     },
     // Save as…: the Save project dialog
     {
@@ -215,6 +219,7 @@ export const tours: Record<string, TourStep[]> = {
         await hover(q('#bOpen'));
         c.shown = true;
       },
+      clip: () => [menuOpen() ? q('#fileMenu') : null],
     },
     // New project…: a blank canvas
     {
