@@ -2769,7 +2769,7 @@ a.tile:hover {
   object-position: 0 0;
 }
 .crop-graph {
-  object-position: 35% 70%;
+  object-position: 82% 50%;
 }
 .crop-agent {
   object-position: 50% 40%;
@@ -3459,6 +3459,1078 @@ figcaption {
 .licence li + li {
   margin-top: 4px;
 }
+.opt {
+  margin-top: 14px;
+  padding: 32px;
+}
+.opt h3 {
+  font: 400 clamp(30px, 3.4vw, 42px) / 1.05 var(--f-mark);
+  margin: 0 0 14px;
+}
+.opt p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 52ch;
+}
+.opt-tag {
+  display: inline-block;
+  margin-bottom: 16px;
+  font: 500 12px/1 var(--f-code);
+  color: var(--accent-fg);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.x-cap {
+  margin-top: 14px;
+}
+
+/* ---------- Features: the tiles' own little animations (site/src/art) ---------- */
+.spec-art .ta {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+}
+.spec-art > svg {
+  color: var(--fg);
+}
+.ta-dark {
+  background: #0d0f14;
+}
+/* pen: the curve draws on behind the pen, nodes and handles land as it passes */
+.ta-pen-line {
+  stroke-dasharray: 1;
+  animation: taDraw 4s var(--ease-io) infinite;
+}
+@keyframes taDraw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  55%,
+  88% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+.ta-pen-tip {
+  offset-path: path('M30 118 C70 30 130 30 150 80 S 210 130 214 40');
+  offset-rotate: 0deg;
+  animation: taTip 4s var(--ease-io) infinite;
+}
+@keyframes taTip {
+  0% {
+    offset-distance: 0%;
+    opacity: 1;
+  }
+  55% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  62%,
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+.ta-pen-n1,
+.ta-pen-h1,
+.ta-pen-n2,
+.ta-pen-h2,
+.ta-pen-n3 {
+  animation: taPop 4s infinite both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ta-pen-h1 {
+  animation-name: taPopH1;
+}
+.ta-pen-n2,
+.ta-pen-h2 {
+  animation-name: taPopN2;
+}
+.ta-pen-n3 {
+  animation-name: taPopN3;
+}
+@keyframes taPop {
+  0%,
+  2% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  6%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taPopH1 {
+  0%,
+  10% {
+    opacity: 0;
+  }
+  16%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taPopN2 {
+  0%,
+  28% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  33%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taPopN3 {
+  0%,
+  53% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  58%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* shapes: each one dragged out from its corner, in turn */
+.ta-sh {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+  animation: taShape 5s var(--ease-out) infinite both;
+}
+.ta-sh2 {
+  animation-delay: 0.5s;
+}
+.ta-sh3 {
+  animation-delay: 1s;
+}
+.ta-sh4 {
+  animation-delay: 1.5s;
+}
+@keyframes taShape {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  12%,
+  80% {
+    transform: none;
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: none;
+    opacity: 0;
+  }
+}
+.ta-sh-box {
+  animation: taShBox 5s linear infinite;
+}
+@keyframes taShBox {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  10% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(57px);
+  }
+  30% {
+    transform: translateX(124px);
+  }
+  40%,
+  80% {
+    transform: translateX(167px);
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: translateX(167px);
+    opacity: 0;
+  }
+}
+/* text: typed one script at a time, caret blinking */
+.spec-art .ta-text {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+}
+.tt {
+  animation: taType 5s steps(1) infinite both;
+}
+.tt1 {
+  font: 400 52px/1 var(--f-mark);
+}
+.tt2 {
+  font:
+    500 40px/1 'Frank Ruhl Libre',
+    'Times New Roman',
+    serif;
+  animation-name: taType2;
+}
+.tt3 {
+  font: 600 36px/1 var(--f-ui);
+  animation-name: taType3;
+}
+@keyframes taType {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  86% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taType2 {
+  0%,
+  28% {
+    opacity: 0;
+  }
+  30%,
+  86% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taType3 {
+  0%,
+  48% {
+    opacity: 0;
+  }
+  50%,
+  86% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-caret {
+  width: 2px;
+  height: 40px;
+  background: var(--accent);
+  margin-left: -10px;
+  animation: taBlink 0.8s steps(1) infinite;
+}
+@keyframes taBlink {
+  50% {
+    opacity: 0;
+  }
+}
+/* images: placed, then scaled and moved like any layer */
+.ta-img {
+  position: relative;
+  width: 150px;
+  height: 94px;
+  animation: taImg 5s var(--ease-io) infinite;
+}
+.ta-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  box-shadow: 0 8px 20px var(--shade);
+}
+@keyframes taImg {
+  0%,
+  8% {
+    transform: translate(0, 0) scale(0.7) rotate(0);
+    opacity: 0;
+  }
+  16% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.7);
+  }
+  40% {
+    transform: translate(-14px, -4px) scale(1.05) rotate(-4deg);
+  }
+  70%,
+  86% {
+    transform: translate(12px, 4px) scale(0.9) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) scale(0.7);
+    opacity: 0;
+  }
+}
+.ta-img-sel {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid var(--accent);
+}
+.ta-img-sel b {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--raised);
+  border: 1px solid var(--accent);
+}
+.ta-img-sel b:nth-child(1) {
+  left: -4px;
+  top: -4px;
+}
+.ta-img-sel b:nth-child(2) {
+  right: -4px;
+  top: -4px;
+}
+.ta-img-sel b:nth-child(3) {
+  left: -4px;
+  bottom: -4px;
+}
+.ta-img-sel b:nth-child(4) {
+  right: -4px;
+  bottom: -4px;
+}
+/* booleans: two circles meet, join, then one cuts the other */
+.ta-bool-a {
+  animation: taBoolA 5s var(--ease-io) infinite;
+}
+.ta-bool-b {
+  animation: taBoolB 5s var(--ease-io) infinite;
+}
+@keyframes taBoolA {
+  0%,
+  6% {
+    transform: translateX(-24px);
+  }
+  24%,
+  92% {
+    transform: none;
+  }
+  100% {
+    transform: translateX(-24px);
+  }
+}
+@keyframes taBoolB {
+  0%,
+  6% {
+    transform: translateX(24px);
+  }
+  24%,
+  92% {
+    transform: none;
+  }
+  100% {
+    transform: translateX(24px);
+  }
+}
+.ta-bool-o {
+  animation: taBoolO 5s infinite;
+}
+@keyframes taBoolO {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  36%,
+  90% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.ta-bool-cut {
+  animation: taBoolCut 5s infinite;
+}
+@keyframes taBoolCut {
+  0%,
+  56% {
+    opacity: 0;
+  }
+  60%,
+  88% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+.spec-art .ta-bool-lbl {
+  place-items: end center;
+  padding-bottom: 8px;
+  font: 500 11px/1 var(--f-code);
+  color: var(--muted);
+}
+.ta-bool-lbl span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  animation: taLbl1 5s infinite;
+}
+.ta-bool-lbl span + span {
+  animation-name: taLbl2;
+}
+@keyframes taLbl1 {
+  32%,
+  54% {
+    opacity: 1;
+  }
+  0%,
+  28%,
+  58%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taLbl2 {
+  60%,
+  88% {
+    opacity: 1;
+  }
+  0%,
+  56%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+/* a pointer, for the interaction tiles */
+.ta-cur {
+  position: absolute;
+  width: 16px;
+  height: 20px;
+  left: 50%;
+  top: 50%;
+  background: no-repeat center / contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='M1 1v15l4-4 3 7 3-1-3-7h6z' fill='%23161a25' stroke='%23fff' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  animation: taCur 4s var(--ease-io) infinite;
+}
+.ta-cur-hand {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='M5.5 9V3.5a1.3 1.3 0 012.6 0V8m0-1.5a1.3 1.3 0 012.6 0V8.5m0-1a1.3 1.3 0 012.6 0v4c0 3.5-2 6-5 6-2.6 0-3.8-1.2-5-3.2L1.6 11a1.3 1.3 0 012-1.5l1.9 1.8' fill='%23fff' stroke='%23161a25' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+@keyframes taCur {
+  0%,
+  10% {
+    transform: translate(70px, 46px);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  40%,
+  75% {
+    transform: translate(10px, 6px);
+    opacity: 1;
+  }
+  92%,
+  100% {
+    transform: translate(70px, 46px);
+    opacity: 0;
+  }
+}
+.ta-trig {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  animation: taTrig 4s var(--ease-out) infinite;
+}
+@keyframes taTrig {
+  0%,
+  38% {
+    transform: none;
+    box-shadow: 0 0 0 0 var(--accent-line);
+  }
+  44% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 10px transparent;
+  }
+  50%,
+  76% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  84%,
+  100% {
+    transform: none;
+  }
+}
+.ta-link {
+  font: 400 30px/1 var(--f-mark);
+  color: var(--accent-fg);
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat;
+  padding-bottom: 6px;
+  animation: taLink 4s var(--ease-out) infinite;
+}
+@keyframes taLink {
+  0%,
+  36% {
+    background-size: 0 1.5px;
+  }
+  52%,
+  84% {
+    background-size: 100% 1.5px;
+  }
+  96%,
+  100% {
+    background-size: 0 1.5px;
+  }
+}
+/* player API: a line runs, the bar follows it */
+.ta-api {
+  grid-template-rows: auto auto;
+  gap: 14px;
+  align-content: center;
+}
+.ta-code {
+  font: 400 13px/1.7 var(--f-code);
+  color: #a9b0c0;
+  display: grid;
+}
+.ta-code i {
+  font-style: normal;
+  color: #a3b2ff;
+}
+.ta-code b {
+  font-weight: 400;
+  color: #f2b63d;
+}
+.ta-code > span {
+  padding: 0 6px;
+  border-radius: 4px;
+  animation: taLine 6s steps(1) infinite;
+}
+.ta-code .l2 {
+  animation-name: taLine2;
+}
+.ta-code .l3 {
+  animation-name: taLine3;
+}
+@keyframes taLine {
+  0%,
+  33% {
+    background: rgba(113, 137, 255, 0.18);
+  }
+  34%,
+  100% {
+    background: none;
+  }
+}
+@keyframes taLine2 {
+  0%,
+  33% {
+    background: none;
+  }
+  34%,
+  66% {
+    background: rgba(113, 137, 255, 0.18);
+  }
+  67%,
+  100% {
+    background: none;
+  }
+}
+@keyframes taLine3 {
+  0%,
+  66% {
+    background: none;
+  }
+  67%,
+  100% {
+    background: rgba(113, 137, 255, 0.18);
+  }
+}
+.ta-bar {
+  position: relative;
+  width: 160px;
+  height: 4px;
+  border-radius: 2px;
+  background: #262a35;
+}
+.ta-bar u {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: #7189ff;
+  animation: taBar 6s linear infinite;
+}
+.ta-bar em {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 12px;
+  background: #ff6b6f;
+  animation: taHead 6s linear infinite;
+}
+@keyframes taBar {
+  0% {
+    width: 0;
+  }
+  10%,
+  33% {
+    width: 40%;
+  }
+  66% {
+    width: 0;
+  }
+  67% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+@keyframes taHead {
+  0% {
+    left: 0;
+  }
+  10%,
+  33% {
+    left: 40%;
+  }
+  66%,
+  67% {
+    left: 0;
+  }
+  100% {
+    left: 100%;
+  }
+}
+/* select same: click one, its twin is picked too */
+.ta-ss1,
+.ta-ss2 {
+  opacity: 0;
+  animation: taSel1 4s infinite;
+}
+.ta-ss2 {
+  animation-name: taSel2;
+}
+@keyframes taSel1 {
+  0%,
+  28% {
+    opacity: 0;
+  }
+  32%,
+  84% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taSel2 {
+  0%,
+  44% {
+    opacity: 0;
+  }
+  48%,
+  84% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-ss-cur {
+  animation: taSsCur 4s var(--ease-io) infinite;
+}
+@keyframes taSsCur {
+  0% {
+    transform: translate(110px, 120px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  26%,
+  80% {
+    transform: translate(60px, 80px);
+    opacity: 1;
+  }
+  95%,
+  100% {
+    transform: translate(110px, 120px);
+    opacity: 0;
+  }
+}
+/* numbers: nudged up with the arrow key, ten at a time with Shift */
+.spec-art .ta-num {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.ta-num-win {
+  display: inline-block;
+  height: 1.3em;
+  overflow: hidden;
+  vertical-align: bottom;
+  color: var(--fg) !important;
+}
+.ta-num-roll {
+  display: block;
+  line-height: 1.3em;
+  color: var(--fg);
+  animation: taRoll 5s steps(1) infinite;
+}
+@keyframes taRoll {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  21%,
+  40% {
+    transform: translateY(-1.3em);
+  }
+  41%,
+  60% {
+    transform: translateY(-2.6em);
+  }
+  61%,
+  88% {
+    transform: translateY(-3.9em);
+  }
+  89%,
+  100% {
+    transform: translateY(-5.2em);
+  }
+}
+.ta-k-up,
+.ta-k-sh {
+  animation: taKey 5s infinite;
+}
+@keyframes taKey {
+  0%,
+  17%,
+  23%,
+  37%,
+  43%,
+  57%,
+  63%,
+  100% {
+    transform: none;
+    border-color: var(--line-2);
+  }
+  20%,
+  40%,
+  60% {
+    transform: translateY(2px);
+    border-color: var(--accent);
+    border-bottom-width: 1px;
+  }
+}
+.ta-k-sh {
+  animation-name: taKeySh;
+}
+@keyframes taKeySh {
+  0%,
+  15%,
+  65%,
+  100% {
+    transform: none;
+    border-color: var(--line-2);
+  }
+  18%,
+  62% {
+    transform: translateY(2px);
+    border-color: var(--accent);
+    border-bottom-width: 1px;
+  }
+}
+/* keys: pressed in turn */
+.spec-art .ta-keys {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+.ta-keys kbd {
+  font-size: 13px;
+  padding: 7px 9px;
+  animation: taPress 3.5s infinite;
+}
+.ta-keys kbd:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.ta-keys kbd:nth-child(3) {
+  animation-delay: 0.8s;
+}
+.ta-keys kbd:nth-child(4) {
+  animation-delay: 1.2s;
+}
+.ta-keys kbd:nth-child(5) {
+  animation-delay: 1.6s;
+}
+.ta-keys kbd:nth-child(6) {
+  animation-delay: 2s;
+}
+.ta-keys kbd:nth-child(7) {
+  animation-delay: 2.4s;
+}
+@keyframes taPress {
+  0%,
+  12%,
+  100% {
+    transform: none;
+    border-color: var(--line-2);
+    color: var(--fg);
+  }
+  4%,
+  8% {
+    transform: translateY(2px);
+    border-color: var(--accent);
+    border-bottom-width: 1px;
+    color: var(--accent-fg);
+  }
+}
+/* help: hover the ⓘ, the explanation shows */
+.ta-help {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ta-help .vh-tip {
+  animation: taTip2 4s var(--ease-out) infinite;
+}
+@keyframes taTip2 {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  38%,
+  82% {
+    opacity: 1;
+    transform: none;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-i {
+  display: inline-block;
+  border-radius: 50%;
+  animation: taI 4s infinite;
+}
+@keyframes taI {
+  0%,
+  26%,
+  86%,
+  100% {
+    background: transparent;
+  }
+  30%,
+  82% {
+    background: var(--accent-soft);
+  }
+}
+/* spell check: the slip is underlined, then fixed */
+.ta-spell {
+  position: relative;
+  display: grid;
+  font: 400 30px/1 var(--f-mark);
+  padding-bottom: 8px;
+}
+.ta-spell > span {
+  grid-area: 1 / 1;
+}
+.ta-sp-bad {
+  animation: taBad 5s steps(1) infinite;
+}
+.ta-sp-ok {
+  opacity: 0;
+  animation: taOk 5s steps(1) infinite;
+}
+@keyframes taBad {
+  0%,
+  64% {
+    opacity: 1;
+  }
+  65%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes taOk {
+  0%,
+  64% {
+    opacity: 0;
+  }
+  65%,
+  100% {
+    opacity: 1;
+  }
+}
+.ta-spell u {
+  position: absolute;
+  left: 52%;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: radial-gradient(
+      circle at 3px 0,
+      transparent 2.2px,
+      var(--head) 2.4px,
+      var(--head) 3.4px,
+      transparent 3.6px
+    )
+    0 0 / 6px 6px repeat-x;
+  transform-origin: 0 50%;
+  animation: taWavy 5s var(--ease-out) infinite;
+}
+@keyframes taWavy {
+  0%,
+  10% {
+    transform: scaleX(0);
+  }
+  24%,
+  62% {
+    transform: none;
+    opacity: 1;
+  }
+  66%,
+  100% {
+    transform: none;
+    opacity: 0;
+  }
+}
+/* projects: the first frame becomes the file's thumbnail */
+.ta-thumb {
+  position: relative;
+  width: 52px;
+  height: 33px;
+  border-radius: 3px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.ta-thumb img {
+  display: block;
+  animation: taThumb 4s var(--ease-out) infinite;
+}
+@keyframes taThumb {
+  0%,
+  20% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+  34%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-saved {
+  font-style: normal;
+  color: var(--ok, #3ecf8e);
+  font-weight: 700;
+  animation: taSaved 4s infinite;
+}
+@keyframes taSaved {
+  0%,
+  40% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  46%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-file {
+  padding: 8px 12px;
+  gap: 10px;
+}
+.ta-file > span:nth-child(2) {
+  font-size: 12px;
+}
+/* import: files drop in */
+.ta-exts span {
+  animation: taDrop 4s var(--ease-out) infinite both;
+}
+.ta-exts span:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.ta-exts span:nth-child(3) {
+  animation-delay: 0.5s;
+}
+@keyframes taDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  14%,
+  80% {
+    opacity: 1;
+    transform: none;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+/* six nav links: tighter between the phone layout and a wide window */
+@media (max-width: 1060px) {
+  .nav {
+    margin-left: 4px;
+    gap: 0;
+  }
+  .nav a {
+    padding: 8px 9px;
+    font-size: 14px;
+  }
+  .top .btn .lbl-long {
+    display: none;
+  }
+}
 
     </style>
   </head>
@@ -3471,7 +4543,8 @@ figcaption {
         <path class="lg-b" d="M4.775 16.537 C4.042 16.537 3.353 16.403 2.709 16.136 C2.065 15.869 1.51 15.49 1.044 14.998 C0.579 14.506 0.23 13.924 0 13.254 L1.995 12.359 C2.288 12.998 2.694 13.5 3.212 13.867 C3.73 14.233 4.304 14.417 4.932 14.417 C5.267 14.417 5.555 14.364 5.796 14.26 C6.037 14.155 6.225 14.011 6.361 13.828 C6.497 13.644 6.565 13.427 6.565 13.176 C6.565 12.904 6.482 12.671 6.314 12.477 C6.147 12.283 5.885 12.129 5.529 12.013 L3.236 11.26 C2.304 10.956 1.602 10.524 1.131 9.964 C0.66 9.404 0.424 8.731 0.424 7.945 C0.424 7.254 0.594 6.647 0.935 6.123 C1.275 5.6 1.751 5.192 2.364 4.898 C2.976 4.605 3.681 4.459 4.476 4.459 C5.178 4.459 5.827 4.579 6.424 4.82 C7.021 5.061 7.537 5.401 7.971 5.841 C8.406 6.281 8.733 6.809 8.953 7.427 L6.974 8.322 C6.754 7.778 6.424 7.351 5.984 7.042 C5.544 6.733 5.042 6.579 4.476 6.579 C4.152 6.579 3.864 6.631 3.613 6.736 C3.361 6.841 3.168 6.99 3.031 7.184 C2.895 7.377 2.827 7.6 2.827 7.851 C2.827 8.123 2.916 8.362 3.094 8.566 C3.272 8.77 3.539 8.93 3.895 9.045 L6.141 9.767 C7.084 10.071 7.788 10.495 8.254 11.04 C8.72 11.584 8.953 12.249 8.953 13.034 C8.953 13.715 8.775 14.32 8.419 14.849 C8.063 15.377 7.573 15.791 6.95 16.089 C6.327 16.388 5.602 16.537 4.775 16.537 Z"/><path class="lg-b" d="M13.037 16.348 L9.031 4.647 L11.701 4.647 L14.45 13.208 L17.199 4.647 L19.869 4.647 L15.864 16.348 Z"/><path class="lg-b" d="M23.191 4.906 C23.908 4.608 24.691 4.459 25.539 4.459 C26.387 4.459 27.149 4.6 27.824 4.883 C28.5 5.165 29.073 5.542 29.544 6.014 C30.015 6.485 30.35 7.008 30.549 7.584 L28.398 8.621 C28.199 8.055 27.851 7.587 27.353 7.215 C26.856 6.843 26.251 6.657 25.539 6.657 C24.848 6.657 24.241 6.82 23.717 7.144 C23.193 7.469 22.788 7.917 22.5 8.487 C22.212 9.058 22.068 9.726 22.068 10.49 C22.068 11.254 22.22 11.924 22.523 12.5 C22.827 13.076 23.243 13.527 23.772 13.851 C24.301 14.176 24.911 14.338 25.602 14.338 C26.136 14.338 26.636 14.236 27.102 14.032 C27.568 13.828 27.945 13.532 28.233 13.144 C28.521 12.757 28.665 12.291 28.665 11.746 L28.665 11.715 L25.539 11.715 L25.539 9.673 L31.099 9.673 L31.099 10.914 C31.099 11.867 30.942 12.697 30.628 13.403 C30.314 14.11 29.892 14.697 29.364 15.163 C28.835 15.629 28.243 15.974 27.589 16.199 C26.934 16.424 26.272 16.537 25.602 16.537 C24.764 16.537 23.984 16.385 23.262 16.081 C22.539 15.778 21.906 15.354 21.361 14.809 C20.817 14.265 20.392 13.626 20.089 12.893 C19.785 12.16 19.633 11.359 19.633 10.49 C19.633 9.621 19.78 8.817 20.073 8.079 C20.366 7.341 20.78 6.702 21.314 6.163 C21.848 5.623 22.474 5.205 23.191 4.906 Z"/><path class="lg-a" d="M37.08 16.741 C36.222 16.741 35.45 16.545 34.764 16.152 C34.078 15.759 33.533 15.223 33.13 14.542 C32.727 13.862 32.526 13.097 32.526 12.249 C32.526 11.401 32.725 10.639 33.122 9.964 C33.52 9.288 34.065 8.757 34.756 8.37 C35.447 7.982 36.222 7.788 37.08 7.788 C37.719 7.788 38.311 7.898 38.855 8.118 C39.4 8.338 39.866 8.644 40.253 9.037 C40.641 9.43 40.918 9.893 41.086 10.427 L39.044 11.307 C38.897 10.877 38.649 10.537 38.298 10.286 C37.947 10.034 37.541 9.909 37.08 9.909 C36.672 9.909 36.308 10.008 35.989 10.207 C35.669 10.406 35.418 10.684 35.235 11.04 C35.052 11.396 34.96 11.804 34.96 12.265 C34.96 12.725 35.052 13.134 35.235 13.49 C35.418 13.846 35.669 14.123 35.989 14.322 C36.308 14.521 36.672 14.621 37.08 14.621 C37.552 14.621 37.96 14.495 38.306 14.244 C38.651 13.992 38.897 13.652 39.044 13.223 L41.086 14.118 C40.929 14.621 40.656 15.071 40.269 15.469 C39.881 15.867 39.416 16.178 38.871 16.403 C38.327 16.629 37.73 16.741 37.08 16.741 Z"/><path class="lg-a" d="M41.683 16.553 L41.683 7.977 L44.039 7.977 L44.039 16.553 Z"/><path class="lg-p" style="--i:0" d="M48.237 3.673 L48.237 2.319 C48.237 2.042 48.461 1.818 48.738 1.818 L50.092 1.818 C50.368 1.818 50.593 2.042 50.593 2.319 L50.593 3.673 C50.593 3.949 50.368 4.174 50.092 4.174 L48.738 4.174 C48.461 4.174 48.237 3.949 48.237 3.673 Z"/><path class="lg-p" style="--i:1" d="M52.794 3.673 L52.794 2.319 C52.794 2.042 53.018 1.818 53.295 1.818 L54.649 1.818 C54.925 1.818 55.15 2.042 55.15 2.319 L55.15 3.673 C55.15 3.949 54.925 4.174 54.649 4.174 L53.295 4.174 C53.018 4.174 52.794 3.949 52.794 3.673 Z"/><path class="lg-p" style="--i:2" d="M57.351 3.673 L57.351 2.319 C57.351 2.042 57.575 1.818 57.852 1.818 L59.206 1.818 C59.483 1.818 59.707 2.042 59.707 2.319 L59.707 3.673 C59.707 3.949 59.483 4.174 59.206 4.174 L57.852 4.174 C57.575 4.174 57.351 3.949 57.351 3.673 Z"/><path class="lg-p" style="--i:3" d="M61.908 3.673 L61.908 2.319 C61.908 2.042 62.132 1.818 62.409 1.818 L63.763 1.818 C64.04 1.818 64.264 2.042 64.264 2.319 L64.264 3.673 C64.264 3.949 64.04 4.174 63.763 4.174 L62.409 4.174 C62.132 4.174 61.908 3.949 61.908 3.673 Z"/><path class="lg-p" style="--i:4" d="M66.465 3.673 L66.465 2.319 C66.465 2.042 66.689 1.818 66.966 1.818 L68.32 1.818 C68.597 1.818 68.821 2.042 68.821 2.319 L68.821 3.673 C68.821 3.949 68.597 4.174 68.32 4.174 L66.966 4.174 C66.689 4.174 66.465 3.949 66.465 3.673 Z"/><path class="lg-p" style="--i:5" d="M71.022 3.673 L71.022 2.319 C71.022 2.042 71.247 1.818 71.523 1.818 L72.877 1.818 C73.154 1.818 73.378 2.042 73.378 2.319 L73.378 3.673 C73.378 3.949 73.154 4.174 72.877 4.174 L71.523 4.174 C71.247 4.174 71.022 3.949 71.022 3.673 Z"/><path class="lg-p" style="--i:6" d="M75.579 3.673 L75.579 2.319 C75.579 2.042 75.804 1.818 76.08 1.818 L77.434 1.818 C77.711 1.818 77.935 2.042 77.935 2.319 L77.935 3.673 C77.935 3.949 77.711 4.174 77.434 4.174 L76.08 4.174 C75.804 4.174 75.579 3.949 75.579 3.673 Z"/><path class="lg-a" d="M44.981 16.553 L44.981 7.977 L47.18 7.977 L47.18 9.673 L47.054 9.296 C47.253 8.783 47.575 8.404 48.02 8.157 C48.465 7.911 48.986 7.788 49.583 7.788 C50.232 7.788 50.8 7.924 51.287 8.197 C51.774 8.469 52.154 8.849 52.426 9.335 C52.698 9.822 52.834 10.39 52.834 11.04 L52.834 16.553 L50.478 16.553 L50.478 11.542 C50.478 11.207 50.413 10.919 50.282 10.678 C50.151 10.438 49.968 10.249 49.732 10.113 C49.497 9.977 49.222 9.909 48.908 9.909 C48.604 9.909 48.332 9.977 48.091 10.113 C47.85 10.249 47.664 10.438 47.533 10.678 C47.402 10.919 47.337 11.207 47.337 11.542 L47.337 16.553 Z"/><path class="lg-a" d="M57.939 16.537 C57.028 16.537 56.237 16.335 55.567 15.932 C54.897 15.529 54.379 14.987 54.012 14.307 C53.646 13.626 53.463 12.872 53.463 12.045 C53.463 11.186 53.654 10.422 54.036 9.752 C54.418 9.082 54.934 8.553 55.583 8.165 C56.232 7.778 56.965 7.584 57.782 7.584 C58.462 7.584 59.065 7.692 59.588 7.906 C60.112 8.121 60.554 8.422 60.915 8.809 C61.277 9.197 61.551 9.644 61.74 10.152 C61.928 10.66 62.023 11.212 62.023 11.809 C62.023 11.977 62.015 12.142 61.999 12.304 C61.983 12.466 61.955 12.605 61.913 12.72 L55.489 12.72 L55.489 10.993 L60.578 10.993 L59.462 11.809 C59.567 11.359 59.562 10.958 59.447 10.608 C59.332 10.257 59.13 9.979 58.842 9.775 C58.554 9.571 58.201 9.469 57.782 9.469 C57.373 9.469 57.023 9.568 56.729 9.767 C56.436 9.966 56.216 10.26 56.07 10.647 C55.923 11.034 55.866 11.506 55.897 12.061 C55.855 12.542 55.913 12.966 56.07 13.333 C56.227 13.699 56.468 13.985 56.792 14.189 C57.117 14.393 57.51 14.495 57.97 14.495 C58.389 14.495 58.748 14.411 59.046 14.244 C59.345 14.076 59.578 13.846 59.745 13.553 L61.63 14.448 C61.462 14.867 61.198 15.233 60.837 15.547 C60.476 15.862 60.049 16.105 59.557 16.278 C59.065 16.451 58.525 16.537 57.939 16.537 Z"/><path class="lg-a" d="M62.619 16.348 L62.619 7.773 L64.818 7.773 L64.818 9.862 L64.583 9.516 C64.708 8.856 65.012 8.37 65.494 8.055 C65.975 7.741 66.551 7.584 67.222 7.584 C67.934 7.584 68.559 7.765 69.098 8.126 C69.638 8.487 69.975 8.972 70.112 9.579 L69.436 9.642 C69.719 8.94 70.122 8.422 70.646 8.087 C71.169 7.752 71.782 7.584 72.483 7.584 C73.101 7.584 73.648 7.72 74.125 7.993 C74.601 8.265 74.975 8.644 75.248 9.131 C75.52 9.618 75.656 10.186 75.656 10.835 L75.656 16.348 L73.3 16.348 L73.3 11.338 C73.3 11.003 73.24 10.715 73.119 10.474 C72.999 10.233 72.829 10.045 72.609 9.909 C72.389 9.773 72.122 9.705 71.808 9.705 C71.504 9.705 71.24 9.773 71.015 9.909 C70.79 10.045 70.617 10.233 70.496 10.474 C70.376 10.715 70.316 11.003 70.316 11.338 L70.316 16.348 L67.96 16.348 L67.96 11.338 C67.96 11.003 67.9 10.715 67.779 10.474 C67.659 10.233 67.489 10.045 67.269 9.909 C67.049 9.773 66.782 9.705 66.468 9.705 C66.164 9.705 65.9 9.773 65.674 9.909 C65.449 10.045 65.277 10.233 65.156 10.474 C65.036 10.715 64.975 11.003 64.975 11.338 L64.975 16.348 Z"/><path class="lg-a" d="M79.08 16.537 C78.462 16.537 77.928 16.437 77.478 16.239 C77.028 16.04 76.682 15.754 76.441 15.383 C76.201 15.011 76.08 14.568 76.08 14.055 C76.08 13.574 76.19 13.147 76.41 12.775 C76.63 12.404 76.968 12.092 77.423 11.841 C77.878 11.589 78.447 11.411 79.127 11.307 L81.75 10.883 L81.75 12.61 L79.551 13.003 C79.216 13.066 78.96 13.173 78.782 13.325 C78.604 13.477 78.515 13.694 78.515 13.977 C78.515 14.239 78.614 14.443 78.813 14.589 C79.012 14.736 79.258 14.809 79.551 14.809 C79.939 14.809 80.279 14.725 80.572 14.558 C80.865 14.39 81.093 14.163 81.255 13.875 C81.418 13.587 81.499 13.27 81.499 12.924 L81.499 10.694 C81.499 10.369 81.371 10.097 81.114 9.877 C80.858 9.657 80.509 9.548 80.07 9.548 C79.651 9.548 79.282 9.663 78.962 9.893 C78.643 10.123 78.41 10.427 78.263 10.804 L76.379 9.909 C76.546 9.427 76.813 9.013 77.18 8.668 C77.546 8.322 77.986 8.055 78.499 7.867 C79.012 7.678 79.572 7.584 80.18 7.584 C80.902 7.584 81.541 7.715 82.096 7.977 C82.651 8.239 83.083 8.602 83.392 9.068 C83.7 9.534 83.855 10.076 83.855 10.694 L83.855 16.348 L81.656 16.348 L81.656 14.966 L82.19 14.872 C81.939 15.249 81.661 15.561 81.358 15.807 C81.054 16.053 80.714 16.236 80.337 16.356 C79.96 16.477 79.541 16.537 79.08 16.537 Z"/><path class="lg-a" d="M45.787 3.425 L41.46 5.924 C41.129 6.115 40.715 5.876 40.715 5.494 L40.715 0.497 C40.715 0.115 41.129 -0.124 41.46 0.067 L45.787 2.566 C46.118 2.757 46.118 3.234 45.787 3.425 Z"/>
       </svg>
     </a>
-    <nav class="nav" aria-label="Site"><a href="../features/">Features</a>
+    <nav class="nav" aria-label="Site"><a href="../">Home</a>
+      <a href="../features/">Features</a>
       <a href="../agent/">Design agent</a>
       <a href="../import/">Import</a>
       <a href="../export/">Export</a>
@@ -4753,6 +5826,28 @@ figcaption {
         press(k);
       });
     })();
+
+  /* ---------- clips of the editor: play while in view (none for readers who ask for less motion) ---------- */
+  var vids = d.querySelectorAll('video.vid');
+  if (vids.length && 'IntersectionObserver' in window) {
+    var still = matchMedia('(prefers-reduced-motion: reduce)');
+    var vio = new IntersectionObserver(
+      function (en) {
+        en.forEach(function (e) {
+          var v = e.target;
+          if (e.isIntersecting && !still.matches) {
+            v.preload = 'auto';
+            var p = v.play();
+            if (p && p.catch) p.catch(function () {});
+          } else v.pause();
+        });
+      },
+      { rootMargin: '160px 0px' },
+    );
+    vids.forEach(function (v) {
+      vio.observe(v);
+    });
+  }
 
   /* ---------- Features: the side index follows the group in view ---------- */
   if (d.querySelector('.idx') && 'IntersectionObserver' in window)

@@ -1,20 +1,32 @@
-# SVGcinema — the website's pictures of the editor
-# Every picture of the editor's UI on the website is a capture of the running editor, never redrawn by hand.
-# This script makes them all, in the light and the dark theme, as WebP at 2× in site/img/.
+# SVGcinema — the website's clips of the editor
+# Every picture of the editor's UI on the website is a recording of the running editor, never redrawn by hand:
+# short looping clips (MP4, H.264) with a poster frame (WebP), in the light and the dark theme, in site/img/.
 # Run it after a UI change that shows in them, with the dev server on port 5199 (npx vite --port 5199):
-#   python3 site/captures.py [http://localhost:5199/]
-# Needs Playwright for Python (Chromium) and Pillow. The design agent's turns are scripted: Playwright answers
-# OpenRouter's URL with canned streams (as in tests/browser/agent-*.py), so no model or key is used.
-import asyncio, io, json, os, sys
+#   python3 site/captures.py [http://localhost:5199/] [light|dark] [clip names…]
+# Needs Playwright for Python (Chromium), Pillow and ffmpeg (libx264).
+#
+# Frames are exactly 1/FPS apart however long a screenshot takes: site/clock.js runs in every frame of the page
+# and, once frozen, time moves only when the recorder ticks it (rAF, timers, Date, CSS and SMIL animations).
+# The design agent's turns are scripted: Playwright answers OpenRouter's URL with canned streams (as in
+# tests/browser/agent-*.py), so no model or key is used.
+import asyncio, io, json, os, shutil, subprocess, sys, tempfile
 from PIL import Image
 from playwright.async_api import async_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMG = os.path.join(ROOT, 'site/img')
-BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://localhost:5199/'
+ARGS = [a for a in sys.argv[1:] if not a.startswith('http') and a not in ('light', 'dark')]
+THEMES = [a for a in sys.argv[1:] if a in ('light', 'dark')] or ['light', 'dark']
+BASE = next((a for a in sys.argv[1:] if a.startswith('http')), 'http://localhost:5199/')
+CLOCK = open(os.path.join(ROOT, 'site/clock.js')).read()
+FPS = 25
 CORS = {'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS'}
 ALL = "(()=>{const all=[];const w=a=>a.forEach(l=>{all.push(l);if(l.ch)w(l.ch)});w(st.doc.layers);return all})()"
 os.makedirs(IMG, exist_ok=True)
+
+
+def want(name):
+    return not ARGS or name in ARGS
 
 
 def oai(text=None, tools=None):
@@ -27,47 +39,102 @@ def oai(text=None, tools=None):
     return s + 'data: [DONE]\n\n'
 
 
-def save(png, name, crop=None, collapse=False):
-    """Writes site/img/<name>.webp from a PNG screenshot (bytes), optionally cropped (in 2× pixels) and with
-    long runs of empty rows (an agent panel's blank chat area) squeezed out."""
-    im = Image.open(io.BytesIO(png)).convert('RGB')
-    if crop:
-        im = im.crop(crop)
-    if collapse:
-        w, h = im.size
-        px = im.load()
+def squeeze_rows(im):
+    """The rows to keep when long runs of empty rows (an agent panel's blank chat area) are squeezed out."""
+    w, h = im.size
+    px = im.load()
 
-        def blank(y):
-            c = px[w // 2, y]
-            return all(sum(abs(a - b) for a, b in zip(px[x, y], c)) <= 12 for x in range(4, w - 4, 7))
+    def blank(y):
+        c = px[w // 2, y]
+        return all(sum(abs(a - b) for a, b in zip(px[x, y], c)) <= 12 for x in range(4, w - 4, 7))
 
-        rows, y = [], 0
-        while y < h:
-            if blank(y):
-                e = y
-                while e < h and blank(e):
-                    e += 1
-                rows += list(range(y, y + 24)) + list(range(e - 24, e)) if e - y > 120 else list(range(y, e))
-                y = e
-            else:
-                rows.append(y)
-                y += 1
-        out = Image.new('RGB', (w, len(rows)))
-        for i, yy in enumerate(rows):
-            out.paste(im.crop((0, yy, w, yy + 1)), (0, i))
-        im = out
-    path = os.path.join(IMG, name + '.webp')
-    im.save(path, 'WEBP', quality=86, method=6)
-    print(f'site/img/{name}.webp {im.size[0]}×{im.size[1]} {os.path.getsize(path) // 1024} KB')
+    rows, y = [], 0
+    while y < h:
+        if blank(y):
+            e = y
+            while e < h and blank(e):
+                e += 1
+            rows += list(range(y, y + 24)) + list(range(e - 24, e)) if e - y > 120 else list(range(y, e))
+            y = e
+        else:
+            rows.append(y)
+            y += 1
+    return rows
 
 
-async def page(b, theme, settings=None, route=None):
+def keep_rows(im, rows):
+    out = Image.new('RGB', (im.size[0], len(rows)))
+    for i, yy in enumerate(rows):
+        out.paste(im.crop((0, yy, im.size[0], yy + 1)), (0, i))
+    return out
+
+
+class Rec:
+    """Records one clip: begin() freezes the page's clock, each frame ticks it by 1/FPS and takes a screenshot of
+    the region, end() writes site/img/<name>.mp4 and its poster <name>.webp."""
+
+    def __init__(self, pg, name, region, squeeze=False, maxw=1800, poster=0.5, wait=0):
+        self.pg, self.name, self.region, self.squeeze, self.maxw, self.poster, self.wait = pg, name, region, squeeze, maxw, poster, wait
+        self.frames = []
+
+    async def begin(self):
+        r = self.region
+        if isinstance(r, str):
+            b = await self.pg.locator(r).first.bounding_box()
+            r = {'x': b['x'], 'y': b['y'], 'width': b['width'], 'height': b['height']}
+        self.clip = {k: round(v) for k, v in r.items()}
+        await self.tick(0)
+        return self
+
+    async def tick(self, ms):
+        for f in self.pg.frames:
+            try:
+                await f.evaluate('([c,ms])=>{if(!window.__tick)(0,eval)(c);__tick(ms)}', [CLOCK, ms])
+            except Exception:
+                pass
+
+    async def frame(self, n=1, wait=None):
+        for _ in range(n):
+            await self.tick(1000 / FPS)
+            w = self.wait if wait is None else wait
+            if w:
+                await self.pg.wait_for_timeout(w)
+            self.frames.append(await self.pg.screenshot(clip=self.clip, scale='device', type='png'))
+
+    async def hold(self, sec, wait=None):
+        await self.frame(max(1, round(sec * FPS)), wait)
+
+    async def end(self):
+        d = tempfile.mkdtemp()
+        rows = None
+        if self.squeeze:
+            rows = squeeze_rows(Image.open(io.BytesIO(self.frames[-1])).convert('RGB'))
+        for i, f in enumerate(self.frames):
+            im = Image.open(io.BytesIO(f)).convert('RGB')
+            if rows:
+                im = keep_rows(im, rows)
+            im.save(f'{d}/{i:05d}.png')
+        mp4 = os.path.join(IMG, self.name + '.mp4')
+        vf = f'scale=trunc(min(iw\\,{self.maxw})/2)*2:-2:flags=lanczos'
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', f'{d}/%05d.png', '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '25', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', mp4], check=True)
+        # the poster: the same frame size as the video
+        n = min(len(self.frames) - 1, int(self.poster * len(self.frames)))
+        p = os.path.join(IMG, self.name + '.webp')
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{d}/{n:05d}.png', '-vf', vf, '-q:v', '86', p], check=True)
+        shutil.rmtree(d)
+        print(f'site/img/{self.name}.mp4 {len(self.frames) / FPS:.1f}s {os.path.getsize(mp4) // 1024} KB, poster {os.path.getsize(p) // 1024} KB')
+
+
+async def page(b, theme, settings=None, route=None, tl=None):
     c = await b.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2)
     pg = await c.new_page()
-    pg.set_default_timeout(8000)
+    pg.set_default_timeout(10000)
     if route:
         await pg.route('https://openrouter.ai/**', route)
+    await pg.add_init_script(CLOCK)
     init = f"localStorage.setItem('svgcinema:theme','{theme}');"
+    if tl:
+        init += f"localStorage.setItem('svgcinema:tlH','{tl}');"
     if settings:
         init += "localStorage.setItem('svgcinema:agent.keys', JSON.stringify({openrouter:'test-key'}));"
         init += f"localStorage.setItem('svgcinema:agent.settings', {json.dumps(json.dumps(settings))});"
@@ -78,48 +145,94 @@ async def page(b, theme, settings=None, route=None):
     return c, pg
 
 
-async def shots(b, theme):
+def pick(*names):
+    """JS: select the sample layers with these names (the first replaces the selection)."""
+    js = ''.join(f"hi.select(a.find(l=>l.name==={json.dumps(n)}).id{',' + repr('toggle') if i else ''});" for i, n in enumerate(names))
+    return f"(()=>{{const a={ALL};{js}}})()"
+
+
+EDITOR_R = {'x': 300, 'y': 52, 'width': 1140, 'height': 560}  # the canvas and the inspector
+DRAW_R = {'x': 0, 'y': 52, 'width': 804, 'height': 560}  # the tool rail, the Layers panel and the canvas
+
+
+async def type_in(rec, sel, text, per=2):
+    for ch in text:
+        await rec.pg.locator(sel).press_sequentially(ch)
+        await rec.frame(per)
+
+
+async def drag(rec, a, b, frames=14):
+    pg = rec.pg
+    await pg.mouse.move(*a)
+    await pg.mouse.down()
+    await rec.frame(2)
+    for i in range(1, frames + 1):
+        t = i / frames
+        t = t * t * (3 - 2 * t)
+        await pg.mouse.move(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+        await rec.frame(1)
+    await pg.mouse.up()
+    await rec.frame(2)
+
+
+async def clips(b, theme):
     sfx = '' if theme == 'light' else '-dark'
     key = {'provider': 'openrouter', 'model': 'anthropic/claude-sonnet-5.5', 'connect': 'key'}
 
-    # 1. the agent after a request: the sun breathes, the title pops in (one undo step)
-    async def chat(r):
-        q = r.request
-        if q.method == 'OPTIONS':
-            return await r.fulfill(status=204, headers=CORS)
-        if q.method == 'GET':
-            return await r.fulfill(status=404, headers=CORS, body='')
-        msgs = json.loads(q.post_data)['messages']
-        last = [i for i, m in enumerate(msgs) if m['role'] == 'user'][-1]
-        tools = [m for m in msgs[last:] if m['role'] == 'tool']
-        ids = await pg.evaluate(f"(()=>{{const a={ALL};const f=n=>a.find(l=>l.name===n).id;return {{sun:f('Sun'),title:f('Title')}}}})()")
-        if not tools:
-            out = oai('I’ll give the sun a slow breathe and pop the title in once the sun is up.', [('apply_preset', {'preset': 'breathe', 'ids': [ids['sun']], 'at': 0})])
-        elif len(tools) == 1:
-            out = oai(None, [('apply_preset', {'preset': 'pop-in', 'ids': [ids['title']], 'at': 2})])
-        else:
-            out = oai('Done. The sun breathes over the whole loop, and the title pops in at 2 s, after the sun has cleared the hills. Want the rays to turn faster too?')
-        await r.fulfill(status=200, headers={**CORS, 'content-type': 'text/event-stream'}, body=out)
+    # ---------- the design agent: a request, its steps, the answer ----------
+    if want('talk'):
+        pg = None
 
-    c, pg = await page(b, theme, key, chat)
-    await pg.click('#bAgent')
-    await pg.wait_for_timeout(400)
-    await pg.fill('#agText', 'Make the sun breathe and pop the title in after it rises')
-    await pg.press('#agText', 'Enter')
-    await pg.wait_for_timeout(2500)
-    await pg.evaluate(f"(()=>{{const a={ALL};hi.select(a.find(l=>l.name==='Sun').id);hi.setTime(2.4)}})()")
-    await pg.wait_for_timeout(400)
-    save(await pg.locator('#agent').screenshot(), 'agent-chat' + sfx, collapse=True)
-    await c.close()
+        async def chat(r):
+            q = r.request
+            if q.method == 'OPTIONS':
+                return await r.fulfill(status=204, headers=CORS)
+            if q.method == 'GET':
+                return await r.fulfill(status=404, headers=CORS, body='')
+            msgs = json.loads(q.post_data)['messages']
+            last = [i for i, m in enumerate(msgs) if m['role'] == 'user'][-1]
+            tools = [m for m in msgs[last:] if m['role'] == 'tool']
+            ids = await pg.evaluate(f"(()=>{{const a={ALL};const f=n=>a.find(l=>l.name===n).id;return {{sun:f('Sun'),title:f('Title')}}}})()")
+            await asyncio.sleep(1.5)  # the model thinking: frames keep coming meanwhile
+            if not tools:
+                out = oai('I’ll give the sun a slow breathe and pop the title in once the sun is up.', [('apply_preset', {'preset': 'breathe', 'ids': [ids['sun']], 'at': 0})])
+            elif len(tools) == 1:
+                out = oai(None, [('apply_preset', {'preset': 'pop-in', 'ids': [ids['title']], 'at': 2})])
+            else:
+                out = oai('Done. The sun breathes over the whole loop, and the title pops in at 2 s, after the sun has cleared the hills. Want the rays to turn faster too?')
+            await r.fulfill(status=200, headers={**CORS, 'content-type': 'text/event-stream'}, body=out)
 
-    # 2. the agent's first screen: how to connect
-    c, pg = await page(b, theme)
-    await pg.click('#bAgent')
-    await pg.wait_for_timeout(500)
-    save(await pg.locator('#agent').screenshot(), 'agent-connect' + sfx, collapse=True)
-    await c.close()
+        c, pg = await page(b, theme, key, chat)
+        await pg.click('#bAgent')
+        await pg.wait_for_timeout(500)
+        rec = await Rec(pg, 'talk' + sfx, '#agent', squeeze=True, poster=1, wait=40).begin()
+        await rec.hold(0.6)
+        await type_in(rec, '#agText', 'Make the sun breathe and pop the title in after it rises', 1)
+        await rec.hold(0.4)
+        await pg.press('#agText', 'Enter')
+        for _ in range(200):
+            await rec.frame(1, 60)
+            if await pg.evaluate("!!document.querySelector('#agent') && /Want the rays/.test(document.getElementById('agent').textContent)"):
+                break
+        await rec.hold(3.5)
+        await rec.end()
+        await c.close()
 
-    # 3. the agent's cards: Vector or image? and Generate 1 image?
+    # ---------- the agent's first screen: how to connect ----------
+    if want('ways'):
+        c, pg = await page(b, theme)
+        await pg.click('#bAgent')
+        await pg.wait_for_timeout(500)
+        rec = await Rec(pg, 'ways' + sfx, '#agent', squeeze=True, poster=0.3).begin()
+        await rec.hold(1.2)
+        await pg.click('.ag-way:has(input[value=key])')
+        await rec.hold(1.6)
+        await pg.click('.ag-way:has(input[value=assistant])')
+        await rec.hold(1.6)
+        await rec.end()
+        await c.close()
+
+    # ---------- the agent's cards: Vector or image? and Generate 1 image? ----------
     async def cards(r):
         q = r.request
         if q.method == 'OPTIONS':
@@ -129,6 +242,7 @@ async def shots(b, theme):
         msgs = json.loads(q.post_data)['messages']
         last = [i for i, m in enumerate(msgs) if m['role'] == 'user'][-1]
         user = msgs[last]['content'] if isinstance(msgs[last]['content'], str) else json.dumps(msgs[last]['content'])
+        await asyncio.sleep(1.2)
         if any(m['role'] == 'tool' for m in msgs[last:]):
             out = oai('Stopped.')
         elif 'moon' in user:
@@ -138,89 +252,254 @@ async def shots(b, theme):
         await r.fulfill(status=200, headers={**CORS, 'content-type': 'text/event-stream'}, body=out)
 
     img = {**key, 'preferVector': False, 'vector': 'agent', 'imgProvider': 'openrouter', 'transparent': True}
-    for ask, sel, name in [('Add a moon to the sky', '.ag-kind', 'agent-kind'), ('Paint a hot-air balloon picture', '.ag-imgask', 'agent-image')]:
+    for ask, sel, name in [('Add a moon to the sky', '.ag-kind', 'vector-card'), ('Paint a hot-air balloon picture', '.ag-imgask', 'picture-card')]:
+        if not want(name):
+            continue
         c, pg = await page(b, theme, img, cards)
         await pg.click('#bAgent')
-        await pg.wait_for_timeout(400)
-        await pg.fill('#agText', ask)
+        await pg.wait_for_timeout(500)
+        rec = await Rec(pg, name + sfx, '#agent', squeeze=True, poster=1, wait=40).begin()
+        await rec.hold(0.5)
+        await type_in(rec, '#agText', ask, 1)
+        await rec.hold(0.3)
         await pg.press('#agText', 'Enter')
-        await pg.wait_for_selector(sel, timeout=8000)
-        await pg.wait_for_timeout(300)
-        save(await pg.locator('#agent').screenshot(), name + sfx, collapse=True)
+        for _ in range(200):
+            await rec.frame(1, 60)
+            if await pg.locator(sel).count():
+                break
+        await rec.hold(3)
+        await rec.end()
         await c.close()
 
-    # 4. the editor's panels on the sample scene
-    c, pg = await page(b, theme)
-    E = pg.evaluate
-    await E("hi.setTime(2.4)")
-    await pg.wait_for_timeout(300)
-    save(await pg.screenshot(), 'editor-draw' + sfx, crop=(0, 104, 1607, 1224))
-    await E(f"(()=>{{const a={ALL};hi.select(a.find(l=>l.name==='Sun').id)}})()")
-    await pg.wait_for_timeout(300)
-    t = await pg.locator('#insp .sec', has=pg.locator('h3', has_text='Transforms')).first.screenshot()
-    save(t, 'inspector-tracks' + sfx)
-    save(await pg.locator('.panel.tl').screenshot(), 'timeline' + sfx)
-    # several layers
-    await E(f"(()=>{{const a={ALL};hi.select(a.find(l=>l.name==='Blob').id);hi.select(a.find(l=>l.name==='Title').id,'toggle');hi.setTime(2.9)}})()")
-    await pg.wait_for_timeout(400)
-    save(await pg.screenshot(), 'editor-multi' + sfx, crop=(600, 104, 2880, 1224))
-    # filters
-    await E(f"(()=>{{const a={ALL};hi.select(a.find(l=>l.name==='Title').id)}})()")
-    await E("(()=>{const h=[...document.querySelectorAll('#insp .sec > h3')].find(h=>h.childNodes[0].textContent.trim()==='Filters');h&&h.scrollIntoView({block:'start'})})()")
-    await pg.wait_for_timeout(300)
-    save(await pg.locator('#insp .sec', has=pg.locator('h3', has_text='Filters')).first.screenshot(), 'filters' + sfx)
-    # presets
-    await pg.click('#lAnim')
-    await pg.wait_for_timeout(250)
-    await pg.click('#animMenu [data-presets]')
-    await pg.wait_for_timeout(1000)
-    await pg.click('[data-pgroup=emph]')
-    await pg.wait_for_timeout(900)
-    save(await pg.locator('#presetPop').screenshot(), 'presets' + sfx)
-    await pg.keyboard.press('Escape')
-    await pg.wait_for_timeout(300)
-    # graph
-    await E(f"(()=>{{const a={ALL};hi.select(a.find(l=>l.name==='Blob').id)}})()")
-    await pg.click('#tGraph')
-    await pg.wait_for_timeout(600)
-    save(await pg.locator('.panel.tl').screenshot(), 'graph' + sfx)
-    await pg.click('#tGraph')
-    await pg.wait_for_timeout(300)
-    # easing
-    await E(f"(()=>{{const a={ALL};const bl=a.find(l=>l.name==='Blob');hi.select(bl.id);st.S.keys.add(bl.t[Object.keys(bl.t)[0]][0]);hi.setTime(0)}})()")
-    await E("(async()=>{(await import('/src/ui/inspector.ts')).renderInspector()})()")
-    await pg.wait_for_timeout(250)
-    await pg.click('#tEase')
-    await pg.wait_for_timeout(300)
-    await pg.click('#ezPop button:text-is("Out")')
-    await pg.click('#ezGrid .ezb:has(span:text-is("Back"))')
-    await pg.wait_for_timeout(250)
-    save(await pg.locator('#ezPop').screenshot(), 'easing' + sfx)
-    await pg.keyboard.press('Escape')
-    await E("(st.S.keys.clear(),hi.select(null),hi.setTime(2.9))")
-    await pg.wait_for_timeout(200)
-    # export, every kind, and Linked to scroll
-    await pg.click('#bExport')
-    await pg.wait_for_timeout(1500)
-    for k in ['svg', 'image', 'video', 'anim']:
-        await pg.click(f'#xKind [data-v="{k}"]')
-        await pg.wait_for_timeout({'svg': 800, 'image': 3000, 'video': 3000, 'anim': 8000}[k])
-        save(await pg.locator('#mExport .xdlg').screenshot(), 'export-' + k + sfx)
-    await pg.click('#xKind [data-v="svg"]')
-    await pg.wait_for_timeout(500)
-    await pg.select_option('#xTrig', 'scrub')
-    await pg.wait_for_timeout(1500)
-    await E("(()=>{const p=document.getElementById('xsPage');if(p)p.scrollTop=p.scrollHeight*0.35})()")
-    await pg.wait_for_timeout(800)
-    save(await pg.locator('#mExport .xdlg').screenshot(), 'export-scroll' + sfx)
-    await c.close()
+    # ---------- the editor ----------
+    names = ['timeline', 'tracks', 'tools', 'filters', 'multi', 'easing', 'presets']
+    if any(want(n) for n in names):
+        c, pg = await page(b, theme)
+        E = pg.evaluate
+
+        async def play(name, region, sec=3.0, **kw):
+            """One loop of the scene playing, from 0:00."""
+            await E('hi.setTime(0)')
+            await pg.wait_for_timeout(300)
+            rec = await Rec(pg, name + sfx, region, **kw).begin()
+            await pg.keyboard.press('Space')
+            await rec.hold(sec)
+            await pg.keyboard.press('Space')
+            await rec.end()
+            await pg.wait_for_timeout(300)
+
+        await E(pick('Rays'))
+        if want('timeline'):
+            await play('timeline', '.panel.tl')
+        if want('tracks'):
+            await play('tracks', EDITOR_R)
+        if want('tools'):
+            # pick a tool by its key, draw, and undo back to where it started
+            await E('(hi.select(null),hi.setTime(2.4))')
+            await pg.wait_for_timeout(400)
+            ab = await E("(()=>{const r=document.getElementById('artboard').getBoundingClientRect();return [r.x,r.y,r.width,r.height]})()")
+            X = lambda fx: ab[0] + ab[2] * fx
+            Y = lambda fy: ab[1] + ab[3] * fy
+            rec = await Rec(pg, 'tools' + sfx, DRAW_R, poster=0.62).begin()
+            await rec.hold(0.6)
+            await pg.keyboard.press('m')  # rectangle
+            await rec.hold(0.4)
+            await drag(rec, (X(0.06), Y(0.08)), (X(0.26), Y(0.32)))
+            await rec.hold(0.5)
+            await pg.keyboard.press('o')  # ellipse
+            await rec.hold(0.4)
+            await drag(rec, (X(0.32), Y(0.1)), (X(0.48), Y(0.34)))
+            await rec.hold(0.5)
+            await pg.keyboard.press('n')  # pencil
+            await rec.hold(0.4)
+            pts = [(X(0.06 + 0.42 * i / 30), Y(0.5 + 0.08 * __import__('math').sin(i / 30 * 3 * 3.1416))) for i in range(31)]
+            await pg.mouse.move(*pts[0])
+            await pg.mouse.down()
+            for q in pts[1:]:
+                await pg.mouse.move(*q)
+                await rec.frame(1)
+            await pg.mouse.up()
+            await rec.hold(1)
+            for _ in range(3):
+                await pg.keyboard.press('Control+z')
+                await rec.hold(0.4)
+            await pg.keyboard.press('Escape')
+            await pg.keyboard.press('v')
+            await E('hi.select(null)')
+            await rec.hold(0.6)
+            await rec.end()
+
+        if want('filters'):
+            # add a drop shadow to the blob, then push its Y and Blur up live with the arrow keys; undo back
+            await E(pick('Blob'))
+            await E('hi.setTime(2.9)')
+            await E("(()=>{const h=[...document.querySelectorAll('#insp .sec > h3')].find(h=>h.childNodes[0].textContent.trim()==='Filters');h&&h.scrollIntoView({block:'start'})})()")
+            await pg.wait_for_timeout(400)
+            rec = await Rec(pg, 'filters' + sfx, EDITOR_R, poster=0.62).begin()
+            await rec.hold(0.7)
+            await pg.click('#fx-add')
+            await rec.hold(0.6)
+            await pg.locator('#fxMenu').get_by_text('Drop shadow', exact=True).first.click()
+            await rec.hold(0.7)
+            for f, keys in [('dy', ['Shift+ArrowUp'] * 2), ('dx', ['Shift+ArrowUp'] * 1), ('sd', ['Shift+ArrowUp'] * 2)]:
+                await pg.locator(f'#insp input[data-f$=".{f}"]').last.click()
+                await rec.hold(0.3)
+                for k in keys:
+                    await pg.keyboard.press(k)
+                    await rec.hold(0.3)
+                await rec.hold(0.3)
+            await pg.keyboard.press('Escape')
+            await rec.hold(1.2)
+            for _ in range(4):
+                await pg.keyboard.press('Control+z')
+                await rec.hold(0.2)
+            await rec.hold(0.5)
+            await rec.end()
+
+        if want('multi'):
+            # two layers in one transform box: scale them together, turn them, and undo
+            await E(pick('Blob', 'Title'))
+            await E('hi.setTime(2.9)')
+            await pg.wait_for_timeout(400)
+            hs = await E("[...document.querySelectorAll('#overlay .ov-h')].map(e=>{const r=e.getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2]})")
+            se, rot = hs[4], hs[8]
+            rec = await Rec(pg, 'multi' + sfx, EDITOR_R, poster=0.35).begin()
+            await rec.hold(0.6)
+            await drag(rec, se, (se[0] + 60, se[1] + 40), 16)
+            await rec.hold(0.4)
+            hs = await E("[...document.querySelectorAll('#overlay .ov-h')].map(e=>{const r=e.getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2]})")
+            rot = hs[8]
+            await drag(rec, rot, (rot[0] + 90, rot[1] + 30), 16)
+            await rec.hold(0.6)
+            for _ in range(2):
+                await pg.keyboard.press('Control+z')
+                await rec.hold(0.5)
+            await rec.hold(0.3)
+            await rec.end()
+
+        if want('presets'):
+            await E(pick('Title'))
+            await pg.wait_for_timeout(200)
+            await pg.click('#lAnim')
+            await pg.wait_for_timeout(250)
+            await pg.click('#animMenu [data-presets]')
+            await pg.wait_for_timeout(1000)
+            await pg.click('[data-pgroup=emph]')
+            await pg.wait_for_timeout(500)
+            rec = await Rec(pg, 'presets' + sfx, '#presetPop', poster=0.2).begin()
+            await rec.hold(2)
+            for g in ['enter', 'exit', 'emph']:
+                await pg.click(f'[data-pgroup={g}]')
+                await rec.hold(1.6)
+            await rec.end()
+            await pg.keyboard.press('Escape')
+            await pg.wait_for_timeout(300)
+
+        if want('easing'):
+            await E(f"(()=>{{const a={ALL};const bl=a.find(l=>l.name==='Blob');hi.select(bl.id);st.S.keys.add(bl.t[Object.keys(bl.t)[0]][0]);hi.setTime(0)}})()")
+            await E("(async()=>{(await import('/src/ui/inspector.ts')).renderInspector()})()")
+            await pg.wait_for_timeout(250)
+            await pg.click('#tEase')
+            await pg.wait_for_timeout(300)
+            await pg.click('#ezPop button:text-is("Out")')
+            await pg.click('#ezGrid .ezb:has(span:text-is("Back"))')
+            await pg.wait_for_timeout(300)
+            rec = await Rec(pg, 'easing' + sfx, '#ezPop', poster=0).begin()
+            await rec.hold(1)
+            for n in ['Ease', 'Cubic', 'Expo', 'Elastic', 'Bounce', 'Back']:
+                await pg.click(f'#ezGrid .ezb:has(span:text-is("{n}"))')
+                await rec.hold(0.9)
+            await rec.end()
+            await pg.keyboard.press('Escape')
+        await c.close()
+
+    # ---------- the graph editor: a bone's rotation curve, with the playhead running ----------
+    if want('graph'):
+        c, pg = await page(b, theme, tl=420)
+        E = pg.evaluate
+        await pg.click('#tGraph')
+        await E(f"(async()=>{{const a={ALL};const l=a.find(l=>l.name==='Stem 3');hi.select(l.id);(await import('/src/ui/graph.ts')).setGraphTrack(l.id,'rot');hi.setTime(0)}})()")
+        await pg.wait_for_timeout(500)
+        rec = await Rec(pg, 'graph' + sfx, '.panel.tl').begin()
+        await pg.keyboard.press('Space')
+        await rec.hold(3.0)
+        await rec.end()
+        await c.close()
+
+    # ---------- export ----------
+    names = ['x-svg', 'x-image', 'x-video', 'x-gif', 'x-scroll']
+    if any(want(n) for n in names):
+        c, pg = await page(b, theme)
+        E = pg.evaluate
+        await E('(st.S.keys.clear(),hi.select(null),hi.setTime(0))')
+        await pg.click('#bExport')
+        await pg.wait_for_timeout(1500)
+        DLG = '#mExport .xdlg'
+
+        if want('x-svg'):
+            await pg.click('#xKind [data-v="svg"]')
+            await pg.wait_for_timeout(1200)
+            rec = await Rec(pg, 'x-svg' + sfx, DLG, poster=0.8).begin()
+            await rec.hold(3)
+            await rec.end()
+
+        if want('x-image'):
+            await E('hi.setTime(2.2)')
+            await pg.click('#xKind [data-v="image"]')
+            await pg.wait_for_timeout(3000)
+            rec = await Rec(pg, 'x-image' + sfx, DLG, poster=0.9, wait=60).begin()
+            await rec.hold(0.8)
+            for f in ['webp', 'avif', 'png']:
+                await pg.click(f'#xiFmt [data-v="{f}"]')
+                await rec.hold(1.2, 120)
+            for _ in range(8):
+                await pg.click('#xiNextF')
+                await rec.hold(0.25, 120)
+            await rec.hold(0.8, 120)
+            await rec.end()
+
+        async def scrub(name, kind, rng, split=False, poster=0.8, sec=3.0):
+            await pg.click(f'#xKind [data-v="{kind}"]')
+            await pg.wait_for_timeout(8000 if kind == 'anim' else 3000)
+            rec = await Rec(pg, name + sfx, DLG, poster=poster, wait=80).begin()
+            n = round(sec * FPS)
+            for i in range(n):
+                t = i / (n - 1)
+                js = f"(()=>{{const s=document.getElementById('{rng}');s.value=s.min*1+(s.max-s.min)*{t};s.dispatchEvent(new Event('input',{{bubbles:true}}))"
+                if split:
+                    js += f";const d=document.getElementById('xaSplit');d.value=50+38*Math.sin({t}*Math.PI*2);d.dispatchEvent(new Event('input',{{bubbles:true}}))"
+                await E(js + '})()')
+                await rec.frame(1)
+            await rec.end()
+
+        if want('x-video'):
+            await scrub('x-video', 'video', 'xvScrub')
+        if want('x-gif'):
+            await scrub('x-gif', 'anim', 'xaScrub', split=True)
+
+        if want('x-scroll'):
+            await pg.click('#xKind [data-v="svg"]')
+            await pg.wait_for_timeout(600)
+            await pg.select_option('#xTrig', 'scrub')
+            await pg.wait_for_timeout(1500)
+            rec = await Rec(pg, 'x-scroll' + sfx, DLG, poster=0.3, wait=30).begin()
+            await rec.hold(0.6)
+            n = 5 * FPS
+            for i in range(n):
+                t = i / (n - 1)
+                f = (1 - __import__('math').cos(t * 2 * __import__('math').pi)) / 2
+                await E(f"(()=>{{const p=document.getElementById('xsPage');if(p)p.scrollTop=(p.scrollHeight-p.clientHeight)*{f}}})()")
+                await rec.frame(1)
+            await rec.hold(0.4)
+            await rec.end()
+        await c.close()
 
 
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        for theme in ['light', 'dark']:
-            await shots(b, theme)
+        for theme in THEMES:
+            await clips(b, theme)
         await b.close()
 
 

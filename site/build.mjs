@@ -67,29 +67,29 @@ function webpSize(file) {
   if (chunk === 'VP8X') return [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)];
   throw new Error(`${file}: not a WebP the build can measure`);
 }
-// {{CAP:name|alt|class}}: a capture of the editor in the reader's theme. Both files are named in the page;
-// the one for the other theme is hidden with CSS, and lazy loading leaves it unfetched.
-function capture(spec, img) {
-  const [name, alt = '', cls = ''] = spec.split('|');
-  const tag = (file, c, a) => {
-    const p = join(here, 'img', file + '.webp');
-    if (!existsSync(p)) throw new Error(`site/img/${file}.webp is missing: run python3 site/captures.py`);
-    const [w, h] = webpSize(p);
-    return `<img class="cap ${c}${cls ? ' ' + cls : ''}" src="${img}${file}.webp" width="${w / 2}" height="${h / 2}" alt="${esc(a)}"${a ? '' : ' aria-hidden="true"'} loading="lazy" decoding="async">`;
-  };
-  return tag(name, 'cap-l', alt) + tag(name + '-dark', 'cap-d', '');
+// {{CLIP:name|alt|class}}: a clip of the editor (site/img/<name>.mp4, recorded by captures.py) in the reader's
+// theme: both videos are in the page, the other theme's hidden with CSS. They load nothing until site.js starts the
+// visible one as it scrolls into view; the poster (<name>.webp, a frame of the clip) shows until then, and stays
+// for readers who ask for less motion. {{CLIPONE:…}} is one clip for both themes.
+function clipTag(file, cls, alt, img) {
+  const poster = join(here, 'img', file + '.webp');
+  if (!existsSync(poster) || !existsSync(join(here, 'img', file + '.mp4')))
+    throw new Error(`site/img/${file}.mp4 or .webp is missing: run python3 site/captures.py`);
+  const [w, h] = webpSize(poster);
+  const label = alt ? ` role="img" aria-label="${esc(alt)}"` : ' aria-hidden="true"';
+  return `<video class="cap vid${cls ? ' ' + cls : ''}" width="${w / 2}" height="${h / 2}" poster="${img}${file}.webp" muted loop playsinline preload="none"${label}><source src="${img}${file}.mp4" type="video/mp4"></video>`;
 }
-// {{SHOT:name|alt|class}}: one capture, the same in both themes (e.g. the dark agent panel on the dark band)
-function shot(spec, img) {
-  const [name, alt = '', cls = ''] = spec.split('|');
-  const p = join(here, 'img', name + '.webp');
-  if (!existsSync(p)) throw new Error(`site/img/${name}.webp is missing: run python3 site/captures.py`);
-  const [w, h] = webpSize(p);
-  return `<img class="cap${cls ? ' ' + cls : ''}" src="${img}${name}.webp" width="${w / 2}" height="${h / 2}" alt="${esc(alt)}" loading="lazy" decoding="async">`;
+function clip(spec, img, both) {
+  const [name, a = '', cls = ''] = spec.split('|'),
+    alt = a.replace(/\s+/g, ' ').trim();
+  if (!both) return clipTag(name, cls, alt, img);
+  return clipTag(name, ('cap-l ' + cls).trim(), alt, img) + clipTag(name + '-dark', ('cap-d ' + cls).trim(), '', img);
 }
 
-// {{ART:slug}}: only the animated picture of a demo card (the Features page puts its own words under it)
+// {{ART:slug}}: only the animated picture of a demo card (the Features page puts its own words under it), or one of
+// the Features tiles' own pictures (src/art/)
 function specArt(slug) {
+  if (existsSync(join(here, `src/art/${slug}.html`))) return read(`src/art/${slug}.html`).trim();
   const src = read(`src/specs/${slug}.html`);
   const a = src.indexOf('<div class="spec-art'),
     b = src.indexOf('<div class="spec-tx">');
@@ -103,6 +103,7 @@ const css = read('src/site.css'),
   header = read('src/partials/header.html'),
   footer = read('src/partials/footer.html');
 const NAV = [
+  ['home', 'Home', ''],
   ['features', 'Features', 'features/'],
   ['agent', 'Design agent', 'agent/'],
   ['import', 'Import', 'import/'],
@@ -139,7 +140,8 @@ for (const f of pages) {
   const editor = editorArg || rootRel + 'editor/';
   const img = rootRel + 'img/';
   const nav = NAV.map(
-    ([id, label, href]) => `<a href="${rootRel}${href}"${meta.nav === id ? ' aria-current="page"' : ''}>${label}</a>`,
+    ([id, label, href]) =>
+      `<a href="${rootRel + href || './'}"${meta.nav === id ? ' aria-current="page"' : ''}>${label}</a>`,
   ).join('\n      ');
   let body = header + '<main id="top">\n' + src + '</main>\n' + footer;
   if (src.includes('id="codeEl"')) body += `<script id="snips" type="application/json">\n  ${snippets}\n</script>\n`;
@@ -148,8 +150,8 @@ for (const f of pages) {
     .replace('{{BODY}}', () => body)
     .replace(/\{\{SPEC:([a-z-]+)\}\}/g, (_, s) => read(`src/specs/${s}.html`).trim())
     .replace(/\{\{ART:([a-z-]+)\}\}/g, (_, s) => specArt(s))
-    .replace(/\{\{CAP:([^}]+)\}\}/g, (_, s) => capture(s, img))
-    .replace(/\{\{SHOT:([^}]+)\}\}/g, (_, s) => shot(s, img))
+    .replace(/\{\{CLIP:([^}]+)\}\}/g, (_, s) => clip(s, img, true))
+    .replace(/\{\{CLIPONE:([^}]+)\}\}/g, (_, s) => clip(s, img, false))
     .replaceAll('{{TITLE}}', esc(meta.title))
     .replaceAll('{{DESCRIPTION}}', esc(meta.description))
     .replaceAll('{{CSS}}', () => css)

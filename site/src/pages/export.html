@@ -29,12 +29,7 @@
           <tr>
             <th scope="row">A website or app</th>
             <td><a href="#svg">Animated SVG</a></td>
-            <td>Sharp at any size, tiny, and you can control it from code</td>
-          </tr>
-          <tr>
-            <th scope="row">A scrolling story</th>
-            <td><a href="#scroll">Linked to scroll</a></td>
-            <td>The page’s scroll drives the timeline, both ways</td>
+            <td>Sharp at any size, tiny, controlled from your code, and it can even follow the page’s scroll</td>
           </tr>
           <tr>
             <th scope="row">Social, slides, video editors</th>
@@ -105,9 +100,37 @@
       </div>
       <span class="starts-n">Less motion: play, or hold the first or last frame</span>
     </div>
+    <div class="card opt split" id="scroll">
+      <div>
+        <div class="opt-tag">Starts › Linked to scroll</div>
+        <h3>Scroll is the playhead.</h3>
+        <p>
+          Scrolling down plays it, scrolling back plays it backwards. Choose when it plays: while it crosses the window,
+          while it scrolls in, while it scrolls out, or your own start and end lines.
+        </p>
+        <ul class="dlist">
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span><b>Smoothing</b> lets it glide after each wheel step instead of jumping</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>The Export preview is a small test page you scroll to try it</span>
+          </li>
+          <li>
+            <span class="dia" aria-hidden="true">◆</span
+            ><span>Pasted inline or in an <code>&lt;object&gt;</code>; follows a box that scrolls on its own</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        {{CLIP:x-scroll|Export with Starts set to Linked to scroll: the preview is a test page with start and end lines
+        and how much has played|shot}}
+      </div>
+    </div>
     <div class="x-cap">
-      {{CAP:export-svg|Export › Animated SVG: Format (JavaScript or CSS only, Embedded or External player), Playback,
-      Size and Advanced, with the preview, file size and Download .svg|shot}}
+      {{CLIP:x-svg|Export › Animated SVG: Format (JavaScript or CSS only, Embedded or External player), Playback, Size
+      and Advanced, with the preview, file size and Download .svg|shot}}
     </div>
     <div class="code">
       <div class="tabs" role="tablist" aria-label="Embed code">
@@ -267,35 +290,6 @@
 
 <i>// about 26 KB minified, then shared by every SVG</i></code></pre>
     </div>
-
-    <div class="split" id="scroll">
-      <div>
-        <div class="tc">LINKED TO SCROLL</div>
-        <h2>Scroll is the playhead.</h2>
-        <p class="lead">
-          Scrolling down plays it, scrolling back plays it backwards. Choose when it plays: while it crosses the window,
-          while it scrolls in, while it scrolls out, or your own start and end lines.
-        </p>
-        <ul class="dlist">
-          <li>
-            <span class="dia" aria-hidden="true">◆</span
-            ><span><b>Smoothing</b> lets it glide after each wheel step instead of jumping</span>
-          </li>
-          <li>
-            <span class="dia" aria-hidden="true">◆</span
-            ><span>The Export preview is a small test page you scroll to try it</span>
-          </li>
-          <li>
-            <span class="dia" aria-hidden="true">◆</span
-            ><span>Pasted inline or in an <code>&lt;object&gt;</code>; follows a box that scrolls on its own</span>
-          </li>
-        </ul>
-      </div>
-      <div>
-        {{CAP:export-scroll|Export with Starts set to Linked to scroll: the preview is a test page with start and end
-        lines and how much has played|shot}}
-      </div>
-    </div>
   </div>
 </section>
 
@@ -312,7 +306,7 @@
     </div>
     <div class="kinds3">
       <article class="card kind" id="vid">
-        {{CAP:export-video|Export › Video|kind-cap}}
+        {{CLIP:x-video|Export › Video|kind-cap}}
         <h3>Video</h3>
         <div class="chipset"><span>MP4 · H.264</span><span>WebM · VP9 / AV1</span><span>PNG frames</span></div>
         <ul class="dlist">
@@ -327,7 +321,7 @@
         </ul>
       </article>
       <article class="card kind" id="gif">
-        {{CAP:export-anim|Export › GIF & Animated WebP|kind-cap}}
+        {{CLIP:x-gif|Export › GIF & Animated WebP|kind-cap}}
         <h3>GIF &amp; Animated WebP</h3>
         <div class="chipset"><span>Our own GIF encoder</span><span>libwebp</span></div>
         <ul class="dlist">
@@ -346,7 +340,7 @@
         </ul>
       </article>
       <article class="card kind" id="img">
-        {{CAP:export-image|Export › Image|kind-cap}}
+        {{CLIP:x-image|Export › Image|kind-cap}}
         <h3>Image</h3>
         <div class="chipset">
           <span>PNG</span><span>JPEG</span><span>WebP</span><span>AVIF</span><span>JPEG XL</span><span>SVG still</span>
