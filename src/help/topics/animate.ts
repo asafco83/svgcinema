@@ -12,6 +12,7 @@ import {
   keyAt,
   lock,
   lpRow,
+  onRuler,
   pause,
   playStep,
   playheadStep,
@@ -452,14 +453,16 @@ Object.assign(scenes, {
   freeze: {
     name: 'Practice: freezing a track',
     svg: svg640(`<g id="Boat">
-<path id="Sail" d="M160 262V150l52 100z" fill="#fff4c9"/>
-<path id="Hull" d="M100 266h124l-22 30h-80z" fill="#e5484d"/>
+<path id="Sail" d="M160 242V130l52 100z" fill="#fff4c9"/>
+<path id="Hull" d="M100 246h124l-22 30h-80z" fill="#e5484d"/>
 </g>
 <path id="Sea" d="M0 290q40-14 80 0t80 0 80 0 80 0 80 0 80 0 80 0 80 0V400H0z" fill="#1f2b5c"/>`),
     setup() {
       lock('Sky', 'Sea');
       const b = byName('Boat');
       if (!b) return;
+      // it rocks around the bottom of its hull
+      b.o = [162, 272];
       const [x, y] = (b.b.pos as number[]) || [0, 0];
       b.t.pos = [
         [0, [x, y], 'linear'],
@@ -482,7 +485,17 @@ const frozen = () => {
   return !!l && isFrozen(l, 'rot');
 };
 /** the sea the boat sails across (the clip of a step that changes how it moves) */
-const voyage = () => screenBox(80, 130, 480, 180);
+const voyage = () => screenBox(80, 110, 480, 190);
+/** the start of the boat's Rotate row: its name and the keyframes of its first 1.6 seconds (the whole row is as
+ *  wide as the timeline) */
+const rotStart = () => {
+  const n = rotName(),
+    row = n && n.parentElement;
+  if (!n || !row) return null;
+  const a = n.getBoundingClientRect(),
+    r = row.getBoundingClientRect();
+  return new DOMRect(a.left, r.top, onRuler(1.6).x - a.left, r.height);
+};
 /** hover the row (the snowflake shows on hover: script events don't give it the :hover look, so it is
  *  shown as the pointer's hover would), then click the snowflake */
 async function clickSnowflake() {
@@ -506,7 +519,7 @@ Object.assign(tours, {
       },
       done: frozen,
       show: clickSnowflake,
-      clip: () => [shapeEl(boat()), ...trackBits(boat(), 'rot')],
+      clip: () => [shapeEl(boat()), rotStart()],
     },
     {
       target: () => lpRow('Boat'),
@@ -523,7 +536,7 @@ Object.assign(tours, {
       },
       done: () => frozen() && Math.abs(+(boat()?.b.rot ?? 0) - 8) < 0.5,
       show: () => type(q('#rot-deg') as HTMLInputElement, '8'),
-      clip: () => [shapeEl(boat()), ...trackBits(boat(), 'rot')],
+      clip: () => [shapeEl(boat()), rotStart()],
     },
     {
       ...playStep(),
@@ -539,7 +552,7 @@ Object.assign(tours, {
       enter: () => setFrozen(true),
       done: () => !frozen() && !!boat()?.t.rot,
       show: () => click(snowflake()),
-      clip: () => [voyage(), ...trackBits(boat(), 'rot')],
+      clip: () => [voyage(), rotStart()],
     },
   ],
 } as Record<string, TourStep[]>);

@@ -467,7 +467,8 @@ const offStep = (n: number, v: number): TourStep => ({
   enter: pick('Dot ' + n),
   done: () => Math.abs(offOf(n) - v) < 0.01,
   show: () => type(q('#sym-off') as HTMLInputElement, String(v)),
-  clip: () => [shapeEl(ballOf(n)), ...trackBits(ballOf(n), 'pos')],
+  // the dot, and its keyframes as they move along the timeline
+  clip: () => [shapeEl(ballOf(n)), ...trackBits(ballOf(n), 'pos').slice(1)],
 });
 
 Object.assign(tours, {

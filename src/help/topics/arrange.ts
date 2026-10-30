@@ -1,5 +1,5 @@
-// SVGcinema — help/topics/arrange: Create, part two (booleans and align, layers and groups, hyperlinks,
-// snapping and guides): scenes and tour steps; the words are in help/content.json
+// SVGcinema — help/topics/arrange: Create, part two (booleans and align, layers and groups, symbols, select same,
+// hyperlinks, snapping and guides): scenes and tour steps; the words are in help/content.json
 import type { Layer } from '../../model/types';
 import { S, doc, layerById } from '../../core/state';
 import { beginEdit, select } from '../../core/history';
@@ -66,9 +66,9 @@ export const scenes: Record<string, Scene> = {
       lock('Sky', 'Hills');
     },
   },
-  // Layers, groups and symbols: a snowman whose head has a plain name and whose scarf is behind the body
+  // Layers and groups: a snowman whose head has a plain name and whose scarf is behind the body
   layers: {
-    name: 'Practice: layers, groups and symbols',
+    name: 'Practice: layers and groups',
     svg: svg640(`<rect id="Snow" y="320" width="640" height="80" fill="#e9eefb"/>
 <rect id="Scarf" x="268" y="206" width="104" height="18" rx="9" fill="#e5484d"/>
 <circle id="Body" cx="320" cy="268" r="62" fill="#fff"/>
@@ -343,9 +343,12 @@ const lmItem = (id: string) => q(`#layermenu:not([hidden]) [data-lm="${id}"]`);
 const sameItem = (k: string) => lmItem('same:' + k);
 const layerMenu = () => q('#layermenu:not([hidden])');
 const AUTUMN = '#e8933a';
+/** every tree's crown has the same new colour (the one typed, or any other a person picks) */
 const autumn = () => {
-  const ts = trees();
-  return ts.length > 1 && ts.every(t => String(crownOf(t)?.b.fill || '').toLowerCase() === AUTUMN);
+  const ts = trees(),
+    fill = (t: Layer) => String(crownOf(t)?.b.fill || '').toLowerCase(),
+    f = ts.length ? fill(ts[0]) : '';
+  return ts.length > 1 && !!f && f !== '#2f9e6b' && ts.every(t => fill(t) === f);
 };
 /** exactly these layers are selected */
 const only = (...names: string[]) => S.selSet.size === names.length && sel(...names);

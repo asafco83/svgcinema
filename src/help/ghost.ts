@@ -184,16 +184,22 @@ export async function drag(a: XY, b: XY, o: { shift?: boolean; ms?: number } = {
   pointer('mouseup', b, { shift: o.shift, target: t0 });
   await wait(380);
 }
-/** Show a key on the pointer and press it (keydown, then keyup). */
-export async function press(label: string, key: string, code: string) {
+/** Show a key on the pointer and press it (keydown, then keyup); `mods` holds Ctrl, Shift or Alt down with it
+ *  (`press('Ctrl C', 'c', 'KeyC', { ctrlKey: true })`). */
+export async function press(
+  label: string,
+  key: string,
+  code: string,
+  mods: { ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean } = {},
+) {
   const k = cursor().querySelector('.tg-key') as HTMLElement;
   k.textContent = label;
   k.hidden = false;
   await wait(260);
   const t = document.activeElement && document.activeElement !== document.body ? document.activeElement : document.body;
-  t.dispatchEvent(new KeyboardEvent('keydown', { key, code, bubbles: true, cancelable: true }));
+  t.dispatchEvent(new KeyboardEvent('keydown', { key, code, bubbles: true, cancelable: true, ...mods }));
   await wait(80);
-  t.dispatchEvent(new KeyboardEvent('keyup', { key, code, bubbles: true, cancelable: true }));
+  t.dispatchEvent(new KeyboardEvent('keyup', { key, code, bubbles: true, cancelable: true, ...mods }));
   await wait(420);
   k.hidden = true;
 }

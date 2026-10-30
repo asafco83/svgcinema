@@ -599,7 +599,7 @@
         },
         {
           "title": "Change its colour",
-          "text": "Click the crown, type #e8933a in <b>Fill</b> and press <kbd>Enter</kbd>. Both trees turn orange: a change inside the symbol reaches every instance.",
+          "text": "Click the crown, type #e8933a in <b>Fill</b> and press <kbd>Enter</kbd>. The other tree follows: a change inside the symbol reaches every instance.",
           "do": "Click the crown, type <b>#e8933a</b> in Fill."
         },
         {
@@ -992,7 +992,7 @@
           "do": "Click the snowflake on the <b>Rotate</b> row again."
         }
       ],
-      "note": "Exports leave a frozen track out: the property keeps the value it holds. Freezing and unfreezing are undo steps. To remove a track for good, use the × at the end of its row's name.",
+      "note": "Exports leave a frozen track out: the property keeps the value it holds. Freezing and unfreezing are undo steps. To remove a track for good, hover its row and click the × beside its diamond.",
       "keys": [
         ["Space", "Play and pause"],
         ["Ctrl Z", "Undo"]
@@ -1288,7 +1288,7 @@
       "ready": true,
       "tour": true,
       "minutes": 3,
-      "intro": "The Edit bone tool fixes a rig's bones without touching the animation: it moves joints and changes a bone's length and rest angle, and the artwork attached to the bones stays where it is. Here the arm's bones were drawn a little off, so the arm comes apart at the elbow as it waves.",
+      "intro": "The Edit bone tool fixes a rig's bones without touching the animation: it moves joints and changes a bone's length and rest angle, and the artwork attached to the bones stays where it is. Here the arm's bones were drawn a little off, so the arm bends in the wrong places as it waves.",
       "goal": "The arm waves, turning at the shoulder and the elbow: the same keyframes as before, on bones that now sit at the joints.",
       "steps": [
         {
@@ -1317,7 +1317,7 @@
           "do": "<kbd>V</kbd>, then <kbd>Space</kbd> to play it."
         }
       ],
-      "note": "Drag the middle of a bone to move the whole bone. While dragging a tip, hold <kbd>Shift</kbd> to snap its angle to 15°, or <kbd>Ctrl</kbd> to turn the attached artwork with the bone; a tip also snaps onto other bones' joints and tips. A joint that sits on its parent's tip moves that tip: <kbd>Alt</kbd>+drag pulls the joint off it.",
+      "note": "Drag a bone between its ends to move the whole bone; what is attached stays put. While dragging a tip, hold <kbd>Shift</kbd> to snap its angle to 15°, or <kbd>Ctrl</kbd> to turn the attached artwork with the bone; a tip also snaps onto other bones' joints and tips. A joint that sits on its parent's tip moves that tip: <kbd>Alt</kbd>+drag pulls the joint off it.",
       "keys": [
         ["E", "Edit bone tool"],
         ["V", "Select tool"],
@@ -1385,8 +1385,39 @@
       "id": "rig-order",
       "group": "rigging",
       "title": "A rig's own draw order",
+      "ready": true,
       "tour": true,
-      "minutes": 3
+      "minutes": 2,
+      "intro": "In a rig, nesting decides what is drawn in front: everything on a bone is drawn together with the bone it hangs on, so a part can't go behind its parent's artwork. Here the far arm, on a bone that hangs on the torso's bone, swings in front of the torso. <b>Own draw order</b> draws the rig's artwork in the order of a list instead, each piece still moving with its bone.",
+      "goal": "The figure swings its arms: the near arm in front of the torso, the far arm behind it.",
+      "steps": [
+        {
+          "title": "Select the rig's top bone",
+          "text": "Click Bone 1 in the Layers panel. It carries the torso and the head, and the arms' bones hang on it; the inspector shows its Bone section.",
+          "do": "Click <b>Bone 1</b> in the Layers panel."
+        },
+        {
+          "title": "Turn on Own draw order",
+          "text": "In the Bone section, tick <b>Own draw order</b>. A list of the artwork attached to the rig's bones appears, front at the top, in the order nesting draws it: nothing changes yet.",
+          "do": "Tick <b>Own draw order</b>."
+        },
+        {
+          "title": "Send the far arm to the back",
+          "text": "Click the down arrow beside <b>Far arm</b> until it is at the bottom of the list, below <b>Torso</b>. On the canvas the far arm goes behind the torso, and in the Layers panel it stays on its bone.",
+          "do": "Click the down arrow beside <b>Far arm</b> until it is at the bottom."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The arms swing, the far one behind the torso, and the export draws them the same way.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "You can also drag a row of the list onto another. Artwork you attach to the rig later goes in front, and turning <b>Own draw order</b> off goes back to nesting. The order is the same all through the animation: it isn't animated.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["Alt B", "Show or hide bones"]
+      ],
+      "related": ["rig-build", "rig-pose", "layers"]
     },
     {
       "id": "rig-pose",
@@ -1575,8 +1606,56 @@
       "id": "pins-mesh",
       "group": "rigging",
       "title": "Pins on images, text and groups",
+      "ready": true,
       "tour": true,
-      "minutes": 3
+      "minutes": 3,
+      "intro": "A path bends through its own nodes, but an image, a text or a group has none: pins bend it through a mesh of triangles laid over it, each triangle carrying the piece of artwork inside it. A text stays a text you can edit, and its gradients and filters bend too.",
+      "goal": "The word sags at its end in 1.5 seconds, bending through its mesh, then holds and starts over.",
+      "steps": [
+        {
+          "title": "Pick the Pin tool",
+          "text": "Press <kbd>W</kbd>. The Pin tool is in the pins button of the tools on the left.",
+          "do": "Press <kbd>W</kbd> for the Pin tool."
+        },
+        {
+          "title": "Pin the start of the word",
+          "text": "Click the H. A pin appears there, and the Pin tool draws the mesh over the text; the chip above the canvas says how many triangles it has.",
+          "do": "Click the <b>H</b>."
+        },
+        {
+          "title": "Pin its end",
+          "text": "Click the exclamation mark for a second pin.",
+          "do": "Click the <b>!</b>."
+        },
+        {
+          "title": "Make the mesh finer",
+          "text": "In the Pins section of the inspector, drag the <b>Mesh</b> slider to the right. The triangles get smaller and more of them cover the text: a denser mesh bends more smoothly, but makes a CSS export larger.",
+          "do": "Drag the <b>Mesh</b> slider to the right."
+        },
+        {
+          "title": "Move the playhead to 1.5s",
+          "text": "Drag the red playhead along the time ruler to 1.5s.",
+          "do": "Drag the playhead to <b>1.5s</b>."
+        },
+        {
+          "title": "Bend the word",
+          "text": "Drag the pin on the exclamation mark down. The word bends between the two pins, letter shapes and all, and the pin gets its own track: at rest at 0s, bent at 1.5s.",
+          "do": "Drag the pin on the <b>!</b> down."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The word bends until 1.5s, holds until the end of the 3-second animation and starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "The mesh covers only where there is artwork, and it is rebuilt by itself when the artwork changes, for instance when you edit the text. A pinned group's layers can't be picked on the canvas: pick them in the Layers panel. In a CSS export each triangle's motion is stored frame by frame, so when that is much larger the Export dialog offers <b>Use JavaScript</b>.",
+      "keys": [
+        ["W", "Pin tool"],
+        ["Del", "Remove the selected pin"],
+        ["Alt P", "Show or hide pins"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["pins", "pins-edit", "text"]
     },
     {
       "id": "pins-bones",

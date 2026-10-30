@@ -6,9 +6,12 @@ import { select, setTool } from '../../core/history';
 import { drawOverlay } from '../../render/overlay';
 import { bonePts, boneTipL, keyRestRot } from '../../tools/bones';
 import { restMat } from '../../tools/bone-edit';
+import { pinMatrix } from '../../tools/pins';
+import { drawOrder, rigArtwork } from '../../model/draw-order';
+import { MESH_DEFAULT } from '../../model/mesh';
 import { rigTimes } from '../../tools/rig';
 import { moveLayers } from '../../ui/layers-panel';
-import { centre, click, drag, hold, press, type, type XY } from '../ghost';
+import { centre, click, drag, hold, moveTo, press, type, type XY } from '../ghost';
 import {
   type Scene,
   type TourStep,
@@ -1077,5 +1080,263 @@ Object.assign(tours, {
       },
       clip: () => [artboard()],
     },
+  ],
+} as Record<string, TourStep[]>);
+
+/* ---------- A rig's own draw order ---------- */
+
+/** a figure seen from the side: the torso and head on Bone 1, an arm on each of two bones chained to it */
+const FIG = svg640(
+  `${PAPER}
+<path id="Back leg" d="${capsule([334, 258], [348, 350], 12)}${capsule([348, 350], [370, 352], 9)}" fill="#2b3a78"/>
+<path id="Front leg" d="${capsule([320, 258], [310, 350], 12)}${capsule([310, 350], [332, 352], 9)}" fill="#1f2b5c"/>
+<path id="Far arm" d="${capsule([326, 150], [326, 240], 10)}" fill="#c4946c"/>
+<path id="Torso" d="M304 152c0-16 8-24 22-24s22 8 22 24v110h-44z" fill="#3f5bd8"/>
+<path id="Head" d="${circle(330, 94, 28)}${circle(357, 101, 7)}" fill="#f2c9a0"/>
+<path id="Near arm" d="${capsule([326, 150], [326, 240], 10)}" fill="#f2c9a0"/>`,
+  false,
+);
+const figBox = () => screenBox(230, 50, 200, 320);
+/** the rig's artwork, back to front, as the canvas draws it */
+const artOrder = () => {
+  const b = byName('Bone 1');
+  return b ? drawOrder(b, doc.layers) || rigArtwork(b, doc.layers) : [];
+};
+const farBehind = () => {
+  const ns = artOrder().map(l => l.name);
+  return !!byName('Bone 1')?.dord && ns.indexOf('Far arm') >= 0 && ns.indexOf('Far arm') < ns.indexOf('Torso');
+};
+const farBack = () => {
+  const l = byName('Far arm');
+  return l ? q(`#insp .dord-mv[data-dir="back"][data-id="${l.id}"]`) : null;
+};
+
+/* ---------- Pins on images, text and groups ---------- */
+
+const word = () => byName('Hello');
+const PIN_L = [196, 196],
+  PIN_R = [446, 196];
+const wordBox = () => screenBox(130, 110, 380, 200);
+/** the text's pin furthest to the right */
+function rightPin(): number | null {
+  const l = word();
+  if (!l || !l.pins || !l.pins.length) return null;
+  return l.pins.reduce((a, p) => (p.x > a.x ? p : a), l.pins[0]).n;
+}
+/** the pins the steps before put on the text, when the person's own aren't there */
+function ensureWordPins(k: number) {
+  const l = word();
+  if (!l) return;
+  const ps = l.pins || [];
+  if (ps.length >= k) return;
+  const M = pinMatrix(l).inverse(),
+    at = [PIN_L, PIN_R].slice(ps.length, k).map(([x, y]) => new DOMPoint(x, y).matrixTransform(M));
+  let n = ps.reduce((m, p) => Math.max(m, p.n), 0);
+  l.pins = [...ps, ...at.map(p => ({ n: ++n, x: r2(p.x), y: r2(p.y) }))];
+  select(l.id);
+}
+const meshN = () => {
+  const l = word();
+  return (l && l.mesh && l.mesh.n) || MESH_DEFAULT;
+};
+/** Drag a slider's thumb to a value: the pointer moves with it, and the slider gets the input events a
+ *  drag gives (a native slider can't be dragged by script), then change. */
+async function slide(r: HTMLInputElement | null, value: number, ms = 900) {
+  if (!r) return;
+  const min = +r.min || 0,
+    max = +r.max || 100,
+    box = r.getBoundingClientRect(),
+    xOf = (v: number) => box.left + 8 + ((v - min) / (max - min)) * (box.width - 16),
+    y = box.top + box.height / 2,
+    v0 = +r.value;
+  await moveTo({ x: xOf(v0), y });
+  const n = Math.max(6, Math.round(ms / 40));
+  for (let i = 1; i <= n; i++) {
+    const v = v0 + ((value - v0) * i) / n;
+    r.value = String(Math.round(v / (+r.step || 1)) * (+r.step || 1));
+    r.dispatchEvent(new Event('input', { bubbles: true }));
+    await moveTo({ x: xOf(v), y }, { ms: 30 });
+  }
+  r.dispatchEvent(new Event('change', { bubbles: true }));
+  await wait(400);
+}
+
+Object.assign(scenes, {
+  // A rig's own draw order: the far arm hangs on a bone chained to the torso's, so nesting draws it in front
+  'rig-order': {
+    name: "Practice: a rig's own draw order",
+    svg: FIG,
+    setup() {
+      lock('Paper', 'Back leg', 'Front leg');
+      // the torso and head go on Bone 1 before the arms' bones are made: nesting then draws the arms in front
+      const b1 = addBone('Bone 1', [326, 262], [326, 140], null);
+      attach('Torso', b1);
+      attach('Head', b1);
+      const b2 = addBone('Bone 2', [326, 150], [326, 240], b1),
+        b3 = addBone('Bone 3', [326, 150], [326, 240], b1);
+      attach('Far arm', b2);
+      attach('Near arm', b3);
+      const swing = (a: number) =>
+        [
+          [0, a, 'inOutSine'],
+          [1.5, -a, 'inOutSine'],
+          [3, a, 'inOutSine'],
+        ] as any;
+      b1.t.rot = [
+        [0, 0, 'inOutSine'],
+        [1.5, 0, 'inOutSine'],
+        [3, 0, 'inOutSine'],
+      ] as any;
+      b2.t.rot = swing(-32);
+      b3.t.rot = swing(32);
+    },
+  },
+  // Pins on images, text and groups: a word to bend through its mesh
+  'pins-mesh': {
+    name: 'Practice: pins on images, text and groups',
+    svg: svg640(`<path id="Hills" d="M0 318c110-40 210-40 320-12s210 28 320-8v102H0z" fill="#1f2b5c"/>
+<text id="Hello" x="320" y="230" text-anchor="middle" font-family="sans-serif" font-size="104" font-weight="700" fill="#ffd36e">Hello!</text>`),
+    setup() {
+      lock('Sky', 'Hills');
+    },
+  },
+} as Record<string, Scene>);
+
+Object.assign(tours, {
+  'rig-order': [
+    // Bone 1 in the Layers panel
+    {
+      target: () => lpRow('Bone 1'),
+      enter: () => {
+        showRig();
+        pause();
+        tool('select');
+        select(null);
+      },
+      done: () => S.sel === byName('Bone 1')?.id && S.selSet.size === 1,
+      show: () => click(lpRow('Bone 1'), 0.4, 0.5),
+      clip: () => [figBox()],
+    },
+    // Own draw order
+    {
+      target: () => q('#fl-dord')?.closest('label') || null,
+      enter: () => {
+        pause();
+        tool('select');
+        pick(byName('Bone 1'));
+        q('#fl-dord')?.scrollIntoView({ block: 'nearest' });
+      },
+      done: () => !!byName('Bone 1')?.dord,
+      show: () => click(q('#fl-dord')),
+      clip: () => [q('#insp .dord')],
+    },
+    // the far arm to the back, below the torso
+    {
+      target: () => farBack(),
+      enter: () => {
+        pause();
+        tool('select');
+        const b = byName('Bone 1');
+        pick(b);
+        if (b && !b.dord) {
+          b.dord = rigArtwork(b, doc.layers).map(x => x.id);
+          select(b.id);
+        }
+        q('#insp .dord')?.scrollIntoView({ block: 'nearest' });
+      },
+      done: () => farBehind(),
+      show: async () => {
+        for (let i = 0; i < 4 && !farBehind(); i++) await click(farBack());
+      },
+      clip: () => [q('#insp .dord'), figBox()],
+    },
+    playStep(),
+  ],
+
+  'pins-mesh': [
+    // W
+    {
+      target: () => pinsBtn(),
+      enter: () => {
+        showRig();
+        pause();
+        if (S.tool === 'pin') setTool('select');
+      },
+      done: () => S.tool === 'pin',
+      show: () => press('W', 'w', 'KeyW'),
+    },
+    // a pin at the start of the word: the mesh appears
+    {
+      target: () => q('#wrap'),
+      enter: () => {
+        showRig();
+        pause();
+        tool('pin');
+      },
+      done: () => !!(word()?.pins || []).length,
+      show: () => tap(screenOf(PIN_L[0], PIN_L[1])),
+      clip: () => [wordBox(), q('#boneChip')],
+    },
+    // a pin at its end
+    {
+      target: () => q('#wrap'),
+      enter: () => {
+        showRig();
+        pause();
+        tool('pin');
+        pick(word());
+        ensureWordPins(1);
+      },
+      done: () => (word()?.pins || []).length >= 2,
+      show: () => tap(screenOf(PIN_R[0], PIN_R[1])),
+      clip: () => [wordBox()],
+    },
+    // Mesh: a finer mesh
+    {
+      target: () => q('#pinMesh')?.closest('.row') || null,
+      enter: c => {
+        pause();
+        tool('pin');
+        pick(word());
+        ensureWordPins(2);
+        drawOverlay();
+        q('#pinMesh')?.scrollIntoView({ block: 'nearest' });
+        c.n = meshN();
+      },
+      done: c => meshN() >= c.n + 24,
+      show: () => slide(q('#pinMesh') as HTMLInputElement | null, Math.min(240, meshN() + 92)),
+      clip: () => [wordBox()],
+    },
+    {
+      ...playheadStep(1.5),
+      enter: () => {
+        pause();
+        tool('pin');
+        pick(word());
+      },
+    },
+    // drag the end's pin down: the word bends, keyed at the playhead
+    {
+      target: () => pinEl(rightPin()),
+      enter: () => {
+        showRig();
+        pause();
+        tool('pin');
+        ensureWordPins(2);
+        pick(word());
+        drawOverlay();
+      },
+      done: () => {
+        const l = word();
+        return !!l && (l.pins || []).some(p => keyAt(l, 'pin' + p.n, 1.5));
+      },
+      show: async () => {
+        const e = pinEl(rightPin());
+        if (!e) return;
+        await drag(centre(e), screenOf(PIN_R[0] - 10, PIN_R[1] + 70), { ms: 1000 });
+      },
+      clip: () => [wordBox(), ...trackBits(word(), 'pin' + rightPin())],
+    },
+    playStep(),
   ],
 } as Record<string, TourStep[]>);
