@@ -3459,15 +3459,15 @@ figcaption {
 .licence li + li {
   margin-top: 4px;
 }
-.opt {
+.scroll-opt {
   margin-top: 14px;
   padding: 32px;
 }
-.opt h3 {
+.scroll-opt h3 {
   font: 400 clamp(30px, 3.4vw, 42px) / 1.05 var(--f-mark);
   margin: 0 0 14px;
 }
-.opt p {
+.scroll-opt p {
   margin: 0 0 18px;
   color: var(--muted);
   font-size: 16px;
@@ -4492,43 +4492,106 @@ figcaption {
 .ta-file > span:nth-child(2) {
   font-size: 12px;
 }
-/* import: files drop in */
-.ta-exts span {
-  animation: taDrop 4s var(--ease-out) infinite both;
+/* import: an SVG file dropped in comes in as layers, its animation as keyframes */
+.ta-imp-file {
+  animation: taImpFile 5s var(--ease-out) infinite;
 }
-.ta-exts span:nth-child(2) {
-  animation-delay: 0.25s;
-}
-.ta-exts span:nth-child(3) {
-  animation-delay: 0.5s;
-}
-@keyframes taDrop {
+@keyframes taImpFile {
   0% {
+    transform: translateY(-40px);
     opacity: 0;
-    transform: translateY(-30px);
   }
-  14%,
-  80% {
-    opacity: 1;
+  10%,
+  86% {
     transform: none;
+    opacity: 1;
   }
-  92%,
+  96%,
   100% {
     opacity: 0;
   }
 }
-/* six nav links: tighter between the phone layout and a wide window */
-@media (max-width: 1060px) {
-  .nav {
-    margin-left: 4px;
-    gap: 0;
+.ta-imp-arrow {
+  animation: taImpArrow 5s infinite;
+}
+@keyframes taImpArrow {
+  0%,
+  14% {
+    opacity: 0;
+    transform: translateX(-6px);
   }
-  .nav a {
-    padding: 8px 9px;
-    font-size: 14px;
+  20%,
+  86% {
+    opacity: 1;
+    transform: none;
   }
-  .top .btn .lbl-long {
-    display: none;
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-imp-rows > g {
+  animation: taImpRow 5s var(--ease-out) infinite both;
+}
+.ta-imp-rows > .r2 {
+  animation-delay: 0.2s;
+}
+.ta-imp-rows > .r3 {
+  animation-delay: 0.4s;
+}
+@keyframes taImpRow {
+  0%,
+  20% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  28%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-imp-rows .k {
+  animation: taImpKey 5s infinite both;
+}
+@keyframes taImpKey {
+  0%,
+  38% {
+    opacity: 0;
+  }
+  44%,
+  86% {
+    opacity: 1;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+.ta-imp-head {
+  animation: taImpHead 5s linear infinite;
+}
+@keyframes taImpHead {
+  0%,
+  46% {
+    transform: translateX(150px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  86% {
+    transform: translateX(222px);
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: translateX(222px);
+    opacity: 0;
   }
 }
 
