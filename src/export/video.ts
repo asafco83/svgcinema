@@ -145,8 +145,10 @@ export async function detectVideo() {
   CAN.done = true;
   return CAN;
 }
-/** The settings, nudged to what this browser can do. */
+/** The settings, nudged to what this browser can do (once that is known: before the check, every encoder looks
+ *  missing, and nudging then would turn MP4 into PNG frames for good). */
 function usable(v: VideoSettings) {
+  if (!CAN.done) return v;
   if (v.fmt === 'mp4' && !CAN.h264) v.fmt = CAN.vp9 || CAN.av1 ? 'webm' : 'seq';
   if (v.fmt === 'webm' && !(CAN.vp9 || CAN.av1)) v.fmt = CAN.h264 ? 'mp4' : 'seq';
   if (v.fmt === 'webm' && v.codec === 'av1' && !CAN.av1) v.codec = 'vp9';
@@ -388,8 +390,8 @@ export function syncVideoUI() {
     seq = v.fmt === 'seq',
     codec = codecOf(v);
   // format
-  ($('#xvFmt [data-v="mp4"]') as HTMLElement).hidden = !CAN.h264;
-  ($('#xvFmt [data-v="webm"]') as HTMLElement).hidden = !(CAN.vp9 || CAN.av1);
+  ($('#xvFmt [data-v="mp4"]') as HTMLElement).hidden = CAN.done && !CAN.h264;
+  ($('#xvFmt [data-v="webm"]') as HTMLElement).hidden = CAN.done && !(CAN.vp9 || CAN.av1);
   segOn('#xvFmt', v.fmt);
   $('#xvCodecMp4').hidden = v.fmt !== 'mp4';
   $('#xvCodecWebm').hidden = v.fmt !== 'webm';

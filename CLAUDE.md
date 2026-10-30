@@ -122,7 +122,7 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   there), `ghost.ts` (Show me: real pointer and key events). The Help panel is `ui/help-panel.ts` (Shift F1, docked where
   the Agent docks). Every topic with a page has its steps, tour or not (`tour` only adds the button): its clips are
   recordings of Show me, cropped to what each step uses. To add a topic: write it in `content.json` (`ready: true`;
-  `"clip": false` on a step done outside the editor), its scene and steps in its group's file, record its clips
+  `"clip": false` on a step done outside the editor), its scene and steps in its group's file (or one it shares helpers with), record its clips
   (`python3 site/captures.py help:<topic>`, both themes, into `public/help/`), rebuild the site; `tests/help.test.ts`
   and `tests/browser/help.py` (every topic run by Show me alone) must pass.
 - `site/` — the website (`site/README.md`): one source per page in `site/src/pages/`, shared partials, demo cards

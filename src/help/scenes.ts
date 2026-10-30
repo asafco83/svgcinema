@@ -5,6 +5,7 @@
 // steps make in any project.
 import type { Scene } from './kit';
 import * as start from './topics/start';
+import * as iface from './topics/interface';
 import * as create from './topics/create';
 import * as arrange from './topics/arrange';
 import * as style from './topics/style';
@@ -18,6 +19,7 @@ export type { Scene } from './kit';
 export { allLayers, byName } from './kit';
 export const SCENES: Record<string, Scene> = {
   ...start.scenes,
+  ...iface.scenes,
   ...create.scenes,
   ...arrange.scenes,
   ...style.scenes,

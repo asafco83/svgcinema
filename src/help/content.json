@@ -1,13 +1,50 @@
 {
   "groups": [
-    { "id": "start", "title": "Getting started", "sub": "Start here" },
-    { "id": "create", "title": "Create", "sub": "Make the artwork" },
-    { "id": "style", "title": "Style", "sub": "Colour, strokes, effects" },
-    { "id": "animate", "title": "Animate", "sub": "Put it in motion" },
-    { "id": "rigging", "title": "Rigging", "sub": "Bones, rigs and pins" },
-    { "id": "timing", "title": "Timing", "sub": "When, and how it gets there" },
-    { "id": "io", "title": "Import and export", "sub": "Bring it in, ship it out" },
-    { "id": "agent", "title": "Design agent", "sub": "Describe it, watch it animate" }
+    {
+      "id": "start",
+      "title": "Getting started",
+      "sub": "Start here"
+    },
+    {
+      "id": "interface",
+      "title": "Interface",
+      "sub": "Find your way around"
+    },
+    {
+      "id": "create",
+      "title": "Create",
+      "sub": "Make the artwork"
+    },
+    {
+      "id": "style",
+      "title": "Style",
+      "sub": "Colour, strokes, effects"
+    },
+    {
+      "id": "animate",
+      "title": "Animate",
+      "sub": "Put it in motion"
+    },
+    {
+      "id": "rigging",
+      "title": "Rigging",
+      "sub": "Bones, rigs and pins"
+    },
+    {
+      "id": "timing",
+      "title": "Timing",
+      "sub": "When, and how it gets there"
+    },
+    {
+      "id": "io",
+      "title": "Import and export",
+      "sub": "Bring it in, ship it out"
+    },
+    {
+      "id": "agent",
+      "title": "Design agent",
+      "sub": "Describe it, watch it animate"
+    }
   ],
   "topics": [
     {
@@ -149,7 +186,283 @@
       ],
       "related": ["editor-glance", "import-svg", "export-svg"]
     },
-
+    {
+      "id": "canvas-nav",
+      "group": "interface",
+      "title": "Moving around the canvas",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Zoom in to work on the small parts, move the view to where you need it, and fit the whole artboard back in. The view is only how you see the canvas: it changes nothing in your animation.",
+      "steps": [
+        {
+          "title": "Zoom in",
+          "text": "Click <b>+</b> at the bottom right of the canvas, beside the zoom percentage: each click zooms in a step, around the middle of the view. <b>−</b> zooms out; <kbd>Ctrl</kbd> <kbd>+</kbd> and <kbd>Ctrl</kbd> <kbd>-</kbd> do the same.",
+          "do": "Click <b>+</b> twice, at the bottom right of the canvas."
+        },
+        {
+          "title": "Zoom at the pointer",
+          "text": "Hold <kbd>Ctrl</kbd> and scroll up over the cat in the window: the canvas zooms in where the pointer is, and the point under it stays put. Scroll down to zoom out.",
+          "do": "Hold <kbd>Ctrl</kbd> and scroll up over the cat."
+        },
+        {
+          "title": "Move the view",
+          "text": "Hold <kbd>Space</kbd> and drag on the canvas: the view moves with the pointer, whatever tool is on. The Hand tool at the bottom of the tools (<kbd>H</kbd>) drags it without Space, and scrolling moves it too. A tap of Space, without a drag, still plays and pauses.",
+          "do": "Hold <kbd>Space</kbd> and drag the canvas."
+        },
+        {
+          "title": "Zoom to a layer",
+          "text": "Click <b>Cat</b> in the Layers panel, then press <kbd>2</kbd>: the view zooms in until the selected layers fill the canvas.",
+          "do": "Click <b>Cat</b> in Layers, then press <kbd>2</kbd>."
+        },
+        {
+          "title": "Fit the artboard",
+          "text": "Click the zoom percentage, then <b>Fit</b>, or press <kbd>1</kbd>: the whole artboard fits the canvas again. The same menu has a slider and a box for any zoom, <b>Fit selection</b> and <b>Zoom 100%</b> (<kbd>0</kbd>).",
+          "do": "Click the zoom percentage, then <b>Fit</b>."
+        }
+      ],
+      "note": "Double-clicking the Hand tool fits the artboard too. The zoom goes from 2% to 3200%. The middle mouse button drags the view with any tool, and Shift + scroll moves it sideways. When the window or a panel changes size, a fitted view fits again; at any other zoom the artwork stays where it is.",
+      "keys": [
+        ["Ctrl +", "Zoom in"],
+        ["Ctrl -", "Zoom out"],
+        ["Ctrl + scroll", "Zoom at the pointer"],
+        ["Space + drag", "Pan the canvas"],
+        ["H", "Hand tool"],
+        ["1", "Zoom to fit"],
+        ["2", "Zoom to the selection"],
+        ["0", "Zoom to 100%"]
+      ],
+      "related": ["snapping", "editor-glance", "shortcuts"]
+    },
+    {
+      "id": "copy-paste",
+      "group": "interface",
+      "title": "Copy, paste and the right-click menu",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Copy layers and paste them as often as you like, a little apart or in the same place. Right-click a layer for a menu of what you can do with it: copy and paste, group, masks, align, arrange, flip and more.",
+      "steps": [
+        {
+          "title": "Copy the fish",
+          "text": "Click the fish on the canvas, then press <kbd>Ctrl</kbd> <kbd>C</kbd>. A message says 1 layer copied: the fish's group, with everything in it. <kbd>Ctrl</kbd> <kbd>X</kbd> cuts it instead.",
+          "do": "Click the fish, then press <kbd>Ctrl</kbd> <kbd>C</kbd>."
+        },
+        {
+          "title": "Paste it",
+          "text": "Press <kbd>Ctrl</kbd> <kbd>V</kbd>. The copy lands a little right of and below the fish, just above the selected layer, and is selected. <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>V</kbd> pastes in place instead, exactly where the copied layer was.",
+          "do": "Press <kbd>Ctrl</kbd> <kbd>V</kbd>."
+        },
+        {
+          "title": "Move the copy",
+          "text": "Drag the new fish to the right, so the two overlap only a little.",
+          "do": "Drag the new fish to the right."
+        },
+        {
+          "title": "Open the right-click menu",
+          "text": "Right-click the new fish. The menu has the commands for the selected layers, among them Copy / Paste, Group, Delete, Select same, Animate, masks, Align, Arrange, Hide, Lock, Rotate 90° and Flip. Commands that don't apply are greyed out. Right-click a row in the Layers panel for the same menu.",
+          "do": "Right-click the new fish."
+        },
+        {
+          "title": "Flip it",
+          "text": "Click <b>Flip horizontal</b>: the copy turns around its origin and swims the other way.",
+          "do": "Click <b>Flip horizontal</b>."
+        },
+        {
+          "title": "Send it backward",
+          "text": "Right-click it again, point at <b>Arrange</b> and click <b>Send backward</b>: the copy goes behind the first fish where they overlap, and below it in the Layers panel. <kbd>Ctrl</kbd> <kbd>[</kbd> does the same.",
+          "do": "Right-click it, then <b>Arrange</b> › <b>Send backward</b>."
+        }
+      ],
+      "note": "Ctrl D duplicates the selected layer in one go (the copy's name ends in “copy”), and Alt-dragging a layer drags a copy of it. With keyframes selected in the timeline, Ctrl C and Ctrl V copy and paste the keyframes instead. The layers you copy stay in this tab; with none copied here, Ctrl V pastes a picture or SVG code copied in another app (Figma's Copy as SVG, for one).",
+      "keys": [
+        ["Ctrl C", "Copy"],
+        ["Ctrl X", "Cut"],
+        ["Ctrl V", "Paste"],
+        ["Ctrl Shift V", "Paste in place"],
+        ["Ctrl D", "Duplicate"],
+        ["Alt + drag", "Duplicate by dragging"],
+        ["Ctrl [", "Send backward"],
+        ["Ctrl ]", "Bring forward"]
+      ],
+      "related": ["layers", "select", "select-same"]
+    },
+    {
+      "id": "doc-settings",
+      "group": "interface",
+      "title": "Canvas and animation settings",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "With nothing selected, the inspector shows the document's own settings: the canvas size and background, and the animation's length, repeat and direction. A new blank project is 640 × 400 with a white background, 3 seconds long, looping forever in the Normal direction.",
+      "steps": [
+        {
+          "title": "Select nothing",
+          "text": "Click an empty part of the canvas, or press <kbd>Esc</kbd>, so nothing is selected. The inspector on the right shows the <b>Document</b> section.",
+          "do": "Click an empty part of the canvas."
+        },
+        {
+          "title": "Change the canvas size",
+          "text": "Type 800 in <b>Canvas</b> W and press <kbd>Enter</kbd>. The artboard grows on the right and the view zooms out to fit it; the artwork stays where it is, at its own size.",
+          "do": "Type <b>800</b> in Canvas W and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Give it a background",
+          "text": "Type #a8d8f0 in <b>Background</b> and press <kbd>Enter</kbd>, or click the swatch beside it for the colour window. This scene had none, so the artboard showed a checkerboard: none also leaves the exported file transparent.",
+          "do": "Type <b>#a8d8f0</b> in Background and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Make it longer",
+          "text": "Type 4 in <b>Length</b> and press <kbd>Enter</kbd>. The timeline now runs to 4 seconds; keyframes keep their times, so the ball rests for a second at the end. The box beside the time in the timeline (<b>/ 0:03.00</b>) sets the length too.",
+          "do": "Type <b>4</b> in Length and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Set how often it plays",
+          "text": "Pick <b>2 times</b> in <b>Repeat</b>: the exported animation plays twice, then stops. The others are Loop forever, Play once, 3 times and 5 times.",
+          "do": "Pick <b>2 times</b> in Repeat."
+        },
+        {
+          "title": "Set the direction",
+          "text": "Pick <b>Alternate</b> in <b>Direction</b>: every second time it plays backwards, so the ball rolls across and back. <b>Reverse</b> plays it backwards every time.",
+          "do": "Pick <b>Alternate</b> in Direction."
+        },
+        {
+          "title": "Play it",
+          "text": "Click Play at the top left of the timeline, or press <kbd>Space</kbd>. With <b>Loop preview</b> on, the button beside Play, the preview goes on repeating in the direction you set; the exported file stops after 2 times.",
+          "do": "Click <b>Play</b>."
+        }
+      ],
+      "note": "These settings are saved with the project. The Export window's Playback section has the same Repeat and Direction, with Starts, After the end and Speed. The canvas can be up to 8000 × 8000, and the animation up to 600 seconds long.",
+      "keys": [
+        ["Esc", "Back to the Select tool"],
+        ["Ctrl Shift A", "Deselect all"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["timeline", "export-svg", "starts"]
+    },
+    {
+      "id": "snapping",
+      "group": "interface",
+      "title": "Snapping, guides and rulers",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Snapping lines things up as you move and draw: to other layers' edges and centres, to path nodes, to guides, to the grid and to whole pixels. Rulers and guides show where things are; the grid gives an even spacing.",
+      "steps": [
+        {
+          "title": "Show the rulers",
+          "text": "Click the grid button at the bottom right of the canvas, then <b>Show rulers</b>. Rulers appear along the top and the left of the canvas.",
+          "do": "Click the grid button, then <b>Show rulers</b>."
+        },
+        {
+          "title": "Pull a guide",
+          "text": "Drag down from the top ruler onto the canvas and let go at 250: a tag shows where the guide is. Dropping a guide back on a ruler removes it.",
+          "do": "Drag down from the top ruler to <b>250</b>."
+        },
+        {
+          "title": "Snap the box to it",
+          "text": "Drag the box down towards the guide. Close to it, the box's bottom edge jumps onto the guide, and a magenta line shows the match. Hold <kbd>Ctrl</kbd> to move without snapping.",
+          "do": "Drag the box down to the guide."
+        },
+        {
+          "title": "Show the grid",
+          "text": "Click the grid button again, then <b>Front grid</b>. The grid's size is at the bottom of the same menu.",
+          "do": "Click the grid button, then <b>Front grid</b>."
+        },
+        {
+          "title": "Snap to the grid",
+          "text": "Click the magnet beside it, then <b>Snap to grid</b>. Moving and drawing now snap to the grid lines too; <b>Enable snapping</b>, in the same menu, turns all snapping off and on.",
+          "do": "Click the magnet, then <b>Snap to grid</b>."
+        }
+      ],
+      "note": "The guides are saved with the project; the rulers, grids and snapping settings are remembered in this browser. Keyframes in the timeline have their own switch, Snap keyframes, at the bottom of the magnet's menu.",
+      "keys": [
+        ["Alt S", "Snapping on or off"],
+        ["Alt R", "Rulers"],
+        ["Alt L", "Guides"],
+        ["Alt G", "Front grid"]
+      ],
+      "related": ["select", "booleans", "layers"]
+    },
+    {
+      "id": "shortcuts",
+      "group": "interface",
+      "title": "Keyboard shortcuts",
+      "ready": true,
+      "intro": "Most things in SVGcinema have a key. The Keyboard shortcuts window lists them all, in five tabs that follow the main menu, with a search box across them.",
+      "steps": [
+        {
+          "title": "Open the list",
+          "text": "Click the keyboard button in the top bar, beside Undo and Redo, or press <kbd>F1</kbd>. It is in the main menu too: ☰ › Help › Keyboard shortcuts.",
+          "do": "Click the keyboard button in the top bar, or press <kbd>F1</kbd>."
+        },
+        {
+          "title": "Pick a tab",
+          "text": "The tabs follow the main menu: <b>General</b> (File, Edit and Help), <b>Layers</b>, <b>Tools</b>, <b>Animation</b> and <b>View</b>, each in titled sections. Click <b>Animation</b>: playback, keyframes, easing, and the <kbd>Shift</kbd> keys that animate a property.",
+          "do": "Click the <b>Animation</b> tab."
+        },
+        {
+          "title": "Search it",
+          "text": "Type zoom in <b>Search shortcuts</b>, at the top: the list shows every match from all the tabs, each with where it lives (View · Zoom).",
+          "do": "Type <b>zoom</b> in Search shortcuts."
+        },
+        {
+          "title": "Close it",
+          "text": "Click ✕, or press <kbd>Esc</kbd>. In the search box, the first <kbd>Esc</kbd> clears the search.",
+          "do": "Click ✕ to close the list."
+        }
+      ],
+      "note": "Each row is a command and its keys: “or” separates two ways to do it, and words such as drag or double-click a node are what the mouse does. On a Mac the list shows ⌘ for Ctrl and ⌥ for Alt. Letter keys also work on keyboard layouts without Latin letters (Hebrew, Russian, Greek…), by the key's place.",
+      "keys": [
+        ["F1", "Keyboard shortcuts"],
+        ["Shift F1", "Help & tutorials"],
+        ["Ctrl Z", "Undo"],
+        ["Ctrl Shift Z", "Redo"],
+        ["Ctrl S", "Save the project"],
+        ["Ctrl D", "Duplicate"],
+        ["Del", "Delete"],
+        ["V", "Select & transform"],
+        ["Space", "Play / pause"],
+        ["1", "Zoom to fit"],
+        ["/", "Close or open all inspector sections"]
+      ],
+      "related": ["editor-glance", "canvas-nav", "copy-paste"]
+    },
+    {
+      "id": "thumbnails",
+      "group": "interface",
+      "title": "Thumbnails for Windows and Linux",
+      "ready": true,
+      "intro": "Every project you save carries a picture of its first frame. A small free add-on for Windows or Linux shows it in your file manager, so your .SVGcinema files show their animations instead of a plain icon.",
+      "steps": [
+        {
+          "title": "Download it",
+          "text": "On the website's <b>Downloads</b> page, under Thumbnails, click <b>Download for Windows</b> (Windows 10 and 11, on regular and ARM PCs), or for Linux the <b>.deb package</b> or the <b>.tar.gz with install script</b>. In the editor, ☰ › Help › Thumbnails on your computer… has the same downloads.",
+          "do": "Download the add-on for your system from the Downloads page.",
+          "clip": false
+        },
+        {
+          "title": "Install it on Windows",
+          "text": "Unzip the download and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown: choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights.",
+          "do": "Unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>.",
+          "clip": false
+        },
+        {
+          "title": "Or install it on Linux",
+          "text": "Install the .deb the way you install any package, for example with <b>sudo apt install ./svgcinema-thumbnails.deb</b>. On other Linux systems, unpack the .tar.gz and run <b>./install.sh</b> in its folder: it asks for your password, because it installs in the system's folders (file managers make thumbnails in a sandbox that only sees those).",
+          "do": "Install the .deb, or run <b>./install.sh</b> from the .tar.gz.",
+          "clip": false
+        },
+        {
+          "title": "See your projects",
+          "text": "Open a folder of .SVGcinema files in File Explorer, or in GNOME Files, Nemo, Caja or Thunar: each file shows its first frame. On Linux, close the file manager's window and open it again if they don't show at once.",
+          "do": "Open a folder of projects in your file manager.",
+          "clip": false
+        }
+      ],
+      "note": "The picture is made again each time you save the project. To remove the add-on, use Settings › Apps on Windows; on Linux, remove the svgcinema-thumbnails package, or run ./uninstall.sh from the .tar.gz. There is none for macOS, and KDE's Dolphin uses its own plugins, so it isn't covered.",
+      "related": ["projects", "editor-glance"]
+    },
     {
       "id": "select",
       "group": "create",
@@ -414,7 +727,7 @@
     {
       "id": "layers",
       "group": "create",
-      "title": "Layers, groups and symbols",
+      "title": "Layers and groups",
       "ready": true,
       "tour": true,
       "minutes": 3,
@@ -446,7 +759,7 @@
           "do": "Click the padlock on the group's row."
         }
       ],
-      "note": "Drag a row in the Layers panel to move it, or drop it into a group. A symbol is artwork whose copies share their contents: right-click a group and choose Make symbol (☰ › Element has it too), add copies from Assets › Symbols, and an edit to one reaches them all.",
+      "note": "Drag a row in the Layers panel to move it, or drop it into a group. Ctrl-click a layer on the canvas to pick it inside its group. To reuse a group as artwork whose copies all follow one edit, make it a symbol: see Symbols.",
       "keys": [
         ["Ctrl G", "Group"],
         ["Ctrl Shift G", "Ungroup"],
@@ -455,7 +768,96 @@
         ["Ctrl H", "Hide or show"],
         ["Ctrl L", "Lock or unlock"]
       ],
-      "related": ["masks", "booleans", "select"]
+      "related": ["masks", "booleans", "select", "symbols"]
+    },
+    {
+      "id": "symbols",
+      "group": "create",
+      "title": "Symbols",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A symbol is artwork you reuse. Its instances share their shapes, colours and the animation inside them, so a change made in one reaches them all, while each instance has its own place, size and keyframes.",
+      "steps": [
+        {
+          "title": "Make a symbol",
+          "text": "Right-click the tree on the canvas and choose <b>Make symbol</b>. The Tree group becomes the symbol's first instance: the inspector's header reads symbol · 1 instance.",
+          "do": "Right-click the tree › <b>Make symbol</b>."
+        },
+        {
+          "title": "Duplicate it",
+          "text": "Click <b>Duplicate</b> in the Layers panel's top bar, or press <kbd>Ctrl</kbd> <kbd>D</kbd>. The copy is a second instance of the same symbol, a little below and to the right.",
+          "do": "Click <b>Duplicate</b>."
+        },
+        {
+          "title": "Move the copy",
+          "text": "Drag the new tree to the right of the first. Its position, size, rotation, opacity and keyframes are its own.",
+          "do": "Drag the copy to the right."
+        },
+        {
+          "title": "Edit the symbol",
+          "text": "Double-click either tree. The rest of the scene dims, the other instance shows as a dashed outline, and a chip on the canvas says which symbol you are editing.",
+          "do": "Double-click a tree."
+        },
+        {
+          "title": "Change its colour",
+          "text": "Click the crown, type #e8933a in <b>Fill</b> and press <kbd>Enter</kbd>. The other tree follows: a change inside the symbol reaches every instance.",
+          "do": "Click the crown, type <b>#e8933a</b> in Fill."
+        },
+        {
+          "title": "Finish editing",
+          "text": "Click <b>Done</b> on the chip. <kbd>Esc</kbd> does it too, once nothing is selected. The scene comes back, with two autumn trees.",
+          "do": "Click <b>Done</b>."
+        }
+      ],
+      "note": "Alt-drag an instance for another one, or click the symbol's card in Assets › Symbols, which lists every symbol with its number of instances (✎ edits it, × deletes it and leaves its instances as plain groups). An instance's Instance section in the inspector has Edit symbol, a Time offset (see Staggering instances) and Detach instance, which turns it into a plain group that no longer follows the symbol.",
+      "keys": [
+        ["Ctrl D", "Duplicate"],
+        ["Esc", "Finish editing the symbol, once nothing is selected"]
+      ],
+      "related": ["layers", "stagger", "select"]
+    },
+    {
+      "id": "select-same",
+      "group": "create",
+      "title": "Select same",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Select same picks every layer that shares something with the selected one: its kind of shape, a colour, its stroke, opacity or blending mode, and for text its font or size. It is the quick way to reach many alike layers at once.",
+      "steps": [
+        {
+          "title": "Select a circle",
+          "text": "Click the orange circle at the top left.",
+          "do": "Click the orange circle at the top left."
+        },
+        {
+          "title": "Open Select same",
+          "text": "Click the <b>Select same</b> button beside the layer name at the top of the inspector. It lists what the circle can be matched by, each with the circle's own value on the right: Ellipse, its fill colour, its opacity…",
+          "do": "Click <b>Select same</b>."
+        },
+        {
+          "title": "Pick Shape",
+          "text": "Click <b>Shape</b>. All three circles are selected, whatever their colour, and a message says how many. The squares and the text stay out.",
+          "do": "Click <b>Shape</b>."
+        },
+        {
+          "title": "Match the outline",
+          "text": "Click the outlined orange square, then <b>Select same</b> › <b>Stroke color</b>. The outlined circle is picked with it: both have the same white stroke.",
+          "do": "Click the outlined square, then <b>Select same</b> › <b>Stroke color</b>."
+        },
+        {
+          "title": "Match the labels",
+          "text": "Click the word Round, then <b>Select same</b> › <b>Font size</b>. With a text layer selected the list has a Text part too, which picks text layers only: both labels are selected, the bigger title isn't.",
+          "do": "Click <b>Round</b>, then <b>Select same</b> › <b>Font size</b>."
+        }
+      ],
+      "note": "With several layers selected, a choice matches any of them: with an orange and a blue circle selected, Fill color picks every orange and every blue layer. Hidden and locked layers are left out, layers inside groups count, and values are compared as they are at the playhead. The same list is in the right-click menu and in ☰ › Edit, under Select same.",
+      "keys": [
+        ["Ctrl A", "Select all layers"],
+        ["Ctrl Shift A", "Deselect all"]
+      ],
+      "related": ["multi", "select", "fill"]
     },
     {
       "id": "hyperlinks",
@@ -485,51 +887,6 @@
       "note": "Links work in the exported SVG, not on the editor's canvas. A browser follows them when the SVG is part of the page (pasted in, or in an object tag, where Same tab opens the page inside the object's box), not when it is shown as an image. Web addresses, mailto:, tel: and #anchors only. Clear the field to remove the link; right-click › Hyperlink… edits the same link.",
       "related": ["layers", "export-svg"]
     },
-    {
-      "id": "snapping",
-      "group": "create",
-      "title": "Snapping, guides and rulers",
-      "ready": true,
-      "tour": true,
-      "minutes": 3,
-      "intro": "Snapping lines things up as you move and draw: to other layers' edges and centres, to path nodes, to guides, to the grid and to whole pixels. Rulers and guides show where things are; the grid gives an even spacing.",
-      "steps": [
-        {
-          "title": "Show the rulers",
-          "text": "Click the grid button at the bottom right of the canvas, then <b>Show rulers</b>. Rulers appear along the top and the left of the canvas.",
-          "do": "Click the grid button, then <b>Show rulers</b>."
-        },
-        {
-          "title": "Pull a guide",
-          "text": "Drag down from the top ruler onto the canvas and let go at 250: a tag shows where the guide is. Dropping a guide back on a ruler removes it.",
-          "do": "Drag down from the top ruler to <b>250</b>."
-        },
-        {
-          "title": "Snap the box to it",
-          "text": "Drag the box down towards the guide. Close to it, the box's bottom edge jumps onto the guide, and a magenta line shows the match. Hold <kbd>Ctrl</kbd> to move without snapping.",
-          "do": "Drag the box down to the guide."
-        },
-        {
-          "title": "Show the grid",
-          "text": "Click the grid button again, then <b>Front grid</b>. The grid's size is at the bottom of the same menu.",
-          "do": "Click the grid button, then <b>Front grid</b>."
-        },
-        {
-          "title": "Snap to the grid",
-          "text": "Click the magnet beside it, then <b>Snap to grid</b>. Moving and drawing now snap to the grid lines too; <b>Enable snapping</b>, in the same menu, turns all snapping off and on.",
-          "do": "Click the magnet, then <b>Snap to grid</b>."
-        }
-      ],
-      "note": "The guides are saved with the project; the rulers, grids and snapping settings are remembered in this browser. Keyframes in the timeline have their own switch, Snap keyframes, at the bottom of the magnet's menu.",
-      "keys": [
-        ["Alt S", "Snapping on or off"],
-        ["Alt R", "Rulers"],
-        ["Alt L", "Guides"],
-        ["Alt G", "Front grid"]
-      ],
-      "related": ["select", "booleans", "layers"]
-    },
-
     {
       "id": "fill",
       "group": "style",
@@ -754,7 +1111,6 @@
       ],
       "related": ["fill", "masks", "keyframes"]
     },
-
     {
       "id": "keyframes",
       "group": "animate",
@@ -802,6 +1158,48 @@
         ["Space", "Play and pause"]
       ],
       "related": ["first-animation", "easing"]
+    },
+    {
+      "id": "freeze",
+      "group": "animate",
+      "title": "Freezing a track",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Freezing a track keeps its keyframes but stops using them for a while: the property holds one value, so you can see the scene without that motion, or work on it, and bring the keyframes back with one click.",
+      "steps": [
+        {
+          "title": "Freeze the rocking",
+          "text": "The boat sails across and rocks as it goes: two tracks, Position and Rotate. Hover the boat's <b>Rotate</b> row in the timeline and click the snowflake at the left of its name. The row and its keyframes turn grey, and the boat holds the angle it has at the playhead.",
+          "do": "Click the snowflake on the <b>Rotate</b> row."
+        },
+        {
+          "title": "Select the boat",
+          "text": "Click <b>Boat</b> in the Layers panel. In the inspector, the {◆} beside Rotate is greyed out: a frozen track takes no keyframes.",
+          "do": "Click <b>Boat</b> in the Layers panel."
+        },
+        {
+          "title": "Tilt it",
+          "text": "Type 8 in Rotate and press <kbd>Enter</kbd>. The boat leans a little, at every moment: you change the value the frozen track holds, and no keyframe is added.",
+          "do": "Type <b>8</b> in Rotate and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The boat sails across, still leaning, without rocking: its Position track plays, the frozen Rotate track doesn't.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        },
+        {
+          "title": "Unfreeze it",
+          "text": "While it plays, click the snowflake again: on a frozen row it stays in view. The Rotate keyframes are back in use and the boat rocks again; the tilt you typed no longer shows, as the keyframes set the angle.",
+          "do": "Click the snowflake on the <b>Rotate</b> row again."
+        }
+      ],
+      "note": "Exports leave a frozen track out: the property keeps the value it holds. Freezing and unfreezing are undo steps. To remove a track for good, hover its row and click the × beside its diamond.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["Ctrl Z", "Undo"]
+      ],
+      "related": ["keyframes", "timeline"]
     },
     {
       "id": "morph",
@@ -1029,9 +1427,8 @@
         ["Shift R", "Add a rotate keyframe at the playhead"],
         ["Space", "Play and pause"]
       ],
-      "related": ["select", "keyframes", "presets"]
+      "related": ["select", "keyframes", "presets", "select-same"]
     },
-
     {
       "id": "rig-build",
       "group": "rigging",
@@ -1085,6 +1482,144 @@
         ["Alt B", "Show or hide bones"]
       ],
       "related": ["rig-pose", "rig-limits", "pins-bones", "layers"]
+    },
+    {
+      "id": "bone-edit",
+      "group": "rigging",
+      "title": "Edit bone tool",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "The Edit bone tool fixes a rig's bones without touching the animation: it moves joints and changes a bone's length and rest angle, and the artwork attached to the bones stays where it is. Here the arm's bones were drawn a little off, so the arm bends in the wrong places as it waves.",
+      "goal": "The arm waves, turning at the shoulder and the elbow: the same keyframes as before, on bones that now sit at the joints.",
+      "steps": [
+        {
+          "title": "Pick the Edit bone tool",
+          "text": "Press <kbd>E</kbd>. The Edit bone tool is in the bones button of the tools on the left. The bones show their rest pose, and a <b>Rest pose</b> chip above the canvas says the keyframes stay as they are.",
+          "do": "Press <kbd>E</kbd> for the Edit bone tool."
+        },
+        {
+          "title": "Move the joint onto the shoulder",
+          "text": "Drag the round joint at the start of Bone 1 up onto the shoulder. The joint moves, the bone's tip stays where it is, and the upper arm doesn't move.",
+          "do": "Drag the joint of Bone 1 onto the shoulder."
+        },
+        {
+          "title": "Drag Bone 1's tip to the elbow",
+          "text": "Drag the round tip of Bone 1 onto the elbow. Bone 1 gets longer and turns, and the joint of Bone 2, which sits on that tip, comes along while its own tip stays put.",
+          "do": "Drag the tip of Bone 1 onto the elbow."
+        },
+        {
+          "title": "Bring Bone 2's tip to the wrist",
+          "text": "Drag the tip of Bone 2 back to the wrist. Bone 2 gets shorter; the forearm stays as it is.",
+          "do": "Drag the tip of Bone 2 to the wrist."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>V</kbd> for the Select tool, then <kbd>Space</kbd>. The wave's keyframes haven't changed, but now the arm turns at the shoulder and the elbow.",
+          "do": "<kbd>V</kbd>, then <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Drag a bone between its ends to move the whole bone; what is attached stays put. While dragging a tip, hold <kbd>Shift</kbd> to snap its angle to 15°, or <kbd>Ctrl</kbd> to turn the attached artwork with the bone; a tip also snaps onto other bones' joints and tips. A joint that sits on its parent's tip moves that tip: <kbd>Alt</kbd>+drag pulls the joint off it.",
+      "keys": [
+        ["E", "Edit bone tool"],
+        ["V", "Select tool"],
+        ["Space", "Play and pause"],
+        ["Alt B", "Show or hide bones"]
+      ],
+      "related": ["rig-build", "bone-scale", "rig-pose", "rig-limits"]
+    },
+    {
+      "id": "bone-scale",
+      "group": "rigging",
+      "title": "Scale bone tool",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "The Scale bone tool stretches and squashes a bone, keyed at the playhead. The artwork attached to the bone scales with it; a bone chained on its tip follows the tip without being stretched.",
+      "goal": "The flower's stem stretches up and gets thinner in 1.5 seconds, carrying the flower, then holds and starts over.",
+      "steps": [
+        {
+          "title": "Select the stem's bone",
+          "text": "With the Select tool, click Bone 1, the bone along the stem. The inspector shows its Transforms and its Bone section.",
+          "do": "Click Bone 1, along the stem."
+        },
+        {
+          "title": "Start a Scale track",
+          "text": "Click {◆} beside <b>Scale</b> in Transforms. Scale gets its own row on the timeline, with a keyframe at 0s at 100%.",
+          "do": "Click {◆} beside <b>Scale</b>."
+        },
+        {
+          "title": "Move the playhead to 1.5s",
+          "text": "Drag the red playhead along the time ruler to 1.5s.",
+          "do": "Drag the playhead to <b>1.5s</b>."
+        },
+        {
+          "title": "Pick the Scale bone tool",
+          "text": "Press <kbd>S</kbd>. The Scale bone tool is in the bones button of the tools on the left. A bar above the canvas picks what a drag changes: <b>Length</b> along the bone, <b>Thickness</b> across it, <b>Linked</b> for both, or <b>Squash & stretch</b>.",
+          "do": "Press <kbd>S</kbd> for the Scale bone tool."
+        },
+        {
+          "title": "Pick Squash & stretch",
+          "text": "Click <b>Squash & stretch</b> in the bar above the canvas. A bone that gets longer now gets thinner too, keeping its area; the <b>Volume</b> menu beside it can keep a tube's volume instead.",
+          "do": "Click <b>Squash & stretch</b> above the canvas."
+        },
+        {
+          "title": "Stretch the stem",
+          "text": "Drag Bone 1 upwards, along its length. The stem and the leaf stretch and thin, keyed at 1.5s; the flower rides up on the tip without being stretched, as Bone 2's <b>Inherit scale</b> is off.",
+          "do": "Drag Bone 1 upwards."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The stem stretches until 1.5s, holds until the end of the 3-second animation and starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "A bone without a Scale track gets one on its first drag, with a single keyframe at the playhead, so the bone is scaled at every time; start the track with {◆} first, as here, to animate it. Press <kbd>Tab</kbd> while dragging to switch between the four modes, and hold <kbd>Shift</kbd> to snap to 10%. Tick <b>Inherit scale</b> in a child bone's Bone section to stretch it with its parent.",
+      "keys": [
+        ["S", "Scale bone tool"],
+        ["V", "Select tool"],
+        ["Space", "Play and pause"],
+        ["Alt B", "Show or hide bones"]
+      ],
+      "related": ["rig-build", "bone-edit", "rig-pose", "keyframes"]
+    },
+    {
+      "id": "rig-order",
+      "group": "rigging",
+      "title": "A rig's own draw order",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "In a rig, nesting decides what is drawn in front: everything on a bone is drawn together with the bone it hangs on, so a part can't go behind its parent's artwork. Here the far arm, on a bone that hangs on the torso's bone, swings in front of the torso. <b>Own draw order</b> draws the rig's artwork in the order of a list instead, each piece still moving with its bone.",
+      "goal": "The figure swings its arms: the near arm in front of the torso, the far arm behind it.",
+      "steps": [
+        {
+          "title": "Select the rig's top bone",
+          "text": "Click Bone 1 in the Layers panel. It carries the torso and the head, and the arms' bones hang on it; the inspector shows its Bone section.",
+          "do": "Click <b>Bone 1</b> in the Layers panel."
+        },
+        {
+          "title": "Turn on Own draw order",
+          "text": "In the Bone section, tick <b>Own draw order</b>. A list of the artwork attached to the rig's bones appears, front at the top, in the order nesting draws it: nothing changes yet.",
+          "do": "Tick <b>Own draw order</b>."
+        },
+        {
+          "title": "Send the far arm to the back",
+          "text": "Click the down arrow beside <b>Far arm</b> until it is at the bottom of the list, below <b>Torso</b>. On the canvas the far arm goes behind the torso, and in the Layers panel it stays on its bone.",
+          "do": "Click the down arrow beside <b>Far arm</b> until it is at the bottom."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The arms swing, the far one behind the torso, and the export draws them the same way.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "You can also drag a row of the list onto another. Artwork you attach to the rig later goes in front, and turning <b>Own draw order</b> off goes back to nesting. The order is the same all through the animation: it isn't animated.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["Alt B", "Show or hide bones"]
+      ],
+      "related": ["rig-build", "rig-pose", "layers"]
     },
     {
       "id": "rig-pose",
@@ -1229,6 +1764,102 @@
       "related": ["pins-bones", "morph", "keyframes"]
     },
     {
+      "id": "pins-edit",
+      "group": "rigging",
+      "title": "Edit pins tool",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "The Edit pins tool moves pins at rest, so they hold the artwork somewhere else. A pin you move takes its motion with it: its keyframes move by the same amount, so it still bends the artwork as far, from its new place. Here Pin 2 sits in the middle of the flag, so the flag only sags in the middle.",
+      "goal": "The flag's free end swings down in 1.5 seconds, bending the whole flag, then holds and starts over.",
+      "steps": [
+        {
+          "title": "Select the flag",
+          "text": "With the Select tool, click the flag. Its pins show: Pin 1 by the pole, and Pin 2 in the middle, whose track pulls the flag down at 1.5s.",
+          "do": "Click the flag."
+        },
+        {
+          "title": "Pick the Edit pins tool",
+          "text": "Hold the pins button in the tools on the left and pick <b>Edit pins tool</b>. The flag shows its rest shape, and a <b>Rest pose</b> chip above the canvas says pins move with their motion.",
+          "do": "Hold the pins button and pick <b>Edit pins tool</b>."
+        },
+        {
+          "title": "Move Pin 2 to the free end",
+          "text": "Drag Pin 2 to the far end of the flag. The flag doesn't change, as a pin at rest holds the artwork where it is, and Pin 2's keyframes move with it.",
+          "do": "Drag Pin 2 to the far end of the flag."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>V</kbd> for the Select tool, then <kbd>Space</kbd>. Now the free end swings down, and the whole flag bends from the pole.",
+          "do": "<kbd>V</kbd>, then <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Hold <kbd>Shift</kbd> while dragging to move a pin straight across or straight up and down. Click a pin and press <kbd>Del</kbd> to remove it. The Edit pins tool doesn't add pins; with the Pin tool, <kbd>Alt</kbd>+drag a pin moves it at rest the same way, keyframes and all.",
+      "keys": [
+        ["W", "Pin tool"],
+        ["Del", "Remove the selected pin"],
+        ["V", "Select tool"],
+        ["Space", "Play and pause"],
+        ["Alt P", "Show or hide pins"]
+      ],
+      "related": ["pins", "pins-bones", "bone-edit"]
+    },
+    {
+      "id": "pins-mesh",
+      "group": "rigging",
+      "title": "Pins on images, text and groups",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "A path bends through its own nodes, but an image, a text or a group has none: pins bend it through a mesh of triangles laid over it, each triangle carrying the piece of artwork inside it. A text stays a text you can edit, and its gradients and filters bend too.",
+      "goal": "The word sags at its end in 1.5 seconds, bending through its mesh, then holds and starts over.",
+      "steps": [
+        {
+          "title": "Pick the Pin tool",
+          "text": "Press <kbd>W</kbd>. The Pin tool is in the pins button of the tools on the left.",
+          "do": "Press <kbd>W</kbd> for the Pin tool."
+        },
+        {
+          "title": "Pin the start of the word",
+          "text": "Click the H. A pin appears there, and the Pin tool draws the mesh over the text; the chip above the canvas says how many triangles it has.",
+          "do": "Click the <b>H</b>."
+        },
+        {
+          "title": "Pin its end",
+          "text": "Click the exclamation mark for a second pin.",
+          "do": "Click the <b>!</b>."
+        },
+        {
+          "title": "Make the mesh finer",
+          "text": "In the Pins section of the inspector, drag the <b>Mesh</b> slider to the right. The triangles get smaller and more of them cover the text: a denser mesh bends more smoothly, but makes a CSS export larger.",
+          "do": "Drag the <b>Mesh</b> slider to the right."
+        },
+        {
+          "title": "Move the playhead to 1.5s",
+          "text": "Drag the red playhead along the time ruler to 1.5s.",
+          "do": "Drag the playhead to <b>1.5s</b>."
+        },
+        {
+          "title": "Bend the word",
+          "text": "Drag the pin on the exclamation mark down. The word bends between the two pins, letter shapes and all, and the pin gets its own track: at rest at 0s, bent at 1.5s.",
+          "do": "Drag the pin on the <b>!</b> down."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The word bends until 1.5s, holds until the end of the 3-second animation and starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "The mesh covers only where there is artwork, and it is rebuilt by itself when the artwork changes, for instance when you edit the text. A pinned group's layers can't be picked on the canvas: pick them in the Layers panel. In a CSS export each triangle's motion is stored frame by frame, so when that is much larger the Export dialog offers <b>Use JavaScript</b>.",
+      "keys": [
+        ["W", "Pin tool"],
+        ["Del", "Remove the selected pin"],
+        ["Alt P", "Show or hide pins"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["pins", "pins-edit", "text"]
+    },
+    {
       "id": "pins-bones",
       "group": "rigging",
       "title": "Pins that follow bones",
@@ -1273,7 +1904,6 @@
       ],
       "related": ["pins", "rig-build", "rig-pose"]
     },
-
     {
       "id": "timeline",
       "group": "timing",
@@ -1460,7 +2090,49 @@
       ],
       "related": ["timeline", "keyframes", "motion-paths"]
     },
-
+    {
+      "id": "stagger",
+      "group": "timing",
+      "title": "Staggering instances",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "The instances of a symbol share its animation, so they all move together. Give an instance a time offset and the same animation starts later on it: a row of instances plays one after another.",
+      "goal": "Three dots hop one after another, like a loading indicator, then rest until the animation starts over.",
+      "steps": [
+        {
+          "title": "Select the middle dot",
+          "text": "The three dots are instances of one symbol, Dot, so they hop together. Click the middle dot on the canvas: the inspector opens on its <b>Instance</b> section.",
+          "do": "Click the middle dot."
+        },
+        {
+          "title": "Give it a time offset",
+          "text": "Type 0.3 in <b>Time offset</b> and press <kbd>Enter</kbd>. This instance's hop now starts 0.3s later: in the timeline, its Ball keyframes move along.",
+          "do": "Type <b>0.3</b> in Time offset and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Select the last dot",
+          "text": "Click the dot on the right. Time offsets are set one instance at a time: with several layers selected, the Instance section isn't there.",
+          "do": "Click the dot on the right."
+        },
+        {
+          "title": "Give it a longer offset",
+          "text": "Type 0.6 in its <b>Time offset</b> and press <kbd>Enter</kbd>. Its hop starts 0.6s after the first dot's.",
+          "do": "Type <b>0.6</b> in Time offset and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Play it",
+          "text": "Press <kbd>Space</kbd>. The dots hop one after another, 0.3s apart, and rest until the 3-second animation starts over.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        }
+      ],
+      "note": "Edits inside the symbol still reach every instance, and each keeps its offset. In the JS export an instance with an offset is written out in full rather than shared, so the file grows a little. To stagger the instances' own movement (each one sliding in, say), select them and apply a preset with Stagger.",
+      "keys": [
+        ["Space", "Play and pause"],
+        ["Home", "Go to the start"]
+      ],
+      "related": ["symbols", "presets", "timeline"]
+    },
     {
       "id": "import-svg",
       "group": "io",
@@ -1823,7 +2495,6 @@
       "note": "The background is Transparent, or the document's background, or a color of your own; JPEG has no transparency. Embed in your site gives a picture tag with the newer format first and PNG behind it, and Download the set (.zip) makes every file it names.",
       "related": ["video", "gif", "export-svg"]
     },
-
     {
       "id": "agent-key",
       "group": "agent",

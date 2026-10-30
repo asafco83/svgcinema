@@ -14,11 +14,13 @@ const plain = h =>
   String(h)
     .replace(/<[^>]+>/g, '')
     .replace(/\{◆\}/g, '◆');
-const keys = k =>
-  k
-    .split(' ')
-    .map(p => `<kbd>${esc(p)}</kbd>`)
+/** "Shift P" → two keys; in "Alt + drag" the + and a word for the pointer (drag, click, scroll) are plain text */
+const keys = k => {
+  const ps = k.split(' ');
+  return ps
+    .map(p => (ps.length > 1 && (p === '+' || /^[a-z]{2,}$/.test(p)) ? esc(p) : `<kbd>${esc(p)}</kbd>`))
     .join(' ');
+};
 const PLAY =
   '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.8v10.4a.6.6 0 00.9.5l8.2-5.2a.6.6 0 000-1L4.9 2.3a.6.6 0 00-.9.5z"/></svg>';
 const SEARCH =
