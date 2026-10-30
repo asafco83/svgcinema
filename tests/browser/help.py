@@ -2,6 +2,8 @@ import asyncio, sys, json, os
 from playwright.async_api import async_playwright
 OUT=os.environ.get('CIN_OUT','/tmp/svgcinema-shots/'); os.makedirs(OUT, exist_ok=True)
 # Help & tutorials (ui/help-panel, help/practice, help/tours):
+# - every practice scene keeps a new project's length, repeat and direction (what the steps make there is what
+#   they make anywhere);
 # - every guided tour runs to the end in its practice editor with "Show me" alone (a change to the editor that
 #   breaks a step fails here), and the practice editor keeps nothing: the saved project, its file and the
 #   settings in the browser are as they were;
@@ -37,6 +39,9 @@ async def main():
             check(f"{t['id']}: the tour starts at step 1 of {len(t['steps'])}", st['i']==0 and st['n']==len(t['steps']), st)
             names=await pg.evaluate("(async()=>{const s=await import('/src/core/state.ts');return [s.doc.name,s.doc.layers.length]})()")
             check(f"{t['id']}: its own small practice scene", names[0].startswith('Practice') and names[1]<=12, names)
+            # the animation's settings are a new project's (so the steps give the same result in any project)
+            d=await pg.evaluate("(async()=>{const s=await import('/src/core/state.ts');const b=s.blankDoc(640,400);return [[s.doc.dur,s.doc.it,s.doc.dir],[b.dur,b.it,b.dir]]})()")
+            check(f"{t['id']}: length, repeat and direction are a new project's defaults", d[0]==d[1], d)
             ok=True
             for i in range(len(t['steps'])):
                 await pg.evaluate('cinTour.show()')

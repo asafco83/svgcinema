@@ -18,7 +18,7 @@
       "tour": true,
       "minutes": 4,
       "intro": "Draw a ball, give it a Position track, key it in two places and play it. That is the whole idea of SVGcinema, in six steps.",
-      "goal": "A ball rolls across the ground and back, on a loop: one track, two keyframes.",
+      "goal": "A ball rolls across the ground in two seconds, rests for a second at the end of the 3-second animation, and starts over: one track, two keyframes.",
       "steps": [
         {
           "title": "Pick the Ellipse tool",
@@ -47,7 +47,7 @@
         },
         {
           "title": "Play it",
-          "text": "Press <kbd>Space</kbd>. The ball rolls across and the playhead loops. Next, give it a better feel in Easing.",
+          "text": "Press <kbd>Space</kbd>. The ball rolls across in two seconds, rests until the end of the animation (3 seconds in a new project), and starts over, as a new project loops forever. Next, give it a better feel in Easing.",
           "do": "Press <kbd>Space</kbd> to play it."
         }
       ],
@@ -87,7 +87,7 @@
       "tour": true,
       "minutes": 3,
       "intro": "Every property in the inspector can be animated. Start a track on it with {◆}, then change the value at another time: a keyframe lands under the playhead, and the editor fills in everything between.",
-      "goal": "The sun turns a quarter and back, on a loop: two keyframes on one track.",
+      "goal": "The sun turns a quarter in two seconds, rests for a second, and starts over: two keyframes on one track.",
       "steps": [
         {
           "title": "Select the sun",
@@ -111,7 +111,7 @@
         },
         {
           "title": "Play it",
-          "text": "Press <kbd>Space</kbd>. To change how it moves between two keys, see Easing.",
+          "text": "Press <kbd>Space</kbd>. The sun turns until 2s, rests until the end of the 3-second animation, and starts over. To change how it moves between two keys, see Easing.",
           "do": "Press <kbd>Space</kbd> to play it."
         }
       ],
@@ -153,7 +153,7 @@
       "tour": true,
       "minutes": 3,
       "intro": "Easing is how a property gets from one keyframe to the next: at an even speed, speeding up, slowing down, overshooting or bouncing. Each keyframe has its own, for the way to the next key.",
-      "goal": "The ball drops and bounces to a stop, on a loop: the same two keyframes, with Bounce out.",
+      "goal": "The ball drops and bounces to a stop, then starts over: the same two keyframes, with Bounce out.",
       "steps": [
         {
           "title": "Play it as it is",

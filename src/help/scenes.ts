@@ -2,7 +2,8 @@
 // The practice scenes of the guided tours: each tutorial opens its own small scene with only what that
 // tutorial needs (never the sample scene, never the user's project). A scene is plain SVG, opened the way
 // File › Open opens one (its ids become the layer names), then `setup` adds what plain SVG can't say
-// (locks, tracks, the animation's length and direction).
+// (locks, the tracks a tutorial starts from). The animation's settings stay a new project's defaults (3 s,
+// loop forever, Normal direction), so what a tutorial makes is what the same steps make in any project.
 import type { Layer } from '../model/types';
 import { doc } from '../core/state';
 
@@ -34,8 +35,6 @@ export const SCENES: Record<string, Scene> = {
 </svg>`,
     setup() {
       lock('Sky', 'Ground');
-      doc.dur = 2;
-      doc.dir = 'alternate';
     },
   },
   // Keyframes and tracks: a sun with a face (a rotation reads), over hills
@@ -51,8 +50,6 @@ export const SCENES: Record<string, Scene> = {
 </svg>`,
     setup() {
       lock('Sky', 'Hills');
-      doc.dur = 2;
-      doc.dir = 'alternate';
     },
   },
   // Easing: a ball that drops at one even speed (Linear), ready to be given a bounce
@@ -72,8 +69,6 @@ export const SCENES: Record<string, Scene> = {
           [1.4, [x, y + 220], 'linear'],
         ];
       }
-      doc.dur = 2;
-      doc.dir = 'normal';
     },
   },
 };
