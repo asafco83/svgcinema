@@ -29,6 +29,9 @@ async def main():
         await pg.click('#xKind [data-v="video"]'); await pg.wait_for_timeout(2500)
         can=await ev("vid.CAN")
         check('the browser can encode H.264 here (headless Chromium)', can['h264'], can)
+        # before the encoder check has answered, every encoder looks missing: the settings must not be nudged then
+        r=await ev("(()=>{const c={...vid.CAN};Object.assign(vid.CAN,{h264:false,vp9:false,av1:false,vp9alpha:false,quantizer:false,done:false});vid.syncVideoUI();const f=st.doc.ex.vid.fmt;Object.assign(vid.CAN,c);vid.syncVideoUI();return f})()")
+        check('opening Video before the encoder check keeps MP4 (not PNG frames)', r=='mp4', r)
         vis=await ev("['xOptsVid','xvPrev'].map(i=>!document.getElementById(i).hidden).concat([document.getElementById('xCopy').hidden, document.getElementById('xOptsImg').hidden])")
         check('Video shows its options and preview; no second footer button', vis==[True,True,True,True], vis)
         foot=await ev("[document.getElementById('xFileSize').textContent, document.getElementById('xFileSub').textContent, document.getElementById('xDlT').textContent]")
