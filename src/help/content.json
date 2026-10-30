@@ -1461,15 +1461,368 @@
       "related": ["timeline", "keyframes", "motion-paths"]
     },
 
-    { "id": "import-svg", "group": "io", "title": "Opening and importing SVG", "tour": true, "minutes": 2 },
-    { "id": "export-svg", "group": "io", "title": "Export an animated SVG", "tour": true, "minutes": 3 },
-    { "id": "starts", "group": "io", "title": "When it starts: load, hover, click, scroll" },
-    { "id": "scroll", "group": "io", "title": "Linked to scroll", "tour": true, "minutes": 3 },
-    { "id": "export-images", "group": "io", "title": "Images and photos in exports" },
-    { "id": "player-api", "group": "io", "title": "The player API" },
-    { "id": "video", "group": "io", "title": "Video" },
-    { "id": "gif", "group": "io", "title": "GIF and animated WebP" },
-    { "id": "stills", "group": "io", "title": "Still images" },
+    {
+      "id": "import-svg",
+      "group": "io",
+      "title": "Opening and importing SVG",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Bring in artwork made elsewhere: an SVG file becomes editable layers, with its groups, names, shapes, gradients and text. Add it to the project you have, or open it as a new one.",
+      "steps": [
+        {
+          "title": "Drop an SVG on the canvas",
+          "text": "Drag an .svg file from your computer onto the canvas. Its artwork comes in as layers, in a group named after the file, centred where you let go. The project's canvas and settings stay as they were.",
+          "do": "Drag an .svg file onto the canvas."
+        },
+        {
+          "title": "Find its layers",
+          "text": "In the Layers panel the new group is open. Its layers keep the SVG's names (its ids, Inkscape labels or SVGator names; the others are named by kind, like Rectangle 1). Click one: shapes stay shapes, with their fill and stroke, to edit as if you had drawn them.",
+          "do": "Click a layer inside the new group."
+        },
+        {
+          "title": "Play its animation",
+          "text": "An SVG animated with CSS, or exported from SVGator, keeps its animation as ordinary keyframes: the moon's glow has an <b>Opacity</b> track. Press <kbd>Space</kbd> to play it.",
+          "do": "Press <kbd>Space</kbd> to play it."
+        },
+        {
+          "title": "Open Import files",
+          "text": "Click ☰ at the top left, then <b>Import files…</b> (<kbd>Ctrl</kbd> <kbd>I</kbd>). The Import window takes SVG and image files: click <b>Choose files</b>, or drop them on it.",
+          "do": "Click ☰, then <b>Import files…</b>."
+        },
+        {
+          "title": "Paste SVG markup",
+          "text": "Or paste SVG markup into its box (from Figma: Copy as SVG) and click <b>Import</b>. It comes in like a dropped file, in a group named Imported SVG, in the middle of the canvas. With SVG markup copied, <kbd>Ctrl</kbd> <kbd>V</kbd> on the canvas does the same.",
+          "do": "Paste SVG markup into the box and click <b>Import</b>."
+        },
+        {
+          "title": "Open an SVG as a project",
+          "text": "<b>Open…</b> (<kbd>Ctrl</kbd> <kbd>O</kbd>) in the ☰ menu opens an .svg as a new project instead: its viewBox becomes the canvas and its title the project's name. An animated SVGator file also brings its length, repeat, direction, speed and start trigger. Save makes it a .SVGcinema file.",
+          "do": "Find <b>Open…</b> in the ☰ menu."
+        }
+      ],
+      "note": "Gradients stay editable gradients, a blur or a drop shadow becomes an editable filter, clip paths and masks become clip and mask groups, and embedded images go to Assets. Whatever couldn't be made editable (other filters, patterns, text on a path) is kept as it is, and a short report after the import lists it. An SVG exported from SVGcinema with Include the editable project ticked brings back the whole project.",
+      "keys": [
+        ["Ctrl O", "Open"],
+        ["Ctrl I", "Import files"],
+        ["Space", "Play and pause"]
+      ],
+      "related": ["projects", "layers", "export-svg"]
+    },
+    {
+      "id": "export-svg",
+      "group": "io",
+      "title": "Export an animated SVG",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Export makes your animation one self-contained .svg file, with its player inside, ready for a web page. This tour goes through the Animated SVG options and the ways to get the file out.",
+      "steps": [
+        {
+          "title": "Open Export",
+          "text": "Click <b>Export</b> at the right of the top bar (<kbd>Ctrl</kbd> <kbd>E</kbd>), then <b>Animated SVG</b> across the top of the window (it opens on the kind you used last). The preview on the right plays the exported file itself.",
+          "do": "Click <b>Export</b>, then <b>Animated SVG</b>."
+        },
+        {
+          "title": "JavaScript or CSS only",
+          "text": "Under <b>Format</b>, <b>Animation</b> is JavaScript: it plays every animator and easing, and can start on load, hover, click or scroll. It plays when the SVG is in the page or in an object tag, but not as an image (an img tag or a CSS background). <b>CSS only</b> needs no script, so it plays as an image too, but starts only on load or hover. Click the note under it to read more.",
+          "do": "Click <b>What the JavaScript export supports</b>."
+        },
+        {
+          "title": "Choose its size",
+          "text": "Under <b>Size</b>, <b>Responsive</b> (the default) makes the SVG fill whatever holds it, keeping its proportions. Click <b>Fixed</b> to give it a size in pixels: type W and H, or a Scale.",
+          "do": "Under Size, click <b>Fixed</b>."
+        },
+        {
+          "title": "Get the code for your site",
+          "text": "Click <b>Embed in your site</b> above the preview: ready code for HTML, React, Next.js, Vue, Angular and Svelte, with a note on where to put the file. <b>Copy snippet</b> copies it.",
+          "do": "Click <b>Embed in your site</b>."
+        },
+        {
+          "title": "Download it",
+          "text": "Click <b>Download .svg</b> at the bottom right: the file is named after the project. <b>Copy SVG code</b> beside it copies the whole file, to paste into a page. The footer shows the file's size.",
+          "do": "Click <b>Download .svg</b>."
+        }
+      ],
+      "note": "The export settings are kept with the project. When it starts, how often it repeats, its direction and speed are under Playback. Advanced, closed at first, has the element IDs and Include the editable project, which lets SVGcinema open the SVG again as the whole project.",
+      "keys": [
+        ["Ctrl E", "Export"],
+        ["Ctrl Shift E", "Export the selected layers"]
+      ],
+      "related": ["starts", "export-images", "player-api"]
+    },
+    {
+      "id": "starts",
+      "group": "io",
+      "title": "When it starts: load, hover, click, scroll",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Playback › Starts, in the Export window, decides what sets the animation going on your page: the page loading, the mouse, a click, scrolling to it, or your own script. The preview works the same way, so you can try each one there.",
+      "steps": [
+        {
+          "title": "Open Export",
+          "text": "Click <b>Export</b> in the top bar, then <b>Animated SVG</b> across the top of the window. When it plays is under <b>Playback</b>.",
+          "do": "Click <b>Export</b>, then <b>Animated SVG</b>."
+        },
+        {
+          "title": "Start it on mouse over",
+          "text": "<b>Starts</b> is On load: it plays as soon as the page shows it. Choose <b>On mouse over</b>. A row appears, <b>On mouse out</b>, for when the pointer leaves: Pause (the default), Reverse back to start, Jump to start or Keep playing.",
+          "do": "Set <b>Starts</b> to <b>On mouse over</b>."
+        },
+        {
+          "title": "Try it in the preview",
+          "text": "Move the pointer over the preview: the balloon starts. Move it away and it pauses where it is.",
+          "do": "Move the pointer over the preview, then away."
+        },
+        {
+          "title": "Start it on click",
+          "text": "Choose <b>On click</b>. The row under it becomes <b>Second click</b>: Pause, or Reverse back to start, Jump to start, Restart or Keep playing.",
+          "do": "Set <b>Starts</b> to <b>On click</b>."
+        },
+        {
+          "title": "Click the preview",
+          "text": "Click the preview to start it, and again to pause it. On your page, the pointer turns into a hand over it.",
+          "do": "Click the preview."
+        }
+      ],
+      "note": "On scroll into view starts it when about a third of it is in the window, and Scrolled away says what happens when it leaves. Linked to scroll ties it to the scroll itself, and Programmatic waits for your page's script (see The player API). CSS only offers On load and On mouse over, and on mouse out it can only pause or jump to the start. Less motion decides what visitors who ask their system for less motion see: the animation playing (the default), its first frame or its last.",
+      "keys": [["Ctrl E", "Export"]],
+      "related": ["scroll", "player-api", "export-svg"]
+    },
+    {
+      "id": "scroll",
+      "group": "io",
+      "title": "Linked to scroll",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Linked to scroll ties the animation to the page's scroll instead of the clock: scrolling down plays it, scrolling back plays it backwards. Use it for an animation that unfolds as the reader moves down the page.",
+      "steps": [
+        {
+          "title": "Open Export",
+          "text": "Click <b>Export</b> in the top bar, then <b>Animated SVG</b> across the top of the window.",
+          "do": "Click <b>Export</b>, then <b>Animated SVG</b>."
+        },
+        {
+          "title": "Choose Linked to scroll",
+          "text": "Under <b>Playback</b>, set <b>Starts</b> to <b>Linked to scroll</b> (JavaScript only). Repeat, Direction, After the end and Speed don't apply, so they are hidden, and the preview becomes a small test page.",
+          "do": "Set <b>Starts</b> to <b>Linked to scroll</b>."
+        },
+        {
+          "title": "Scroll the test page",
+          "text": "Scroll the test page in the preview: the balloon follows the scroll, forwards and back. Dashed lines show where in the window it starts and ends, and the panel beside it shows how much has played.",
+          "do": "Scroll the test page in the preview."
+        },
+        {
+          "title": "Choose where it plays",
+          "text": "<b>Plays</b> is While it crosses the window: from its top coming in at the bottom to its bottom leaving at the top. Choose <b>While it scrolls in, until centred</b>, or While it scrolls out, or Custom to pick the edges and where in the window. <b>Smoothing</b> (0.3 s) lets it glide after each mouse-wheel step.",
+          "do": "Set <b>Plays</b> to <b>While it scrolls in, until centred</b>."
+        },
+        {
+          "title": "Put it on your page",
+          "text": "Click <b>Embed in your site</b>. The SVG has to see your page's scroll: paste its code into the page, or use an object tag with a file from the same site. In a box that scrolls on its own, it follows that box; as an image (an img tag) it shows only its first frame.",
+          "do": "Click <b>Embed in your site</b>."
+        }
+      ],
+      "note": "It works with the embedded player and with the external one; an external player has to be version 1.2.0 or later. CSS only can't link to scroll.",
+      "related": ["starts", "player-api", "export-svg"]
+    },
+    {
+      "id": "export-images",
+      "group": "io",
+      "title": "Images and photos in exports",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Pictures on the canvas are written into the exported SVG, so the file needs nothing else. Each one is resized to the largest size it is shown at and compressed, which can make a photo many times smaller.",
+      "steps": [
+        {
+          "title": "Open Export",
+          "text": "Click <b>Export</b> in the top bar, then <b>Animated SVG</b>. With pictures on the canvas, the options have an <b>Images</b> section.",
+          "do": "Click <b>Export</b>, then <b>Animated SVG</b>."
+        },
+        {
+          "title": "See what happens to each picture",
+          "text": "Under <b>Images</b>, <b>Resize and compress for this size</b> is ticked. Click the line under it that adds the pictures up: each one's size and format as it is in Assets, and as it goes into the file, sized for 2× the width it is shown at.",
+          "do": "Click the line that adds up the pictures."
+        },
+        {
+          "title": "Pick a format",
+          "text": "<b>Format</b> is Smallest file (automatic): it tries what this browser can make (AVIF, WebP, and JPEG, or PNG for a picture with transparency) and keeps the smallest. Choose one yourself, like <b>WebP</b>; <b>Quality</b> (82%) sets how much it is compressed.",
+          "do": "Set <b>Format</b> to <b>WebP</b>."
+        },
+        {
+          "title": "Size it for your site",
+          "text": "Under <b>Size</b>, <b>Largest width</b> is the widest the animation will be shown on your site (the canvas's width at first). Type 960: the pictures are made sharp enough for it. Untick <b>Sharp on high-density screens (2×)</b> for pictures half as wide, or <b>Resize and compress</b> to keep the files as they are.",
+          "do": "Type <b>960</b> in <b>Largest width</b>."
+        }
+      ],
+      "note": "Pictures are embedded as data inside the SVG, so it can be moved and hosted on its own; animated GIFs are kept as they are. The same settings apply to a CSS-only export.",
+      "related": ["images", "export-svg", "stills"]
+    },
+    {
+      "id": "player-api",
+      "group": "io",
+      "title": "The player API",
+      "ready": true,
+      "intro": "An SVG exported with JavaScript has a player that your page's script can drive: play, pause, seek, change the speed, and listen for its events. The Embed tab of the Export window has the code.",
+      "steps": [
+        {
+          "title": "Open Export",
+          "text": "Click <b>Export</b> in the top bar, then <b>Animated SVG</b> across the top of the window. The player comes with the JavaScript export (the default); a CSS-only file has none.",
+          "do": "Click <b>Export</b>, then <b>Animated SVG</b>."
+        },
+        {
+          "title": "Choose the player",
+          "text": "Under <b>Format</b>, <b>Player</b> is Embedded: each SVG carries its own copy and plays anywhere, even offline. <b>External</b> leaves it out (about 26 KB less per SVG): the SVG uses your page's copy of the player, or loads it from jsDelivr. Both have the same API.",
+          "do": "Under Player, click <b>External</b>."
+        },
+        {
+          "title": "Open the API code",
+          "text": "Click <b>Embed in your site</b> above the preview, then <b>Player API</b>: how to get the player, and every method, event and property it has.",
+          "do": "Click <b>Embed in your site</b>, then <b>Player API</b>."
+        },
+        {
+          "title": "Copy it",
+          "text": "Click <b>Copy snippet</b>. With External, the HTML code starts with an optional line for your own copy of the player, and <b>Download the player</b> beside Copy snippet gets that file.",
+          "do": "Click <b>Copy snippet</b>."
+        },
+        {
+          "title": "Get the player in your page",
+          "text": "In your page's script, the player is the SVG element's <b>player</b>: find the SVG by its id (the code has it), in the page or in an object tag's contentDocument. With the external player it is there once the player file has loaded: wait for the SVG's <b>cinready</b> event.",
+          "do": "Get the SVG's <b>player</b> in your page's script.",
+          "clip": false
+        },
+        {
+          "title": "Drive it",
+          "text": "Call <b>play()</b>, <b>pause()</b>, <b>seek(50)</b> (a percentage) or <b>seekTo(1200)</b> (milliseconds), <b>set('speed', 2)</b>, and listen with <b>on('end', …)</b>. Every method returns the player, so calls can be chained. To start it only from your script, set Starts to <b>Programmatic</b>.",
+          "do": "Call <b>play()</b>, <b>pause()</b> or <b>seek()</b>.",
+          "clip": false
+        }
+      ],
+      "note": "Scripts don't run in an SVG shown as an image (an img tag or a CSS background), so there is no player to reach there. With the external player, SVGs your script adds to the page later start with CinPlayer.boot(svg).",
+      "related": ["starts", "export-svg", "scroll"]
+    },
+    {
+      "id": "video",
+      "group": "io",
+      "title": "Video",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Export › Video makes the animation into a video file, for social sites, slides and video editors. Every frame is drawn exactly and encoded by your browser, faster than real time.",
+      "steps": [
+        {
+          "title": "Open Export, pick Video",
+          "text": "Click <b>Export</b> in the top bar, then <b>Video</b> across the top of the window. The preview shows the animation in the video's frame, with its own playhead and Play button.",
+          "do": "Click <b>Export</b>, then <b>Video</b>."
+        },
+        {
+          "title": "Pick the file",
+          "text": "<b>File</b> is MP4 (H.264), which plays everywhere. Click <b>WebM</b> for a smaller file: VP9, or AV1, the smallest. <b>PNG frames</b> makes one picture per frame, in a .zip, for video editors. Codecs your browser can't encode aren't offered.",
+          "do": "Click <b>WebM</b>."
+        },
+        {
+          "title": "Choose the frame size",
+          "text": "Under <b>Size</b>, <b>Frame</b> is 1080p Full HD (1920 × 1080). Choose <b>Square (1080 × 1080)</b> for a feed post, or Document, 720p, Portrait 4:5 or Story 9:16; or type the pixels.",
+          "do": "Set <b>Frame</b> to <b>Square</b>."
+        },
+        {
+          "title": "Fit or fill",
+          "text": "When the frame's shape isn't the animation's, <b>Fit</b> shows all of it with bars in the background color, and <b>Fill</b> fills the frame and crops what is left over. Click <b>Fill (crop)</b>.",
+          "do": "Click <b>Fill (crop)</b>."
+        },
+        {
+          "title": "Export it",
+          "text": "Click <b>Export .webm</b> at the bottom right. The footer shows the progress, the size so far, the time left and <b>Cancel</b>; then the file downloads.",
+          "do": "Click <b>Export .webm</b>."
+        }
+      ],
+      "note": "Timing exports the whole animation or a part of it, at 30 fps (24 to 60). Compression aims for a Quality (70), a File size or a Bitrate, with a keyframe every 2 seconds. Transparent background is offered for PNG frames, and for WebM VP9 where the browser's encoder keeps transparency. Embed in your site has a muted, looping video tag with WebM and MP4 sources and a poster image; Export the set (.zip) makes them all.",
+      "related": ["gif", "stills", "export-svg"]
+    },
+    {
+      "id": "gif",
+      "group": "io",
+      "title": "GIF and animated WebP",
+      "ready": true,
+      "tour": true,
+      "minutes": 3,
+      "intro": "Export › GIF & Animated WebP makes an animated picture for places that don't play SVG or video: email, chat apps, documents. The preview is made from the real file each time you change a setting, so the size you see is the size you get.",
+      "steps": [
+        {
+          "title": "Open Export, pick GIF",
+          "text": "Click <b>Export</b> in the top bar, then <b>GIF & Animated WebP</b> across the top of the window. <b>File</b> is GIF, which plays everywhere, with at most 256 colors per frame; Animated WebP has every color and is much smaller, but most email apps don't show it.",
+          "do": "Click <b>Export</b>, then <b>GIF & Animated WebP</b>."
+        },
+        {
+          "title": "Choose its size",
+          "text": "Under <b>Size</b>, <b>Scale</b> is 75% of the document. Click <b>50%</b>: the line above the preview shows the new file's size, and how much smaller it is than a plain GIF of the same frames.",
+          "do": "Under Size, click <b>50%</b>."
+        },
+        {
+          "title": "Use fewer colors",
+          "text": "Under <b>Compression</b>, drag <b>Colors</b> down from 128: fewer colors, a smaller file. <b>Keep exact</b> keeps the colors you tick (a logo's, say) exactly, and <b>Dithering</b> mixes dots of the colors there are, so gradients don't band.",
+          "do": "Drag <b>Colors</b> down."
+        },
+        {
+          "title": "Compare with the original",
+          "text": "The preview shows the frame at the playhead twice: the original on the left, the GIF on the right. Drag the divider to compare them.",
+          "do": "Drag the divider across the preview."
+        },
+        {
+          "title": "Play the file",
+          "text": "Click <b>Play</b> under the preview: it plays the file itself.",
+          "do": "Click <b>Play</b> under the preview."
+        },
+        {
+          "title": "Download it",
+          "text": "Click <b>Download .gif</b> at the bottom right. Embed in your site has the code for your page; tick Also an Animated WebP there and Download the set (.zip) makes both, the WebP for browsers with the GIF behind it.",
+          "do": "Click <b>Download .gif</b>."
+        }
+      ],
+      "note": "Frames are 15 a second (10 to 50), for the whole animation or a part, looping forever; frames that don't change are merged. Store only the pixels that change keeps each frame to what moved. With a transparent background, GIF pixels are either clear or solid, so soft edges are blended with the Edge color.",
+      "related": ["video", "stills", "export-svg"]
+    },
+    {
+      "id": "stills",
+      "group": "io",
+      "title": "Still images",
+      "ready": true,
+      "tour": true,
+      "minutes": 2,
+      "intro": "Export › Image saves one frame of the animation as a picture: PNG, JPEG, WebP, AVIF, JPEG XL, or the frame as still SVG. Use it for a thumbnail, a poster or a fallback.",
+      "steps": [
+        {
+          "title": "Open Export, pick Image",
+          "text": "Click <b>Export</b> in the top bar, then <b>Image</b> across the top of the window. The preview is the encoded file itself, with its size and format.",
+          "do": "Click <b>Export</b>, then <b>Image</b>."
+        },
+        {
+          "title": "Choose the frame",
+          "text": "It saves the frame under the playhead. Type 1.5 in <b>Time</b> and press <kbd>Enter</kbd>, drag the playhead under the preview, or step a frame at a time with the arrows: the editor's playhead moves with it.",
+          "do": "Type <b>1.5</b> in Time and press <kbd>Enter</kbd>."
+        },
+        {
+          "title": "Pick a format",
+          "text": "<b>Format</b> is PNG, which loses nothing. Click <b>WebP</b> for a smaller file: <b>Quality</b> (82%) and <b>Lossless</b> show for it. AVIF and JPEG XL are smaller still, but not every browser shows JPEG XL yet.",
+          "do": "Click <b>WebP</b>."
+        },
+        {
+          "title": "Choose its size",
+          "text": "Under <b>Size</b>, <b>Scale</b> is 2× the canvas, sharp on high-density screens. Click <b>1×</b> for the canvas's own size, or Custom to type the pixels.",
+          "do": "Under Size, click <b>1×</b>."
+        },
+        {
+          "title": "Download it",
+          "text": "Click <b>Download .webp</b> at the bottom right, or <b>Copy image</b> to paste it somewhere else (as PNG).",
+          "do": "Click <b>Download .webp</b>."
+        }
+      ],
+      "note": "The background is Transparent, or the document's background, or a color of your own; JPEG has no transparency. Embed in your site gives a picture tag with the newer format first and PNG behind it, and Download the set (.zip) makes every file it names.",
+      "related": ["video", "gif", "export-svg"]
+    },
 
     {
       "id": "agent-key",
@@ -1581,7 +1934,7 @@
         },
         {
           "title": "Test it",
-          "text": "Click <b>Test</b> under the model: it makes one small test image, which uses a little of your credit. With <b>Transparent background</b> on, it checks that too: when a model can't make one, SVGcinema asks for a flat green background and removes it.",
+          "text": "Click <b>Test</b> in Images: it makes one small test image, which uses a little of your credit. With <b>Transparent background</b> on, it checks that too: when a model can't make one, SVGcinema asks it for a flat green background and removes that.",
           "do": "Click <b>Test</b> under Images."
         },
         {

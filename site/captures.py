@@ -13,8 +13,8 @@
 # and, once frozen, time moves only when the recorder ticks it (rAF, timers, Date, CSS and SMIL animations).
 # The design agent's turns are scripted: Playwright answers OpenRouter's URL with canned streams (as in
 # tests/browser/agent-*.py), so no model or key is used.
-import asyncio, io, json, os, shutil, subprocess, sys, tempfile
-from PIL import Image
+import asyncio, base64, io, json, os, re, shutil, subprocess, sys, tempfile
+from PIL import Image, ImageDraw
 from playwright.async_api import async_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -631,6 +631,78 @@ class HelpRec(Rec):
         print(f'{os.path.relpath(mp4, ROOT)} {self.n / FPS:.1f}s crop {self.crop} {os.path.getsize(mp4) // 1024} KB, poster {os.path.getsize(p) // 1024} KB')
 
 
+# The design agent's help topics (agent-*): Playwright answers the model providers with canned replies (the same as
+# tests/browser/help.py), so no step reaches a real provider and none needs the network. The lists read live
+# (models, prices) answer 404, so the built-in ones show; the Test, a picture and two requests are scripted.
+PROVIDERS = re.compile(r'^https://(openrouter\.ai|api\.openai\.com|api\.anthropic\.com|generativelanguage\.googleapis\.com|api\.groq\.com)/')
+
+
+def ag_balloon():
+    im = Image.new('RGB', (240, 300), (0, 255, 0))
+    d = ImageDraw.Draw(im)
+    d.ellipse((30, 10, 210, 200), fill=(226, 82, 64))
+    d.ellipse((85, 10, 155, 200), fill=(250, 232, 206))
+    d.polygon([(92, 180), (148, 180), (134, 236), (106, 236)], fill=(226, 82, 64))
+    d.rectangle((104, 236, 136, 266), fill=(150, 100, 58))
+    b = io.BytesIO()
+    im.save(b, 'PNG')
+    return base64.b64encode(b.getvalue()).decode()
+
+
+AG_KITE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 210"><path id="Tail" d="M60 130c-16 14 16 26 0 40s16 26 0 36" fill="none" stroke="#ffd36e" stroke-width="4" stroke-linecap="round"/><path id="Body" d="M60 0l50 60-50 70-50-70z" fill="#ff7a59"/><path id="Spars" d="M60 0v130M10 60h100" fill="none" stroke="#7a2e1d" stroke-width="3"/></svg>'
+
+
+def agent_route(pg):
+    png = ag_balloon()
+
+    async def route(r):
+        q = r.request
+        u = q.url
+        if q.method == 'OPTIONS':
+            return await r.fulfill(status=204, headers=CORS)
+        if q.method != 'POST':
+            return await r.fulfill(status=404, headers=CORS, body='')
+        js = {**CORS, 'content-type': 'application/json'}
+        sse = {**CORS, 'content-type': 'text/event-stream'}
+        if u.endswith('/api/v1/images'):
+            await asyncio.sleep(1.5)  # the model at work: the "Generating" card shows meanwhile
+            return await r.fulfill(status=200, headers=js, body=json.dumps({'data': [{'b64_json': png, 'media_type': 'image/png'}]}))
+        if not u.endswith('/chat/completions'):
+            return await r.fulfill(status=404, headers=CORS, body='')
+        body = json.loads(q.post_data)
+        msgs = body['messages']
+        offered = [t['function']['name'] for t in body.get('tools', [])]
+        await asyncio.sleep(0.8)
+        if 'ping' in offered:
+            return await r.fulfill(status=200, headers=sse, body=oai(None, [('ping', {})]))
+        if not offered:
+            return await r.fulfill(status=200, headers=sse, body=oai('Red.'))
+        last = [i for i, m in enumerate(msgs) if m['role'] == 'user'][-1]
+        user = json.dumps(msgs[last]['content'])
+        done = [m for m in msgs[last:] if m['role'] == 'tool']
+        if 'balloon' in user:
+            if not done:
+                out = oai('I’ll paint the balloon.', [('generate_image', {'prompt': 'A hot-air balloon with red and cream stripes, soft watercolour', 'name': 'Balloon'})])
+            elif len(done) == 1:
+                res = json.loads(done[0]['content'])
+                out = oai(None, [('place_image', {'asset': res['asset'], 'name': 'Balloon', 'x': 330, 'y': 150, 'width': 120})]) if 'asset' in res else oai('All right, no picture.')
+            else:
+                out = oai('Done: the balloon is in the sky.')
+        elif 'kite' in user:
+            if not done:
+                out = oai('I’ll draw the kite as vector, so its tail can move on its own.', [('import_svg', {'svg': AG_KITE, 'name': 'Kite', 'x': 140, 'y': 140})])
+            elif len(done) == 1:
+                tail = await pg.evaluate("(async()=>{const s=await import('/src/core/state.ts');const l=s.doc.layers.find(l=>l.name==='Tail');return l?l.id:''})()")
+                out = oai(None, [('apply_preset', {'preset': 'swing', 'ids': [tail], 'at': 0, 'length': 3})])
+            else:
+                out = oai('Done: the kite is vector layers, and its tail swings.')
+        else:
+            out = oai('Done.')
+        await r.fulfill(status=200, headers=sse, body=out)
+
+    return route
+
+
 async def help_clips(b, theme):
     """public/help/<topic>-<step>[-dark].mp4/.webp: each step of each help topic, done by its Show me in the
     topic's practice scene (?tour=<topic>&clip=1: no tour card, and the tour waits for next()), cropped to the part
@@ -645,10 +717,14 @@ async def help_clips(b, theme):
             continue
         if not any(s.get('clip', True) for s in t['steps']):
             continue
-        c = await b.new_context(viewport={'width': HELP_W, 'height': HELP_H}, device_scale_factor=2)
+        c = await b.new_context(viewport={'width': HELP_W, 'height': HELP_H}, device_scale_factor=2, permissions=['clipboard-read', 'clipboard-write'])
         await c.route('https://cdn.jsdelivr.net/npm/@fontsource/**', fontsource)
         pg = await c.new_page()
         pg.set_default_timeout(10000)
+        if t['id'].startswith('agent-'):
+            await pg.route(PROVIDERS, agent_route(pg))
+            # Copy (the assistant's starting message) shows "Copied." as it does for a person
+            await c.grant_permissions(['clipboard-read', 'clipboard-write'], origin=BASE.rstrip('/'))
         await pg.add_init_script(CLOCK)
         await pg.add_init_script(f"localStorage.setItem('svgcinema:theme','{theme}');")
         await pg.goto(BASE + f"?tour={t['id']}&clip=1")

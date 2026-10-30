@@ -36,8 +36,7 @@ def ag_oai(text=None, tools=None):
 def ag_balloon():
     im=Image.new('RGB',(240,300),(0,255,0)); d=ImageDraw.Draw(im)
     d.ellipse((30,10,210,200),fill=(226,82,64)); d.ellipse((85,10,155,200),fill=(250,232,206))
-    d.line((80,190,104,250),fill=(90,60,40),width=3); d.line((160,190,136,250),fill=(90,60,40),width=3)
-    d.rectangle((100,248,140,280),fill=(150,100,58))
+    d.polygon([(92,180),(148,180),(134,236),(106,236)],fill=(226,82,64)); d.rectangle((104,236,136,266),fill=(150,100,58))
     b=io.BytesIO(); im.save(b,'PNG'); return base64.b64encode(b.getvalue()).decode()
 AG_PNG=ag_balloon()
 AG_KITE='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 210"><path id="Tail" d="M60 130c-16 14 16 26 0 40s16 26 0 36" fill="none" stroke="#ffd36e" stroke-width="4" stroke-linecap="round"/><path id="Body" d="M60 0l50 60-50 70-50-70z" fill="#ff7a59"/><path id="Spars" d="M60 0v130M10 60h100" fill="none" stroke="#7a2e1d" stroke-width="3"/></svg>'

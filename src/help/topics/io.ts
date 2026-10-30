@@ -101,7 +101,10 @@ function photo() {
     x.beginPath();
     x.moveTo(0, H);
     for (let i = 0; i <= W; i += 8)
-      x.lineTo(i, base - amp * (Math.sin(i * f) * 0.6 + Math.sin(i * f * 2.7 + 1.3) * 0.3 + Math.sin(i * f * 6.1) * 0.1));
+      x.lineTo(
+        i,
+        base - amp * (Math.sin(i * f) * 0.6 + Math.sin(i * f * 2.7 + 1.3) * 0.3 + Math.sin(i * f * 6.1) * 0.1),
+      );
     x.lineTo(W, H);
     x.fill();
   };
@@ -113,12 +116,30 @@ function photo() {
   lake.addColorStop(1, '#4b5d8f');
   x.fillStyle = lake;
   x.fillRect(0, 780, W, H - 780);
+  let s = 7;
+  const rnd = () => (s = (Math.imul(s, 1103515245) + 12345) & 0x7fffffff) / 0x7fffffff;
+  // pines along the shore, ripples on the lake
+  x.fillStyle = '#23264a';
+  for (let i = 0; i < 260; i++) {
+    const tx = rnd() * W,
+      th = 30 + rnd() * 70,
+      tw = th * (0.28 + rnd() * 0.12),
+      ty = 790 - rnd() * 40;
+    x.beginPath();
+    x.moveTo(tx, ty - th);
+    x.lineTo(tx + tw / 2, ty);
+    x.lineTo(tx - tw / 2, ty);
+    x.fill();
+  }
+  for (let i = 0; i < 500; i++) {
+    x.fillStyle = `rgba(255,236,200,${0.08 + rnd() * 0.22})`;
+    x.fillRect(rnd() * W, 800 + rnd() * 200, 20 + rnd() * 90, 1 + rnd() * 2);
+  }
   // grain
   const im = x.getImageData(0, 0, W, H),
     d = im.data;
-  let s = 7;
   for (let i = 0; i < d.length; i += 4) {
-    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    s = (Math.imul(s, 1103515245) + 12345) & 0x7fffffff;
     const n = ((s >> 16) % 13) - 6;
     d[i] += n;
     d[i + 1] += n;
@@ -198,9 +219,9 @@ function calm() {
   if (menuOpen()) closeFileMenu();
 }
 /** scrolls a control into view, as a person would before using it */
-const into = (sel: string) => {
+const into = (sel: string, block: ScrollLogicalPosition = 'nearest') => {
   const e = q(sel);
-  if (e) e.scrollIntoView({ block: 'nearest' });
+  if (e) e.scrollIntoView({ block });
 };
 /** The Export window open on a kind, on its Preview tab, with these sections open (a person may have closed
  *  them: the dialog remembers it). */
@@ -459,7 +480,7 @@ export const tours: Record<string, TourStep[]> = {
       enter: () => {
         inExport('svg', 'xSecSize');
         svgSet({ size: 'resp' });
-        into('#xSecSize');
+        into('#xSecSize', 'start');
       },
       done: () => doc.ex.size === 'fixed',
       show: () => click(q('#xSize [data-v="fixed"]')),
@@ -633,6 +654,14 @@ export const tours: Record<string, TourStep[]> = {
       show: async () => {
         await until(() => /→/.test(q('#xImgList')?.textContent || ''));
         await click(q('#xImgDet summary'));
+        // then down the options, to the list it opened
+        const col = q('#xOptsSvg') as HTMLElement,
+          list = q('#xImgList') as HTMLElement;
+        await scrollBy(
+          col,
+          Math.max(0, list.getBoundingClientRect().bottom - col.getBoundingClientRect().bottom + 12),
+          700,
+        );
       },
       clip: () => [q('#xImgGrp')],
     },

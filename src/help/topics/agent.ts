@@ -100,6 +100,8 @@ async function ask(text: string) {
 }
 /** the panel's last answer (a request, or your assistant's session) */
 const lastTurn = () => Array.from(document.querySelectorAll('#agBody .ag-turn')).pop() || null;
+/** Settings › Agent model (provider, model, key, Test) */
+const modelSec = () => q('#agKey')?.closest('.ag-sec') || null;
 const way = (v: string) => q(`#agBody .ag-way input[value="${v}"]`)?.closest('label') || null;
 
 // Copy and Download notice the person's own click too (the tour waits for it)
@@ -145,6 +147,9 @@ async function assistant() {
     const sun = byName('Sun');
     if (sun) await api.call('apply_preset', { preset: 'breathe', ids: [sun.id], at: 0, length: 3 });
     await wait(800);
+    // it looks at its work a moment in, where the star has popped in
+    await api.call('seek', { time: 1.2 });
+    await wait(600);
     api.done('The sun breathes over the whole loop, and a star pops in at 0.4 s.');
     await wait(400);
   } finally {
@@ -168,7 +173,7 @@ const openStep = (connect: '' | 'key' | 'assistant', key = false): TourStep => (
 
 /** First open: how do you want to connect? (the way, then Continue) */
 const wayStep = (v: 'key' | 'assistant'): TourStep => ({
-  target: () => q('#agBody .ag-ways') || q('#bAgent'),
+  target: () => q('#agBody .ag-ways') || q('#agBody .ag-how') || q('#agBody .ag-setup fieldset') || q('#bAgent'),
   enter: () => setUp(''),
   done: () => getSettings().connect === v,
   show: async () => {
@@ -176,7 +181,12 @@ const wayStep = (v: 'key' | 'assistant'): TourStep => ({
     await click(way(v), 0.3, 0.3);
     await click(q('#agBody [data-act="way"]'));
   },
-  clip: () => [q('#agBody .ag-setup'), q('#agBody .ag-connect .ag-how')],
+  clip: () => [
+    q('#agBody .ag-ways'),
+    q('#agBody [data-act="way"]'),
+    q('#agBody .ag-setup fieldset'),
+    q('#agBody .ag-how'),
+  ],
 });
 
 const keyOf = () => getKeys().openrouter || '';
@@ -211,11 +221,11 @@ export const tours: Record<string, TourStep[]> = {
       },
       done: () => !!keyOf(),
       show: () => type(q('#agKey') as HTMLInputElement, DEMO_KEY),
-      clip: () => [q('#agBody .ag-sec')],
+      clip: () => [modelSec()],
     },
     // pick a model, then Test
     {
-      target: () => q('#agBody .ag-sec'),
+      target: () => modelSec(),
       enter: c => {
         if (!keyOf()) setKey('openrouter', DEMO_KEY);
         toSettings();
@@ -231,7 +241,7 @@ export const tours: Record<string, TourStep[]> = {
         await until(() => shown('#agBody .ag-checks') && !/Testing/.test(q('#agBody .ag-checks')!.textContent || ''));
         await wait(600);
       },
-      clip: () => [q('#agBody .ag-sec'), q('#agBody .ag-checks')],
+      clip: () => [modelSec(), q('#agBody .ag-checks')],
     },
     // back to the chat
     {
@@ -242,7 +252,7 @@ export const tours: Record<string, TourStep[]> = {
       },
       done: () => inChat() && shown('#agComp'),
       show: () => click(q('#agHead [data-act="back"]')),
-      clip: () => [q('#agBody .ag-hello'), q('#agComp')],
+      clip: () => [q('#agBody .ag-hello')],
     },
   ],
 
