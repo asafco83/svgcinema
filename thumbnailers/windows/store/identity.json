@@ -1,6 +1,6 @@
 {
-  "_comment": "The package identity from Partner Center (your app › Product management › Product identity). Until it is filled in, the MSIX is built with these placeholders: fine for trying it out, but the Store only accepts the real values.",
-  "name": "SVGcinema.Thumbnails",
-  "publisher": "CN=SVGcinema",
-  "publisherDisplayName": "SVGcinema"
+  "_comment": "The package identity from Partner Center (the SVGcinema Thumbnails app \u203a Product management \u203a Product identity).",
+  "name": "SVGcinema.com.SVGcinemaThumbnails",
+  "publisher": "CN=B9F91AC0-13E2-4F3A-B65B-2E2FF2E397B6",
+  "publisherDisplayName": "SVGcinema.com"
 }
