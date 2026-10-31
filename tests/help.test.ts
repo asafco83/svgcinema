@@ -56,7 +56,8 @@ describe('help content', () => {
   it('Start here: a few topics, each a guided tour', () => {
     const s = READY.filter(t => t.start);
     expect(s.length).toBeGreaterThanOrEqual(3);
-    s.forEach(t => expect(t.tour, t.id).toBe(true));
+    // the hub's card shows what it makes: the topic's goal, exported
+    s.forEach(t => expect(t.tour && !!t.goal, t.id).toBe(true));
   });
   it('the diamond and keys render as markup', () => {
     expect(rich('Click {◆} here')).toContain('<i class="hp-dm"');
