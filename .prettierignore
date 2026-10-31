@@ -8,5 +8,3 @@ site/help/*/index.html
 site/src/hero.svg
 deploy
 
-# the Microsoft Store packages and listing assets (kept as they were uploaded)
-Store assets/

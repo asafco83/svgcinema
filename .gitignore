@@ -13,3 +13,6 @@ player/cin-player.min.js
 player/LICENSE
 public/downloads
 svgcinema-site.zip
+
+# the Microsoft Store packages and listing assets: a local backup only, never in this public repo
+Store assets/
