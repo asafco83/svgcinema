@@ -70,7 +70,7 @@ export function helpPages(content) {
     <div class="hcards">${starts
       .map(
         t => `<article class="card hcard">
-        <a class="hcard-vis" href="{{ROOT}}help/${t.id}/" tabindex="-1" aria-hidden="true">{{HCLIP:${t.id}-${t.steps.length}||hclip}}</a>
+        <a class="hcard-vis" href="{{ROOT}}help/${t.id}/" tabindex="-1" aria-hidden="true"><img src="{{EDITOR_URL}}help/${t.id}.svg" width="640" height="400" alt="" loading="lazy" /></a>
         <p class="hcard-k"><span class="htag">Guided tour</span><span class="hmin">${t.minutes || 3} min · ${t.steps.length} steps</span></p>
         <h3><a href="{{ROOT}}help/${t.id}/">${esc(t.title)}</a></h3>
         <p>${esc(plain(t.intro))}</p>

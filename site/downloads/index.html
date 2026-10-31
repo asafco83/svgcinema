@@ -4654,16 +4654,12 @@ figcaption {
   overflow: hidden;
   background: var(--mat);
 }
-.hcard-vis .cap {
+.hcard-vis img {
+  /* what the tutorial makes: its finished practice scene, the exported SVG playing */
+  display: block;
+  width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 46% 30%;
-  /* closer in: the practice scene and the controls around it */
-  transform: scale(1.55);
-  transform-origin: 46% 34%;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
 }
 .hcard-k {
   margin: 0;
@@ -5575,11 +5571,12 @@ figcaption {
               <path d="M10 7v3.5M10 13.2v.1" />
             </svg>
             <div>
-              <b>Windows will warn you. That’s expected.</b>
+              <b>Your browser and Windows will warn you. That’s expected.</b>
               <span
-                >Unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn’t signed, so Windows says the
-                publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no
-                administrator rights.</span
+                >The browser may hold the download back as one it doesn’t see often: open the download’s menu (⋮ or …)
+                and choose <b>Keep</b>. Then unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn’t
+                signed, so Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. It
+                installs for you only, with no administrator rights.</span
               >
             </div>
           </div>

@@ -4630,16 +4630,12 @@ figcaption {
   overflow: hidden;
   background: var(--mat);
 }
-.hcard-vis .cap {
+.hcard-vis img {
+  /* what the tutorial makes: its finished practice scene, the exported SVG playing */
+  display: block;
+  width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 46% 30%;
-  /* closer in: the practice scene and the controls around it */
-  transform: scale(1.55);
-  transform-origin: 46% 34%;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
 }
 .hcard-k {
   margin: 0;

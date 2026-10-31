@@ -443,7 +443,7 @@
         },
         {
           "title": "Install it on Windows",
-          "text": "Unzip the download and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown: choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights.",
+          "text": "If your browser holds the download back as one it doesn't see often, open the download's menu and choose <b>Keep</b>. Unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown: choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights.",
           "do": "Unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>.",
           "clip": false
         },
