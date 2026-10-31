@@ -8,6 +8,7 @@ import { ASSETS, S, URLS, doc, setDoc, syncAidc, syncIdc } from '../core/state';
 import { IDB, assetURL } from '../io/assets';
 import { updateFileInfo } from '../io/file-state';
 import { EPHEMERAL, PRACTICE } from '../core/batch-mode';
+import { initLaunch, registerSW } from './pwa';
 import { initBatch } from '../io/batch';
 import { normalizeDoc } from '../io/open';
 import { sampleDoc } from '../model/sample';
@@ -83,6 +84,9 @@ export async function boot() {
     loop(t);
   });
   initBatch();
+  // the installed app: works offline, and opens the .SVGcinema files it was opened with
+  registerSW();
+  initLaunch();
 }
 
 export function init(): void {
