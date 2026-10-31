@@ -33,7 +33,7 @@
             <uap:SupportedFileTypes>
               <uap:FileType>.svgcinema</uap:FileType>
             </uap:SupportedFileTypes>
-            <desktop2:ThumbnailHandler Clsid="{63935DE2-C1BD-42DA-8535-64972BEE12AE}" />
+            <desktop2:ThumbnailHandler Clsid="63935DE2-C1BD-42DA-8535-64972BEE12AE" />
           </uap:FileTypeAssociation>
         </uap:Extension>
         <com:Extension Category="windows.comServer">
