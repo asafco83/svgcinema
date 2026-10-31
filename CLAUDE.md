@@ -125,6 +125,9 @@ unit tests. `paper` (booleans, lazy-loaded) and `opentype.js` (text to outlines)
   `"clip": false` on a step done outside the editor), its scene and steps in its group's file (or one it shares helpers with), record its clips
   (`python3 site/captures.py help:<topic>`, both themes, into `public/help/`), rebuild the site; `tests/help.test.ts`
   and `tests/browser/help.py` (every topic run by Show me alone) must pass.
+- `src/app/pwa.ts` + `public/sw.js` + `public/manifest.webmanifest` — the editor as an installable app (PWA; its
+  Microsoft Store package is made from the live site with PWABuilder): the service worker keeps the editor offline
+  (production builds only, never in a practice or batch frame), and `.SVGcinema` files open in the installed app.
 - `site/` — the website (`site/README.md`): one source per page in `site/src/pages/`, shared partials, demo cards
   (`src/specs/`), CSS and script; `node site/build.mjs` writes the pages (commit them; `tests/browser/site.py` checks
   they are current). Pictures of the editor are clips of the real editor in `site/img/` (MP4 + poster, light and

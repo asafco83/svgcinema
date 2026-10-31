@@ -559,6 +559,16 @@ The site is served at `https://<user>.github.io/<repo>/`. The Vite `base: './'` 
 
 **Website:** `site/` holds the SVGcinema website that introduces the editor and links into it: a short home page (the live hero, the workflow, the design agent, highlights, export) and a page each for Features, Design agent, Import, Export, Downloads and the Licence, with clips of the real editor in light and dark (recorded by `site/captures.py`) and animated pictures throughout. `node site/build.mjs` builds the pages (`site/index.html`, `site/features/index.html`, …), which expect the editor in an `editor/` folder beside the home page; `npm run build:deploy` puts them together in `deploy/` for any static host, and `npm run build:zip` makes the whole site (thumbnail installers, player and Claude skill included) as `svgcinema-site.zip`. The Pages workflow does not publish it yet. See [`site/README.md`](site/README.md).
 
+## Install as an app (PWA, Microsoft Store)
+
+The editor is an installable web app: browsers offer **Install SVGcinema** (Chrome, Edge), and it opens in its own window with its own icon. It's still the website, so it updates with it.
+
+- **Offline:** a service worker (`public/sw.js`, registered by `src/app/pwa.ts` in production builds only, never in a practice editor or the batch converter) keeps the editor once it has been opened: the page network-first, the scripts, styles, icons and fonts from the cache (refreshed in the background), files used later (the image encoders) kept once used; videos, downloads and source maps are never kept. The build writes `sw-precache.json` (what to keep on install, `vite.config.ts`), and each build has its own cache.
+- **Files:** the manifest (`public/manifest.webmanifest`) registers `.SVGcinema` files: opened with the installed app, a project opens as with File › Open (asking to save first) and keeps its file, so Save writes back to it.
+- **Microsoft Store:** the Store package is made from the live site with PWABuilder: at pwabuilder.com enter the editor's address (`https://www.svgcinema.com/editor/`), choose **Package for stores › Windows**, fill in Partner Center's package identity (Product identity page), and upload the `.msixbundle` it makes to the submission. The package loads the site, so later updates to the site need no new package.
+
+`tests/browser/pwa.py` checks the manifest and icons, the service worker on a production build (offline, the editor still opens), that a practice editor registers none, and opening a `.SVGcinema` file the app was launched with.
+
 ## Toward a desktop app (Tauri)
 
 The code is ready for a Tauri shell without changes. When it gets wrapped:
