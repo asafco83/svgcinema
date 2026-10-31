@@ -2,7 +2,7 @@
 # Every picture of the editor's UI on the website is a recording of the running editor, never redrawn by hand:
 # short looping clips (MP4, H.264) with a poster frame (WebP), in the light and the dark theme, in site/img/.
 # Run it after a UI change that shows in them, with the dev server on port 5199 (npx vite --port 5199):
-#   python3 site/captures.py [http://localhost:5199/] [light|dark] [clip names…]
+#   python3 site/captures.py [http://localhost:5199/] [light|dark] [clip names…]  (`site`: all of site/img)
 # The help topics' step clips (Help & tutorials) are recorded too, into public/help/ (the editor's Help panel
 # shows them, and the website's help pages load them from the editor): `help` records them all, `help:<topic>`
 # one topic's. Each is a recording of the tour's own "Show me" for that step, in the tutorial's practice
@@ -31,7 +31,8 @@ os.makedirs(IMG, exist_ok=True)
 
 
 def want(name):
-    return not ARGS or name in ARGS
+    # `site`: every clip of the website (site/img), none of the help steps'
+    return not ARGS or name in ARGS or ('site' in ARGS and name != 'help' and not name.startswith('help:'))
 
 
 def oai(text=None, tools=None):
@@ -130,8 +131,66 @@ class Rec:
         print(f'{os.path.relpath(mp4, ROOT)} {len(self.frames) / FPS:.1f}s {os.path.getsize(mp4) // 1024} KB, poster {os.path.getsize(p) // 1024} KB')
 
 
+FONTS = os.path.join(tempfile.gettempdir(), 'svgcinema-fontsource')
+
+
+def npm_font_dir(name, ver='latest'):
+    """An @fontsource package's files/ folder, fetched from the npm registry once (cached)."""
+    d = os.path.join(FONTS, (name + '@' + ver).replace('/', '_'))
+    if not os.path.isdir(d):
+        os.makedirs(d, exist_ok=True)
+        out = subprocess.run(['npm', 'pack', f'{name}@{ver}', '--pack-destination', d, '--silent'], capture_output=True, text=True, check=True).stdout.strip().splitlines()[-1]
+        subprocess.run(['tar', 'xzf', os.path.join(d, out), '-C', d], check=True)
+    return os.path.join(d, 'package', 'files')
+
+
+async def fontsource(route):
+    """Web fonts come from jsDelivr (render/fonts): where that host can't be reached (a sandbox that only reaches
+    the package registry), the same @fontsource files are served from the npm package."""
+    u = route.request.url.split('/npm/', 1)[1].split('?')[0]
+    pkg, path = u.split('/files/', 1)
+    name, ver = pkg.rsplit('@', 1)
+    f = os.path.join(npm_font_dir(name, ver), path)
+    if not os.path.exists(f):
+        return await route.abort()
+    ct = 'font/woff2' if f.endswith('.woff2') else 'font/woff' if f.endswith('.woff') else 'font/ttf'
+    await route.fulfill(status=200, body=open(f, 'rb').read(), headers={'content-type': ct, **CORS})
+
+
+# the editor's own fonts (index.html loads them from Google Fonts): the same faces from the @fontsource packages
+UI_FONTS = [('instrument-sans', 'Instrument Sans', [(400, 'normal'), (500, 'normal'), (600, 'normal')]),
+            ('instrument-serif', 'Instrument Serif', [(400, 'normal'), (400, 'italic')]),
+            ('jetbrains-mono', 'JetBrains Mono', [(400, 'normal'), (500, 'normal')])]
+
+
+async def google_fonts(route):
+    """fonts.googleapis.com and fonts.gstatic.com, answered from the npm packages, so clips show the editor's real
+    type even where Google Fonts can't be reached."""
+    u = route.request.url
+    if 'fonts.googleapis.com' in u:
+        css = ''
+        for pkg, fam, faces in UI_FONTS:
+            for w, st in faces:
+                css += f"@font-face{{font-family:'{fam}';font-style:{st};font-weight:{w};font-display:swap;src:url(https://fonts.gstatic.com/npm/{pkg}/{pkg}-latin-{w}-{st}.woff2) format('woff2')}}\n"
+        return await route.fulfill(status=200, body=css, headers={'content-type': 'text/css', **CORS})
+    if '/npm/' in u:
+        pkg, f = u.split('/npm/', 1)[1].split('/', 1)
+        path = os.path.join(npm_font_dir('@fontsource/' + pkg), f)
+        if os.path.exists(path):
+            return await route.fulfill(status=200, body=open(path, 'rb').read(), headers={'content-type': 'font/woff2', **CORS})
+    await route.abort()
+
+
+async def with_fonts(c):
+    """A browser context whose pages get the editor's fonts and the web fonts from the npm packages."""
+    await c.route('https://fonts.googleapis.com/**', google_fonts)
+    await c.route('https://fonts.gstatic.com/**', google_fonts)
+    await c.route('https://cdn.jsdelivr.net/npm/@fontsource/**', fontsource)
+
+
 async def page(b, theme, settings=None, route=None, tl=None):
     c = await b.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2)
+    await with_fonts(c)
     pg = await c.new_page()
     pg.set_default_timeout(10000)
     if route:
@@ -615,25 +674,6 @@ async def clips(b, theme):
 
 
 HELP_W, HELP_H, HELP_OUT, HELP_MIN = 1280, 800, 880, 560
-FONTS = os.path.join(tempfile.gettempdir(), 'svgcinema-fontsource')
-
-
-async def fontsource(route):
-    """Web fonts come from jsDelivr (render/fonts): where that host can't be reached (a sandbox that only reaches
-    the package registry), the same @fontsource files are served from the npm package."""
-    u = route.request.url.split('/npm/', 1)[1].split('?')[0]
-    pkg, path = u.split('/files/', 1)
-    name, ver = pkg.rsplit('@', 1)
-    d = os.path.join(FONTS, pkg.replace('/', '_'))
-    if not os.path.isdir(d):
-        os.makedirs(d, exist_ok=True)
-        out = subprocess.run(['npm', 'pack', f'{name}@{ver}', '--pack-destination', d, '--silent'], capture_output=True, text=True, check=True).stdout.strip().splitlines()[-1]
-        subprocess.run(['tar', 'xzf', os.path.join(d, out), '-C', d], check=True)
-    f = os.path.join(d, 'package', 'files', path)
-    if not os.path.exists(f):
-        return await route.abort()
-    ct = 'font/woff2' if f.endswith('.woff2') else 'font/woff' if f.endswith('.woff') else 'font/ttf'
-    await route.fulfill(status=200, body=open(f, 'rb').read(), headers={'content-type': ct, **CORS})
 
 
 def crop_box(r):
@@ -770,7 +810,7 @@ async def help_clips(b, theme):
         if not any(s.get('clip', True) for s in t['steps']):
             continue
         c = await b.new_context(viewport={'width': HELP_W, 'height': HELP_H}, device_scale_factor=2, permissions=['clipboard-read', 'clipboard-write'])
-        await c.route('https://cdn.jsdelivr.net/npm/@fontsource/**', fontsource)
+        await with_fonts(c)
         pg = await c.new_page()
         pg.set_default_timeout(10000)
         if t['id'].startswith('agent-'):
