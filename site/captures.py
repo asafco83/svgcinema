@@ -2,7 +2,7 @@
 # Every picture of the editor's UI on the website is a recording of the running editor, never redrawn by hand:
 # short looping clips (MP4, H.264) with a poster frame (WebP), in the light and the dark theme, in site/img/.
 # Run it after a UI change that shows in them, with the dev server on port 5199 (npx vite --port 5199):
-#   python3 site/captures.py [http://localhost:5199/] [light|dark] [clip names…]
+#   python3 site/captures.py [http://localhost:5199/] [light|dark] [clip names…]  (`site`: all of site/img)
 # The help topics' step clips (Help & tutorials) are recorded too, into public/help/ (the editor's Help panel
 # shows them, and the website's help pages load them from the editor): `help` records them all, `help:<topic>`
 # one topic's. Each is a recording of the tour's own "Show me" for that step, in the tutorial's practice
@@ -31,7 +31,8 @@ os.makedirs(IMG, exist_ok=True)
 
 
 def want(name):
-    return not ARGS or name in ARGS
+    # `site`: every clip of the website (site/img), none of the help steps'
+    return not ARGS or name in ARGS or ('site' in ARGS and name != 'help' and not name.startswith('help:'))
 
 
 def oai(text=None, tools=None):
