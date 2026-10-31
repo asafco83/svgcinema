@@ -26,10 +26,29 @@ jobs:
           if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null }
           & $iscc /Othumbnailers\windows\Output thumbnailers\windows\installer.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build the Microsoft Store package
+        shell: pwsh
+        run: |
+          # failures show as annotations (with makeappx's own messages), so they can be read without the log
+          foreach ($s in 'pack.ps1', 'test-install.ps1') {
+            $o = pwsh thumbnailers/windows/store/$s 2>&1 | Out-String
+            Write-Host $o
+            if ($LASTEXITCODE -ne 0) {
+              $msg = ($o -split "`n" | Where-Object { $_ -match 'error|fail|exception|0x8' } | Select-Object -First 12) -join ' | '
+              Write-Host "::error title=$s::$($msg -replace '[\r\n]', ' ')"
+              exit 1
+            }
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: windows
           path: thumbnailers/windows/Output/SVGcinema-Thumbnails-Setup.exe
+      # for Partner Center (uploaded there by hand): the release job puts it in its own "thumbnails-store" release,
+      # not the "thumbnails" one the website's downloads come from
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store
+          path: thumbnailers/windows/Output/store/SVGcinema-Thumbnails.msixbundle
 
   linux:
     runs-on: ubuntu-latest
@@ -51,20 +70,50 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
+          name: windows
           path: out
-          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux
+          path: out
+      # Browsers judge a download partly by how often they've seen that exact file. Every build of the installer
+      # is a new file, so it is only republished when something in it changed; otherwise the published one
+      # (and what browsers know of it) stays.
+      - name: Keep the published Windows installer unless it changed
+        run: |
+          if git diff --quiet ${{ github.event.before }} ${{ github.sha }} -- thumbnailers/windows/installer.iss \
+              thumbnailers/windows/svgcinema-thumbs.cpp thumbnailers/windows/svgcinema-thumbs.def thumbnailers/windows/svgcinema-file.ico; then
+            echo "The Windows installer didn't change: keeping the published one"; rm -f out/SVGcinema-Thumbnails-Setup.exe
+          fi
       - name: Publish to the "thumbnails" release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           # the Windows installer goes out zipped: many web hosts refuse to serve .exe files
-          (cd out && zip -9 -q SVGcinema-Thumbnails-Setup.zip SVGcinema-Thumbnails-Setup.exe && rm SVGcinema-Thumbnails-Setup.exe)
+          if [ -f out/SVGcinema-Thumbnails-Setup.exe ]; then
+            (cd out && zip -9 -q SVGcinema-Thumbnails-Setup.zip SVGcinema-Thumbnails-Setup.exe && rm SVGcinema-Thumbnails-Setup.exe)
+          fi
           NOTES="Shows the first frame of .SVGcinema projects as their thumbnail in your file manager. Windows: unzip SVGcinema-Thumbnails-Setup.zip and run SVGcinema-Thumbnails-Setup.exe (no administrator rights; Windows may warn that the publisher is unknown: choose More info, then Run anyway). Linux: install svgcinema-thumbnails.deb, or unpack the .tar.gz and run ./install.sh."
           gh release view thumbnails >/dev/null 2>&1 || gh release create thumbnails --latest=false \
             --title "SVGcinema thumbnails" --notes "$NOTES"
           gh release edit thumbnails --notes "$NOTES"
           gh release upload thumbnails out/* --clobber
           gh release delete-asset thumbnails SVGcinema-Thumbnails-Setup.exe -y 2>/dev/null || true
+      - uses: actions/download-artifact@v4
+        with:
+          name: store
+          path: store
+      - name: Publish the Store package to the "thumbnails-store" release (for Partner Center, not the website)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view thumbnails-store >/dev/null 2>&1 || gh release create thumbnails-store --prerelease --latest=false \
+            --title "SVGcinema Thumbnails: Microsoft Store package" --notes "The MSIX bundle to upload to Partner Center. Not a download for the website."
+          gh release upload thumbnails-store store/SVGcinema-Thumbnails.msixbundle --clobber

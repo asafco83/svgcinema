@@ -42,3 +42,21 @@ release):
 - `package.sh`: builds the `.deb` (installs under `/usr`) and the `.tar.gz`. The `.tar.gz` contains
   `install.sh` / `uninstall.sh`, which install under `/usr/local` with sudo: file managers run
   thumbnailers in a sandbox that only sees system folders.
+
+## Microsoft Store package (Windows)
+
+`windows/store/` builds the same add-on as an MSIX for the Microsoft Store, so it installs without the
+unknown-publisher and download warnings an unsigned installer gets (the Store signs it):
+
+- `AppxManifest.xml`: registers `svgcinema-thumbs.dll` as the `.svgcinema` thumbnail handler (COM, run in a
+  surrogate process), the file type with its name and icon, and a small app (`about.cpp`) that says what it
+  does, as the Start menu needs one.
+- `identity.json`: the package identity. Put Partner Center's values here (your app › Product management ›
+  Product identity: Package/Identity/Name, Package/Identity/Publisher, Package/Properties/PublisherDisplayName).
+- `pack.ps1`: one MSIX per architecture (x64, ARM64) from `build.cmd`'s output, bundled into
+  `SVGcinema-Thumbnails.msixbundle`; `test-install.ps1` signs a copy with a throwaway certificate, installs it,
+  checks the registration and removes it (CI).
+
+The Thumbnailers workflow uploads the bundle as the `store` artifact and, on master, to its own
+`thumbnails-store` release (not the `thumbnails` one the website's downloads come from): upload it to Partner
+Center by hand. Raise the version in `pack.ps1` (`-Version`) for each new submission.

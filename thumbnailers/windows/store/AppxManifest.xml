@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SVGcinema Thumbnails as an MSIX package for the Microsoft Store (pack.ps1 fills in the tokens).
+     It registers the same thumbnail handler DLL as the installer (COM, run by Windows in a surrogate
+     process), the .SVGcinema file type with its name and icon, and a small app that says what it does. -->
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop2 com rescap">
+  <Identity Name="{NAME}" Publisher="{PUBLISHER}" Version="{VERSION}" ProcessorArchitecture="{ARCH}" />
+  <Properties>
+    <DisplayName>SVGcinema Thumbnails</DisplayName>
+    <PublisherDisplayName>{PUBLISHER_DISPLAY_NAME}</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Shows the first frame of your SVGcinema projects (.SVGcinema files) as their thumbnail in File Explorer.</Description>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="svgcinema-thumbs-about.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="SVGcinema Thumbnails" Description="Thumbnails for SVGcinema projects in File Explorer"
+        BackgroundColor="transparent" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" />
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="svgcinema">
+            <uap:DisplayName>SVGcinema project</uap:DisplayName>
+            <uap:Logo>Assets\FileIcon.png</uap:Logo>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.svgcinema</uap:FileType>
+            </uap:SupportedFileTypes>
+            <desktop2:ThumbnailHandler Clsid="63935DE2-C1BD-42DA-8535-64972BEE12AE" />
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="SVGcinema thumbnails">
+              <com:Class Id="63935DE2-C1BD-42DA-8535-64972BEE12AE" Path="svgcinema-thumbs.dll" ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

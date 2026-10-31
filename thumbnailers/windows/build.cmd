@@ -15,4 +15,6 @@ call "%VS%\VC\Auxiliary\Build\vcvarsall.bat" %1 >nul || exit /b 1
 set "OUT=%~dp0build\%2"
 if not exist "%OUT%" mkdir "%OUT%"
 cl /nologo /O2 /MT /EHsc /W3 /DUNICODE /D_UNICODE /LD "%~dp0svgcinema-thumbs.cpp" /Fo"%OUT%\\" /link /DEF:"%~dp0svgcinema-thumbs.def" /OUT:"%OUT%\svgcinema-thumbs.dll" ole32.lib shlwapi.lib shell32.lib windowscodecs.lib gdi32.lib advapi32.lib user32.lib uuid.lib || exit /b 1
+rem the Store package's small app (store\about.cpp)
+cl /nologo /O2 /MT /EHsc /W3 /utf-8 /DUNICODE /D_UNICODE "%~dp0store\about.cpp" /Fo"%OUT%\\" /link /SUBSYSTEM:WINDOWS /OUT:"%OUT%\svgcinema-thumbs-about.exe" user32.lib shell32.lib || exit /b 1
 endlocal & exit /b 0

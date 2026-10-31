@@ -51,7 +51,7 @@ export function thumbsHTML(linux = onLinux()) {
   ).join('');
   const windows = `<div class="th-main" data-os="windows">
       <div class="th-dl">${a(THUMB_LINKS.windows, DL_ICON + 'Download for Windows', 'btn pri th-btn')}<span>2 MB .zip · Windows 10 and 11</span></div>
-      <div class="th-warn" role="note">${WARN_ICON}<div><b>Your browser and Windows will warn you. That's expected.</b><span>The browser may hold the download back as one it doesn't see often: open the download's menu (⋮ or …) and choose <b>Keep</b>. Then unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights; remove it any time in Settings › Apps.</span></div></div>
+      <div class="th-warn" role="note">${WARN_ICON}<div><b>Windows will warn you. That's expected.</b><span>Unzip it and run <b>SVGcinema-Thumbnails-Setup.exe</b>. The installer isn't signed, so Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. It installs for you only, with no administrator rights; remove it any time in Settings › Apps.</span></div></div>
     </div>`;
   const linuxMain = `<div class="th-main" data-os="linux">
       <div class="th-dl">${a(THUMB_LINKS.deb, DL_ICON + 'Download .deb package', 'btn pri th-btn')}${a(THUMB_LINKS.tar, '.tar.gz with install script', 'btn th-btn')}</div>
