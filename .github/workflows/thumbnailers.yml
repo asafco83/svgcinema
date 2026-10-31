@@ -29,8 +29,16 @@ jobs:
       - name: Build the Microsoft Store package
         shell: pwsh
         run: |
-          pwsh thumbnailers/windows/store/pack.ps1
-          pwsh thumbnailers/windows/store/test-install.ps1
+          # failures show as annotations (with makeappx's own messages), so they can be read without the log
+          foreach ($s in 'pack.ps1', 'test-install.ps1') {
+            $o = pwsh thumbnailers/windows/store/$s 2>&1 | Out-String
+            Write-Host $o
+            if ($LASTEXITCODE -ne 0) {
+              $msg = ($o -split "`n" | Where-Object { $_ -match 'error|fail|exception|0x8' } | Select-Object -First 12) -join ' | '
+              Write-Host "::error title=$s::$($msg -replace '[\r\n]', ' ')"
+              exit 1
+            }
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: windows
