@@ -57,5 +57,6 @@ unknown-publisher and download warnings an unsigned installer gets (the Store si
   `SVGcinema-Thumbnails.msixbundle`; `test-install.ps1` signs a copy with a throwaway certificate, installs it,
   checks the registration and removes it (CI).
 
-The Thumbnailers workflow uploads the bundle as the `store` artifact (not to the release): upload it to
-Partner Center by hand. Raise the version in `pack.ps1` (`-Version`) for each new submission.
+The Thumbnailers workflow uploads the bundle as the `store` artifact and, on master, to its own
+`thumbnails-store` release (not the `thumbnails` one the website's downloads come from): upload it to Partner
+Center by hand. Raise the version in `pack.ps1` (`-Version`) for each new submission.

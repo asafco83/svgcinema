@@ -43,7 +43,8 @@ jobs:
         with:
           name: windows
           path: thumbnailers/windows/Output/SVGcinema-Thumbnails-Setup.exe
-      # for Partner Center: uploaded by hand, not published to the release
+      # for Partner Center (uploaded there by hand): the release job puts it in its own "thumbnails-store" release,
+      # not the "thumbnails" one the website's downloads come from
       - uses: actions/upload-artifact@v4
         with:
           name: store
@@ -104,3 +105,15 @@ jobs:
           gh release edit thumbnails --notes "$NOTES"
           gh release upload thumbnails out/* --clobber
           gh release delete-asset thumbnails SVGcinema-Thumbnails-Setup.exe -y 2>/dev/null || true
+      - uses: actions/download-artifact@v4
+        with:
+          name: store
+          path: store
+      - name: Publish the Store package to the "thumbnails-store" release (for Partner Center, not the website)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view thumbnails-store >/dev/null 2>&1 || gh release create thumbnails-store --prerelease --latest=false \
+            --title "SVGcinema Thumbnails: Microsoft Store package" --notes "The MSIX bundle to upload to Partner Center. Not a download for the website."
+          gh release upload thumbnails-store store/SVGcinema-Thumbnails.msixbundle --clobber
