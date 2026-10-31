@@ -1,0 +1,77 @@
+SVGcinema — Microsoft Store listing (English)
+Paste each part into Partner Center › Store listings › English (United States).
+
+────────────────────────────────────────
+DESCRIPTION
+────────────────────────────────────────
+Make animated SVGs for the web: draw or import your artwork, animate it on a keyframe timeline, and export one small animated SVG file that plays on any website.
+
+SVGcinema is a complete animation editor that runs in its own window. Everything you need is in one place: drawing tools, a layers panel, an inspector for every property and a timeline with keyframes and easing.
+
+DRAW OR BRING IN YOUR ARTWORK
+Draw with the pen, pencil and shape tools, add text with Google Fonts or your own fonts, and place images. Or drop in an SVG from Figma, Illustrator or Inkscape: its layers, shapes, gradients and text come in ready to edit, and CSS animations come in as keyframes.
+
+ANIMATE ANYTHING
+Every property can be animated: position, scale, rotation, colours and gradients, strokes and dashes, opacity, filters and more. Morph one shape into another, send a layer along a motion path, draw lines on with trim paths, and shape the timing with easing presets or your own curves in the graph editor. Onion skin shows where things come from and where they go.
+
+RIGS, BONES AND PINS
+Build a rig with bones, pose it with FK or IK, set limits, and bend artwork with pins and mesh warp, even pins that follow bones.
+
+ONE FILE THAT PLAYS ANYWHERE
+Export one self-contained animated SVG, with a small player inside or as pure CSS. Choose when it starts: on load, on hover, on click, when scrolled into view, or linked to the page's scroll. Also export video (MP4, WebM), GIF and animated WebP, or a still image (PNG, JPEG, WebP, AVIF).
+
+LEARN AS YOU GO
+Help & tutorials cover every tool, with guided tours that run in a practice scene: the editor points at each control and waits while you try it, and your own project stays safe.
+
+DESIGN AGENT (OPTIONAL)
+Describe what you want and watch it being drawn and animated, using your own API key from the AI provider you choose, or the AI assistant you already use in your browser.
+
+Your projects are saved as .SVGcinema files and open straight in the app. The editor works offline once installed.
+
+────────────────────────────────────────
+PRODUCT FEATURES (one per line, up to 20)
+────────────────────────────────────────
+Keyframe timeline: animate every property, each with its own track
+Draw with pen, pencil, shapes and text, or import SVG from Figma, Illustrator and Inkscape
+Easing presets and a graph editor for your own timing curves
+Shape morphing, motion paths and trim paths
+Bones and rigs with FK, IK and limits; pins and mesh warp
+Gradients, strokes and dashes, masks, blending and filters
+Export one animated SVG: JavaScript player or pure CSS
+Starts on load, hover, click, scroll into view, or linked to scroll
+Export video (MP4, WebM), GIF, animated WebP and still images
+Guided tours in a practice scene for every tool
+Optional AI design agent with your own API key
+Opens .SVGcinema project files; works offline
+
+────────────────────────────────────────
+SEARCH TERMS (up to 7)
+────────────────────────────────────────
+SVG animation
+animated SVG
+motion graphics
+vector animation
+keyframe animation
+Lottie alternative
+web animation
+
+────────────────────────────────────────
+SCREENSHOTS (upload in this order; captions are optional)
+────────────────────────────────────────
+1-editor-light.png   The editor: layers, canvas, inspector and the keyframe timeline
+2-editor-dark.png    Light and dark themes
+3-graph-dark.png     Rigs with bones, and the graph editor for your own timing
+4-export-light.png   Export one animated SVG that plays on any website
+5-help-light.png     Guided tours run in a practice scene, step by step
+6-easing-dark.png    Easing presets for the feel of every move
+
+────────────────────────────────────────
+OTHER FIELDS
+────────────────────────────────────────
+Short title:                SVGcinema
+Developed by:               SVGcinema
+Copyright and trademark:    © 2026 SVGcinema. All rights reserved.
+Additional license terms:   https://www.svgcinema.com/licence/
+Website:                    https://www.svgcinema.com/
+Support contact info:       https://www.svgcinema.com/help/
+Privacy policy (Properties): https://www.svgcinema.com/privacy/
